@@ -674,17 +674,19 @@ h1 {
 .bottom-nav { 
     position: fixed; 
     bottom: 0; 
-    left:0; 
-    right:0; 
+    left: 0; 
+    right: 0; 
+    height: 65px; /* Sabit yükseklik verdik, artık değişmez */
     background-color: var(--nav-bg); 
     backdrop-filter: blur(20px); 
+    -webkit-backdrop-filter: blur(20px); 
     display: flex; 
     justify-content: space-around; 
-    padding: 10px 8px calc(10px + env(safe-area-inset-bottom)) 8px; 
+    align-items: center; /* İkonları ortalar */
+    padding-bottom: 0;   /* Ekstra boşluğu kaldırdık */
     border-top: 1px solid #252525; 
-    z-index: 100; 
+    z-index: 9999; 
 }
-
 .nav-btn {
     background: transparent;
     border: none;
