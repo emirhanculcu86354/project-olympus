@@ -676,14 +676,16 @@ h1 {
     bottom: 0;
     left: 0;
     right: 0;
+    height: calc(65px + env(safe-area-inset-bottom)); /* Barın yüksekliği iOS çizgisine göre otomatik ayarlanır */
     background-color: var(--nav-bg);
     backdrop-filter: blur(20px);
     -webkit-backdrop-filter: blur(20px);
     display: flex;
     justify-content: space-around;
-    padding: 10px 8px calc(10px + env(safe-area-inset-bottom)) 8px;
+    align-items: center; /* İkonları dikey olarak ortalar */
+    padding-bottom: env(safe-area-inset-bottom); /* iOS'un altındaki yatay çizginin arkasında kalmasını sağlar */
     border-top: 1px solid #252525;
-    z-index: 500;
+    z-index: 9999; /* Sayfanın en üstünde kalmasını garanti eder */
 }
 
 .nav-btn {
