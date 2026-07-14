@@ -1,0 +1,136 @@
+:root {
+    --bg-dark: #121212; --nav-bg: rgba(20, 20, 20, 0.96); --card-bg: #1e1e1e;
+    --modal-bg: #222; --goldnova: #f6c000; --text-light: #ffffff; --text-muted: #aaaaaa;
+}
+
+* { margin: 0; padding: 0; box-sizing: border-box; font-family: -apple-system, sans-serif; -webkit-tap-highlight-color: transparent; }
+
+/* EKRAN VE ALT BAR SORUNUNUN KESİN ÇÖZÜMÜ */
+html, body { 
+    height: 100%; height: 100dvh; width: 100vw; 
+    background-color: var(--bg-dark); color: var(--text-light); 
+    overflow: hidden; margin: 0; 
+}
+body { display: flex; flex-direction: column; }
+
+/* APP CONTENT YAPI TAŞI */
+#app-content { display: flex; flex-direction: column; height: 100%; width: 100%; }
+
+.brand-title { font-family: 'Montserrat', sans-serif; font-weight: 900; font-style: italic; color: var(--goldnova); font-size: 20px; letter-spacing: 1px; }
+
+.mobile-header { padding: env(safe-area-inset-top) 15px 12px 10px; background-color: var(--bg-dark); border-bottom: 1px solid #252525; z-index: 10; flex-shrink: 0; display: block; }
+.header-top { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; }
+.header-right { display: flex; align-items: center; gap: 15px; }
+.date-input { background: #151515; border: 1px solid #333; color: var(--goldnova); padding: 5px 8px; border-radius: 8px; font-size: 14px; }
+.header-avatar { width: 36px; height: 36px; border-radius: 50%; border: 2px solid var(--goldnova); object-fit: cover; cursor: pointer; }
+
+.day-tracker-container { display: flex; justify-content: space-between; align-items: center; background: #1a1a1a; padding: 8px 12px; border-radius: 10px; border: 1px solid #333;}
+.current-day-badge { font-weight: 800; font-size: 14px; color: #fff; }
+.toggle-container { display: flex; background: #252525; border-radius: 8px; overflow: hidden; }
+.day-toggle { background: transparent; border: none; color: var(--text-muted); padding: 6px 12px; font-size: 11px; font-weight: bold; transition: 0.2s;}
+.day-toggle.active { background: var(--goldnova); color: #000; }
+
+/* İÇERİK ALANI SCROLL DÜZENİ */
+.content { flex: 1; overflow-y: auto; padding: 15px 15px calc(80px + env(safe-area-inset-bottom)) 15px; -webkit-overflow-scrolling: touch; }
+.screen { display: none; animation: fade 0.25s ease; }
+.screen.active { display: block; }
+@keyframes fade { from { opacity: 0; } to { opacity: 1; } }
+
+h1 { font-size: 24px; font-weight: 800; margin-bottom: 4px; }
+.subtitle { color: var(--goldnova); font-size: 12px; margin-bottom: 15px; font-weight: 500; }
+
+.phase-selector { display: flex; gap: 8px; margin-bottom: 15px; }
+.phase-btn { background: #222; color: #fff; border: 1px solid #333; padding: 10px 14px; border-radius: 20px; font-weight: 600; flex:1; transition: 0.2s;}
+.phase-btn.active { background: var(--goldnova); color: #000; border-color: var(--goldnova); }
+
+.grid-container { display: flex; flex-direction: column; gap: 10px; }
+.card { background-color: var(--card-bg); padding: 15px; border-radius: 12px; border-left: 4px solid var(--goldnova); cursor: pointer; transition: 0.2s;}
+.card:active { transform: scale(0.98); }
+.card h3 { font-size: 16px; margin-bottom: 6px; }
+.card p { color: var(--text-muted); font-size: 13px; margin-bottom: 5px; padding-bottom: 5px;}
+.rest-day { border-left-color: #555; pointer-events: none;}
+
+/* DİYET KARTLARI */
+.supp-container { display:flex; flex-direction:column; gap:10px; overflow: hidden; }
+.diet-card { background: #1a1a1a; border: 1px solid #333; border-radius: 14px; padding: 15px; position: relative; border-left: 4px solid transparent; touch-action: pan-y; will-change: transform; transition: transform 0.4s cubic-bezier(0.25, 0.8, 0.25, 1), background 0.4s ease; overflow: hidden; }
+.diet-card-inner { display:flex; align-items:center; gap:15px; pointer-events: none; }
+.diet-card.completed { background: rgba(0, 255, 0, 0.15) !important; border-left-color: #00ff00 !important; }
+.diet-card.skipped { background: rgba(255, 0, 0, 0.15) !important; border-left-color: #ff0000 !important; }
+.meal-alt { max-height: 0; opacity: 0; transition: max-height 0.4s ease, opacity 0.3s ease, margin-top 0.3s ease; font-size: 12px; color: var(--goldnova); font-weight: 500;}
+.diet-card.expanded .meal-alt { max-height: 150px; opacity: 1; margin-top: 12px; border-top: 1px dashed #444; padding-top: 10px; }
+
+.supp-item { background: #1a1a1a; border: 1px solid #333; border-radius: 12px; padding: 12px; display:flex; align-items:center; gap:12px; }
+.supp-icon { font-size: 22px; background: #252525; height: 44px; width: 44px; display:flex; justify-content:center; align-items:center; border-radius: 10px; flex-shrink: 0; border: 1px solid #444;}
+.supp-details { flex: 1; pointer-events: none; }
+.supp-details h4 { color: var(--goldnova); font-size: 14px; margin-bottom: 3px; font-weight: 700;}
+.supp-details p { color: #e0e0e0; font-size: 12px; line-height: 1.4; }
+
+/* TAKİP MERKEZİ */
+.tracking-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+.track-card { background: var(--card-bg); border: 1px solid #333; border-radius: 12px; padding: 18px 8px; text-align: center; cursor: pointer; transition: 0.2s; }
+.track-card:active { background: #333; transform: scale(0.95); }
+.spec-track-card { border: 1px dashed var(--goldnova); background: rgba(246, 192, 0, 0.03); }
+.track-icon { font-size: 30px; margin-bottom: 8px; }
+.track-card h4 { color: #fff; font-size: 14px; margin-bottom: 4px; font-weight:bold;}
+.track-card p { color: var(--text-muted); font-size: 11px; }
+
+/* AKTİVİTE */
+.checklist-container { display: flex; flex-direction: column; gap: 10px; }
+.checklist-item { background-color: var(--card-bg); padding: 14px; border-radius: 12px; display: flex; align-items: center; justify-content: space-between; cursor: pointer; transition: background 0.2s;}
+.checklist-item:active { background: #2a2a2a; }
+.check-left { display: flex; align-items: center; gap: 12px; width: 100%; pointer-events: none;}
+.check-left input { width: 20px; height: 20px; accent-color: var(--goldnova); pointer-events: auto;}
+.delete-btn { background: #ff4444; color: white; border: none; border-radius: 6px; padding: 6px 12px; font-size: 12px; font-weight: bold; pointer-events: auto; }
+
+.success-banner { background: var(--goldnova); color: #000; padding: 15px; border-radius: 12px; font-weight: 900; text-align: center; font-size: 15px; margin-bottom: 15px; animation: bounce 0.4s ease; }
+@keyframes bounce { 0%, 100% { transform: scale(1); } 50% { transform: scale(1.05); } }
+
+.water-stats { display: flex; justify-content: space-between; font-size: 12px; color: var(--text-muted); margin-bottom: 8px; }
+.progress-bar-bg { width: 100%; background: #333; height: 12px; border-radius: 10px; overflow: hidden; margin-bottom: 15px; }
+.progress-bar-fill { height: 100%; background: #00d2ff; width: 0%; transition: width 0.3s ease; }
+
+.edit-btn { background: transparent; border: 1px solid var(--goldnova); color: var(--goldnova); padding: 6px 12px; border-radius: 8px; font-size: 12px; font-weight: bold; cursor: pointer;}
+.timer-btn { background: #222; color: var(--goldnova); border: 1px solid var(--goldnova); padding: 8px 12px; border-radius: 6px; font-size: 12px; font-weight: bold; cursor: pointer; margin-top:8px;}
+.hidden { display: none !important; }
+
+/* GÖREV EKLE BUTONU (Kare ve düzgün) */
+.add-activity-container { display: flex; gap: 10px; margin-bottom: 15px; align-items: center; }
+.add-activity-container input { flex: 1; padding: 14px; border-radius: 10px; border: 1px solid #333; background: #151515; color: white;}
+.add-activity-container button { width: 50px; height: 50px; flex-shrink: 0; background: var(--goldnova); border: none; border-radius: 10px; font-size: 28px; font-weight: bold; color: #000; display:flex; justify-content:center; align-items:center; cursor: pointer; }
+
+.form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom:15px; }
+.input-group label { color: var(--text-muted); font-size: 12px; margin-bottom: 4px; display: block; }
+.input-group input { width: 100%; padding: 12px; border-radius: 8px; border: 1px solid #333; background-color: #151515; color: white; font-size:15px;}
+.save-btn { background-color: var(--goldnova); color: #000; border: none; padding: 14px; font-size: 15px; font-weight: 800; border-radius: 10px; width: 100%; margin-top: 10px; cursor: pointer;}
+
+/* MODAL KODLARI */
+.modal { display: none; position: fixed; z-index: 1000; left: 0; top: 0; width: 100vw; height: 100dvh; background-color: rgba(0,0,0,0.85); backdrop-filter: blur(8px); justify-content: center; align-items: center; padding: 15px;}
+.modal-content { background-color: var(--modal-bg); padding: 20px; border-radius: 16px; width: 100%; max-width:400px; display: flex; flex-direction: column; border: 1px solid #444; max-height: 85vh;}
+.modal-body { overflow-y: auto !important; flex: 1; margin-bottom: 12px; -webkit-overflow-scrolling: touch; padding-right: 5px;}
+.exercise-row { padding: 14px 0; border-bottom: 1px solid #333; display: flex; flex-direction: column; align-items: flex-start;}
+
+.profile-header { display: flex; flex-direction: column; align-items: center; margin-bottom: 20px; }
+.profile-img-container img { width: 90px; height: 90px; border-radius: 50%; object-fit: cover; border: 3px solid var(--goldnova); }
+.score-container { display: flex; align-items: center; gap: 15px; background: #1a1a1a; padding: 12px; border-radius: 12px; border: 1px solid #333; justify-content: center;}
+.score-circle { width: 50px; height: 50px; border-radius: 50%; background: var(--goldnova); display: flex; justify-content: center; align-items: center; color: #000; font-weight: 800; font-size: 18px; }
+.score-text { color: #fff; font-weight: bold; font-size: 14px; }
+
+.read-only-stat { background: #252525; padding: 12px; border-radius: 8px; border: 1px solid #333; display: flex; flex-direction: column; align-items: center; }
+.read-only-stat span { color: var(--text-muted); font-size: 11px; margin-bottom: 4px;}
+.read-only-stat strong { color: var(--goldnova); font-size: 16px; }
+
+/* ALT NAVİGASYON (IOS DÜZELTMESİ) */
+.bottom-nav { position: fixed; bottom: 0; left:0; right:0; background-color: var(--nav-bg); backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px); display: flex; justify-content: space-around; padding: 10px 8px calc(10px + env(safe-area-inset-bottom)) 8px; border-top: 1px solid #252525; z-index: 500; }
+.nav-btn { background: transparent; border: none; color: #888; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 4px; flex: 1; transition: 0.2s; cursor: pointer;}
+.nav-btn.active { color: var(--goldnova); }
+.nav-btn .icon { font-size: 22px; margin-bottom: 2px;}
+.nav-btn .text { font-size: 11px; font-weight: 700; }
+
+/* OVERLAY MODALLARI (Giriş & Player) */
+.full-screen-overlay { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background-color: var(--bg-dark); z-index: 3000; display: flex; flex-direction: column; justify-content: center; align-items: center; width: 100vw; height: 100dvh; }
+.login-box { background: var(--card-bg); padding: 40px 20px; border-radius: 16px; border: 1px solid #333; text-align: center; width: 90%; max-width: 400px; box-shadow: 0 10px 30px rgba(0,0,0,0.5); display: flex; flex-direction: column; align-items: center; }
+.workout-player-header { position: absolute; top: env(safe-area-inset-top); left: 0; width: 100%; display: flex; justify-content: space-between; padding: 20px; border-bottom: 1px solid #222; }
+#player-progress { font-weight: bold; color: #fff; }
+.close-player-btn { background: transparent; border: none; color: #ff4444; font-weight: bold; font-size: 14px; cursor: pointer;}
+.workout-player-body { flex: 1; display: flex; flex-direction: column; justify-content: center; width: 100%; padding: 20px; }
+.workout-player-footer { position: absolute; bottom: calc(20px + env(safe-area-inset-bottom)); left: 0; width: 100%; padding: 0 20px; }

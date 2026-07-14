@@ -1,0 +1,203 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <title>Project Olympus</title>
+    <link rel="apple-touch-icon" href="icon.png">
+    
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,400..900;1,400..900&display=swap" rel="stylesheet">
+    
+    <link rel="stylesheet" href="style.css">
+    
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+    
+    <script src="https://www.gstatic.com/firebasejs/10.8.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.8.1/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.8.1/firebase-firestore-compat.js"></script>
+</head>
+<body>
+
+    <div id="login-screen" class="full-screen-overlay">
+        <div class="login-box">
+            <h1 class="brand-title" style="font-size:30px; margin-bottom:15px;">PROJECT OLYMPUS</h1>
+            <p style="color:var(--text-muted); margin-bottom:30px; font-size:14px;">Kendi limitlerini aşmaya hazır mısın?</p>
+            <button id="google-login-btn" class="save-btn" style="display:flex; justify-content:center; align-items:center; gap:10px; font-size:16px; width: 100%;">
+                <img src="https://upload.wikimedia.org/wikipedia/commons/c/c1/Google_%22G%22_logo.svg" alt="G" style="width:22px; background: white; border-radius: 50%; padding: 2px;">
+                Google İle Giriş Yap
+            </button>
+        </div>
+    </div>
+
+    <div id="active-workout-screen" class="full-screen-overlay hidden" style="background-color: #000; z-index: 2000;">
+        <div class="workout-player-header">
+            <span id="player-progress">1 / 6 Hareket</span>
+            <button class="close-player-btn" onclick="exitWorkoutPlayer()">Kapat X</button>
+        </div>
+        <div class="workout-player-body">
+            <h2 id="player-ex-name" style="color:var(--goldnova); font-size:28px; text-align:center; margin-bottom:5px;">Bench Press</h2>
+            <p id="player-ex-details" style="color:#888; text-align:center; margin-bottom:30px;">Set: 4 x 8 | Tempo: 3-1-1-0 | RPE: 8.5</p>
+            <div class="form-grid" style="max-width: 300px; margin: 0 auto; gap:15px;">
+                <div class="input-group"><label style="text-align:center;">Ağırlık (kg)</label><input type="number" id="player-weight" style="font-size:24px; text-align:center; font-weight:bold;"></div>
+                <div class="input-group"><label style="text-align:center;">Tekrar</label><input type="number" id="player-reps" style="font-size:24px; text-align:center; font-weight:bold;"></div>
+            </div>
+            <div id="player-timer-display" class="hidden" style="text-align:center; margin-top:30px;">
+                <p style="color:#888;">Dinlenme Süresi</p><h1 style="color:var(--goldnova); font-size:48px;" id="timer-seconds">90</h1>
+            </div>
+        </div>
+        <div class="workout-player-footer">
+            <button id="player-save-btn" class="save-btn" onclick="saveSetAndRest()">Seti Kaydet & Dinlen</button>
+            <button id="player-next-btn" class="edit-btn hidden" style="width:100%; padding:15px; font-size:16px; margin-top:10px;" onclick="nextExercise()">Sonraki Harekete Geç</button>
+        </div>
+    </div>
+
+    <div id="app-content" class="hidden">
+        
+        <header class="mobile-header" id="main-header">
+            <div class="header-top">
+                <h2 class="brand-title">PROJECT OLYMPUS</h2>
+                <div class="header-right">
+                    <button onclick="logout()" class="edit-btn" style="border-color:#ff4444; color:#ff4444; font-size:10px; padding: 4px 8px;">Çıkış</button>
+                    <img id="header-profile-img" src="icon.png" class="header-avatar top-nav-btn" data-target="profile-sec" alt="Profil">
+                </div>
+            </div>
+            <div class="day-tracker-container" id="day-tracker">
+                <div class="current-day-badge"><span id="display-day-text">GÜN 1</span></div>
+                <div class="toggle-container">
+                    <button id="btn-today" class="day-toggle active">Bugün</button>
+                    <button id="btn-tomorrow" class="day-toggle">Yarın</button>
+                    <button id="btn-all" class="day-toggle">Tümü</button>
+                </div>
+            </div>
+        </header>
+
+        <main class="content">
+            
+            <section id="workout-sec" class="screen active">
+                <div class="phase-selector">
+                    <button class="phase-btn active" data-phase="p1">Faz 1</button>
+                    <button class="phase-btn" data-phase="p2">Faz 2</button>
+                    <button class="phase-btn" data-phase="p3">Faz 3</button>
+                </div>
+                <h1 id="workout-day-title">Antrenman</h1>
+                <p class="subtitle" id="workout-day-desc">Program yükleniyor...</p>
+                <div id="days-container" class="grid-container"></div>
+                <div id="workout-modal" class="modal">
+                    <div class="modal-content" style="height: 85vh;">
+                        <h2 id="modal-title" style="margin-bottom: 15px; color:var(--goldnova);">Detay</h2>
+                        <button class="save-btn" id="start-workout-btn" style="margin-bottom: 15px; font-size: 16px;">🚀 İdmanı Başlat</button>
+                        <div id="modal-exercises" class="modal-body"></div>
+                        <button class="save-btn close-modal-btn" style="background:#333; color:white;">Listeyi Kapat</button>
+                    </div>
+                </div>
+            </section>
+
+            <section id="diet-sec" class="screen">
+                <div style="display:flex; justify-content:space-between; align-items:center;">
+                    <h1 id="diet-day-title">Beslenme</h1>
+                    <button class="edit-btn" onclick="resetDietUI()">Sıfırla</button>
+                </div>
+                <p class="subtitle" id="diet-day-desc" style="margin-bottom:10px;">Bugünün Menüsü</p>
+                <p style="font-size:11px; color:#888; text-align:center; margin-bottom:15px;">Yediğin öğünü sağa, kaçırdığını sola kaydır. Alternatifler için karta tıkla.</p>
+                <div id="diet-container" class="supp-container" style="margin-bottom: 30px;"></div>
+                <h3 style="margin-bottom: 10px;">Supplement Protokolü</h3>
+                <div class="supp-container">
+                    <div class="supp-item"><div class="supp-icon">☀️</div><div class="supp-details"><h4>Sabah</h4><p>Filtre Kahve (Dinlenmede: 5g Kreatin)</p></div></div>
+                    <div class="supp-item"><div class="supp-icon">⚡</div><div class="supp-details"><h4>Pre-Workout</h4><p>Filtre Kahve + Elektrolit</p></div></div>
+                    <div class="supp-item"><div class="supp-icon">💪</div><div class="supp-details"><h4>Post-Workout</h4><p>Whey Protein + 5g Kreatin (Varsa)</p></div></div>
+                </div>
+            </section>
+
+            <section id="activity-sec" class="screen">
+                <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom: 5px;">
+                    <h1>Günlük Aktivite</h1>
+                    <button id="edit-activity-btn" class="edit-btn">Düzenle</button>
+                </div>
+                <p class="subtitle">Manifestoya Sadakat Kontrolü</p>
+                <div id="add-activity-container" class="add-activity-container hidden">
+                    <input type="text" id="new-activity-input" placeholder="Yeni görev ekle...">
+                    <button id="add-activity-btn">+</button>
+                </div>
+                <div id="success-banner" class="success-banner hidden">🔥 GÜNLÜK HEDEFE ULAŞILDI!</div>
+                <div id="activity-list" class="checklist-container"></div>
+            </section>
+
+            <section id="tracking-sec" class="screen">
+                <h1>Takip Merkezi</h1>
+                <p class="subtitle">İlerleme Grafikleri ve Veri Girişi</p>
+                <div class="tracking-grid">
+                    <div class="track-card" onclick="openTrackingModal('fat')"><div class="track-icon">🧬</div><h4>Yağ Oranı</h4><p>US Navy Formülü</p></div>
+                    <div class="track-card" onclick="openTrackingModal('measurements')"><div class="track-icon">📏</div><h4>Ölçülerim</h4><p>Mezura Kaydı</p></div>
+                    <div class="track-card" onclick="openTrackingModal('volume')"><div class="track-icon">📊</div><h4>İdman Hacmi</h4><p>5 Temel Hareket</p></div>
+                    <div class="track-card" onclick="openTrackingModal('weight')"><div class="track-icon">⚖️</div><h4>Ağırlık</h4><p>Kilo Grafiği</p></div>
+                    <div class="track-card" onclick="openTrackingModal('water')"><div class="track-icon">💧</div><h4>Su Tüketimi</h4><p>Hedef Takibi</p></div>
+                    <div class="track-card" onclick="openTrackingModal('macros')"><div class="track-icon">🍱</div><h4>Öğün Takibi</h4><p>Kalori Grafiği</p></div>
+                    <div class="track-card spec-track-card" onclick="openTrackingModal('deload_info')"><div class="track-icon">⚙️</div><h4>Deload Motoru</h4></div>
+                    <div class="track-card spec-track-card" onclick="openTrackingModal('macro_info')"><div class="track-icon">🚀</div><h4>Makro Manipülasyon</h4></div>
+                </div>
+                <div id="tracking-modal" class="modal">
+                    <div class="modal-content">
+                        <h2 id="track-modal-title" style="margin-bottom: 15px; color:var(--goldnova);">Başlık</h2>
+                        <div id="track-modal-body" class="modal-body" style="min-height: 150px;"></div>
+                        <button class="save-btn" onclick="document.getElementById('tracking-modal').style.display='none'">Kapat</button>
+                    </div>
+                </div>
+            </section>
+
+            <section id="profile-sec" class="screen">
+                <div class="profile-header">
+                    <div class="profile-img-container">
+                        <input type="file" id="profile-img-upload" accept="image/*" style="display:none;">
+                        <img id="profile-image-large" src="icon.png" alt="Profil">
+                        <button onclick="document.getElementById('profile-img-upload').click();" class="edit-btn" style="margin-top:10px;">Fotoğrafı Değiştir</button>
+                    </div>
+                    <div class="profile-info" style="margin-top:15px; text-align:center;">
+                        <h2 id="profile-name-display" class="brand-title" style="font-size:24px;">Sporcu Adı</h2>
+                        <p class="subtitle" style="margin-bottom:0; color:#888;">Project Olympus</p>
+                    </div>
+                </div>
+                <div class="score-container"><div class="score-circle"><span id="weekly-score">100</span><small>%</small></div><div class="score-text">Haftalık Başarı Skoru</div></div>
+                <button class="save-btn" style="background:#252525; color:var(--goldnova); border: 1px solid var(--goldnova); margin-top:20px;" onclick="document.getElementById('settings-modal').style.display='flex'">Ayarlar & Tercihler</button>
+                <h3 style="margin-top: 30px; margin-bottom: 10px;">Güncel İstatistikler</h3>
+                <div class="form-container" style="background: transparent; padding:0;">
+                    <div class="form-grid">
+                        <div class="read-only-stat"><span>Kilo:</span> <strong id="ro-weight">-- kg</strong></div>
+                        <div class="read-only-stat"><span>Boy:</span> <strong id="ro-height">-- cm</strong></div>
+                        <div class="read-only-stat"><span>Bel:</span> <strong id="ro-waist">-- cm</strong></div>
+                        <div class="read-only-stat"><span>Göğüs:</span> <strong id="ro-chest">-- cm</strong></div>
+                        <div class="read-only-stat"><span>Omuz:</span> <strong id="ro-shoulder">-- cm</strong></div>
+                        <div class="read-only-stat"><span>Kol:</span> <strong id="ro-arm">-- cm</strong></div>
+                        <div class="read-only-stat"><span>Basen:</span> <strong id="ro-hips">-- cm</strong></div>
+                        <div class="read-only-stat"><span>Kalf:</span> <strong id="ro-calf">-- cm</strong></div>
+                    </div>
+                </div>
+                <div style="height: 50px;"></div>
+            </section>
+
+            <div id="settings-modal" class="modal">
+                <div class="modal-content">
+                    <h2 style="color:var(--goldnova); margin-bottom:15px;">Ayarlar</h2>
+                    <div class="modal-body">
+                        <div class="input-group"><label>Ad Soyad</label><input type="text" id="profile-name-input"></div>
+                        <div class="input-group" style="margin-top:15px;"><label>Program Başlangıç Tarihi</label><input type="date" id="start-date" class="date-input" style="width:100%; padding:14px;"></div>
+                    </div>
+                    <button class="save-btn" id="save-settings-btn">Kaydet & Kapat</button>
+                </div>
+            </div>
+        </main>
+
+        <nav class="bottom-nav">
+            <button class="nav-btn active" data-target="workout-sec"><span class="icon">🏋️</span><span class="text">İdman</span></button>
+            <button class="nav-btn" data-target="diet-sec"><span class="icon">🍽️</span><span class="text">Diyet</span></button>
+            <button class="nav-btn" data-target="activity-sec"><span class="icon">✅</span><span class="text">Görev</span></button>
+            <button class="nav-btn" data-target="tracking-sec"><span class="icon">🎯</span><span class="text">Takip</span></button>
+        </nav>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>
