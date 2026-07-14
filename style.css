@@ -671,18 +671,21 @@ h1 {
 }
 
 /* ALT NAVİGASYON (IOS DÜZELTMESİ) */
-.bottom-nav {
-    position: fixed;
-    bottom: 0;
-    left: 0;
-    right: 0;
-    background-color: var(--nav-bg);
-    backdrop-filter: blur(20px);
-    display: flex;
-    justify-content: space-around;
-    padding: 10px 8px calc(10px + env(safe-area-bottom)) 8px;
-    border-top: 1px solid #252525;
-    z-index: 100;
+.bottom-nav { 
+    position: fixed; 
+    bottom: -15px; /* Barı 15px aşağı kaydırır (gerekirse -20px yapabilirsin) */
+    left: 0; 
+    right: 0; 
+    height: 85px; /* Barı daha kalın yapmak için 65px'den 85px'e çıkardık */
+    background-color: var(--nav-bg); 
+    backdrop-filter: blur(20px); 
+    -webkit-backdrop-filter: blur(20px); 
+    display: flex; 
+    justify-content: space-around; 
+    align-items: center; /* Kalınlaştığında ikonların ortada durması için */
+    padding-bottom: 15px; /* İçerideki ikonların yukarı kayması için boşluk */
+    border-top: 1px solid #252525; 
+    z-index: 9999; 
 }
 .nav-btn {
     background: transparent;
