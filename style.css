@@ -132,7 +132,7 @@ body {
 .content {
     flex: 1;
     overflow-y: auto;
-    padding: 15px 15px calc(95px + env(safe-area-inset-bottom)) 15px;
+    padding: 15px 15px 70px 15px; /* Bar ince olduğu için bu boşluğu da küçülttük */
     -webkit-overflow-scrolling: touch;
 }
 
@@ -669,17 +669,17 @@ h1 {
 /* KUSURSUZ SABİTLENMİŞ ALT NAVİGASYON */
 .bottom-nav { 
     position: fixed; 
-    bottom: -15px; /* Barı 15px aşağı kaydırır (gerekirse -20px yapabilirsin) */
+    bottom: 0; 
     left: 0; 
     right: 0; 
-    height: 85px; /* Barı daha kalın yapmak için 65px'den 85px'e çıkardık */
+    height: 55px; /* İkonlara tam yapışacak en ince boyut */
     background-color: var(--nav-bg); 
     backdrop-filter: blur(20px); 
     -webkit-backdrop-filter: blur(20px); 
     display: flex; 
     justify-content: space-around; 
-    align-items: center; /* Kalınlaştığında ikonların ortada durması için */
-    padding-bottom: 15px; /* İçerideki ikonların yukarı kayması için boşluk */
+    align-items: center; 
+    padding-bottom: 0; /* Alttaki ekstra boşlukları tamamen sildik */
     border-top: 1px solid #252525; 
     z-index: 9999; 
 }
