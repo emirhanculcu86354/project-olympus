@@ -669,17 +669,17 @@ h1 {
 /* KUSURSUZ SABİTLENMİŞ ALT NAVİGASYON */
 .bottom-nav { 
     position: fixed; 
-    bottom: 0; 
+    bottom: -15px; /* Barı 15px aşağı kaydırır (gerekirse -20px yapabilirsin) */
     left: 0; 
     right: 0; 
-    height: calc(65px + env(safe-area-inset-bottom));
+    height: 85px; /* Barı daha kalın yapmak için 65px'den 85px'e çıkardık */
     background-color: var(--nav-bg); 
     backdrop-filter: blur(20px); 
     -webkit-backdrop-filter: blur(20px); 
     display: flex; 
     justify-content: space-around; 
-    align-items: center; 
-    padding-bottom: env(safe-area-inset-bottom);
+    align-items: center; /* Kalınlaştığında ikonların ortada durması için */
+    padding-bottom: 15px; /* İçerideki ikonların yukarı kayması için boşluk */
     border-top: 1px solid #252525; 
     z-index: 9999; 
 }
