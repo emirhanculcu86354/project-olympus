@@ -16,7 +16,6 @@
     -webkit-tap-highlight-color: transparent;
 }
 
-/* EKRAN VE ARKA PLAN YORUMU */
 html,
 body {
     height: 100%;
@@ -33,7 +32,6 @@ body {
     flex-direction: column;
 }
 
-/* APP CONTENT YAPI TAŞI */
 #app-content {
     display: flex;
     flex-direction: column;
@@ -128,7 +126,6 @@ body {
     color: #000;
 }
 
-/* İÇERİK ALANI SCROLL DÜZENİ */
 .content {
     flex: 1;
     overflow-y: auto;
@@ -149,6 +146,7 @@ body {
     from {
         opacity: 0;
     }
+
     to {
         opacity: 1;
     }
@@ -226,7 +224,6 @@ h1 {
     pointer-events: none;
 }
 
-/* DİYET KARTLARI */
 .supp-container {
     display: flex;
     flex-direction: column;
@@ -322,7 +319,6 @@ h1 {
     line-height: 1.4;
 }
 
-/* TAKİP MERKEZİ */
 .tracking-grid {
     display: grid;
     grid-template-columns: 1fr 1fr;
@@ -366,7 +362,6 @@ h1 {
     font-size: 11px;
 }
 
-/* AKTİVİTE */
 .checklist-container {
     display: flex;
     flex-direction: column;
@@ -427,8 +422,15 @@ h1 {
 }
 
 @keyframes bounce {
-    0%, 100% { transform: scale(1); }
-    50% { transform: scale(1.05); }
+
+    0%,
+    100% {
+        transform: scale(1);
+    }
+
+    50% {
+        transform: scale(1.05);
+    }
 }
 
 .water-stats {
@@ -466,23 +468,10 @@ h1 {
     cursor: pointer;
 }
 
-.timer-btn {
-    background: #222;
-    color: var(--goldnova);
-    border: 1px solid var(--goldnova);
-    padding: 8px 12px;
-    border-radius: 6px;
-    font-size: 12px;
-    font-weight: bold;
-    cursor: pointer;
-    margin-top: 8px;
-}
-
 .hidden {
     display: none !important;
 }
 
-/* GÖREV EKLE BUTONU */
 .add-activity-container {
     display: flex;
     gap: 10px;
@@ -552,7 +541,7 @@ h1 {
     cursor: pointer;
 }
 
-/* MODAL KODLARI */
+/* MODALLER */
 .modal {
     display: none;
     position: fixed;
@@ -601,14 +590,6 @@ h1 {
     flex-direction: column;
     align-items: center;
     margin-bottom: 20px;
-}
-
-.profile-img-container img {
-    width: 90px;
-    height: 90px;
-    border-radius: 50%;
-    object-fit: cover;
-    border: 3px solid var(--goldnova);
 }
 
 .score-container {
@@ -662,22 +643,22 @@ h1 {
     font-size: 16px;
 }
 
-/* EN İNCE ALT NAVİGASYON (GÜNCELLENDİ) */
-.bottom-nav { 
-    position: fixed; 
-    bottom: 0; 
-    left: 0; 
-    right: 0; 
-    height: 55px; 
-    background-color: var(--nav-bg); 
-    backdrop-filter: blur(20px); 
-    -webkit-backdrop-filter: blur(20px); 
-    display: flex; 
-    justify-content: space-around; 
-    align-items: center; 
-    padding-bottom: 0; 
-    border-top: 1px solid #252525; 
-    z-index: 9999; 
+/* EN İNCE ALT NAVİGASYON */
+.bottom-nav {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    height: 55px;
+    background-color: var(--nav-bg);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    display: flex;
+    justify-content: space-around;
+    align-items: center;
+    padding-bottom: 0;
+    border-top: 1px solid #252525;
+    z-index: 9999;
 }
 
 .nav-btn {
@@ -708,7 +689,6 @@ h1 {
     font-weight: 700;
 }
 
-/* OVERLAY MODALLARI (Giriş & Player) */
 .full-screen-overlay {
     position: fixed;
     top: 0;
@@ -739,10 +719,48 @@ h1 {
     align-items: center;
 }
 
-/* KAS ANATOMİSİ RENKLENDİRME */
-.muscle-group {
-    transition: fill 0.4s ease;
+/* KAS ANATOMİSİ RENKLENDİRME VE MODAL */
+.muscle-group polygon { 
+    fill: #2a2a2a; 
+    stroke: #151515;
+    stroke-width: 2px;
+    transition: fill 0.4s ease, filter 0.4s ease; 
 }
-.muscle-group.worked {
-    fill: #00ff00 !important; 
+
+/* KASLAR ÇALIŞINCA ALTIN SARISI/YEŞİL PARLAMA EFEKTİ */
+.muscle-group.worked polygon { 
+    fill: #00ff00 !important; /* Rengi var(--goldnova) yaparak altın sarısı da yapabilirsin */
+    filter: drop-shadow(0 0 8px rgba(0, 255, 0, 0.6)); /* Siberpunk bir parlama katar */
+}
+
+#anatomy-modal {
+    position: fixed;
+    z-index: 999999 !important;
+    top: 0;
+    right: -100%;
+    width: 100vw;
+    height: 100dvh;
+    background-color: rgba(0, 0, 0, 0.98);
+    transition: right 0.4s cubic-bezier(0.25, 0.8, 0.25, 1);
+}
+
+#anatomy-modal.open {
+    right: 0;
+}
+
+#anatomy-modal .modal-content {
+    margin: 20px auto;
+    padding: 20px;
+    background-color: #1a1a1a;
+    border-radius: 20px;
+    width: 90%;
+    max-width: 400px;
+    height: 90vh;
+    display: flex;
+    flex-direction: column;
+}
+
+#anatomy-modal .modal-body {
+    flex: 1;
+    overflow-y: auto;
 }

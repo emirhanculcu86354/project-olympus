@@ -10,15 +10,12 @@
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <title>Project Olympus</title>
     <link rel="apple-touch-icon" href="icon.png">
-
     <link href="https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,400..900;1,400..900&display=swap"
         rel="stylesheet">
-
     <link rel="stylesheet" href="style.css">
 
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
-
     <script src="https://www.gstatic.com/firebasejs/10.8.1/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.8.1/firebase-auth-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.8.1/firebase-firestore-compat.js"></script>
@@ -70,7 +67,6 @@
     </div>
 
     <div id="app-content" class="hidden">
-
         <header class="mobile-header" id="main-header">
             <div class="header-top">
                 <h2 class="brand-title">PROJECT OLYMPUS</h2>
@@ -92,7 +88,6 @@
         </header>
 
         <main class="content">
-
             <section id="workout-sec" class="screen active">
                 <div class="phase-selector">
                     <button class="phase-btn active" data-phase="p1">Faz 1</button>
@@ -123,6 +118,7 @@
                 <p style="font-size:11px; color:#888; text-align:center; margin-bottom:15px;">Yediğin öğünü sağa,
                     kaçırdığını sola kaydır. Alternatifler için karta tıkla.</p>
                 <div id="diet-container" class="supp-container" style="margin-bottom: 30px;"></div>
+
                 <h3 style="margin-bottom: 10px;">Supplement Protokolü</h3>
                 <div class="supp-container">
                     <div class="supp-item">
@@ -217,48 +213,44 @@
             </section>
 
             <section id="profile-sec" class="screen">
-                <div class="profile-header" style="position: relative;">
-                    <button id="open-anatomy-btn"
-                        onclick="document.getElementById('anatomy-modal').style.display='flex'"
-                        style="position: absolute; right: 10px; top: 0; background: transparent; border: none; color: var(--goldnova); font-size: 28px; cursor: pointer;">☰</button>
-
-                    <div class="profile-img-container">
-                        <img id="profile-image-large" src="icon.png" alt="Profile">
-                    </div>
-                    <h1 id="profile-name-display" style="margin-top: 10px;">Sporcu</h1>
-                </div>
-                <div class="profile-header">
-
+                <div class="profile-header" style="position: relative; padding-top: 20px;">
+                    <button id="open-anatomy-btn" onclick="openAnatomy()"
+                        style="position: absolute; right: 0; top: 0; background: transparent; border: none; color: var(--goldnova); font-size: 28px; cursor: pointer; padding: 5px;">☰</button>
                     <div class="profile-img-container">
                         <input type="file" id="profile-img-upload" accept="image/*" style="display:none;">
-                        
+                        <img id="profile-image-large" src="icon.png" alt="Profil"
+                            style="width: 90px; height: 90px; border-radius: 50%; border: 3px solid var(--goldnova);">
                         <button onclick="document.getElementById('profile-img-upload').click();" class="edit-btn"
                             style="margin-top:10px;">Fotoğrafı Değiştir</button>
                     </div>
-                   
+                    <div class="profile-info" style="margin-top:15px; text-align:center;">
+                        <h2 id="profile-name-display" class="brand-title" style="font-size:24px;">Yükleniyor...</h2>
+                        <p class="subtitle" style="margin-bottom:0; color:#888;">Project Olympus</p>
+                    </div>
                 </div>
+
                 <div class="score-container">
                     <div class="score-circle"><span id="weekly-score">100</span><small>%</small></div>
                     <div class="score-text">Haftalık Başarı Skoru</div>
                 </div>
+
                 <button class="save-btn"
                     style="background:#252525; color:var(--goldnova); border: 1px solid var(--goldnova); margin-top:20px;"
                     onclick="document.getElementById('settings-modal').style.display='flex'">Ayarlar &
                     Tercihler</button>
+
                 <h3 style="margin-top: 30px; margin-bottom: 10px;">Güncel İstatistikler</h3>
-                <div class="form-container" style="background: transparent; padding:0;">
-                    <div class="form-grid">
-                        <div class="read-only-stat"><span>Kilo:</span> <strong id="ro-weight">-- kg</strong></div>
-                        <div class="read-only-stat"><span>Boy:</span> <strong id="ro-height">-- cm</strong></div>
-                        <div class="read-only-stat"><span>Bel:</span> <strong id="ro-waist">-- cm</strong></div>
-                        <div class="read-only-stat"><span>Göğüs:</span> <strong id="ro-chest">-- cm</strong></div>
-                        <div class="read-only-stat"><span>Omuz:</span> <strong id="ro-shoulder">-- cm</strong></div>
-                        <div class="read-only-stat"><span>Kol:</span> <strong id="ro-arm">-- cm</strong></div>
-                        <div class="read-only-stat"><span>Basen:</span> <strong id="ro-hips">-- cm</strong></div>
-                        <div class="read-only-stat"><span>Kalf:</span> <strong id="ro-calf">-- cm</strong></div>
-                    </div>
+                <div class="form-grid">
+                    <div class="read-only-stat"><span>Kilo:</span> <strong id="ro-weight">-- kg</strong></div>
+                    <div class="read-only-stat"><span>Boy:</span> <strong id="ro-height">-- cm</strong></div>
+                    <div class="read-only-stat"><span>Bel:</span> <strong id="ro-waist">-- cm</strong></div>
+                    <div class="read-only-stat"><span>Göğüs:</span> <strong id="ro-chest">-- cm</strong></div>
+                    <div class="read-only-stat"><span>Omuz:</span> <strong id="ro-shoulder">-- cm</strong></div>
+                    <div class="read-only-stat"><span>Kol:</span> <strong id="ro-arm">-- cm</strong></div>
+                    <div class="read-only-stat"><span>Basen:</span> <strong id="ro-hips">-- cm</strong></div>
+                    <div class="read-only-stat"><span>Kalf:</span> <strong id="ro-calf">-- cm</strong></div>
                 </div>
-                <div style="height: 50px;"></div>
+                <div style="height: 80px;"></div>
             </section>
 
             <div id="settings-modal" class="modal">
@@ -286,62 +278,61 @@
                     class="text">Takip</span></button>
         </nav>
     </div>
-    <div id="anatomy-modal" class="modal">
-        <div class="modal-content" style="max-height: 90vh; text-align: center;">
-            <h2 style="color: var(--goldnova); margin-bottom: 15px;">Haftalık Anatomi & Analiz</h2>
 
-            <div style="background: #1a1a1a; border-radius: 12px; padding: 20px; margin-bottom: 20px;">
-                <svg viewBox="0 0 100 200" style="width: 150px; height: auto;">
-                    <circle cx="50" cy="20" r="15" fill="#333" />
-                    <path id="muscle-chest" d="M 30 45 L 70 45 L 65 70 L 35 70 Z" fill="#333" class="muscle-group" />
-                    <path id="muscle-core" d="M 35 72 L 65 72 L 60 105 L 40 105 Z" fill="#333" class="muscle-group" />
-                    <path id="muscle-arms-l" d="M 25 45 L 15 90 L 25 90 L 30 50 Z" fill="#333" class="muscle-group" />
-                    <path id="muscle-arms-r" d="M 75 45 L 85 90 L 75 90 L 70 50 Z" fill="#333" class="muscle-group" />
-                    <path id="muscle-legs-l" d="M 40 110 L 30 180 L 45 180 L 48 110 Z" fill="#333"
-                        class="muscle-group" />
-                    <path id="muscle-legs-r" d="M 60 110 L 70 180 L 55 180 L 52 110 Z" fill="#333"
-                        class="muscle-group" />
+    <!-- APP CONTENT DIŞINDA KALAN, TEK ANATOMİ MODALI -->
+    <div id="anatomy-modal" style="display: none;">
+        <div class="modal-content">
+            <h2 style="color: var(--goldnova); margin-bottom: 15px; text-align: center;">Haftalık Anatomi & Analiz</h2>
+
+            <div
+                style="background: #1a1a1a; border-radius: 12px; padding: 20px; margin-bottom: 20px; text-align: center;">
+                <svg viewBox="0 0 200 340"
+                    style="width: 100%; max-width: 220px; height: auto; margin: 0 auto; display: block; filter: drop-shadow(0 0 15px rgba(0,0,0,0.5));">
+
+                    <g fill="#2a2a2a" stroke="#151515" stroke-width="2">
+                        <polygon points="90,20 110,20 115,40 100,55 85,40" />
+                        <polygon points="95,55 105,55 110,70 90,70" />
+                    </g>
+
+                    <g id="muscle-chest" class="muscle-group">
+                        <polygon points="98,72 65,72 70,105 98,110" />
+                        <polygon points="102,72 135,72 130,105 102,110" />
+                    </g>
+
+                    <g id="muscle-core" class="muscle-group">
+                        <polygon points="98,112 72,108 77,155 98,165" />
+                        <polygon points="102,112 128,108 123,155 102,165" />
+                    </g>
+
+                    <g id="muscle-arms-l" class="muscle-group">
+                        <polygon points="63,72 40,85 45,105 68,90" />
+                        <polygon points="45,107 30,140 45,145 60,110" />
+                        <polygon points="30,142 20,185 35,190 45,147" />
+                    </g>
+
+                    <g id="muscle-arms-r" class="muscle-group">
+                        <polygon points="137,72 160,85 155,105 132,90" />
+                        <polygon points="155,107 170,140 155,145 140,110" />
+                        <polygon points="170,142 180,185 165,190 155,147" />
+                    </g>
+
+                    <g id="muscle-legs-l" class="muscle-group">
+                        <polygon points="75,160 45,230 70,240 95,170" />
+                        <polygon points="48,245 45,310 65,315 72,245" />
+                    </g>
+
+                    <g id="muscle-legs-r" class="muscle-group">
+                        <polygon points="125,160 155,230 130,240 105,170" />
+                        <polygon points="152,245 155,310 135,315 128,245" />
+                    </g>
                 </svg>
-                <p style="font-size: 11px; color: var(--text-muted); margin-top: 10px;">Çalıştırılan kaslar <span
-                        style="color: #00ff00;">yeşil</span> yanar.</p>
             </div>
 
-            <div id="all-charts-container" style="text-align: left;">
-                <p style="color: var(--text-muted); font-size: 13px;">Tüm grafiklerin ve istatistiklerin burada
-                    listelenecek...</p>
+            <div id="all-charts-container" class="modal-body" style="text-align: left;">
+                <!-- Grafikler buraya gelecek -->
             </div>
 
-            <button class="save-btn"
-                onclick="document.getElementById('anatomy-modal').style.display='none'">Kapat</button>
-        </div>
-    </div>
-    <div id="anatomy-modal" class="modal">
-        <div class="modal-content" style="max-height: 90vh; text-align: center;">
-            <h2 style="color: var(--goldnova); margin-bottom: 15px;">Haftalık Anatomi & Analiz</h2>
-
-            <div style="background: #1a1a1a; border-radius: 12px; padding: 20px; margin-bottom: 20px;">
-                <svg viewBox="0 0 100 200" style="width: 150px; height: auto;">
-                    <circle cx="50" cy="20" r="15" fill="#333" />
-                    <path id="muscle-chest" d="M 30 45 L 70 45 L 65 70 L 35 70 Z" fill="#333" class="muscle-group" />
-                    <path id="muscle-core" d="M 35 72 L 65 72 L 60 105 L 40 105 Z" fill="#333" class="muscle-group" />
-                    <path id="muscle-arms-l" d="M 25 45 L 15 90 L 25 90 L 30 50 Z" fill="#333" class="muscle-group" />
-                    <path id="muscle-arms-r" d="M 75 45 L 85 90 L 75 90 L 70 50 Z" fill="#333" class="muscle-group" />
-                    <path id="muscle-legs-l" d="M 40 110 L 30 180 L 45 180 L 48 110 Z" fill="#333"
-                        class="muscle-group" />
-                    <path id="muscle-legs-r" d="M 60 110 L 70 180 L 55 180 L 52 110 Z" fill="#333"
-                        class="muscle-group" />
-                </svg>
-                <p style="font-size: 11px; color: var(--text-muted); margin-top: 10px;">Çalıştırılan kaslar <span
-                        style="color: #00ff00;">yeşil</span> yanar.</p>
-            </div>
-
-            <div id="all-charts-container" style="text-align: left;">
-                <p style="color: var(--text-muted); font-size: 13px;">Tüm grafiklerin ve istatistiklerin burada
-                    listelenecek...</p>
-            </div>
-
-            <button class="save-btn"
-                onclick="document.getElementById('anatomy-modal').style.display='none'">Kapat</button>
+            <button class="save-btn" onclick="closeAnatomy()" style="margin-top: 15px;">Kapat</button>
         </div>
     </div>
 
