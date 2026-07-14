@@ -129,15 +129,15 @@ document.addEventListener("DOMContentLoaded", () => {
         calculateCurrentDay();
         document.getElementById('settings-modal').style.display = 'none';
         syncDataToCloud();
-        calculateCurrentDay();
-        checkWaterReset();
-        saveAndRenderActivities();
-        loadProfileData();
-        checkDeloadEngine();
-        // YENİ EKLENEN KISIM: Modal yüklendiğinde tıklama olaylarını dinlemeye başla
-        initMuscleInteractions();
+        
     });
-
+    calculateCurrentDay();
+    checkWaterReset();
+    saveAndRenderActivities();
+    loadProfileData();
+    checkDeloadEngine();
+    // YENİ EKLENEN KISIM: Modal yüklendiğinde tıklama olaylarını dinlemeye başla
+    initMuscleInteractions();
     const dateInput = document.getElementById('start-date');
     const savedDate = localStorage.getItem('olympus_start_date');
     if (savedDate) { dateInput.value = savedDate; } else { const today = new Date().toISOString().split('T')[0]; dateInput.value = today; localStorage.setItem('olympus_start_date', today); }
@@ -824,7 +824,7 @@ function drawVolumeChart(canvasId) {
         options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: true, labels: { color: '#fff', font: { size: 10 } } } }, scales: { x: { ticks: { color: '#888' } }, y: { ticks: { color: '#888' } } } } 
     });
 }
-// KASLARA BASILI TUTMA (İNTERAKTİF) ÖZELLİĞİ
+// KASLARA BASILI TUTMA (İyileştirilmiş)
 function initMuscleInteractions() {
     const display = document.getElementById('muscle-name-display');
     const groups = document.querySelectorAll('.muscle-group');
@@ -833,11 +833,13 @@ function initMuscleInteractions() {
         const name = group.getAttribute('data-name');
         
         const showLabel = (e) => {
+            // Yazıyı göster
             display.innerText = name;
             display.style.opacity = '1';
             group.classList.add('active-touch');
-            // Telefonda küçük bir titreşim (Destekleyen cihazlarda)
-            if(navigator.vibrate) navigator.vibrate(15); 
+            
+            // Titreşim
+            if(navigator.vibrate) navigator.vibrate(20);
         };
         
         const hideLabel = () => {
@@ -845,14 +847,44 @@ function initMuscleInteractions() {
             group.classList.remove('active-touch');
         };
         
-        // Mobil Cihazlar İçin (Dokunma)
-        group.addEventListener('touchstart', showLabel, {passive: true});
-        group.addEventListener('touchend', hideLabel);
-        group.addEventListener('touchcancel', hideLabel);
-        
-        // Bilgisayarlar İçin (Mouse)
-        group.addEventListener('mousedown', showLabel);
-        group.addEventListener('mouseup', hideLabel);
-        group.addEventListener('mouseleave', hideLabel);
+        // Hem Mouse hem Dokunma olaylarını yakala
+        group.addEventListener('pointerdown', showLabel, {passive: true});
+        group.addEventListener('pointerup', hideLabel, {passive: true});
+        group.addEventListener('pointerleave', hideLabel, {passive: true});
+        group.addEventListener('pointercancel', hideLabel, {passive: true});
     });
+}
+window.exportOlympusReport = function() {
+    const p = JSON.parse(localStorage.getItem('olympus_profile')) || {};
+    const history = JSON.parse(localStorage.getItem('olympus_history')) || [];
+    
+    // Veri yapısı
+    const header = ["Tarih", "Kilo (kg)", "Bel (cm)", "Göğüs (cm)", "Omuz (cm)", "Kol (cm)", "Basen (cm)", "Kalf (cm)"];
+    const ws_data = [
+        header,
+        ...history.map(h => [h.date, h.weight || "-", p.waist || "-", p.chest || "-", p.shoulder || "-", p.arm || "-", p.hips || "-", p.calf || "-"]),
+        ["Hedef", p.target_w || "80", p.target_waist || "85", p.target_chest || "110", p.target_shoulder || "125", p.target_arm || "40", p.target_hips || "95", p.target_calf || "42"]
+    ];
+
+    const wb = XLSX.utils.book_new();
+    const ws = XLSX.utils.aoa_to_sheet(ws_data);
+
+    // Sütun genişlikleri
+    ws['!cols'] = [{wch: 12}, {wch: 10}, {wch: 10}, {wch: 10}, {wch: 10}, {wch: 10}, {wch: 10}, {wch: 10}];
+
+    // STİL EKLEME (Renklendirme)
+    // SheetJS'in "Style" özelliği için "xlsx-style" kütüphanesi gerekir ama
+    // standart SheetJS ile sütunları belirginleştirmenin en iyi yolu budur:
+    const range = XLSX.utils.decode_range(ws['!ref']);
+    for (let C = range.s.c; C <= range.e.c; ++C) {
+        let address = XLSX.utils.encode_col(C) + "1"; // Sadece başlık satırı
+        if (!ws[address]) continue;
+        ws[address].s = { 
+            fill: { fgColor: { rgb: "F6C000" } }, // Goldnova rengi
+            font: { bold: true, color: { rgb: "000000" } } 
+        };
+    }
+
+    XLSX.utils.book_append_sheet(wb, ws, "Gelişim Takibi");
+    XLSX.writeFile(wb, "Olympus_Premium_Raporu.xlsx");
 }

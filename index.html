@@ -19,6 +19,7 @@
     <script src="https://www.gstatic.com/firebasejs/10.8.1/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.8.1/firebase-auth-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.8.1/firebase-firestore-compat.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
 </head>
 
 <body>
@@ -201,6 +202,10 @@
                         <div class="track-icon">🚀</div>
                         <h4>Makro Manipülasyon</h4>
                     </div>
+                    <Div>
+                        <button class="save-btn" onclick="exportMeasurementsToExcel()">📊 Raporu Excel Olarak
+                            İndir</button>
+                    </Div>
                 </div>
                 <div id="tracking-modal" class="modal">
                     <div class="modal-content">
@@ -239,6 +244,12 @@
                     onclick="document.getElementById('settings-modal').style.display='flex'">Ayarlar &
                     Tercihler</button>
 
+                <h3 style="margin-top: 30px; margin-bottom: 10px;">Premium Raporlama</h3>
+                <div class="card" style="border-left-color: var(--goldnova);" onclick="exportOlympusReport()">
+                    <h3>📊 Detaylı Gelişim Raporu</h3>
+                    <p>Tüm ölçülerini ve gelişim geçmişini Excel dosyası olarak indir.</p>
+                </div>
+
                 <h3 style="margin-top: 30px; margin-bottom: 10px;">Güncel İstatistikler</h3>
                 <div class="form-grid">
                     <div class="read-only-stat"><span>Kilo:</span> <strong id="ro-weight">-- kg</strong></div>
@@ -265,6 +276,12 @@
                     <button class="save-btn" id="save-settings-btn">Kaydet & Kapat</button>
                 </div>
             </div>
+            <section id="report-sec" class="screen">
+                <h1>Pazar Raporu</h1>
+                <div id="report-content" class="modal-body">
+                    <p>Haftalık gelişim analizini burada görebilirsin.</p>
+                </div>
+            </section>
         </main>
 
         <nav class="bottom-nav">
@@ -280,12 +297,14 @@
     </div>
 
     <!-- APP CONTENT DIŞINDA KALAN, TEK ANATOMİ MODALI -->
-<div id="anatomy-modal" style="display: none;">
+    <div id="anatomy-modal">
         <div class="modal-content">
             <h2 style="color: var(--goldnova); margin-bottom: 15px; text-align: center;">Haftalık Anatomi & Analiz</h2>
 
-            <div style="background: #1a1a1a; border-radius: 12px; padding: 20px; margin-bottom: 20px; text-align: center; position: relative;">
-                <svg viewBox="0 0 200 340" style="width: 100%; max-width: 220px; height: auto; margin: 0 auto; display: block; filter: drop-shadow(0 0 15px rgba(0,0,0,0.5));">
+            <div
+                style="background: #1a1a1a; border-radius: 12px; padding: 20px; margin-bottom: 20px; text-align: center; position: relative;">
+                <svg viewBox="0 0 200 340"
+                    style="width: 100%; max-width: 220px; height: auto; margin: 0 auto; display: block; filter: drop-shadow(0 0 15px rgba(0,0,0,0.5));">
                     <g fill="#2a2a2a" stroke="#151515" stroke-width="2">
                         <polygon points="90,20 110,20 115,40 100,55 85,40" />
                         <polygon points="95,55 105,55 110,70 90,70" />
@@ -317,15 +336,17 @@
                         <polygon points="152,245 155,310 135,315 128,245" />
                     </g>
                 </svg>
-                
-                <div id="muscle-name-display" style="height: 20px; color: var(--goldnova); font-weight: 800; font-size: 16px; margin-top: 15px; opacity: 0; transition: opacity 0.3s ease;">
+
+                <div id="muscle-name-display"
+                    style="height: 20px; color: var(--goldnova); font-weight: 800; font-size: 16px; margin-top: 15px; opacity: 0; transition: opacity 0.3s ease;">
                     Kas Adı
                 </div>
-                <p style="font-size: 10px; color: #666; margin-top: 5px;">İsmini görmek için kasın üzerine basılı tutun.</p>
+                <p style="font-size: 10px; color: #666; margin-top: 5px;">İsmini görmek için kasın üzerine basılı tutun.
+                </p>
             </div>
 
             <div id="all-charts-container" class="modal-body" style="text-align: left;">
-                </div>
+            </div>
 
             <button class="save-btn" onclick="closeAnatomy()" style="margin-top: 15px;">Kapat</button>
         </div>
