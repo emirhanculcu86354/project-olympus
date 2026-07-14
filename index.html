@@ -280,57 +280,52 @@
     </div>
 
     <!-- APP CONTENT DIŞINDA KALAN, TEK ANATOMİ MODALI -->
-    <div id="anatomy-modal" style="display: none;">
+<div id="anatomy-modal" style="display: none;">
         <div class="modal-content">
             <h2 style="color: var(--goldnova); margin-bottom: 15px; text-align: center;">Haftalık Anatomi & Analiz</h2>
 
-            <div
-                style="background: #1a1a1a; border-radius: 12px; padding: 20px; margin-bottom: 20px; text-align: center;">
-                <svg viewBox="0 0 200 340"
-                    style="width: 100%; max-width: 220px; height: auto; margin: 0 auto; display: block; filter: drop-shadow(0 0 15px rgba(0,0,0,0.5));">
-
+            <div style="background: #1a1a1a; border-radius: 12px; padding: 20px; margin-bottom: 20px; text-align: center; position: relative;">
+                <svg viewBox="0 0 200 340" style="width: 100%; max-width: 220px; height: auto; margin: 0 auto; display: block; filter: drop-shadow(0 0 15px rgba(0,0,0,0.5));">
                     <g fill="#2a2a2a" stroke="#151515" stroke-width="2">
                         <polygon points="90,20 110,20 115,40 100,55 85,40" />
                         <polygon points="95,55 105,55 110,70 90,70" />
                     </g>
-
-                    <g id="muscle-chest" class="muscle-group">
+                    <g id="muscle-chest" class="muscle-group" data-name="Göğüs (Chest)">
                         <polygon points="98,72 65,72 70,105 98,110" />
                         <polygon points="102,72 135,72 130,105 102,110" />
                     </g>
-
-                    <g id="muscle-core" class="muscle-group">
+                    <g id="muscle-core" class="muscle-group" data-name="Karın (Core)">
                         <polygon points="98,112 72,108 77,155 98,165" />
                         <polygon points="102,112 128,108 123,155 102,165" />
                     </g>
-
-                    <g id="muscle-arms-l" class="muscle-group">
+                    <g id="muscle-arms-l" class="muscle-group" data-name="Sol Kol & Omuz">
                         <polygon points="63,72 40,85 45,105 68,90" />
                         <polygon points="45,107 30,140 45,145 60,110" />
                         <polygon points="30,142 20,185 35,190 45,147" />
                     </g>
-
-                    <g id="muscle-arms-r" class="muscle-group">
+                    <g id="muscle-arms-r" class="muscle-group" data-name="Sağ Kol & Omuz">
                         <polygon points="137,72 160,85 155,105 132,90" />
                         <polygon points="155,107 170,140 155,145 140,110" />
                         <polygon points="170,142 180,185 165,190 155,147" />
                     </g>
-
-                    <g id="muscle-legs-l" class="muscle-group">
+                    <g id="muscle-legs-l" class="muscle-group" data-name="Sol Bacak (Legs)">
                         <polygon points="75,160 45,230 70,240 95,170" />
                         <polygon points="48,245 45,310 65,315 72,245" />
                     </g>
-
-                    <g id="muscle-legs-r" class="muscle-group">
+                    <g id="muscle-legs-r" class="muscle-group" data-name="Sağ Bacak (Legs)">
                         <polygon points="125,160 155,230 130,240 105,170" />
                         <polygon points="152,245 155,310 135,315 128,245" />
                     </g>
                 </svg>
+                
+                <div id="muscle-name-display" style="height: 20px; color: var(--goldnova); font-weight: 800; font-size: 16px; margin-top: 15px; opacity: 0; transition: opacity 0.3s ease;">
+                    Kas Adı
+                </div>
+                <p style="font-size: 10px; color: #666; margin-top: 5px;">İsmini görmek için kasın üzerine basılı tutun.</p>
             </div>
 
             <div id="all-charts-container" class="modal-body" style="text-align: left;">
-                <!-- Grafikler buraya gelecek -->
-            </div>
+                </div>
 
             <button class="save-btn" onclick="closeAnatomy()" style="margin-top: 15px;">Kapat</button>
         </div>

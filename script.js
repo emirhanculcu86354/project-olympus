@@ -129,6 +129,13 @@ document.addEventListener("DOMContentLoaded", () => {
         calculateCurrentDay();
         document.getElementById('settings-modal').style.display = 'none';
         syncDataToCloud();
+        calculateCurrentDay();
+        checkWaterReset();
+        saveAndRenderActivities();
+        loadProfileData();
+        checkDeloadEngine();
+        // YENİ EKLENEN KISIM: Modal yüklendiğinde tıklama olaylarını dinlemeye başla
+        initMuscleInteractions();
     });
 
     const dateInput = document.getElementById('start-date');
@@ -815,5 +822,37 @@ function drawVolumeChart(canvasId) {
             ] 
         }, 
         options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: true, labels: { color: '#fff', font: { size: 10 } } } }, scales: { x: { ticks: { color: '#888' } }, y: { ticks: { color: '#888' } } } } 
+    });
+}
+// KASLARA BASILI TUTMA (İNTERAKTİF) ÖZELLİĞİ
+function initMuscleInteractions() {
+    const display = document.getElementById('muscle-name-display');
+    const groups = document.querySelectorAll('.muscle-group');
+    
+    groups.forEach(group => {
+        const name = group.getAttribute('data-name');
+        
+        const showLabel = (e) => {
+            display.innerText = name;
+            display.style.opacity = '1';
+            group.classList.add('active-touch');
+            // Telefonda küçük bir titreşim (Destekleyen cihazlarda)
+            if(navigator.vibrate) navigator.vibrate(15); 
+        };
+        
+        const hideLabel = () => {
+            display.style.opacity = '0';
+            group.classList.remove('active-touch');
+        };
+        
+        // Mobil Cihazlar İçin (Dokunma)
+        group.addEventListener('touchstart', showLabel, {passive: true});
+        group.addEventListener('touchend', hideLabel);
+        group.addEventListener('touchcancel', hideLabel);
+        
+        // Bilgisayarlar İçin (Mouse)
+        group.addEventListener('mousedown', showLabel);
+        group.addEventListener('mouseup', hideLabel);
+        group.addEventListener('mouseleave', hideLabel);
     });
 }
