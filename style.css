@@ -674,7 +674,7 @@ h1 {
 /* ALT NAVİGASYON (IOS DÜZELTMESİ) */
 .bottom-nav { 
     position: fixed; 
-    bottom: -5; /* Boşluk kalmaması için 0 yaptık */
+    bottom: 0; /* Boşluk kalmaması için 0 yaptık */
     left: 0; 
     right: 0; 
     height: 80px; /* Barın yüksekliğini tam istediğin kalınlığa göre burayı değiştir */
