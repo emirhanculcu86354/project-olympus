@@ -20,13 +20,13 @@
 html,
 body {
     height: 100%;
-    width: 100vw;
+    width: 100%;
     background-color: var(--bg-dark);
     color: var(--text-light);
     overflow: hidden;
     margin: 0;
     padding: 0;
-    position: fixed; /* Sayfanın komple kaymasını engeller */
+    overscroll-behavior-y: none; /* Sayfanın yaylanmasını engeller, yukarı fırlatmaz */
 }
 
 body {
@@ -133,7 +133,7 @@ body {
 .content {
     flex: 1;
     overflow-y: auto;
-    padding: 15px 15px calc(80px + env(safe-area-inset-bottom)) 15px;
+    padding: 15px 15px calc(90px + env(safe-area-inset-bottom)) 15px;
     -webkit-overflow-scrolling: touch;
 }
 
@@ -672,21 +672,23 @@ h1 {
 }
 
 /* ALT NAVİGASYON (IOS DÜZELTMESİ) */
-.bottom-nav { 
-    position: fixed; 
-    bottom: 0; /* Boşluk kalmaması için 0 yaptık */
-    left: 0; 
-    right: 0; 
-    height: 80px; /* Barın yüksekliğini tam istediğin kalınlığa göre burayı değiştir */
-    background-color: var(--nav-bg); 
-    backdrop-filter: blur(20px); 
-    -webkit-backdrop-filter: blur(20px); 
-    display: flex; 
-    justify-content: space-around; 
-    align-items: center; 
-    padding-bottom: 0px; /* Alttaki tüm padding'i sıfırladık */
-    border-top: 1px solid #252525; 
-    z-index: 9999; 
+.bottom-nav {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    /* Siyah boşluğu yok edip barın kendi rengiyle doldurmasını sağlar: */
+    padding-bottom: env(safe-area-inset-bottom); 
+    /* 70px ikonların alanı + alttaki boşluk kadar kalınlaşır */
+    height: calc(70px + env(safe-area-inset-bottom)); 
+    background-color: var(--nav-bg);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    display: flex;
+    justify-content: space-around;
+    align-items: center;
+    border-top: 1px solid #252525;
+    z-index: 9999;
 }
 .nav-btn {
     background: transparent;
