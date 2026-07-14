@@ -673,7 +673,7 @@ h1 {
 /* ALT NAVİGASYON (IOS DÜZELTMESİ) */
 .bottom-nav { 
     position: fixed; 
-    bottom: 0; 
+    bottom: -35; 
     left: 0; 
     right: 0; 
     height: 80px; /* Sabit yükseklik verdik, artık değişmez */
