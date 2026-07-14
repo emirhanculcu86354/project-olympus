@@ -20,12 +20,13 @@
 html,
 body {
     height: 100%;
-    height: 100dvh;
     width: 100vw;
     background-color: var(--bg-dark);
     color: var(--text-light);
     overflow: hidden;
     margin: 0;
+    padding: 0;
+    position: fixed; /* Sayfanın komple kaymasını engeller */
 }
 
 body {
@@ -673,17 +674,17 @@ h1 {
 /* ALT NAVİGASYON (IOS DÜZELTMESİ) */
 .bottom-nav { 
     position: fixed; 
-    bottom: -15px; /* Barı 15px aşağı kaydırır (gerekirse -20px yapabilirsin) */
+    bottom: 0; /* Boşluk kalmaması için 0 yaptık */
     left: 0; 
     right: 0; 
-    height: 85px; /* Barı daha kalın yapmak için 65px'den 85px'e çıkardık */
+    height: 75px; /* Barın yüksekliğini tam istediğin kalınlığa göre burayı değiştir */
     background-color: var(--nav-bg); 
     backdrop-filter: blur(20px); 
     -webkit-backdrop-filter: blur(20px); 
     display: flex; 
     justify-content: space-around; 
-    align-items: center; /* Kalınlaştığında ikonların ortada durması için */
-    padding-bottom: 15px; /* İçerideki ikonların yukarı kayması için boşluk */
+    align-items: center; 
+    padding-bottom: 0px; /* Alttaki tüm padding'i sıfırladık */
     border-top: 1px solid #252525; 
     z-index: 9999; 
 }
