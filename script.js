@@ -922,9 +922,12 @@ function scrollToBottomOly() {
 }
 
 // ARKA PLANDA GEMINI API'YE SORU SORMA MOTORU
+// ARKA PLANDA GEMINI API'YE SORU SORMA MOTORU
 async function askGeminiAI(userPrompt) {
-    // Burada uygulamanın güvenliği ve spor odağı için bir sistem yönlendirmesi (system instruction) yapıyoruz
-    const apiKey = ""; // Mevcut Firebase key'inden türetilmiştir
+    
+    // YENİ EKLENEN KISIM: Key'i dışarıdan (config.js'den) güvenle alıyoruz
+    const apiKey = ENV.GEMINI_API_KEY; 
+    
     const systemInstruction = "Sen Project Olympus uygulamasının resmi yapay zeka asistanı Oly'sin. Görevin kullanıcılara sadece fitness, beslenme, anatomi, idman programları, supplementler ve motivasyon konularında destek olmaktır. Cevapların kısa, net, samimi, bilimsel ve motive edici olmalıdır. Türkçe cevap ver.";
     
     const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${apiKey}`;
