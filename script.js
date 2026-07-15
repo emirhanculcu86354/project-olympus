@@ -129,15 +129,15 @@ document.addEventListener("DOMContentLoaded", () => {
         calculateCurrentDay();
         document.getElementById('settings-modal').style.display = 'none';
         syncDataToCloud();
-        
+        calculateCurrentDay();
+        checkWaterReset();
+        saveAndRenderActivities();
+        loadProfileData();
+        checkDeloadEngine();
+        // YENİ EKLENEN KISIM: Modal yüklendiğinde tıklama olaylarını dinlemeye başla
+        initMuscleInteractions();
     });
-    calculateCurrentDay();
-    checkWaterReset();
-    saveAndRenderActivities();
-    loadProfileData();
-    checkDeloadEngine();
-    // YENİ EKLENEN KISIM: Modal yüklendiğinde tıklama olaylarını dinlemeye başla
-    initMuscleInteractions();
+
     const dateInput = document.getElementById('start-date');
     const savedDate = localStorage.getItem('olympus_start_date');
     if (savedDate) { dateInput.value = savedDate; } else { const today = new Date().toISOString().split('T')[0]; dateInput.value = today; localStorage.setItem('olympus_start_date', today); }
@@ -214,6 +214,8 @@ document.addEventListener("DOMContentLoaded", () => {
     saveAndRenderActivities();
     loadProfileData();
     checkDeloadEngine();
+    initMuscleInteractions();
+    initDraggableOly()
 });
 
 // 4. UYGULAMA FONKSİYONLARI
@@ -824,7 +826,7 @@ function drawVolumeChart(canvasId) {
         options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: true, labels: { color: '#fff', font: { size: 10 } } } }, scales: { x: { ticks: { color: '#888' } }, y: { ticks: { color: '#888' } } } } 
     });
 }
-// KASLARA BASILI TUTMA (İyileştirilmiş)
+// KASLARA BASILI TUTMA (İNTERAKTİF) ÖZELLİĞİ
 function initMuscleInteractions() {
     const display = document.getElementById('muscle-name-display');
     const groups = document.querySelectorAll('.muscle-group');
@@ -833,13 +835,11 @@ function initMuscleInteractions() {
         const name = group.getAttribute('data-name');
         
         const showLabel = (e) => {
-            // Yazıyı göster
             display.innerText = name;
             display.style.opacity = '1';
             group.classList.add('active-touch');
-            
-            // Titreşim
-            if(navigator.vibrate) navigator.vibrate(20);
+            // Telefonda küçük bir titreşim (Destekleyen cihazlarda)
+            if(navigator.vibrate) navigator.vibrate(15); 
         };
         
         const hideLabel = () => {
@@ -847,44 +847,226 @@ function initMuscleInteractions() {
             group.classList.remove('active-touch');
         };
         
-        // Hem Mouse hem Dokunma olaylarını yakala
-        group.addEventListener('pointerdown', showLabel, {passive: true});
-        group.addEventListener('pointerup', hideLabel, {passive: true});
-        group.addEventListener('pointerleave', hideLabel, {passive: true});
-        group.addEventListener('pointercancel', hideLabel, {passive: true});
+        // Mobil Cihazlar İçin (Dokunma)
+        group.addEventListener('touchstart', showLabel, {passive: true});
+        group.addEventListener('touchend', hideLabel);
+        group.addEventListener('touchcancel', hideLabel);
+        
+        // Bilgisayarlar İçin (Mouse)
+        group.addEventListener('mousedown', showLabel);
+        group.addEventListener('mouseup', hideLabel);
+        group.addEventListener('mouseleave', hideLabel);
     });
 }
-window.exportOlympusReport = function() {
-    const p = JSON.parse(localStorage.getItem('olympus_profile')) || {};
-    const history = JSON.parse(localStorage.getItem('olympus_history')) || [];
-    
-    // Veri yapısı
-    const header = ["Tarih", "Kilo (kg)", "Bel (cm)", "Göğüs (cm)", "Omuz (cm)", "Kol (cm)", "Basen (cm)", "Kalf (cm)"];
-    const ws_data = [
-        header,
-        ...history.map(h => [h.date, h.weight || "-", p.waist || "-", p.chest || "-", p.shoulder || "-", p.arm || "-", p.hips || "-", p.calf || "-"]),
-        ["Hedef", p.target_w || "80", p.target_waist || "85", p.target_chest || "110", p.target_shoulder || "125", p.target_arm || "40", p.target_hips || "95", p.target_calf || "42"]
-    ];
+// ==========================================
+// OLY CHAT & AI MOTORU FONKSİYONLARI
+// ==========================================
 
-    const wb = XLSX.utils.book_new();
-    const ws = XLSX.utils.aoa_to_sheet(ws_data);
+window.openOlyChat = function() {
+    const chatWin = document.getElementById('oly-chat-window');
+    const avatar = document.getElementById('oly-avatar');
+    chatWin.classList.add('open');
+    avatar.style.right = '-50px'; // Chat açılınca avatarı gizle
+    if (navigator.vibrate) navigator.vibrate(30);
+    scrollToBottomOly();
+};
 
-    // Sütun genişlikleri
-    ws['!cols'] = [{wch: 12}, {wch: 10}, {wch: 10}, {wch: 10}, {wch: 10}, {wch: 10}, {wch: 10}, {wch: 10}];
+window.closeOlyChat = function() {
+    document.getElementById('oly-chat-window').classList.remove('open');
+    document.getElementById('oly-avatar').style.right = '0'; // Avatarı geri getir
+};
 
-    // STİL EKLEME (Renklendirme)
-    // SheetJS'in "Style" özelliği için "xlsx-style" kütüphanesi gerekir ama
-    // standart SheetJS ile sütunları belirginleştirmenin en iyi yolu budur:
-    const range = XLSX.utils.decode_range(ws['!ref']);
-    for (let C = range.s.c; C <= range.e.c; ++C) {
-        let address = XLSX.utils.encode_col(C) + "1"; // Sadece başlık satırı
-        if (!ws[address]) continue;
-        ws[address].s = { 
-            fill: { fgColor: { rgb: "F6C000" } }, // Goldnova rengi
-            font: { bold: true, color: { rgb: "000000" } } 
-        };
+window.handleOlyKey = function(event) {
+    if (event.key === 'Enter') {
+        sendOlyMessage();
     }
+};
 
-    XLSX.utils.book_append_sheet(wb, ws, "Gelişim Takibi");
-    XLSX.writeFile(wb, "Olympus_Premium_Raporu.xlsx");
+window.sendOlyMessage = async function() {
+    const input = document.getElementById('oly-input');
+    const text = input.value.trim();
+    if (!text) return;
+
+    // Kullanıcı mesajını ekrana yaz
+    appendOlyMessage(text, 'oly-user');
+    input.value = '';
+
+    // "Oly yazıyor..." animasyonu ekle
+    const typingIndicator = appendOlyMessage('Oly düşünüyor...', 'oly-typing');
+    
+    try {
+        // GERÇEK GEMINI API ENTEGRASYONU
+        const responseText = await askGeminiAI(text);
+        typingIndicator.remove(); // Göstergeyi sil
+        appendOlyMessage(responseText, 'oly-ai');
+    } catch (error) {
+        typingIndicator.remove();
+        appendOlyMessage('Ufak bir bağlantı sorunu yaşadım. Tekrar dener misin?', 'oly-ai');
+        console.error(error);
+    }
+};
+
+function appendOlyMessage(text, className) {
+    const container = document.getElementById('oly-messages-container');
+    const msg = document.createElement('div');
+    msg.className = `oly-message ${className}`;
+    msg.innerHTML = text;
+    container.appendChild(msg);
+    scrollToBottomOly();
+    return msg;
 }
+
+function scrollToBottomOly() {
+    const container = document.getElementById('oly-messages-container');
+    container.scrollTop = container.scrollHeight;
+}
+
+// ARKA PLANDA GEMINI API'YE SORU SORMA MOTORU
+async function askGeminiAI(userPrompt) {
+    // Burada uygulamanın güvenliği ve spor odağı için bir sistem yönlendirmesi (system instruction) yapıyoruz
+    const apiKey = "AQ.Ab8RN6JwpqapHwOGOdB3heA_MIDt1DtsW_lElVukqGB5V75esA"; // Mevcut Firebase key'inden türetilmiştir
+    const systemInstruction = "Sen Project Olympus uygulamasının resmi yapay zeka asistanı Oly'sin. Görevin kullanıcılara sadece fitness, beslenme, anatomi, idman programları, supplementler ve motivasyon konularında destek olmaktır. Cevapların kısa, net, samimi, bilimsel ve motive edici olmalıdır. Türkçe cevap ver.";
+    
+    const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${apiKey}`;
+    
+    const response = await fetch(url, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+            contents: [
+                { role: "user", parts: [{ text: `${systemInstruction}\n\nKullanıcı Sorusu: ${userPrompt}` }] }
+            ]
+        })
+    });
+    
+    const data = await response.json();
+    return data.candidates[0].content.parts[0].text;
+}
+// ==========================================
+// OLY AVATAR SÜRÜKLEME VE MIKNATIS MOTORU
+// ==========================================
+function initDraggableOly() {
+    const avatar = document.getElementById('oly-avatar');
+    let isDragging = false;
+    let moved = false; // Sürükleme mi yoksa tıklama mı olduğunu anlamak için
+    let initialX, initialY, startLeft, startTop;
+
+    const dragStart = (e) => {
+        if (e.type === 'touchstart') {
+            initialX = e.touches[0].clientX;
+            initialY = e.touches[0].clientY;
+        } else {
+            initialX = e.clientX;
+            initialY = e.clientY;
+        }
+        isDragging = true;
+        moved = false;
+
+        const rect = avatar.getBoundingClientRect();
+        startLeft = rect.left;
+        startTop = rect.top;
+
+        // Sürüklerken animasyonu kapat (gecikmeyi önler)
+        avatar.style.transition = 'none';
+    };
+
+    const drag = (e) => {
+        if (!isDragging) return;
+        e.preventDefault(); // Ekranın kaymasını engelle
+        
+        let currentX, currentY;
+        if (e.type === 'touchmove') {
+            currentX = e.touches[0].clientX;
+            currentY = e.touches[0].clientY;
+        } else {
+            currentX = e.clientX;
+            currentY = e.clientY;
+        }
+
+        const dx = currentX - initialX;
+        const dy = currentY - initialY;
+        
+        // 5 pikselden fazla hareket ederse bu bir sürüklmedir, tıklama iptal!
+        if (Math.abs(dx) > 5 || Math.abs(dy) > 5) {
+            moved = true; 
+        }
+
+        let newLeft = startLeft + dx;
+        let newTop = startTop + dy;
+
+        // Ekran sınırlarının dışına çıkmasını engelle
+        const maxX = window.innerWidth - avatar.offsetWidth;
+        const maxY = window.innerHeight - avatar.offsetHeight;
+        newLeft = Math.max(0, Math.min(newLeft, maxX));
+        newTop = Math.max(0, Math.min(newTop, maxY));
+
+        avatar.style.left = newLeft + 'px';
+        avatar.style.top = newTop + 'px';
+        avatar.style.right = 'auto'; // Right değerini iptal et
+    };
+
+    const dragEnd = () => {
+        if (!isDragging) return;
+        isDragging = false;
+        
+        // Animasyonu geri aç
+        avatar.style.transition = 'all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1)';
+        
+        const rect = avatar.getBoundingClientRect();
+        const centerX = window.innerWidth / 2;
+
+        // Ekranın sağına mı daha yakın soluna mı? (Mıknatıs etkisi)
+        if (rect.left + (rect.width / 2) > centerX) {
+            // Sağa yapıştır
+            avatar.style.left = 'auto';
+            avatar.style.right = '0px';
+            avatar.style.borderRadius = '80px 0 0 80px';
+            avatar.style.justifyContent = 'flex-end';
+            avatar.style.paddingRight = '8px';
+            avatar.style.paddingLeft = '0';
+        } else {
+            // Sola yapıştır
+            avatar.style.left = '0px';
+            avatar.style.right = 'auto';
+            avatar.style.borderRadius = '0 80px 80px 0'; // Şekli ters çevir!
+            avatar.style.justifyContent = 'flex-start';
+            avatar.style.paddingLeft = '8px';
+            avatar.style.paddingRight = '0';
+        }
+    };
+
+    // Tıklama Yöneticisi (Eğer sürüklendiyse sohbeti açma)
+    avatar.onclick = (e) => {
+        if (moved) {
+            e.preventDefault();
+            moved = false;
+            return;
+        }
+        openOlyChat();
+    };
+
+    // Dinleyicileri (Listeners) ekle
+    avatar.addEventListener('mousedown', dragStart);
+    document.addEventListener('mousemove', drag);
+    document.addEventListener('mouseup', dragEnd);
+
+    avatar.addEventListener('touchstart', dragStart, {passive: false});
+    document.addEventListener('touchmove', drag, {passive: false});
+    document.addEventListener('touchend', dragEnd);
+}
+
+// Oly Chat Açılış/Kapanış (Güncellendi)
+window.openOlyChat = function() {
+    const chatWin = document.getElementById('oly-chat-window');
+    const avatar = document.getElementById('oly-avatar');
+    chatWin.classList.add('open');
+    // Avatarı küçülterek gizle (Sağda da solda da olsa sorun olmaz)
+    avatar.style.transform = 'scale(0)'; 
+    if (navigator.vibrate) navigator.vibrate(30);
+    scrollToBottomOly();
+};
+
+window.closeOlyChat = function() {
+    document.getElementById('oly-chat-window').classList.remove('open');
+    document.getElementById('oly-avatar').style.transform = 'scale(1)'; // Avatarı geri getir
+};
