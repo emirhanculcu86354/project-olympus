@@ -776,14 +776,15 @@ h1 {
    OLY YAPAY ZEKA ASİSTANI TASARIMI
    ========================================== */
 
+/* Başlangıç Konumu ve Geçişler */
 #oly-avatar {
     position: fixed;
     right: 0;
-    top: 50%; /* Başlangıç konumu */
+    top: 50%; 
     width: 45px;
     height: 80px;
     background: var(--goldnova);
-    border-radius: 80px 0 0 80px; /* Sola veya sağa geçmesine göre JS ile değişecek */
+    border-radius: 80px 0 0 80px; 
     z-index: 9998;
     cursor: grab;
     display: flex;
@@ -791,13 +792,29 @@ h1 {
     justify-content: flex-end;
     padding-right: 8px;
     box-shadow: 0 0 20px rgba(246, 192, 0, 0.4);
-    /* Sürükleme sırasında gecikme olmaması için transition sadece scale/renk için geçerli */
-    transition: transform 0.3s ease, border-radius 0.3s ease, background 0.3s ease;
+    /* Şekil değiştirirken yumuşak bir geçiş olması için */
+    transition: transform 0.3s ease, border-radius 0.3s ease, background 0.3s ease, width 0.3s ease, height 0.3s ease, padding 0.3s ease;
 }
 
 #oly-avatar:active {
     cursor: grabbing;
-    transform: scale(0.95);
+}
+
+/* OLY SÜRÜKLENİRKEN: Su Damlası (Blob) Efekti */
+#oly-avatar.dragging {
+    width: 65px !important;
+    height: 65px !important;
+    justify-content: center !important;
+    padding: 0 !important;
+    box-shadow: 0 10px 25px rgba(246, 192, 0, 0.6);
+    /* Sıvı hareketini başlatan animasyon */
+    animation: liquidBlob 1.5s infinite ease-in-out;
+}
+
+/* Su gibi dalgalanma (Liquid Blob) Keyframeleri */
+@keyframes liquidBlob {
+    0%, 100% { border-radius: 60% 40% 30% 70% / 60% 30% 70% 40%; }
+    50% { border-radius: 30% 60% 70% 40% / 50% 60% 30% 60%; }
 }
 
 /* Göz kırpma animasyonlu gözler */

@@ -924,7 +924,7 @@ function scrollToBottomOly() {
 // ARKA PLANDA GEMINI API'YE SORU SORMA MOTORU
 async function askGeminiAI(userPrompt) {
     // Burada uygulamanın güvenliği ve spor odağı için bir sistem yönlendirmesi (system instruction) yapıyoruz
-    const apiKey = "AQ.Ab8RN6JwpqapHwOGOdB3heA_MIDt1DtsW_lElVukqGB5V75esA"; // Mevcut Firebase key'inden türetilmiştir
+    const apiKey = ""; // Mevcut Firebase key'inden türetilmiştir
     const systemInstruction = "Sen Project Olympus uygulamasının resmi yapay zeka asistanı Oly'sin. Görevin kullanıcılara sadece fitness, beslenme, anatomi, idman programları, supplementler ve motivasyon konularında destek olmaktır. Cevapların kısa, net, samimi, bilimsel ve motive edici olmalıdır. Türkçe cevap ver.";
     
     const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${apiKey}`;
@@ -945,10 +945,13 @@ async function askGeminiAI(userPrompt) {
 // ==========================================
 // OLY AVATAR SÜRÜKLEME VE MIKNATIS MOTORU
 // ==========================================
+// ==========================================
+// OLY AVATAR SÜRÜKLEME VE SIVI MIKNATIS MOTORU
+// ==========================================
 function initDraggableOly() {
     const avatar = document.getElementById('oly-avatar');
     let isDragging = false;
-    let moved = false; // Sürükleme mi yoksa tıklama mı olduğunu anlamak için
+    let moved = false; 
     let initialX, initialY, startLeft, startTop;
 
     const dragStart = (e) => {
@@ -966,13 +969,14 @@ function initDraggableOly() {
         startLeft = rect.left;
         startTop = rect.top;
 
-        // Sürüklerken animasyonu kapat (gecikmeyi önler)
-        avatar.style.transition = 'none';
+        // Oly'yi sıvı tam daire formuna sok!
+        avatar.classList.add('dragging');
+        avatar.style.transition = 'none'; 
     };
 
     const drag = (e) => {
         if (!isDragging) return;
-        e.preventDefault(); // Ekranın kaymasını engelle
+        e.preventDefault(); 
         
         let currentX, currentY;
         if (e.type === 'touchmove') {
@@ -986,7 +990,6 @@ function initDraggableOly() {
         const dx = currentX - initialX;
         const dy = currentY - initialY;
         
-        // 5 pikselden fazla hareket ederse bu bir sürüklmedir, tıklama iptal!
         if (Math.abs(dx) > 5 || Math.abs(dy) > 5) {
             moved = true; 
         }
@@ -994,7 +997,6 @@ function initDraggableOly() {
         let newLeft = startLeft + dx;
         let newTop = startTop + dy;
 
-        // Ekran sınırlarının dışına çıkmasını engelle
         const maxX = window.innerWidth - avatar.offsetWidth;
         const maxY = window.innerHeight - avatar.offsetHeight;
         newLeft = Math.max(0, Math.min(newLeft, maxX));
@@ -1002,20 +1004,24 @@ function initDraggableOly() {
 
         avatar.style.left = newLeft + 'px';
         avatar.style.top = newTop + 'px';
-        avatar.style.right = 'auto'; // Right değerini iptal et
+        avatar.style.right = 'auto'; 
     };
 
     const dragEnd = () => {
         if (!isDragging) return;
         isDragging = false;
         
-        // Animasyonu geri aç
+        // Sıvı formunu kapat ve yumuşak geçişi aç
+        avatar.classList.remove('dragging');
         avatar.style.transition = 'all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1)';
         
         const rect = avatar.getBoundingClientRect();
         const centerX = window.innerWidth / 2;
 
-        // Ekranın sağına mı daha yakın soluna mı? (Mıknatıs etkisi)
+        // Kenarlara yapışırken eski ölçülerini (45x80) geri veriyoruz
+        avatar.style.width = '45px';
+        avatar.style.height = '80px';
+
         if (rect.left + (rect.width / 2) > centerX) {
             // Sağa yapıştır
             avatar.style.left = 'auto';
@@ -1028,14 +1034,13 @@ function initDraggableOly() {
             // Sola yapıştır
             avatar.style.left = '0px';
             avatar.style.right = 'auto';
-            avatar.style.borderRadius = '0 80px 80px 0'; // Şekli ters çevir!
+            avatar.style.borderRadius = '0 80px 80px 0'; 
             avatar.style.justifyContent = 'flex-start';
             avatar.style.paddingLeft = '8px';
             avatar.style.paddingRight = '0';
         }
     };
 
-    // Tıklama Yöneticisi (Eğer sürüklendiyse sohbeti açma)
     avatar.onclick = (e) => {
         if (moved) {
             e.preventDefault();
@@ -1045,7 +1050,6 @@ function initDraggableOly() {
         openOlyChat();
     };
 
-    // Dinleyicileri (Listeners) ekle
     avatar.addEventListener('mousedown', dragStart);
     document.addEventListener('mousemove', drag);
     document.addEventListener('mouseup', dragEnd);
