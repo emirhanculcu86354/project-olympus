@@ -921,34 +921,64 @@ function scrollToBottomOly() {
     container.scrollTop = container.scrollHeight;
 }
 
-// ARKA PLANDA GEMINI API'YE SORU SORMA MOTORU
+// OLY AYARLARINI GÜNCELLEME
+window.updateOlyKey = function() {
+    const newKey = prompt("Lütfen Gemini API anahtarınızı girin:", localStorage.getItem('OLY_API_KEY') || "");
+    if (newKey) {
+        localStorage.setItem('OLY_API_KEY', newKey);
+        alert("Anahtar güncellendi! Oly artık hazır.");
+    }
+};
+
+// OLY AI MOTORU (GEMINI 3.5 FLASH - En Güncel Sürüm)
 async function askGeminiAI(userPrompt) {
-    // Önce hafızaya bak, yoksa sor
     let apiKey = localStorage.getItem('OLY_API_KEY');
     
-    if (!apiKey) {
-        apiKey = prompt("Oly'yi aktif etmek için Gemini API anahtarını girin:");
-        localStorage.setItem('OLY_API_KEY', apiKey);
+    if (!apiKey || apiKey === "null") {
+        updateOlyKey();
+        apiKey = localStorage.getItem('OLY_API_KEY');
     }
     
-    const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${apiKey}`;
+    if (!apiKey) throw new Error("Anahtar girilmedi.");
+
+    apiKey = apiKey.trim();
+
+    const systemInstruction = "Sen Project Olympus uygulamasının resmi yapay zeka asistanı Oly'sin. Görevin kullanıcılara sadece fitness, beslenme, anatomi, idman programları ve motivasyon konularında destek olmaktır. Türkçe, samimi ve net cevaplar ver.";
     
-    const response = await fetch(url, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-            contents: [
-                { role: "user", parts: [{ text: `${systemInstruction}\n\nKullanıcı Sorusu: ${userPrompt}` }] }
-            ]
-        })
-    });
+    // DİKKAT: Modeli listedeki en güncel sürüm olan 'gemini-3.5-flash' olarak değiştirdik!
+    const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-3.5-flash:generateContent?key=${apiKey}`;
     
-    const data = await response.json();
-    return data.candidates[0].content.parts[0].text;
+    try {
+        const response = await fetch(url, {
+            method: "POST",
+            headers: { 
+                "Content-Type": "application/json"
+            },
+            body: JSON.stringify({ 
+                contents: [
+                    { 
+                        role: "user", 
+                        parts: [{ text: `${systemInstruction}\n\nSoru: ${userPrompt}` }] 
+                    }
+                ] 
+            })
+        });
+        
+        if (!response.ok) {
+            const errorData = await response.json();
+            console.error("Google API Detaylı Hata:", errorData);
+            throw new Error(`Bağlantı hatası: ${response.status} - Hata detayı için F12 konsoluna bak.`);
+        }
+
+        const data = await response.json();
+        return data.candidates[0].content.parts[0].text;
+
+    } catch (error) {
+        console.error("Oly Motor Hatası:", error);
+        throw error; 
+    }
 }
-// ==========================================
-// OLY AVATAR SÜRÜKLEME VE MIKNATIS MOTORU
-// ==========================================
+
 // ==========================================
 // OLY AVATAR SÜRÜKLEME VE SIVI MIKNATIS MOTORU
 // ==========================================
