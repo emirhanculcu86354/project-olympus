@@ -22,6 +22,10 @@
 </head>
 
 <body>
+    <!-- Yükleme Ekranı -->
+    <div id="loading-screen" class="loading-screen">
+        <h1 id="loading-text" class="loading-text"></h1>
+    </div>
 
     <div id="login-screen" class="full-screen-overlay">
         <div class="login-box">
@@ -233,6 +237,11 @@
                     <div class="score-circle"><span id="weekly-score">100</span><small>%</small></div>
                     <div class="score-text">Haftalık Başarı Skoru</div>
                 </div>
+                <!-- OLYMPUS ARENA GİRİŞ BUTONU -->
+                <button class="arena-entry-btn" onclick="openArenaScreen()">
+                    <span style="font-size: 22px;">⚔️</span>
+                    <span>OLYMPUS ARENA'YA GİR</span>
+                </button>
 
                 <button class="save-btn"
                     style="background:#252525; color:var(--goldnova); border: 1px solid var(--goldnova); margin-top:20px;"
@@ -252,6 +261,32 @@
                 </div>
                 <div style="height: 80px;"></div>
             </section>
+            <!-- OLYMPUS ARENA EKRANI (Buraya Ekliyoruz) -->
+            <section id="arena-sec" class="screen">
+                <div class="header-section" style="padding-top: 20px; text-align: center; position: relative;">
+                    <button onclick="closeArenaScreen()"
+                        style="position: absolute; left: 15px; top: 20px; background: none; border: none; color: var(--goldnova); font-size: 24px; cursor: pointer;">←</button>
+                    <h2 style="color: var(--goldnova); letter-spacing: 2px;">OLYMPUS ARENA</h2>
+                    <p style="color: var(--text-muted); font-size: 14px;">Diğer sporcuları bul ve rekabete katıl.</p>
+                </div>
+
+                <div class="arena-search-box">
+                    <input type="text" id="user-search-input" placeholder="Sporcu ara (Örn: Emirhan)...">
+                    <button onclick="searchUsers()">Bul</button>
+                </div>
+
+                <div id="search-results" class="arena-list"></div>
+
+                <hr style="border-color: #333; margin: 25px 0;">
+
+                <h3 style="color: #fff; font-size: 16px; margin-bottom: 15px;">Canlı Akış (Feed)</h3>
+                <div id="arena-feed" class="arena-list">
+                    <p style="color: gray; text-align: center; font-size: 14px;">Henüz bir hareket yok. Birilerini takip
+                        etmeye başla!</p>
+                </div>
+                <div style="height: 80px;"></div>
+            </section>
+            <!-- ARENA EKRANI SONU -->
 
             <div id="settings-modal" class="modal">
                 <div class="modal-content">
@@ -350,6 +385,9 @@
                     <span style="color: #00ff00; font-size: 10px; font-weight: bold;">● Çevrimiçi Yapay Zeka</span>
                 </div>
             </div>
+            <!-- Ayar İkonu Burada -->
+            <button onclick="updateOlyKey()"
+                style="background:none; border:none; color:var(--goldnova); cursor:pointer; margin-left: auto; margin-right: 10px;">⚙️</button>
             <button class="oly-close-btn" onclick="closeOlyChat()">✕</button>
         </div>
 
@@ -363,19 +401,6 @@
         <div class="oly-chat-footer">
             <input type="text" id="oly-input" placeholder="Oly'ye bir şey sor..." onkeypress="handleOlyKey(event)">
             <button id="oly-send-btn" onclick="sendOlyMessage()">Gönder</button>
-        </div> 
-        
-        <div class="oly-chat-header">
-            <div style="display: flex; align-items: center; gap: 10px;">
-                <div class="oly-chat-avatar-mini">🤖</div>
-                <div>
-                    <h4 style="color: var(--goldnova); font-size: 14px; margin: 0;">Oly</h4>
-                </div>
-            </div>
-            <!-- Ayar ikonu -->
-            <button onclick="updateOlyKey()"
-                style="background:none; border:none; color:var(--goldnova); cursor:pointer;">⚙️</button>
-            <button class="oly-close-btn" onclick="closeOlyChat()">✕</button>
         </div>
     </div>
     <script src="config.js"></script>

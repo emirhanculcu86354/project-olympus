@@ -16,10 +16,26 @@ const db = firebase.firestore();
 
 db.settings({ cacheSizeBytes: firebase.firestore.CACHE_SIZE_UNLIMITED });
 
+// YÜKLEME EKRANI KONTROLÜ İÇİN DEĞİŞKEN
+let isAppInitialized = false;
+
 auth.onAuthStateChanged(user => {
     if (user) {
+        // 1. DURUM: KULLANICI ZATEN GİRİŞ YAPMIŞ
         document.getElementById('login-screen').classList.add('hidden');
-        document.getElementById('app-content').classList.remove('hidden');
+        
+        // Eğer uygulama ilk kez yükleniyorsa daktilo animasyonunu başlat
+        if (!isAppInitialized) {
+            playSplashAnimation(() => {
+                // Animasyon bitince ana ekranı göster
+                document.getElementById('app-content').classList.remove('hidden');
+            });
+            isAppInitialized = true;
+        } else {
+            // Animasyon zaten oynadıysa direkt göster
+            document.getElementById('app-content').classList.remove('hidden');
+        }
+
         const photo = user.photoURL || 'icon.png';
         const name = user.displayName || 'Sporcu';
         document.getElementById('header-profile-img').src = photo;
@@ -28,8 +44,13 @@ auth.onAuthStateChanged(user => {
         document.getElementById('profile-name-input').value = name;
         loadDataFromCloud(user.uid);
     } else {
+        // 2. DURUM: KULLANICI GİRİŞ YAPMAMIŞ (Uygulamayı ilk defa açıyor)
+        const loadingScreen = document.getElementById('loading-screen');
+        if (loadingScreen) loadingScreen.style.display = 'none'; // Animasyonu iptal et
+        
         document.getElementById('login-screen').classList.remove('hidden');
         document.getElementById('app-content').classList.add('hidden');
+        isAppInitialized = true;
     }
 });
 
@@ -1108,3 +1129,126 @@ window.closeOlyChat = function() {
     document.getElementById('oly-chat-window').classList.remove('open');
     document.getElementById('oly-avatar').style.transform = 'scale(1)'; // Avatarı geri getir
 };
+// ==========================================
+// YÜKLEME (SPLASH) EKRANI ANİMASYONU
+// ==========================================
+function playSplashAnimation(onCompleteCallback) {
+    const textElement = document.getElementById('loading-text');
+    const loadingScreen = document.getElementById('loading-screen');
+    
+    // Eğer HTML'de yükleme ekranı yoksa direkt uygulamaya geç
+    if (!textElement || !loadingScreen) {
+        if (onCompleteCallback) onCompleteCallback();
+        return;
+    }
+
+    const targetText = "PROJECT OLYMPUS";
+    let charIndex = 0;
+    textElement.textContent = ""; 
+
+    // Daktilo efekti: Harfleri sırayla yazdır
+    const typingInterval = setInterval(() => {
+        if (charIndex < targetText.length) {
+            textElement.textContent += targetText.charAt(charIndex);
+            charIndex++;
+        } else {
+            clearInterval(typingInterval); // Yazım bitti
+            
+            // Yazı tam olarak ekranda belirdikten sonra yarım saniye bekle
+            setTimeout(() => {
+                // Ekranı CSS ile yukarı kaydır
+                loadingScreen.classList.add('slide-up-animation');
+                
+                // CSS animasyon süresi (0.8s) dolunca arkaplandan sil ve ana sayfayı göster
+                setTimeout(() => {
+                    loadingScreen.style.display = 'none';
+                    if (onCompleteCallback) onCompleteCallback(); // Ana sayfayı açan tetikleyici
+                }, 800); 
+                
+            }, 600); 
+        }
+    }, 120); // Harf çıkış hızı
+}
+// ==========================================
+// ARENA EKRANI GEÇİŞ KONTROLLERİ
+// ==========================================
+window.openArenaScreen = function() {
+    // Tüm ekranları gizle
+    document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+    // Sadece Arena'yı göster
+    document.getElementById('arena-sec').classList.add('active');
+    
+    // Üstteki takvim/gün barını gizle (Arena'da görünmemesi için)
+    const dayTracker = document.getElementById('day-tracker');
+    if(dayTracker) dayTracker.style.display = 'none';
+    
+    loadGlobalFeed();
+    
+    if (navigator.vibrate) navigator.vibrate(50);
+}
+
+window.closeArenaScreen = function() {
+    // Arena'yı kapatıp Profil'e geri dön
+    document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+    document.getElementById('profile-sec').classList.add('active');
+    
+    if (navigator.vibrate) navigator.vibrate(30);
+}
+// ==========================================
+// CANLI AKIŞ (GLOBAL FEED) YÜKLEME MOTORU
+// ==========================================
+async function loadGlobalFeed() {
+    const feedDiv = document.getElementById('arena-feed');
+    feedDiv.innerHTML = '<p style="color:var(--goldnova); text-align:center;">Akış yükleniyor...</p>';
+    
+    try {
+        // Firebase'den maksimum 15 kişi çek
+        const snapshot = await db.collection("users").limit(15).get();
+        let users = [];
+        
+        snapshot.forEach(doc => {
+            const data = doc.data();
+            // Kendimizi feed'de görmeyelim
+            if (data.uid !== auth.currentUser.uid && data.name) {
+                users.push(data);
+            }
+        });
+        
+        // Kullanıcıları rastgele karıştır ve en fazla 10 tanesini al
+        users = users.sort(() => 0.5 - Math.random()).slice(0, 10);
+        feedDiv.innerHTML = ''; 
+        
+        if (users.length === 0) {
+            feedDiv.innerHTML = '<p style="color:gray; text-align:center;">Arenada şu an kimse yok. İlk sen ol!</p>';
+            return;
+        }
+
+        // Sporcular için rastgele aksiyon listesi
+        const actions = [
+            "bugün idmanını tamamladı! 🔥", 
+            "arenaya katıldı! ⚔️", 
+            "su hedefine ulaştı! 💧", 
+            "yeni bir rekor peşinde! 🎯",
+            "diyetine tam uyum sağladı! 🥗"
+        ];
+
+        users.forEach(user => {
+            const randomAction = actions[Math.floor(Math.random() * actions.length)];
+            
+            feedDiv.innerHTML += `
+                <div class="arena-user-card" style="border-left: 3px solid var(--goldnova);">
+                    <img src="${user.photo || 'icon.png'}" alt="profile" class="arena-user-img">
+                    <div class="arena-user-info">
+                        <h4>${user.name}</h4>
+                        <p style="font-size: 13px; color: #aaa; margin: 0;">${randomAction}</p>
+                    </div>
+                    <button class="follow-btn" onclick="followUser('${user.uid}')">Takip Et</button>
+                </div>
+            `;
+        });
+        
+    } catch (error) {
+        console.error("Akış yükleme hatası:", error);
+        feedDiv.innerHTML = '<p style="color:#ff4444; text-align:center;">Akış çekilemedi.</p>';
+    }
+}

@@ -1,4 +1,4 @@
-const CACHE_NAME = 'olympus-cache-v50';
+const CACHE_NAME = 'olympus-cache-v51';
 const ASSETS_TO_CACHE = [
   'index.html',
   'style.css',
