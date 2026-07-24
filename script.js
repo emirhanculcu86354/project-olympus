@@ -1208,28 +1208,26 @@ async function loadGlobalFeed() {
     feedDiv.innerHTML = '<p style="color:var(--goldnova); text-align:center;">Akış yükleniyor...</p>';
 
     try {
-        // Firebase'den maksimum 15 kişi çek
+        // 1. ÖNCE KENDİ VERİMİZİ ÇEKİYORUZ
+        const myDoc = await db.collection("users").doc(auth.currentUser.uid).get();
+        const myData = myDoc.exists ? myDoc.data() : null;
+
+        // 2. SONRA DİĞER KULLANICILARI ÇEKİYORUZ
         const snapshot = await db.collection("users").limit(15).get();
         let users = [];
 
         snapshot.forEach(doc => {
             const data = doc.data();
-            // Kendimizi feed'de görmeyelim
+            // Diğerleri listesine kendimizi katmıyoruz (zaten en üste ekleyeceğiz)
             if (data.uid !== auth.currentUser.uid && data.name) {
                 users.push(data);
             }
         });
 
-        // Kullanıcıları rastgele karıştır ve en fazla 10 tanesini al
+        // Diğerlerini rastgele karıştır
         users = users.sort(() => 0.5 - Math.random()).slice(0, 10);
         feedDiv.innerHTML = '';
 
-        if (users.length === 0) {
-            feedDiv.innerHTML = '<p style="color:gray; text-align:center;">Arenada şu an kimse yok. İlk sen ol!</p>';
-            return;
-        }
-
-        // Sporcular için rastgele aksiyon listesi
         const actions = [
             "bugün idmanını tamamladı! 🔥",
             "arenaya katıldı! ⚔️",
@@ -1238,9 +1236,23 @@ async function loadGlobalFeed() {
             "diyetine tam uyum sağladı! 🥗"
         ];
 
+        // 3. VİTRİN: KENDİ PROFİLİMİZİ EN ÜSTE, MAVİ BİR PARLAMAYLA EKLİYORUZ
+        if (myData && myData.name) {
+            const myAction = actions[Math.floor(Math.random() * actions.length)];
+            feedDiv.innerHTML += `
+                <div class="arena-user-card" style="border-left: 3px solid #00d2ff; background: rgba(0, 210, 255, 0.05);">
+                    <img src="${myData.photo || 'icon.png'}" alt="profile" class="arena-user-img">
+                    <div class="arena-user-info">
+                        <h4>${myData.name} <span style="font-size:10px; color:#00d2ff;">(Önizleme)</span></h4>
+                        <p style="font-size: 13px; color: #aaa; margin: 0;">${myAction}</p>
+                    </div>
+                </div>
+            `;
+        }
+
+        // 4. DİĞER KULLANICILARI ALTINA DİZİYORUZ
         users.forEach(user => {
             const randomAction = actions[Math.floor(Math.random() * actions.length)];
-
             feedDiv.innerHTML += `
                 <div class="arena-user-card" style="border-left: 3px solid var(--goldnova);">
                     <img src="${user.photo || 'icon.png'}" alt="profile" class="arena-user-img">
@@ -1248,11 +1260,14 @@ async function loadGlobalFeed() {
                         <h4>${user.name}</h4>
                         <p style="font-size: 13px; color: #aaa; margin: 0;">${randomAction}</p>
                     </div>
-                    <!-- DİKKAT: Butona ID eklendi -->
                     <button class="follow-btn" id="btn-${user.uid}" onclick="followUser('${user.uid}')">Takip Et</button>
                 </div>
             `;
         });
+
+        if (users.length === 0 && !myData) {
+            feedDiv.innerHTML = '<p style="color:gray; text-align:center;">Arenada şu an kimse yok.</p>';
+        }
 
     } catch (error) {
         console.error("Akış yükleme hatası:", error);
@@ -1306,23 +1321,29 @@ window.searchUsers = async function () {
     resultsDiv.innerHTML = '<p style="color:var(--goldnova); text-align:center;">Aranıyor...</p>';
 
     try {
-        // Firebase'deki tüm kullanıcıları çekip isme göre filtreliyoruz
         const snapshot = await db.collection("users").get();
         resultsDiv.innerHTML = '';
         let found = false;
 
         snapshot.forEach(doc => {
             const data = doc.data();
-            // Kendi ismimizi listede görmemek ve aranan harfleri içerenleri bulmak için:
-            if (data.name && data.name.toLowerCase().includes(query) && data.uid !== auth.currentUser.uid) {
+            // FİLTREYİ KALDIRDIK: Artık ismimiz eşleşirse biz de çıkıyoruz
+            if (data.name && data.name.toLowerCase().includes(query)) {
                 found = true;
+
+                // Eğer bulunan kişi BİZ isek, butonu pasif ve farklı yapıyoruz
+                const isMe = data.uid === auth.currentUser.uid;
+                const btnHTML = isMe
+                    ? ''
+                    : `<button class="follow-btn" id="btn-${data.uid}" onclick="followUser('${data.uid}')">Takip Et</button>`;
+
                 resultsDiv.innerHTML += `
                     <div class="arena-user-card" style="border-left: 3px solid var(--goldnova);">
                         <img src="${data.photo || 'icon.png'}" alt="profile" class="arena-user-img">
                         <div class="arena-user-info">
-                            <h4>${data.name}</h4>
+                            <h4>${data.name} ${isMe ? '<span style="font-size:10px; color:var(--goldnova);">(Sen)</span>' : ''}</h4>
                         </div>
-                        <button class="follow-btn" id="btn-${data.uid}" onclick="followUser('${data.uid}')">Takip Et</button>
+                        ${btnHTML}
                     </div>
                 `;
             }
