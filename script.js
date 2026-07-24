@@ -395,7 +395,6 @@ window.finishWorkout = function () {
     document.getElementById('main-header').style.display = 'block';
     confetti({ particleCount: 150, spread: 80, colors: ['#f6c000', '#fff'] });
 
-    // YENİ: Hangi günde ve fazdaysak, o günün kaslarını al ve kaydet
     const activeDayData = programData[currentPhase].find(x => x.day == calculatedDay);
     if (activeDayData && activeDayData.muscles) {
         let worked = JSON.parse(localStorage.getItem('olympus_worked_muscles')) || [];
@@ -405,8 +404,11 @@ window.finishWorkout = function () {
         localStorage.setItem('olympus_worked_muscles', JSON.stringify(worked));
     }
 
-    alert("🔥 İDMAN TAMAMLANDI! Kas haritan güncellendi.");
-    toggleAct(3, true); // Görevlerden idmanı işaretle
+    // YENİ: İdman bitince 150 Puan Ekle
+    if (window.addOlympusPoints) window.addOlympusPoints(150, "İdman Tamamlandı");
+
+    alert("🔥 İDMAN TAMAMLANDI!\n🏆 KAS HARİTAN GÜNCELLENDİ VE 150 OLYMPUS KAZANDIN!");
+    toggleAct(3, true);
 }
 
 window.exitWorkoutPlayer = function () {
@@ -1189,6 +1191,7 @@ window.openArenaScreen = function () {
     if (dayTracker) dayTracker.style.display = 'none';
 
     loadGlobalFeed();
+    loadLeaderboard();
 
     if (navigator.vibrate) navigator.vibrate(50);
 }
@@ -1358,3 +1361,231 @@ window.searchUsers = async function () {
         resultsDiv.innerHTML = '<p style="color:#ff4444; text-align:center;">Bağlantı hatası yaşandı.</p>';
     }
 };
+// ==========================================
+// OLYMPUS PUAN VE MİNİ OYUN MOTORU
+// ==========================================
+
+// Puan Ekleme Fonksiyonu (İdman veya Oyun bitince çağrılır)
+window.addOlympusPoints = async function (amount, reason) {
+    let currentPoints = parseInt(localStorage.getItem('olympus_total_points')) || 0;
+    currentPoints += amount;
+    localStorage.setItem('olympus_total_points', currentPoints);
+
+    // Firebase'e kaydet
+    try {
+        await db.collection("users").doc(auth.currentUser.uid).set({
+            olympusPoints: currentPoints
+        }, { merge: true });
+        console.log(`${amount} Puan eklendi. Sebep: ${reason}`);
+    } catch (e) {
+        console.error("Puan kaydedilemedi", e);
+    }
+};
+
+// Oyun Değişkenleri
+let gameTimerInterval;
+let gameSpawnInterval;
+let gameScore = 0;
+let gameTime = 60;
+let isGameRunning = false;
+
+window.openMiniGame = function () {
+    document.getElementById('minigame-screen').classList.remove('hidden');
+    
+    const olyAvatar = document.getElementById('oly-avatar');
+    if (olyAvatar) olyAvatar.style.display = 'none';
+}
+
+window.closeMiniGame = function () {
+    document.getElementById('minigame-screen').classList.add('hidden');
+    endMiniGame(true); // Zorla kapatılırsa bitir
+
+    // Oly'yi geri getir (Oyun bitti, asistan dönebilir)
+    const olyAvatar = document.getElementById('oly-avatar');
+    // Avatarın normal CSS flex yapısını bozmamak için 'flex' yapıyoruz
+    if (olyAvatar) olyAvatar.style.display = 'flex';
+}
+
+window.startMiniGame = function () {
+    // Bugün oynadı mı kontrolü
+    const today = new Date().toLocaleDateString('tr-TR');
+    const lastPlayed = localStorage.getItem('olympus_game_last_played');
+    if (lastPlayed === today) {
+        alert("Bugünlük hakkını doldurdun şampiyon! Yarın tekrar gel.");
+        return;
+    }
+
+    document.getElementById('start-game-btn').style.display = 'none';
+    document.getElementById('game-info').style.display = 'none';
+
+    gameScore = 0;
+    gameTime = 60;
+    isGameRunning = true;
+    document.getElementById('game-score').innerText = gameScore;
+    document.getElementById('game-time').innerText = gameTime;
+
+    // Süre sayacı
+    gameTimerInterval = setInterval(() => {
+        gameTime--;
+        document.getElementById('game-time').innerText = gameTime;
+        if (gameTime <= 0) endMiniGame(false);
+    }, 1000);
+
+    // Eşya Düşürme Sayacı (Her 600ms'de bir eşya atar)
+    gameSpawnInterval = setInterval(spawnItem, 600);
+}
+
+function spawnItem() {
+    if (!isGameRunning) return;
+
+    const goodItems = ['🍎', '🥦', '🥩', '🏋️‍♂️', '💧', '🍗', '🥚', '🍌'];
+    const badItems = ['🍔', '🍕', '🍩', '🍺', '🍟', '🍫', '🍦'];
+
+    // %70 İhtimalle iyi, %30 ihtimalle kötü eşya gelir
+    const isGood = Math.random() > 0.3;
+    const itemArray = isGood ? goodItems : badItems;
+    const itemEmoji = itemArray[Math.floor(Math.random() * itemArray.length)];
+
+    const itemEl = document.createElement('div');
+    itemEl.className = 'falling-item';
+    itemEl.innerText = itemEmoji;
+
+    // Rastgele yatay konum (ekrandan taşmasın diye %5 ile %85 arası)
+    const randomX = Math.floor(Math.random() * 80) + 5;
+    itemEl.style.left = randomX + '%';
+
+    // Rastgele düşme hızı (2.5 saniye ile 4 saniye arası)
+    const duration = Math.random() * 1.5 + 2.5;
+    itemEl.style.animationDuration = duration + 's';
+
+    // Tıklama Olayı (Mobil için touchstart, PC için mousedown)
+    itemEl.addEventListener('pointerdown', (e) => {
+        if (!isGameRunning) return;
+
+        // Puan hesapla
+        const pointChange = isGood ? 15 : -15;
+        gameScore += pointChange;
+        document.getElementById('game-score').innerText = gameScore;
+
+        // Ekrana anlık +15 / -15 yazısı çıkar
+        showPopupText(e.clientX, e.clientY, isGood ? '+15' : '-15', isGood ? '#00ff00' : '#ff4444');
+
+        // Eşyayı yok et ve titreşim ver
+        itemEl.remove();
+        if (navigator.vibrate) navigator.vibrate(isGood ? 15 : 40);
+    });
+
+    document.getElementById('game-area').appendChild(itemEl);
+
+    // Düşen eşyayı animasyon bitince DOM'dan sil (bellek şişmesin)
+    setTimeout(() => { if (itemEl.parentElement) itemEl.remove(); }, duration * 1000);
+}
+
+function showPopupText(x, y, text, color) {
+    const popup = document.createElement('div');
+    popup.className = 'game-popup';
+    popup.style.left = (x - 10) + 'px';
+    popup.style.top = (y - 20) + 'px';
+    popup.style.color = color;
+    popup.innerText = text;
+    document.body.appendChild(popup);
+    setTimeout(() => popup.remove(), 800);
+}
+
+function endMiniGame(forceClose) {
+    isGameRunning = false;
+    clearInterval(gameTimerInterval);
+    clearInterval(gameSpawnInterval);
+    document.getElementById('game-area').innerHTML = `
+        <button id="start-game-btn" class="save-btn" style="position:absolute; top:40%; left:50%; transform:translate(-50%, -50%); width:250px; background:#00d2ff; color:#000;" onclick="startMiniGame()">
+            ▶ OYUNU BAŞLAT (1 DK)
+        </button>
+    `; // Temizle
+
+    if (forceClose) return;
+
+    const today = new Date().toLocaleDateString('tr-TR');
+
+    if (gameScore >= 200) {
+        addOlympusPoints(30, "Günün Oyunu Kazanıldı");
+        localStorage.setItem('olympus_game_last_played', today); // Oynadı işaretle
+
+        confetti({ particleCount: 200, spread: 90, colors: ['#00d2ff', '#fff'] });
+        alert(`Tebrikler! ${gameScore} puan topladın.\n\n🏆 HESABINA 30 OLYMPUS EKLENDİ!`);
+        closeMiniGame();
+    } else {
+        localStorage.setItem('olympus_game_last_played', today); // Kaybetse de hakkı yanar
+        alert(`Süre bitti! Sadece ${gameScore} puan toplayabildin. 200 puana ulaşamadığın için ödül alamadın.\n\nYarın tekrar dene!`);
+        closeMiniGame();
+    }
+}
+// ==========================================
+// PODYUM VE LİDERLİK TABLOSU YÜKLEME MOTORU
+// ==========================================
+async function loadLeaderboard() {
+    const boardDiv = document.getElementById('arena-leaderboard');
+    if(!boardDiv) return;
+    
+    try {
+        // En yüksek Olympus puanına sahip 3 sporcuyu çek
+        const snapshot = await db.collection("users").orderBy("olympusPoints", "desc").limit(3).get();
+        let topUsers = [];
+        snapshot.forEach(doc => topUsers.push(doc.data()));
+        
+        if(topUsers.length === 0) {
+            boardDiv.innerHTML = '<p style="color:gray; font-size:12px; text-align:center;">Henüz kimse puan kazanmadı. Oynayan ilk sen ol!</p>';
+            return;
+        }
+        
+        // Podyum sıralaması (0. indeks = 1. olan vb.)
+        const rank1 = topUsers[0] || null;
+        const rank2 = topUsers[1] || null;
+        const rank3 = topUsers[2] || null;
+        
+        boardDiv.innerHTML = '';
+        
+        // --- 2. SIRA (SOLDA) ---
+        if(rank2) {
+            boardDiv.innerHTML += `
+                <div class="podium-item rank-2">
+                    <span class="podium-crown">🥈</span>
+                    <img src="${rank2.photo || 'icon.png'}" class="podium-avatar">
+                    <div class="podium-name">${rank2.name}</div>
+                    <div class="podium-score">${rank2.olympusPoints} P</div>
+                </div>
+            `;
+        } else {
+            boardDiv.innerHTML += `<div class="podium-item rank-2" style="visibility:hidden;"></div>`;
+        }
+        
+        // --- 1. SIRA (ORTADA - EN YÜKSEKTE) ---
+        if(rank1) {
+            boardDiv.innerHTML += `
+                <div class="podium-item rank-1">
+                    <span class="podium-crown">👑</span>
+                    <img src="${rank1.photo || 'icon.png'}" class="podium-avatar">
+                    <div class="podium-name">${rank1.name}</div>
+                    <div class="podium-score">${rank1.olympusPoints} P</div>
+                </div>
+            `;
+        }
+        
+        // --- 3. SIRA (SAĞDA) ---
+        if(rank3) {
+            boardDiv.innerHTML += `
+                <div class="podium-item rank-3">
+                    <span class="podium-crown">🥉</span>
+                    <img src="${rank3.photo || 'icon.png'}" class="podium-avatar">
+                    <div class="podium-name">${rank3.name}</div>
+                    <div class="podium-score">${rank3.olympusPoints} P</div>
+                </div>
+            `;
+        } else {
+            boardDiv.innerHTML += `<div class="podium-item rank-3" style="visibility:hidden;"></div>`;
+        }
+        
+    } catch(e) {
+        console.error("Liderlik tablosu yüklenemedi:", e);
+        boardDiv.innerHTML = '<p style="color:#ff4444; font-size:12px; text-align:center;">Sıralama alınamadı.</p>';
+    }
+}

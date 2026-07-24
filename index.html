@@ -269,13 +269,27 @@
                     <h2 style="color: var(--goldnova); letter-spacing: 2px;">OLYMPUS ARENA</h2>
                     <p style="color: var(--text-muted); font-size: 14px;">Diğer sporcuları bul ve rekabete katıl.</p>
                 </div>
-
+                <!-- GÜNÜN OYUNU BUTONU -->
+                <button class="arena-entry-btn" onclick="openMiniGame()"
+                    style="margin-top:0; margin-bottom: 20px; background: linear-gradient(45deg, #001f3f, #00d2ff); border-color: #00d2ff; color: #fff;">
+                    <span style="font-size: 22px;">🎮</span>
+                    <span>GÜNÜN OYUNU (GÖKTEN DÜŞENLER)</span>
+                </button>
                 <div class="arena-search-box">
                     <input type="text" id="user-search-input" placeholder="Sporcu ara (Örn: Emirhan)...">
                     <button onclick="searchUsers()">Bul</button>
                 </div>
 
                 <div id="search-results" class="arena-list"></div>
+
+                <hr style="border-color: #333; margin: 25px 0;">
+
+                <h3
+                    style="color: #fff; font-size: 16px; margin-bottom: 45px; text-align: center; text-transform: uppercase; letter-spacing: 1px;">
+                    🏆 Olympus Liderleri 🏆</h3>
+                <div id="arena-leaderboard" class="podium-container">
+                    <p style="color: gray; text-align: center; width: 100%; font-size: 12px;">Puanlar yükleniyor...</p>
+                </div>
 
                 <hr style="border-color: #333; margin: 25px 0;">
 
@@ -401,6 +415,33 @@
         <div class="oly-chat-footer">
             <input type="text" id="oly-input" placeholder="Oly'ye bir şey sor..." onkeypress="handleOlyKey(event)">
             <button id="oly-send-btn" onclick="sendOlyMessage()">Gönder</button>
+        </div>
+    </div>
+    <!-- MİNİ OYUN EKRANI -->
+    <div id="minigame-screen" class="full-screen-overlay hidden" style="background:#111; z-index:4000;">
+        <div class="header-top"
+            style="width:100%; padding: 20px; background:#1a1a1a; border-bottom: 2px solid #00d2ff;">
+            <h2 style="color:#00d2ff; font-weight:900; font-style:italic;">OLYMPUS CATCH</h2>
+            <button onclick="closeMiniGame()" class="edit-btn" style="border-color:#ff4444; color:#ff4444;">Kapat (Pes
+                Et)</button>
+        </div>
+        <div
+            style="display:flex; justify-content:space-between; width:90%; font-size:24px; font-weight:bold; margin-top:15px;">
+            <span style="color:#fff;">Süre: <span id="game-time" style="color:#ff4444;">60</span>s</span>
+            <span style="color:#fff;">Puan: <span id="game-score" style="color:var(--goldnova);">0</span></span>
+        </div>
+        <div id="game-area"
+            style="flex:1; width:100%; position:relative; overflow:hidden; background:#0a0a0a; margin-top:15px; border-top: 2px solid #333;">
+            <button id="start-game-btn" class="save-btn"
+                style="position:absolute; top:40%; left:50%; transform:translate(-50%, -50%); width:250px; background:#00d2ff; color:#000;"
+                onclick="startMiniGame()">
+                ▶ OYUNU BAŞLAT (1 DK)
+            </button>
+            <p id="game-info"
+                style="position:absolute; top:55%; left:0; width:100%; text-align:center; color:#888; font-size:12px; padding:0 20px;">
+                Sağlıklı gıdaları ve spor aletlerini yakala (+15).<br>Fast food'a dokunursan puan kaybedersin
+                (-15).<br><strong style="color:var(--goldnova);">Hedef: 200 Puan</strong>
+            </p>
         </div>
     </div>
     <script src="config.js"></script>

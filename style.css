@@ -1116,3 +1116,124 @@ h1 {
     background: var(--goldnova, #FFD700);
     color: #000;
 }
+/* OLYMPUS CATCH MİNİ OYUN STİLLERİ */
+.falling-item {
+    position: absolute;
+    font-size: 45px;
+    cursor: pointer;
+    user-select: none;
+    -webkit-user-select: none;
+    animation: fallAnimation linear forwards;
+    transition: transform 0.1s;
+    filter: drop-shadow(0 5px 10px rgba(0,0,0,0.5));
+}
+
+.falling-item:active {
+    transform: scale(1.5);
+}
+
+@keyframes fallAnimation {
+    0% { top: -60px; opacity: 1; }
+    90% { opacity: 1; }
+    100% { top: 100vh; opacity: 0; }
+}
+
+.game-popup {
+    position: absolute;
+    color: var(--goldnova);
+    font-weight: bold;
+    font-size: 20px;
+    pointer-events: none;
+    animation: floatUp 0.8s ease forwards;
+}
+
+@keyframes floatUp {
+    0% { transform: translateY(0); opacity: 1; }
+    100% { transform: translateY(-50px); opacity: 0; }
+}
+/* ==========================================
+   OLYMPUS LİDERLİK PODYUMU STİLLERİ
+   ========================================== */
+.podium-container {
+    display: flex;
+    justify-content: center;
+    align-items: flex-end;
+    gap: 8px;
+    margin-bottom: 10px;
+    min-height: 150px;
+}
+
+.podium-item {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    width: 30%;
+    text-align: center;
+    background: #151515;
+    border-top-left-radius: 12px;
+    border-top-right-radius: 12px;
+    padding-top: 10px;
+    position: relative;
+    box-shadow: 0 -5px 15px rgba(0,0,0,0.3);
+}
+
+/* 1. SIRA (ALTIN) */
+.podium-item.rank-1 { 
+    height: 140px; 
+    background: linear-gradient(to top, rgba(246, 192, 0, 0.15), #151515); 
+    border: 1px solid var(--goldnova); 
+    border-bottom: none; 
+    z-index: 3; 
+}
+/* 2. SIRA (GÜMÜŞ) */
+.podium-item.rank-2 { 
+    height: 110px; 
+    background: linear-gradient(to top, rgba(192, 192, 192, 0.15), #151515); 
+    border: 1px solid #c0c0c0; 
+    border-bottom: none; 
+    z-index: 2; 
+}
+/* 3. SIRA (BRONZ) */
+.podium-item.rank-3 { 
+    height: 90px; 
+    background: linear-gradient(to top, rgba(205, 127, 50, 0.15), #151515); 
+    border: 1px solid #cd7f32; 
+    border-bottom: none; 
+    z-index: 1; 
+}
+
+.podium-avatar {
+    width: 45px;
+    height: 45px;
+    border-radius: 50%;
+    object-fit: cover;
+    margin-top: -35px; /* Fotoğrafı kutunun üstüne taşır */
+    border: 3px solid #333;
+    background: #000;
+}
+
+.rank-1 .podium-avatar { border-color: var(--goldnova); width: 60px; height: 60px; margin-top: -45px; }
+.rank-2 .podium-avatar { border-color: #c0c0c0; }
+.rank-3 .podium-avatar { border-color: #cd7f32; }
+
+.podium-name { 
+    color: #fff; 
+    font-size: 11px; 
+    font-weight: bold; 
+    margin-top: 8px; 
+    white-space: nowrap; 
+    overflow: hidden; 
+    text-overflow: ellipsis; 
+    max-width: 95%; 
+}
+
+.podium-score { 
+    color: var(--goldnova); 
+    font-size: 15px; 
+    font-weight: 900; 
+    margin-top: 5px; 
+    text-shadow: 0 0 10px rgba(246,192,0,0.3);
+}
+
+.podium-crown { position: absolute; top: -60px; font-size: 22px; filter: drop-shadow(0 2px 4px rgba(0,0,0,0.5));}
+.rank-1 .podium-crown { top: -75px; font-size: 32px; filter: drop-shadow(0 0 10px rgba(246,192,0,0.8));}
