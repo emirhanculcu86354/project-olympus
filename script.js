@@ -23,7 +23,7 @@ auth.onAuthStateChanged(user => {
     if (user) {
         // 1. DURUM: KULLANICI ZATEN GİRİŞ YAPMIŞ
         document.getElementById('login-screen').classList.add('hidden');
-        
+
         // Eğer uygulama ilk kez yükleniyorsa daktilo animasyonunu başlat
         if (!isAppInitialized) {
             playSplashAnimation(() => {
@@ -42,12 +42,18 @@ auth.onAuthStateChanged(user => {
         document.getElementById('profile-image-large').src = photo;
         document.getElementById('profile-name-display').innerText = name;
         document.getElementById('profile-name-input').value = name;
+        db.collection("users").doc(user.uid).set({
+            uid: user.uid,
+            name: name,
+            photo: photo,
+            lastActive: firebase.firestore.FieldValue.serverTimestamp()
+        }, { merge: true });
         loadDataFromCloud(user.uid);
     } else {
         // 2. DURUM: KULLANICI GİRİŞ YAPMAMIŞ (Uygulamayı ilk defa açıyor)
         const loadingScreen = document.getElementById('loading-screen');
         if (loadingScreen) loadingScreen.style.display = 'none'; // Animasyonu iptal et
-        
+
         document.getElementById('login-screen').classList.remove('hidden');
         document.getElementById('app-content').classList.add('hidden');
         isAppInitialized = true;
@@ -251,7 +257,7 @@ function calculateCurrentDay() {
     if (viewMode === 'today') {
         calculatedDay = ((baseDay - 1) % 7) + 1;
         document.getElementById('display-day-text').innerText = `GÜN ${calculatedDay}`;
-        
+
         // YENİ: Pazartesi (Gün 1) olduğunda kasları otomatik temizle!
         if (calculatedDay === 1) {
             let lastReset = localStorage.getItem('olympus_muscle_reset_date');
@@ -262,7 +268,7 @@ function calculateCurrentDay() {
                 updateAnatomyView(); // Ekranda da temizle
             }
         }
-        
+
     } else if (viewMode === 'tomorrow') {
         calculatedDay = ((baseDay) % 7) + 1;
         document.getElementById('display-day-text').innerText = `GÜN ${calculatedDay}`;
@@ -388,7 +394,7 @@ window.finishWorkout = function () {
     document.getElementById('active-workout-screen').classList.add('hidden');
     document.getElementById('main-header').style.display = 'block';
     confetti({ particleCount: 150, spread: 80, colors: ['#f6c000', '#fff'] });
-    
+
     // YENİ: Hangi günde ve fazdaysak, o günün kaslarını al ve kaydet
     const activeDayData = programData[currentPhase].find(x => x.day == calculatedDay);
     if (activeDayData && activeDayData.muscles) {
@@ -783,9 +789,9 @@ window.openAnatomy = function () {
     const modal = document.getElementById('anatomy-modal');
     modal.style.display = 'block';
     setTimeout(() => { modal.classList.add('open'); }, 10);
-    
+
     updateAnatomyView();
-    
+
     // TÜM GRAFİKLERİ BURAYA EKLİYORUZ
     const container = document.getElementById('all-charts-container');
     container.innerHTML = `
@@ -816,7 +822,7 @@ window.openAnatomy = function () {
 window.closeAnatomy = function () {
     const modal = document.getElementById('anatomy-modal');
     modal.classList.remove('open');
-    setTimeout(() => { modal.style.display = 'none'; }, 400); 
+    setTimeout(() => { modal.style.display = 'none'; }, 400);
 };
 
 function updateAnatomyView() {
@@ -835,44 +841,44 @@ function drawVolumeChart(canvasId) {
     const ctx = document.getElementById(canvasId)?.getContext('2d');
     const volHistory = JSON.parse(localStorage.getItem('olympus_vol_history')) || [];
     if (!ctx || volHistory.length === 0) return;
-    new Chart(ctx, { 
-        type: 'line', 
-        data: { 
-            labels: volHistory.map(h => h.date.split('.')[0]), 
+    new Chart(ctx, {
+        type: 'line',
+        data: {
+            labels: volHistory.map(h => h.date.split('.')[0]),
             datasets: [
-                { label: 'Bench', data: volHistory.map(h => h.bench), borderColor: '#00d2ff', backgroundColor: 'transparent', tension: 0.2 }, 
+                { label: 'Bench', data: volHistory.map(h => h.bench), borderColor: '#00d2ff', backgroundColor: 'transparent', tension: 0.2 },
                 { label: 'Squat', data: volHistory.map(h => h.squat), borderColor: '#f6c000', backgroundColor: 'transparent', tension: 0.2 }
-            ] 
-        }, 
-        options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: true, labels: { color: '#fff', font: { size: 10 } } } }, scales: { x: { ticks: { color: '#888' } }, y: { ticks: { color: '#888' } } } } 
+            ]
+        },
+        options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: true, labels: { color: '#fff', font: { size: 10 } } } }, scales: { x: { ticks: { color: '#888' } }, y: { ticks: { color: '#888' } } } }
     });
 }
 // KASLARA BASILI TUTMA (İNTERAKTİF) ÖZELLİĞİ
 function initMuscleInteractions() {
     const display = document.getElementById('muscle-name-display');
     const groups = document.querySelectorAll('.muscle-group');
-    
+
     groups.forEach(group => {
         const name = group.getAttribute('data-name');
-        
+
         const showLabel = (e) => {
             display.innerText = name;
             display.style.opacity = '1';
             group.classList.add('active-touch');
             // Telefonda küçük bir titreşim (Destekleyen cihazlarda)
-            if(navigator.vibrate) navigator.vibrate(15); 
+            if (navigator.vibrate) navigator.vibrate(15);
         };
-        
+
         const hideLabel = () => {
             display.style.opacity = '0';
             group.classList.remove('active-touch');
         };
-        
+
         // Mobil Cihazlar İçin (Dokunma)
-        group.addEventListener('touchstart', showLabel, {passive: true});
+        group.addEventListener('touchstart', showLabel, { passive: true });
         group.addEventListener('touchend', hideLabel);
         group.addEventListener('touchcancel', hideLabel);
-        
+
         // Bilgisayarlar İçin (Mouse)
         group.addEventListener('mousedown', showLabel);
         group.addEventListener('mouseup', hideLabel);
@@ -883,7 +889,7 @@ function initMuscleInteractions() {
 // OLY CHAT & AI MOTORU FONKSİYONLARI
 // ==========================================
 
-window.openOlyChat = function() {
+window.openOlyChat = function () {
     const chatWin = document.getElementById('oly-chat-window');
     const avatar = document.getElementById('oly-avatar');
     chatWin.classList.add('open');
@@ -892,18 +898,18 @@ window.openOlyChat = function() {
     scrollToBottomOly();
 };
 
-window.closeOlyChat = function() {
+window.closeOlyChat = function () {
     document.getElementById('oly-chat-window').classList.remove('open');
     document.getElementById('oly-avatar').style.right = '0'; // Avatarı geri getir
 };
 
-window.handleOlyKey = function(event) {
+window.handleOlyKey = function (event) {
     if (event.key === 'Enter') {
         sendOlyMessage();
     }
 };
 
-window.sendOlyMessage = async function() {
+window.sendOlyMessage = async function () {
     const input = document.getElementById('oly-input');
     const text = input.value.trim();
     if (!text) return;
@@ -914,7 +920,7 @@ window.sendOlyMessage = async function() {
 
     // "Oly yazıyor..." animasyonu ekle
     const typingIndicator = appendOlyMessage('Oly düşünüyor...', 'oly-typing');
-    
+
     try {
         // GERÇEK GEMINI API ENTEGRASYONU
         const responseText = await askGeminiAI(text);
@@ -943,7 +949,7 @@ function scrollToBottomOly() {
 }
 
 // OLY AYARLARINI GÜNCELLEME
-window.updateOlyKey = function() {
+window.updateOlyKey = function () {
     const newKey = prompt("Lütfen Gemini API anahtarınızı girin:", localStorage.getItem('OLY_API_KEY') || "");
     if (newKey) {
         localStorage.setItem('OLY_API_KEY', newKey);
@@ -954,37 +960,37 @@ window.updateOlyKey = function() {
 // OLY AI MOTORU (GEMINI 3.5 FLASH - En Güncel Sürüm)
 async function askGeminiAI(userPrompt) {
     let apiKey = localStorage.getItem('OLY_API_KEY');
-    
+
     if (!apiKey || apiKey === "null") {
         updateOlyKey();
         apiKey = localStorage.getItem('OLY_API_KEY');
     }
-    
+
     if (!apiKey) throw new Error("Anahtar girilmedi.");
 
     apiKey = apiKey.trim();
 
     const systemInstruction = "Sen Project Olympus uygulamasının resmi yapay zeka asistanı Oly'sin. Görevin kullanıcılara sadece fitness, beslenme, anatomi, idman programları ve motivasyon konularında destek olmaktır. Türkçe, samimi ve net cevaplar ver.";
-    
+
     // DİKKAT: Modeli listedeki en güncel sürüm olan 'gemini-3.5-flash' olarak değiştirdik!
     const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-3.5-flash:generateContent?key=${apiKey}`;
-    
+
     try {
         const response = await fetch(url, {
             method: "POST",
-            headers: { 
+            headers: {
                 "Content-Type": "application/json"
             },
-            body: JSON.stringify({ 
+            body: JSON.stringify({
                 contents: [
-                    { 
-                        role: "user", 
-                        parts: [{ text: `${systemInstruction}\n\nSoru: ${userPrompt}` }] 
+                    {
+                        role: "user",
+                        parts: [{ text: `${systemInstruction}\n\nSoru: ${userPrompt}` }]
                     }
-                ] 
+                ]
             })
         });
-        
+
         if (!response.ok) {
             const errorData = await response.json();
             console.error("Google API Detaylı Hata:", errorData);
@@ -996,7 +1002,7 @@ async function askGeminiAI(userPrompt) {
 
     } catch (error) {
         console.error("Oly Motor Hatası:", error);
-        throw error; 
+        throw error;
     }
 }
 
@@ -1006,7 +1012,7 @@ async function askGeminiAI(userPrompt) {
 function initDraggableOly() {
     const avatar = document.getElementById('oly-avatar');
     let isDragging = false;
-    let moved = false; 
+    let moved = false;
     let initialX, initialY, startLeft, startTop;
 
     const dragStart = (e) => {
@@ -1026,13 +1032,13 @@ function initDraggableOly() {
 
         // Oly'yi sıvı tam daire formuna sok!
         avatar.classList.add('dragging');
-        avatar.style.transition = 'none'; 
+        avatar.style.transition = 'none';
     };
 
     const drag = (e) => {
         if (!isDragging) return;
-        e.preventDefault(); 
-        
+        e.preventDefault();
+
         let currentX, currentY;
         if (e.type === 'touchmove') {
             currentX = e.touches[0].clientX;
@@ -1044,9 +1050,9 @@ function initDraggableOly() {
 
         const dx = currentX - initialX;
         const dy = currentY - initialY;
-        
+
         if (Math.abs(dx) > 5 || Math.abs(dy) > 5) {
-            moved = true; 
+            moved = true;
         }
 
         let newLeft = startLeft + dx;
@@ -1059,17 +1065,17 @@ function initDraggableOly() {
 
         avatar.style.left = newLeft + 'px';
         avatar.style.top = newTop + 'px';
-        avatar.style.right = 'auto'; 
+        avatar.style.right = 'auto';
     };
 
     const dragEnd = () => {
         if (!isDragging) return;
         isDragging = false;
-        
+
         // Sıvı formunu kapat ve yumuşak geçişi aç
         avatar.classList.remove('dragging');
         avatar.style.transition = 'all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1)';
-        
+
         const rect = avatar.getBoundingClientRect();
         const centerX = window.innerWidth / 2;
 
@@ -1089,7 +1095,7 @@ function initDraggableOly() {
             // Sola yapıştır
             avatar.style.left = '0px';
             avatar.style.right = 'auto';
-            avatar.style.borderRadius = '0 80px 80px 0'; 
+            avatar.style.borderRadius = '0 80px 80px 0';
             avatar.style.justifyContent = 'flex-start';
             avatar.style.paddingLeft = '8px';
             avatar.style.paddingRight = '0';
@@ -1109,23 +1115,23 @@ function initDraggableOly() {
     document.addEventListener('mousemove', drag);
     document.addEventListener('mouseup', dragEnd);
 
-    avatar.addEventListener('touchstart', dragStart, {passive: false});
-    document.addEventListener('touchmove', drag, {passive: false});
+    avatar.addEventListener('touchstart', dragStart, { passive: false });
+    document.addEventListener('touchmove', drag, { passive: false });
     document.addEventListener('touchend', dragEnd);
 }
 
 // Oly Chat Açılış/Kapanış (Güncellendi)
-window.openOlyChat = function() {
+window.openOlyChat = function () {
     const chatWin = document.getElementById('oly-chat-window');
     const avatar = document.getElementById('oly-avatar');
     chatWin.classList.add('open');
     // Avatarı küçülterek gizle (Sağda da solda da olsa sorun olmaz)
-    avatar.style.transform = 'scale(0)'; 
+    avatar.style.transform = 'scale(0)';
     if (navigator.vibrate) navigator.vibrate(30);
     scrollToBottomOly();
 };
 
-window.closeOlyChat = function() {
+window.closeOlyChat = function () {
     document.getElementById('oly-chat-window').classList.remove('open');
     document.getElementById('oly-avatar').style.transform = 'scale(1)'; // Avatarı geri getir
 };
@@ -1135,7 +1141,7 @@ window.closeOlyChat = function() {
 function playSplashAnimation(onCompleteCallback) {
     const textElement = document.getElementById('loading-text');
     const loadingScreen = document.getElementById('loading-screen');
-    
+
     // Eğer HTML'de yükleme ekranı yoksa direkt uygulamaya geç
     if (!textElement || !loadingScreen) {
         if (onCompleteCallback) onCompleteCallback();
@@ -1144,7 +1150,7 @@ function playSplashAnimation(onCompleteCallback) {
 
     const targetText = "PROJECT OLYMPUS";
     let charIndex = 0;
-    textElement.textContent = ""; 
+    textElement.textContent = "";
 
     // Daktilo efekti: Harfleri sırayla yazdır
     const typingInterval = setInterval(() => {
@@ -1153,45 +1159,45 @@ function playSplashAnimation(onCompleteCallback) {
             charIndex++;
         } else {
             clearInterval(typingInterval); // Yazım bitti
-            
+
             // Yazı tam olarak ekranda belirdikten sonra yarım saniye bekle
             setTimeout(() => {
                 // Ekranı CSS ile yukarı kaydır
                 loadingScreen.classList.add('slide-up-animation');
-                
+
                 // CSS animasyon süresi (0.8s) dolunca arkaplandan sil ve ana sayfayı göster
                 setTimeout(() => {
                     loadingScreen.style.display = 'none';
                     if (onCompleteCallback) onCompleteCallback(); // Ana sayfayı açan tetikleyici
-                }, 800); 
-                
-            }, 600); 
+                }, 800);
+
+            }, 600);
         }
     }, 120); // Harf çıkış hızı
 }
 // ==========================================
 // ARENA EKRANI GEÇİŞ KONTROLLERİ
 // ==========================================
-window.openArenaScreen = function() {
+window.openArenaScreen = function () {
     // Tüm ekranları gizle
     document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
     // Sadece Arena'yı göster
     document.getElementById('arena-sec').classList.add('active');
-    
+
     // Üstteki takvim/gün barını gizle (Arena'da görünmemesi için)
     const dayTracker = document.getElementById('day-tracker');
-    if(dayTracker) dayTracker.style.display = 'none';
-    
+    if (dayTracker) dayTracker.style.display = 'none';
+
     loadGlobalFeed();
-    
+
     if (navigator.vibrate) navigator.vibrate(50);
 }
 
-window.closeArenaScreen = function() {
+window.closeArenaScreen = function () {
     // Arena'yı kapatıp Profil'e geri dön
     document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
     document.getElementById('profile-sec').classList.add('active');
-    
+
     if (navigator.vibrate) navigator.vibrate(30);
 }
 // ==========================================
@@ -1200,12 +1206,12 @@ window.closeArenaScreen = function() {
 async function loadGlobalFeed() {
     const feedDiv = document.getElementById('arena-feed');
     feedDiv.innerHTML = '<p style="color:var(--goldnova); text-align:center;">Akış yükleniyor...</p>';
-    
+
     try {
         // Firebase'den maksimum 15 kişi çek
         const snapshot = await db.collection("users").limit(15).get();
         let users = [];
-        
+
         snapshot.forEach(doc => {
             const data = doc.data();
             // Kendimizi feed'de görmeyelim
@@ -1213,11 +1219,11 @@ async function loadGlobalFeed() {
                 users.push(data);
             }
         });
-        
+
         // Kullanıcıları rastgele karıştır ve en fazla 10 tanesini al
         users = users.sort(() => 0.5 - Math.random()).slice(0, 10);
-        feedDiv.innerHTML = ''; 
-        
+        feedDiv.innerHTML = '';
+
         if (users.length === 0) {
             feedDiv.innerHTML = '<p style="color:gray; text-align:center;">Arenada şu an kimse yok. İlk sen ol!</p>';
             return;
@@ -1225,16 +1231,16 @@ async function loadGlobalFeed() {
 
         // Sporcular için rastgele aksiyon listesi
         const actions = [
-            "bugün idmanını tamamladı! 🔥", 
-            "arenaya katıldı! ⚔️", 
-            "su hedefine ulaştı! 💧", 
+            "bugün idmanını tamamladı! 🔥",
+            "arenaya katıldı! ⚔️",
+            "su hedefine ulaştı! 💧",
             "yeni bir rekor peşinde! 🎯",
             "diyetine tam uyum sağladı! 🥗"
         ];
 
         users.forEach(user => {
             const randomAction = actions[Math.floor(Math.random() * actions.length)];
-            
+
             feedDiv.innerHTML += `
                 <div class="arena-user-card" style="border-left: 3px solid var(--goldnova);">
                     <img src="${user.photo || 'icon.png'}" alt="profile" class="arena-user-img">
@@ -1242,13 +1248,92 @@ async function loadGlobalFeed() {
                         <h4>${user.name}</h4>
                         <p style="font-size: 13px; color: #aaa; margin: 0;">${randomAction}</p>
                     </div>
-                    <button class="follow-btn" onclick="followUser('${user.uid}')">Takip Et</button>
+                    <!-- DİKKAT: Butona ID eklendi -->
+                    <button class="follow-btn" id="btn-${user.uid}" onclick="followUser('${user.uid}')">Takip Et</button>
                 </div>
             `;
         });
-        
+
     } catch (error) {
         console.error("Akış yükleme hatası:", error);
         feedDiv.innerHTML = '<p style="color:#ff4444; text-align:center;">Akış çekilemedi.</p>';
     }
 }
+window.followUser = async function (targetUid) {
+    const btn = document.getElementById(`btn-${targetUid}`);
+    if (!btn) return;
+
+    // Arayüzü anında güncelle (Kullanıcıyı bekletmemek için)
+    const isFollowing = btn.classList.contains('following');
+    const userRef = db.collection("users").doc(auth.currentUser.uid);
+
+    try {
+        if (isFollowing) {
+            // Takipten Çıkar (Firebase dizisinden sil)
+            await userRef.update({
+                following: firebase.firestore.FieldValue.arrayRemove(targetUid)
+            });
+            btn.classList.remove('following');
+            btn.innerText = "Takip Et";
+        } else {
+            // Takip Et (Firebase dizisine ekle)
+            await userRef.update({
+                following: firebase.firestore.FieldValue.arrayUnion(targetUid)
+            });
+            btn.classList.add('following');
+            btn.innerText = "Takip Ediliyor";
+        }
+
+        if (navigator.vibrate) navigator.vibrate(30);
+    } catch (error) {
+        console.error("Takip işlemi başarısız:", error);
+        alert("Bir hata oluştu, lütfen bağlantını kontrol et.");
+    }
+};
+// ==========================================
+// OLYMPUS ARENA ARAMA MOTORU
+// ==========================================
+window.searchUsers = async function () {
+    const searchInput = document.getElementById('user-search-input');
+    const query = searchInput.value.trim().toLowerCase();
+    const resultsDiv = document.getElementById('search-results');
+
+    if (!query) {
+        resultsDiv.innerHTML = '<p style="color:gray; text-align:center;">Lütfen bir isim girin.</p>';
+        return;
+    }
+
+    resultsDiv.innerHTML = '<p style="color:var(--goldnova); text-align:center;">Aranıyor...</p>';
+
+    try {
+        // Firebase'deki tüm kullanıcıları çekip isme göre filtreliyoruz
+        const snapshot = await db.collection("users").get();
+        resultsDiv.innerHTML = '';
+        let found = false;
+
+        snapshot.forEach(doc => {
+            const data = doc.data();
+            // Kendi ismimizi listede görmemek ve aranan harfleri içerenleri bulmak için:
+            if (data.name && data.name.toLowerCase().includes(query) && data.uid !== auth.currentUser.uid) {
+                found = true;
+                resultsDiv.innerHTML += `
+                    <div class="arena-user-card" style="border-left: 3px solid var(--goldnova);">
+                        <img src="${data.photo || 'icon.png'}" alt="profile" class="arena-user-img">
+                        <div class="arena-user-info">
+                            <h4>${data.name}</h4>
+                        </div>
+                        <button class="follow-btn" id="btn-${data.uid}" onclick="followUser('${data.uid}')">Takip Et</button>
+                    </div>
+                `;
+            }
+        });
+
+        if (!found) {
+            resultsDiv.innerHTML = '<p style="color:gray; text-align:center;">Sporcu bulunamadı.</p>';
+        }
+
+    } catch (error) {
+        console.error("Arama hatası:", error);
+        resultsDiv.innerHTML = '<p style="color:#ff4444; text-align:center;">Bağlantı hatası yaşandı.</p>';
+    }
+};
