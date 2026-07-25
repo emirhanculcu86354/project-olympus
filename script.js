@@ -2139,3 +2139,94 @@ window.triggerCardCelebration = function() {
         card.classList.remove('flipping');
     }, 800);
 };
+// ==========================================
+// OYUNCU SEÇİM VE ARKADAŞ LİSTESİ MOTORU
+// ==========================================
+let activeEditingIndex = null;
+
+window.editPlayer = function(index) {
+    activeEditingIndex = index;
+    const oldName = currentSquad[index] !== "Seçilmedi" ? currentSquad[index] : "";
+    
+    document.getElementById('manual-player-input').value = oldName;
+    document.getElementById('player-select-modal').style.display = 'flex';
+    
+    // Firebase'den takip edilen veya sistemdeki arkadaşları yükle
+    loadArenaFriendsForSelection();
+};
+
+async function loadArenaFriendsForSelection() {
+    const listContainer = document.getElementById('arena-friends-list');
+    listContainer.innerHTML = '<p style="color:gray; font-size:11px; text-align:center; padding:10px;">Arkadaşlar aranıyor...</p>';
+    
+    try {
+        const currentUser = auth.currentUser;
+        if (!currentUser) {
+            listContainer.innerHTML = '<p style="color:gray; font-size:11px; text-align:center; padding:10px;">Giriş yapılmamış.</p>';
+            return;
+        }
+
+        // Kullanıcının takip ettiklerini al
+        const userDoc = await db.collection("users").doc(currentUser.uid).get();
+        const userData = userDoc.exists ? userDoc.data() : {};
+        const followingIds = userData.following || [];
+
+        let friends = [];
+        
+        // Eğer takip ettiği kişiler varsa onları çek
+        if (followingIds.length > 0) {
+            // Firestore 'in' sorgusu en fazla 10 eleman alabilir, güvenli olması için chunk yapabiliriz veya genel kullanıcıları çekeriz
+            const snapshot = await db.collection("users").limit(15).get();
+            snapshot.forEach(doc => {
+                const data = doc.data();
+                if (data.name && data.uid !== currentUser.uid) {
+                    friends.push(data);
+                }
+            });
+        } else {
+            // Takip ettiği yoksa sistemdeki diğer kullanıcıları göster
+            const snapshot = await db.collection("users").limit(10).get();
+            snapshot.forEach(doc => {
+                const data = doc.data();
+                if (data.name && data.uid !== currentUser.uid) {
+                    friends.push(data);
+                }
+            });
+        }
+
+        listContainer.innerHTML = '';
+        if (friends.length === 0) {
+            listContainer.innerHTML = '<p style="color:gray; font-size:11px; text-align:center; padding:10px;">Henüz başka sporcu bulunamadı.</p>';
+            return;
+        }
+
+        friends.forEach(friend => {
+            const item = document.createElement('div');
+            item.className = 'friend-select-item';
+            item.innerHTML = `
+                <img src="${friend.photo || 'icon.png'}" class="friend-select-avatar">
+                <span style="color:#fff; font-size:13px; font-weight:bold;">${friend.name}</span>
+            `;
+            item.onclick = () => {
+                document.getElementById('manual-player-input').value = friend.name;
+                confirmPlayerSelection();
+            };
+            listContainer.appendChild(item);
+        });
+
+    } catch (e) {
+        console.error("Arkadaş listesi yüklenemedi:", e);
+        listContainer.innerHTML = '<p style="color:#ff4444; font-size:11px; text-align:center; padding:10px;">Liste yüklenirken hata oluştu.</p>';
+    }
+}
+
+window.confirmPlayerSelection = function() {
+    const inputVal = document.getElementById('manual-player-input').value.trim();
+    if (activeEditingIndex !== null) {
+        currentSquad[activeEditingIndex] = inputVal !== "" ? inputVal.substring(0, 15) : "Seçilmedi";
+        renderPitch();
+    }
+    document.getElementById('player-select-modal').style.display = 'none';
+    if (navigator.vibrate) navigator.vibrate(30);
+};
+
