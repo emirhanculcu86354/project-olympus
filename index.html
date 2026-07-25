@@ -215,7 +215,119 @@
                     </div>
                 </div>
             </section>
+            <!-- ================= SPORLAR EKRANI ================= -->
+            <section id="sports-sec" class="screen">
+                <div id="sports-home">
+                    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom: 5px;">
+                        <h1 style="margin:0;">Sporlar</h1>
+                        <button onclick="closeSportsScreen()" class="edit-btn"
+                            style="border-color:#ff4444; color:#ff4444;">← Profil'e Dön</button>
+                    </div>
+                    <p class="subtitle">Takım oyunları ve taktiksel yönetim.</p>
 
+                    <div class="tracking-grid" style="margin-top: 20px;">
+                        <div class="track-card" onclick="openFootballManager()"
+                            style="background: linear-gradient(145deg, #0d3617, #151515); border-color: #27ae60;">
+                            <div class="track-icon">⚽</div>
+                            <h4>Futbol (Halı Saha)</h4>
+                            <p>Kadro ve Skorlar</p>
+                        </div>
+                        <div class="track-card" style="opacity: 0.5; cursor: not-allowed;">
+                            <div class="track-icon">🏀</div>
+                            <h4>Basketbol</h4>
+                            <p>Yakında Eklenecek</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- FUTBOL YÖNETİM MERKEZİ (İÇ EKRAN) -->
+                <div id="football-manager" class="hidden">
+                    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:15px;">
+                        <button onclick="closeFootballManager()" class="edit-btn"
+                            style="border-color:#ff4444; color:#ff4444;">← Geri</button>
+                        <h2 style="color: var(--goldnova); font-weight: 900; font-style: italic;">FC GOLDNOVA</h2>
+                    </div>
+
+                    <!-- SEKME KONTROLLERİ -->
+                    <div class="toggle-container" style="width: 100%; margin-bottom: 20px;">
+                        <button id="btn-tab-lineup" class="day-toggle active" style="flex:1; font-size:13px;"
+                            onclick="switchFootballTab('lineup')">Kadro & Taktik</button>
+                        <button id="btn-tab-history" class="day-toggle" style="flex:1; font-size:13px;"
+                            onclick="switchFootballTab('history')">Geçmiş Maçlar</button>
+                    </div>
+
+                    <!-- 1. SEKME: KADRO & TAKTİK -->
+                    <div id="fb-tab-lineup">
+                        <div class="input-group" style="margin-bottom: 15px;">
+                            <label style="color:var(--goldnova);">7v7 Diziliş Seçimi</label>
+                            <select id="formation-select" onchange="changeFormation()"
+                                style="width:100%; padding:12px; background:#151515; border:1px solid #333; color:#fff; border-radius:8px; font-weight:bold; outline:none;">
+                                <option value="2-3-1">2-3-1 (Dengeli)</option>
+                                <option value="3-2-1">3-2-1 (Defansif)</option>
+                                <option value="2-2-2">2-2-2 (Ofansif)</option>
+                                <option value="1-3-2">1-3-2 (Hücum Pres)</option>
+                            </select>
+                        </div>
+
+                        <!-- FUTBOL SAHASI -->
+                        <div class="football-pitch" id="pitch-container">
+                            <div class="pitch-lines center-circle"></div>
+                            <div class="pitch-lines penalty-box-top"></div>
+                            <div class="pitch-lines penalty-box-bottom"></div>
+
+                            <!-- Formalar JS tarafından buraya basılacak -->
+                        </div>
+                        <p style="text-align:center; color:#888; font-size:11px; margin-top:10px;">İsim girmek veya
+                            değiştirmek için formalara tıkla.</p>
+                        <button class="save-btn" onclick="saveLineup()"
+                            style="margin-top: 10px; background:#27ae60;">Kadroyu Kaydet</button>
+
+                        <!-- FIFA UT TARZI OYUNCU KARTI -->
+                        <div class="fifa-card-container" style="margin-top: 25px;">
+                            <h3
+                                style="color: var(--goldnova); font-size: 14px; margin-bottom: 10px; text-align: center;">
+                                🎴 Oyuncu Kartın (FUT Style)</h3>
+                            <div class="fut-card" onclick="triggerCardCelebration()">
+                                <div class="fut-card-top">
+                                    <div class="fut-ovr" id="fut-rating">88</div>
+                                    <div class="fut-pos" id="fut-position">ST</div>
+                                    <div class="fut-nation">🇹🇷</div>
+                                    <div class="fut-club">⚡</div>
+                                </div>
+                                <div class="fut-card-img-container">
+                                    <img id="fut-avatar-img" src="icon.png" alt="Player" class="fut-player-img">
+                                </div>
+                                <div class="fut-card-bottom">
+                                    <div class="fut-player-name" id="fut-name">EMİRHAN ÇULCU</div>
+                                    <div class="fut-stats-grid">
+                                        <div class="fut-stat"><span>HIZ</span> <strong id="stat-pace">90</strong></div>
+                                        <div class="fut-stat"><span>ŞUT</span> <strong id="stat-shoot">85</strong></div>
+                                        <div class="fut-stat"><span>PAS</span> <strong id="stat-pass">82</strong></div>
+                                        <div class="fut-stat"><span>DRB</span> <strong id="stat-dribble">88</strong>
+                                        </div>
+                                        <div class="fut-stat"><span>DEF</span> <strong id="stat-def">70</strong></div>
+                                        <div class="fut-stat"><span>FİZ</span> <strong id="stat-phys">86</strong></div>
+                                    </div>
+                                </div>
+                            </div>
+                            <button class="edit-btn" onclick="openFutEditModal()"
+                                style="width:100%; margin-top:12px; border-color:var(--goldnova); color:var(--goldnova);">⚙️
+                                Kart Özelliklerini Düzenle</button>
+                        </div>
+                    </div>
+
+                    <!-- 2. SEKME: GEÇMİŞ MAÇLAR -->
+                    <div id="fb-tab-history" class="hidden">
+                        <button class="save-btn" onclick="addNewMatch()"
+                            style="margin-bottom: 20px; background:var(--goldnova); color:#000;">+ Yeni Maç Skoru
+                            Ekle</button>
+
+                        <div id="match-history-container" class="grid-container">
+                            <!-- Skorlar JS tarafından buraya basılacak -->
+                        </div>
+                    </div>
+                </div>
+            </section>
             <section id="profile-sec" class="screen">
                 <div class="profile-header" style="position: relative; padding-top: 20px;">
                     <button id="open-anatomy-btn" onclick="openAnatomy()"
@@ -233,14 +345,23 @@
                     </div>
                 </div>
 
-                <div class="score-container">
+                <!-- GÜNCELLENMİŞ BAŞARI SKORU (Tıklanabilir) -->
+                <div class="score-container" onclick="openBadgesModal()" style="cursor: pointer; transition: 0.2s;">
                     <div class="score-circle"><span id="weekly-score">100</span><small>%</small></div>
-                    <div class="score-text">Haftalık Başarı Skoru</div>
+                    <div class="score-text">
+                        Haftalık Başarı Skoru
+                        <br><span style="font-size:10px; color:var(--goldnova);">🏆 Rozetleri Görmek İçin Dokun</span>
+                    </div>
                 </div>
                 <!-- OLYMPUS ARENA GİRİŞ BUTONU -->
                 <button class="arena-entry-btn" onclick="openArenaScreen()">
                     <span style="font-size: 22px;">⚔️</span>
                     <span>OLYMPUS ARENA'YA GİR</span>
+                </button>
+                <button class="arena-entry-btn" onclick="openSportsScreen()"
+                    style="margin-top: 15px; background: linear-gradient(45deg, #0d3617, #151515); border-color: #27ae60; color: #fff;">
+                    <span style="font-size: 22px;">⚽</span>
+                    <span>FC OLYMPUS</span>
                 </button>
 
                 <button class="save-btn"
@@ -310,6 +431,16 @@
                         </div>
                         <div class="input-group" style="margin-top:15px;"><label>Program Başlangıç Tarihi</label><input
                                 type="date" id="start-date" class="date-input" style="width:100%; padding:14px;"></div>
+                    </div>
+                    <!-- YENİ: iOS TARZI TEMA DEĞİŞTİRİCİ (TOGGLE) -->
+                    <div class="input-group"
+                        style="margin-top: 25px; display: flex; justify-content: space-between; align-items: center; background: #151515; padding: 12px 15px; border-radius: 12px; border: 1px solid #333;">
+                        <label style="margin: 0; font-size: 14px; color: #fff; font-weight: bold;">Açık Tema (Gündüz
+                            Modu)</label>
+                        <label class="ios-switch">
+                            <input type="checkbox" id="theme-toggle-checkbox" onchange="toggleTheme()">
+                            <span class="ios-slider"></span>
+                        </label>
                     </div>
                     <button class="save-btn" id="save-settings-btn">Kaydet & Kapat</button>
                 </div>
@@ -383,6 +514,60 @@
             <button class="save-btn" onclick="closeAnatomy()" style="margin-top: 15px;">Kapat</button>
         </div>
     </div>
+    <!-- BAŞARI ROZETLERİ MODALI -->
+    <div id="badges-modal" class="modal">
+        <div class="modal-content" style="max-height: 85vh; width: 95%; max-width: 500px;">
+            <h2 style="color:var(--goldnova); text-align:center; margin-bottom: 15px;">Başarı Rozetleri</h2>
+            <p style="text-align: center; color: var(--text-muted); font-size: 12px; margin-bottom: 15px;">Sistem
+                gelişimini takip eder. Görevleri tamamlayarak rozetleri aydınlat!</p>
+            <div class="modal-body badge-grid" id="badge-grid-container">
+                <!-- Rozetler JS ile buraya yüklenecek -->
+            </div>
+            <button class="save-btn"
+                onclick="document.getElementById('badges-modal').style.display='none'">Kapat</button>
+        </div>
+    </div>
+    <!-- YENİ MAÇ EKLEME MODALI -->
+    <div id="new-match-modal" class="modal">
+        <div class="modal-content">
+            <h2 style="color:var(--goldnova); margin-bottom:15px;">Fikstür / Maç Ekle</h2>
+            <div class="modal-body form-grid">
+                <div class="input-group"><label>Rakip Takım</label><input type="text" id="match-opp"
+                        placeholder="Örn: Real Mardin"></div>
+                <div class="input-group"><label>Tarih</label><input type="date" id="match-date" class="date-input">
+                </div>
+                <div class="input-group"><label>Saat</label><input type="time" id="match-time" class="date-input"></div>
+                <div class="input-group"><label>Saha Konumu</label><input type="text" id="match-loc"
+                        placeholder="Örn: Merkez Halı Saha"></div>
+                <div class="input-group"><label>Bizim Skor (Oynandıysa)</label><input type="number" id="match-score-my">
+                </div>
+                <div class="input-group"><label>Rakip Skor (Oynandıysa)</label><input type="number"
+                        id="match-score-opp"></div>
+            </div>
+            <p style="font-size:11px; color:var(--text-muted); text-align:center; margin:10px 0;">Not: Şu an "Kadro &
+                Taktik" sekmesinde kurulu olan diziliş bu maça kalıcı olarak kaydedilecektir.</p>
+            <button class="save-btn" onclick="saveNewMatchAdvanced()" style="background:#27ae60;">Maçı Kaydet</button>
+            <button class="edit-btn" style="width:100%; margin-top:10px;"
+                onclick="document.getElementById('new-match-modal').style.display='none'">İptal</button>
+        </div>
+    </div>
+
+    <!-- GEÇMİŞ MAÇ KADROSU İZLEME MODALI -->
+    <div id="view-match-modal" class="modal">
+        <div class="modal-content" style="max-width: 500px;">
+            <h2 id="view-match-title" style="color:var(--goldnova); text-align:center; margin-bottom:5px;">Maç Detayı
+            </h2>
+            <p id="view-match-subtitle" style="text-align:center; font-size:12px; color:#888; margin-bottom:15px;"></p>
+            <div class="football-pitch" id="view-pitch-container">
+                <div class="pitch-lines center-circle"></div>
+                <div class="pitch-lines penalty-box-top"></div>
+                <div class="pitch-lines penalty-box-bottom"></div>
+                <!-- Oyuncular buraya basılacak -->
+            </div>
+            <button class="save-btn" onclick="document.getElementById('view-match-modal').style.display='none'"
+                style="margin-top:15px;">Kapat</button>
+        </div>
+    </div>
     <div id="oly-avatar">
         <div class="oly-eyes">
             <div class="oly-eye"></div>
@@ -419,11 +604,12 @@
     </div>
     <!-- MİNİ OYUN EKRANI -->
     <div id="minigame-screen" class="full-screen-overlay hidden" style="background:#111; z-index:4000;">
+        <!-- GÜNCELLENMİŞ MİNİ OYUN HEADER'I -->
         <div class="header-top"
-            style="width:100%; padding: 20px; background:#1a1a1a; border-bottom: 2px solid #00d2ff;">
-            <h2 style="color:#00d2ff; font-weight:900; font-style:italic;">OLYMPUS CATCH</h2>
-            <button onclick="closeMiniGame()" class="edit-btn" style="border-color:#ff4444; color:#ff4444;">Kapat (Pes
-                Et)</button>
+            style="width:100%; padding: calc(env(safe-area-inset-top) + 15px) 20px 15px 20px; background:#1a1a1a; border-bottom: 2px solid #00d2ff; display: flex; justify-content: space-between; align-items: center;">
+            <h2 style="color:#00d2ff; font-weight:900; font-style:italic; margin:0;">OLYMPUS CATCH</h2>
+            <button onclick="closeMiniGame()" class="edit-btn"
+                style="border-color:#ff4444; color:#ff4444;">Kapat</button>
         </div>
         <div
             style="display:flex; justify-content:space-between; width:90%; font-size:24px; font-weight:bold; margin-top:15px;">
@@ -442,6 +628,33 @@
                 Sağlıklı gıdaları ve spor aletlerini yakala (+15).<br>Fast food'a dokunursan puan kaybedersin
                 (-15).<br><strong style="color:var(--goldnova);">Hedef: 200 Puan</strong>
             </p>
+        </div>
+    </div>
+    <!-- FUT KARTI DÜZENLEME MODALI -->
+    <!-- FUT KARTI DÜZENLEME MODALI (GÜNCELLENMİŞ) -->
+    <div id="fut-edit-modal" class="modal">
+        <div class="modal-content">
+            <h2 style="color:var(--goldnova); margin-bottom:15px;">FIFA Kartını Özelleştir</h2>
+            <div class="modal-body form-grid">
+                
+                <!-- YENİ: FOTOĞRAF DEĞİŞTİRME ALANI -->
+                <div class="input-group" style="grid-column: span 2; text-align: center; margin-bottom: 5px;">
+                    <label>Kart Fotoğrafı</label>
+                    <input type="file" id="edit-card-img-file" accept="image/*" style="display:none;" onchange="previewCardImage(event)">
+                    <button type="button" class="edit-btn" onclick="document.getElementById('edit-card-img-file').click()" style="width:100%; border-color:var(--goldnova); color:var(--goldnova);">📷 Fotoğraf Dosyası Seç</button>
+                </div>
+
+                <div class="input-group"><label>Reyting (OVR)</label><input type="number" id="edit-ovr" value="88"></div>
+                <div class="input-group"><label>Mevki</label><input type="text" id="edit-pos" value="ST"></div>
+                <div class="input-group"><label>Hız (PAC)</label><input type="number" id="edit-pace" value="90"></div>
+                <div class="input-group"><label>Şut (SHO)</label><input type="number" id="edit-shoot" value="85"></div>
+                <div class="input-group"><label>Pas (PAS)</label><input type="number" id="edit-pass" value="82"></div>
+                <div class="input-group"><label>Dribbling (DRI)</label><input type="number" id="edit-dribble" value="88"></div>
+                <div class="input-group"><label>Defans (DEF)</label><input type="number" id="edit-def" value="70"></div>
+                <div class="input-group"><label>Fizik (PHY)</label><input type="number" id="edit-phys" value="86"></div>
+            </div>
+            <button class="save-btn" onclick="saveFutCardData()" style="background:var(--goldnova); color:#000;">Kartı Güncelle</button>
+            <button class="edit-btn" style="width:100%; margin-top:10px;" onclick="document.getElementById('fut-edit-modal').style.display='none'">İptal</button>
         </div>
     </div>
     <script src="config.js"></script>

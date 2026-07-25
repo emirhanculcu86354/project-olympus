@@ -1391,7 +1391,7 @@ let isGameRunning = false;
 
 window.openMiniGame = function () {
     document.getElementById('minigame-screen').classList.remove('hidden');
-    
+
     const olyAvatar = document.getElementById('oly-avatar');
     if (olyAvatar) olyAvatar.style.display = 'none';
 }
@@ -1589,3 +1589,529 @@ async function loadLeaderboard() {
         boardDiv.innerHTML = '<p style="color:#ff4444; font-size:12px; text-align:center;">Sıralama alınamadı.</p>';
     }
 }
+// ==========================================
+// BAŞARI ROZETLERİ (ACHIEVEMENTS) MOTORU
+// ==========================================
+
+const badgesData = [
+    { id: 'b1', icon: '🔥', title: 'İlk Kan', desc: 'İlk idmanını başarıyla tamamla.', req: () => (JSON.parse(localStorage.getItem('olympus_worked_muscles')) || []).length > 0 },
+    { id: 'b2', icon: '💧', title: 'Poseidon', desc: 'Su içme hedefine ulaş.', req: () => { const w = JSON.parse(localStorage.getItem('olympus_water_obj')); return w && w.yesterday >= (localStorage.getItem('olympus_water_goal')||3000); } },
+    { id: 'b3', icon: '🎮', title: 'Oyunbaz', desc: 'Olympus Catch oyununu oyna.', req: () => localStorage.getItem('olympus_game_last_played') !== null },
+    { id: 'b4', icon: '🥉', title: 'Bronz Hırs', desc: '100 Olympus Puanı topla.', req: () => (parseInt(localStorage.getItem('olympus_total_points')) || 0) >= 100 },
+    { id: 'b5', icon: '🥈', title: 'Gümüş Disiplin', desc: '500 Olympus Puanı topla.', req: () => (parseInt(localStorage.getItem('olympus_total_points')) || 0) >= 500 },
+    { id: 'b6', icon: '🥇', title: 'Altın İrade', desc: '1000 Olympus Puanı topla.', req: () => (parseInt(localStorage.getItem('olympus_total_points')) || 0) >= 1000 },
+    { id: 'b7', icon: '⚖️', title: 'Mimar', desc: 'Vücut ölçülerini sisteme kaydet.', req: () => { const p = JSON.parse(localStorage.getItem('olympus_profile')); return p && p.w; } },
+    { id: 'b8', icon: '📈', title: 'Güç Tutkunu', desc: 'İdman hacmi (1RM) değerini kaydet.', req: () => { const p = JSON.parse(localStorage.getItem('olympus_profile')); return p && p.bench; } },
+    { id: 'b9', icon: '🍱', title: 'Makro Ustası', desc: 'Kalori takibini grafiğe yansıt.', req: () => (JSON.parse(localStorage.getItem('olympus_cal_history')) || []).length > 0 },
+    { id: 'b10', icon: '👑', title: 'Kusursuz Gün', desc: 'Tüm günlük görevleri işaretle.', req: () => { const acts = JSON.parse(localStorage.getItem('olympus_acts')) || []; return acts.length > 0 && acts.every(a => a.done); } }
+];
+
+window.openBadgesModal = function() {
+    const container = document.getElementById('badge-grid-container');
+    container.innerHTML = '';
+    
+    // Kazanılan rozet sayısını bul
+    let earnedCount = 0;
+
+    badgesData.forEach(badge => {
+        // Fonksiyon çalışıp şart sağlanıyor mu kontrol ediliyor
+        const isEarned = badge.req(); 
+        if (isEarned) earnedCount++;
+        
+        container.innerHTML += `
+            <div class="badge-card ${isEarned ? 'earned' : ''}">
+                <div class="badge-icon">${badge.icon}</div>
+                <div class="badge-title">${badge.title}</div>
+                <div class="badge-desc">${badge.desc}</div>
+            </div>
+        `;
+    });
+    
+    // Rozet başarı oranını konsola yazdır (geliştirici için)
+    console.log(`Toplam ${earnedCount}/${badgesData.length} rozet kazanıldı.`);
+    
+    // Modalı aç
+    document.getElementById('badges-modal').style.display = 'flex';
+    if (navigator.vibrate) navigator.vibrate(50);
+};
+// ==========================================
+// TEMA (LIGHT / DARK MODE) YÖNETİM MOTORU
+// ==========================================
+window.toggleTheme = function() {
+    const checkbox = document.getElementById('theme-toggle-checkbox');
+    const isLight = checkbox.checked;
+    
+    if (isLight) {
+        document.body.classList.add('light-mode');
+    } else {
+        document.body.classList.remove('light-mode');
+    }
+    
+    // Tercihi tarayıcıya kaydet
+    localStorage.setItem('olympus_theme', isLight ? 'light' : 'dark');
+    
+    if (navigator.vibrate) navigator.vibrate(20);
+};
+
+// Sayfa ilk yüklendiğinde kullanıcının eski tema tercihini kontrol et
+// DİKKAT: Bu kısmı "document.addEventListener('DOMContentLoaded', () => {" bloğunun İÇİNE de ekleyebilirsin veya en altta ayrı durabilir.
+document.addEventListener('DOMContentLoaded', () => {
+    const savedTheme = localStorage.getItem('olympus_theme');
+    const checkbox = document.getElementById('theme-toggle-checkbox');
+    
+    if (savedTheme === 'light') {
+        document.body.classList.add('light-mode');
+        if (checkbox) checkbox.checked = true;
+    }
+});
+// ==========================================
+// HALI SAHA (FUTBOL) YÖNETİM MOTORU (GELİŞMİŞ & GOLANOVA)
+// ==========================================
+const formations7v7 = {
+    '2-3-1': [ {t: 90, l: 50}, {t: 70, l: 30}, {t: 70, l: 70}, {t: 45, l: 20}, {t: 45, l: 50}, {t: 45, l: 80}, {t: 15, l: 50} ],
+    '3-2-1': [ {t: 90, l: 50}, {t: 70, l: 20}, {t: 70, l: 50}, {t: 70, l: 80}, {t: 45, l: 35}, {t: 45, l: 65}, {t: 15, l: 50} ],
+    '2-2-2': [ {t: 90, l: 50}, {t: 70, l: 30}, {t: 70, l: 70}, {t: 45, l: 30}, {t: 45, l: 70}, {t: 15, l: 30}, {t: 15, l: 70} ],
+    '1-3-2': [ {t: 90, l: 50}, {t: 70, l: 50}, {t: 45, l: 20}, {t: 45, l: 50}, {t: 45, l: 80}, {t: 15, l: 35}, {t: 15, l: 65} ]
+};
+
+let currentSquad = Array(7).fill("Seçilmedi");
+
+window.openFootballManager = function() {
+    document.getElementById('sports-home').classList.add('hidden');
+    document.getElementById('football-manager').classList.remove('hidden');
+    
+    const oly = document.getElementById('oly-avatar');
+    if (oly) oly.style.display = 'none';
+    
+    const savedLineup = JSON.parse(localStorage.getItem('goldnova_squad_names'));
+    const savedFormation = localStorage.getItem('goldnova_squad_formation');
+    if (savedLineup) currentSquad = savedLineup;
+    if (savedFormation) document.getElementById('formation-select').value = savedFormation;
+    
+    renderPitch();
+    renderMatchHistory();
+    renderFutCard();
+};
+
+window.closeFootballManager = function() {
+    document.getElementById('football-manager').classList.add('hidden');
+    document.getElementById('sports-home').classList.remove('hidden');
+    
+    const oly = document.getElementById('oly-avatar');
+    if (oly) oly.style.display = 'flex';
+};
+
+window.switchFootballTab = function(tab) {
+    document.getElementById('btn-tab-lineup').classList.toggle('active', tab === 'lineup');
+    document.getElementById('btn-tab-history').classList.toggle('active', tab === 'history');
+    document.getElementById('fb-tab-lineup').style.display = tab === 'lineup' ? 'block' : 'none';
+    document.getElementById('fb-tab-history').style.display = tab === 'history' ? 'block' : 'none';
+};
+
+window.changeFormation = function() { renderPitch(); };
+
+function renderPitch() {
+    const pitch = document.getElementById('pitch-container');
+    const formationKey = document.getElementById('formation-select').value;
+    const coords = formations7v7[formationKey];
+    
+    pitch.querySelectorAll('.player-spot').forEach(p => p.remove());
+
+    coords.forEach((pos, index) => {
+        const spot = document.createElement('div');
+        spot.className = 'player-spot';
+        spot.style.top = pos.t + '%';
+        spot.style.left = pos.l + '%';
+        
+        const jerseyHTML = index === 0 ? '<div class="jersey">🦺</div>' : '<div class="jersey">👕</div>';
+        const playerName = currentSquad[index] || "Tıkla";
+        spot.innerHTML = `${jerseyHTML}<div class="player-name-plate">${playerName}</div>`;
+        spot.onclick = () => editPlayer(index);
+        pitch.appendChild(spot);
+    });
+}
+
+window.editPlayer = function(index) {
+    const oldName = currentSquad[index] !== "Seçilmedi" ? currentSquad[index] : "";
+    const newName = prompt("Mevkideki oyuncunun Adı Soyadı:", oldName);
+    if (newName !== null && newName.trim() !== "") {
+        currentSquad[index] = newName.substring(0, 15);
+        renderPitch();
+    }
+};
+
+window.saveLineup = function() {
+    const formation = document.getElementById('formation-select').value;
+    localStorage.setItem('goldnova_squad_names', JSON.stringify(currentSquad));
+    localStorage.setItem('goldnova_squad_formation', formation);
+    if (navigator.vibrate) navigator.vibrate(50);
+    alert("Kadro ve diziliş kaydedildi! Goldnova sahaya hazır.");
+};
+
+window.addNewMatch = function() {
+    document.getElementById('new-match-modal').style.display = 'flex';
+};
+
+window.saveNewMatchAdvanced = function() {
+    const opp = document.getElementById('match-opp').value;
+    const date = document.getElementById('match-date').value;
+    const time = document.getElementById('match-time').value;
+    const loc = document.getElementById('match-loc').value;
+    const scoreMy = document.getElementById('match-score-my').value;
+    const scoreOpp = document.getElementById('match-score-opp').value;
+    
+    if(!opp || !date || !time) {
+        alert("Lütfen Rakip, Tarih ve Saat girin.");
+        return;
+    }
+    
+    const savedFormation = document.getElementById('formation-select').value;
+    const savedSquad = [...currentSquad]; 
+    
+    const matchDatetime = new Date(`${date}T${time}`);
+    const isFuture = matchDatetime.getTime() > new Date().getTime();
+
+    const matchObj = {
+        id: Date.now(),
+        opponent: opp,
+        datetime: matchDatetime.toISOString(),
+        location: loc || "Belirtilmedi",
+        scoreGoldnova: isFuture ? null : parseInt(scoreMy || 0),
+        scoreOpponent: isFuture ? null : parseInt(scoreOpp || 0),
+        formation: savedFormation,
+        squad: savedSquad,
+        isFuture: isFuture
+    };
+    
+    let history = JSON.parse(localStorage.getItem('goldnova_match_history')) || [];
+    history.push(matchObj);
+    history.sort((a, b) => new Date(b.datetime) - new Date(a.datetime));
+    localStorage.setItem('goldnova_match_history', JSON.stringify(history));
+    
+    document.getElementById('new-match-modal').style.display = 'none';
+    renderMatchHistory();
+};
+
+function renderMatchHistory() {
+    const container = document.getElementById('match-history-container');
+    const history = JSON.parse(localStorage.getItem('goldnova_match_history')) || [];
+    
+    container.innerHTML = '';
+    if (history.length === 0) {
+        container.innerHTML = '<p style="color:#888; text-align:center; margin-top:20px;">Henüz kaydedilmiş bir maç veya fikstür bulunmuyor.</p>';
+        return;
+    }
+    
+    history.forEach(match => {
+        const isFuture = new Date(match.datetime).getTime() > new Date().getTime();
+        const dateStr = new Date(match.datetime).toLocaleString('tr-TR', { day:'2-digit', month:'2-digit', year:'numeric', hour:'2-digit', minute:'2-digit'});
+        
+        let innerCardHTML = '';
+        if(isFuture) {
+            innerCardHTML = `
+            <div class="scoreboard-card future-match" onclick="openMatchLineup(${match.id})">
+                <div class="match-countdown" data-target="${match.datetime}">Hesaplanıyor...</div>
+                <div class="scoreboard-date">${dateStr}</div>
+                <div class="scoreboard-teams">
+                    <div class="team-name" style="color:var(--goldnova);">GOLDNOVA</div>
+                    <div class="team-score" style="border-color:var(--goldnova); color:var(--goldnova); font-size:16px;">VS</div>
+                    <div class="team-name">${match.opponent}</div>
+                </div>
+                <div class="match-location">📍 ${match.location} <span style="margin-left:auto; color:var(--goldnova); font-size:10px;">Kadro 👁️</span></div>
+            </div>`;
+        } else {
+            let resultColor = match.scoreGoldnova > match.scoreOpponent ? '#27ae60' : (match.scoreGoldnova < match.scoreOpponent ? '#ff4444' : '#888');
+            innerCardHTML = `
+            <div class="scoreboard-card" style="border-left-color: ${resultColor};" onclick="openMatchLineup(${match.id})">
+                <div class="scoreboard-date">${dateStr}</div>
+                <div class="scoreboard-teams">
+                    <div class="team-name" style="color: var(--goldnova);">GOLDNOVA</div>
+                    <div class="team-score">${match.scoreGoldnova} - ${match.scoreOpponent}</div>
+                    <div class="team-name">${match.opponent}</div>
+                </div>
+                <div class="match-location">📍 ${match.location} <span style="margin-left:auto; color:var(--goldnova); font-size:10px;">Kadro 👁️</span></div>
+            </div>`;
+        }
+
+        // Kaydırarak Silme Sarıcısı (Wrapper)
+        const wrapper = document.createElement('div');
+        wrapper.className = 'scoreboard-wrapper';
+        wrapper.innerHTML = `
+            <div class="scoreboard-delete-bg">SİL 🗑️</div>
+        `;
+        
+        const tempContainer = document.createElement('div');
+        tempContainer.innerHTML = innerCardHTML;
+        const cardEl = tempContainer.firstElementChild;
+        wrapper.appendChild(cardEl);
+        container.appendChild(wrapper);
+
+        // Sola kaydırma (Swipe) Olayları
+        let startX = 0;
+        let currentTranslate = 0;
+        
+        cardEl.addEventListener('touchstart', (e) => {
+            startX = e.touches[0].clientX;
+            cardEl.style.transition = 'none';
+        }, {passive: true});
+
+        cardEl.addEventListener('touchmove', (e) => {
+            let moveX = e.touches[0].clientX - startX;
+            if (moveX < 0 && moveX > -110) {
+                cardEl.style.transform = `translateX(${moveX}px)`;
+            }
+        }, {passive: true});
+
+        cardEl.addEventListener('touchend', (e) => {
+            let endX = e.changedTouches[0].clientX;
+            cardEl.style.transition = 'transform 0.3s ease';
+            if (startX - endX > 70) {
+                // Sola yeterince kaydırıldıysa silme butonunu açık tut veya direkt sil
+                if(confirm("Bu maçı silmek istiyor musun?")) {
+                    deleteMatch(match.id);
+                    return;
+                }
+            }
+            cardEl.style.transform = 'translateX(0px)';
+        });
+    });
+}
+
+window.deleteMatch = function(matchId) {
+    let history = JSON.parse(localStorage.getItem('goldnova_match_history')) || [];
+    history = history.filter(m => m.id !== matchId);
+    localStorage.setItem('goldnova_match_history', JSON.stringify(history));
+    renderMatchHistory();
+    if(navigator.vibrate) navigator.vibrate(50);
+};
+
+// MAÇ KADROSU İZLEME
+window.openMatchLineup = function(matchId) {
+    const history = JSON.parse(localStorage.getItem('goldnova_match_history')) || [];
+    const match = history.find(m => m.id === matchId);
+    if(!match) return;
+    
+    document.getElementById('view-match-title').innerText = `Goldnova vs ${match.opponent}`;
+    document.getElementById('view-match-subtitle').innerText = `${new Date(match.datetime).toLocaleDateString('tr-TR')} | Sistem: ${match.formation}`;
+    
+    const pitch = document.getElementById('view-pitch-container');
+    pitch.querySelectorAll('.player-spot').forEach(p => p.remove());
+    
+    const coords = formations7v7[match.formation];
+    
+    coords.forEach((pos, index) => {
+        const spot = document.createElement('div');
+        spot.className = 'player-spot';
+        spot.style.top = pos.t + '%';
+        spot.style.left = pos.l + '%';
+        spot.style.cursor = 'default';
+        
+        const jerseyHTML = index === 0 ? '<div class="jersey">🦺</div>' : '<div class="jersey">👕</div>';
+        const playerName = match.squad[index] || "Boş";
+        
+        spot.innerHTML = `${jerseyHTML}<div class="player-name-plate">${playerName}</div>`;
+        pitch.appendChild(spot);
+    });
+    
+    document.getElementById('view-match-modal').style.display = 'flex';
+};
+// ==========================================
+// SPORLAR VE FUTBOL EKRANI KONTROLLERİ (GÜNCELLENDİ)
+// ==========================================
+window.openSportsScreen = function() {
+    document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+    document.getElementById('sports-sec').classList.add('active');
+    
+    // Doğrudan Futbol Yönetim Merkezini açmak istiyorsan:
+    document.getElementById('sports-home').classList.add('hidden');
+    document.getElementById('football-manager').classList.remove('hidden');
+    
+    // Oly'yi gizle
+    const oly = document.getElementById('oly-avatar');
+    if (oly) oly.style.display = 'none';
+
+    // Kadroyu ve geçmiş maçları yükle
+    if(typeof renderPitch === 'function') renderPitch();
+    if(typeof renderMatchHistory === 'function') renderMatchHistory();
+
+    const dayTracker = document.getElementById('day-tracker');
+    if(dayTracker) dayTracker.style.display = 'none';
+    
+    if (navigator.vibrate) navigator.vibrate(30);
+};
+
+window.closeSportsScreen = function() {
+    document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+    document.getElementById('profile-sec').classList.add('active');
+    
+    // Oly'yi geri getir
+    const oly = document.getElementById('oly-avatar');
+    if (oly) oly.style.display = 'flex';
+
+    if (navigator.vibrate) navigator.vibrate(30);
+};
+
+// Sekme Değiştirme (Kadro vs Geçmiş Maçlar)
+window.switchFootballTab = function(tab) {
+    const lineupBtn = document.getElementById('btn-tab-lineup');
+    const historyBtn = document.getElementById('btn-tab-history');
+    const lineupDiv = document.getElementById('fb-tab-lineup');
+    const historyDiv = document.getElementById('fb-tab-history');
+
+    if (tab === 'lineup') {
+        lineupBtn.classList.add('active');
+        historyBtn.classList.remove('active');
+        lineupDiv.classList.remove('hidden');
+        lineupDiv.style.display = 'block';
+        historyDiv.classList.add('hidden');
+        historyDiv.style.display = 'none';
+    } else {
+        historyBtn.classList.add('active');
+        lineupBtn.classList.remove('active');
+        historyDiv.classList.remove('hidden');
+        historyDiv.style.display = 'block';
+        lineupDiv.classList.add('hidden');
+        lineupDiv.style.display = 'none';
+        
+        // Geçmiş maçlar sekmesine geçildiğinde listeyi tazele
+        if(typeof renderMatchHistory === 'function') renderMatchHistory();
+    }
+};
+// ==========================================
+// FUT KARTI YÖNETİM MOTORU (FOTOĞRAF DESTEKLİ & EKSİZSİZ)
+// ==========================================
+let tempCustomCardImg = null;
+
+function renderFutCard() {
+    const savedCard = JSON.parse(localStorage.getItem('goldnova_fut_card')) || {
+        ovr: 88, pos: 'ST', pace: 90, shoot: 85, pass: 82, dribble: 88, def: 70, phys: 86,
+        img: null
+    };
+    
+    document.getElementById('fut-rating').innerText = savedCard.ovr;
+    document.getElementById('fut-position').innerText = savedCard.pos;
+    document.getElementById('stat-pace').innerText = savedCard.pace;
+    document.getElementById('stat-shoot').innerText = savedCard.shoot;
+    document.getElementById('stat-pass').innerText = savedCard.pass;
+    document.getElementById('stat-dribble').innerText = savedCard.dribble;
+    document.getElementById('stat-def').innerText = savedCard.def;
+    document.getElementById('stat-phys').innerText = savedCard.phys;
+    
+    const avatarImg = document.getElementById('fut-avatar-img');
+    if (savedCard.img) {
+        avatarImg.src = savedCard.img;
+    } else {
+        const user = auth.currentUser;
+        if (user && user.photoURL) {
+            avatarImg.src = user.photoURL;
+        } else {
+            avatarImg.src = 'icon.png';
+        }
+    }
+    
+    const profileName = document.getElementById('profile-name-display').innerText;
+    document.getElementById('fut-name').innerText = profileName !== "Yükleniyor..." ? profileName.toUpperCase() : "GOLDNOVA OYUNCU";
+}
+
+window.openFutEditModal = function() {
+    const savedCard = JSON.parse(localStorage.getItem('goldnova_fut_card')) || {
+        ovr: 88, pos: 'ST', pace: 90, shoot: 85, pass: 82, dribble: 88, def: 70, phys: 86, img: null
+    };
+    
+    document.getElementById('edit-ovr').value = savedCard.ovr;
+    document.getElementById('edit-pos').value = savedCard.pos;
+    document.getElementById('edit-pace').value = savedCard.pace;
+    document.getElementById('edit-shoot').value = savedCard.shoot;
+    document.getElementById('edit-pass').value = savedCard.pass;
+    document.getElementById('edit-dribble').value = savedCard.dribble;
+    document.getElementById('edit-def').value = savedCard.def;
+    document.getElementById('edit-phys').value = savedCard.phys;
+    
+    tempCustomCardImg = savedCard.img;
+    document.getElementById('fut-edit-modal').style.display = 'flex';
+};
+
+window.previewCardImage = function(event) {
+    const file = event.target.files[0];
+    if (file) {
+        const reader = new FileReader();
+        reader.onload = function(e) {
+            tempCustomCardImg = e.target.result;
+        };
+        reader.readAsDataURL(file);
+    }
+};
+
+window.saveFutCardData = function() {
+    const existingCard = JSON.parse(localStorage.getItem('goldnova_fut_card')) || {};
+    
+    const cardData = {
+        ovr: document.getElementById('edit-ovr').value,
+        pos: document.getElementById('edit-pos').value.toUpperCase(),
+        pace: document.getElementById('edit-pace').value,
+        shoot: document.getElementById('edit-shoot').value,
+        pass: document.getElementById('edit-pass').value,
+        dribble: document.getElementById('edit-dribble').value,
+        def: document.getElementById('edit-def').value,
+        phys: document.getElementById('edit-phys').value,
+        img: tempCustomCardImg !== undefined ? tempCustomCardImg : existingCard.img
+    };
+    
+    localStorage.setItem('goldnova_fut_card', JSON.stringify(cardData));
+    document.getElementById('fut-edit-modal').style.display = 'none';
+    renderFutCard();
+    if(navigator.vibrate) navigator.vibrate(50);
+    alert("FIFA kartın başarıyla güncellendi şampiyon! 🎴🔥");
+};
+
+window.triggerCardCelebration = function() {
+    const card = document.querySelector('.fut-card');
+    if (!card) return;
+    
+    if (card.classList.contains('flipping')) return;
+    card.classList.add('flipping');
+    
+    if (typeof confetti === 'function') {
+        confetti({
+            particleCount: 120,
+            spread: 80,
+            origin: { y: 0.6 },
+            colors: ['#f6c000', '#ffffff', '#ffd700', '#ffaa00']
+        });
+    }
+    
+    if (navigator.vibrate) navigator.vibrate([50, 50, 100]);
+    
+    setTimeout(() => {
+        card.classList.remove('flipping');
+    }, 800);
+};
+// ==========================================
+// FUT KARTI TIKLAMA KUTLAMA MOTORU
+// ==========================================
+window.triggerCardCelebration = function() {
+    const card = document.querySelector('.fut-card');
+    if (!card) return;
+    
+    // Eğer zaten dönüyorsa tekrar tetikleme
+    if (card.classList.contains('flipping')) return;
+    
+    card.classList.add('flipping');
+    
+    // Konfeti Patlat
+    if (typeof confetti === 'function') {
+        confetti({
+            particleCount: 120,
+            spread: 80,
+            origin: { y: 0.6 },
+            colors: ['#f6c000', '#ffffff', '#ffd700', '#ffaa00']
+        });
+    }
+    
+    if (navigator.vibrate) navigator.vibrate([50, 50, 100]);
+    
+    // Animasyon bitince sınıfı kaldır
+    setTimeout(() => {
+        card.classList.remove('flipping');
+    }, 800);
+};
