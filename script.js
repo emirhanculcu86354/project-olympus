@@ -2163,61 +2163,25 @@ window.editPlayer = function(index) {
     loadArenaFriendsForSelection();
 };
 
-window.confirmPlayerSelection = function() {
-    const inputEl = document.getElementById('manual-player-input');
-    
-    // Güvenlik kontrolü
-    if (!inputEl) {
-        console.error("İsim girme alanı bulunamadı!");
-        return;
-    }
-    
-    const inputVal = inputEl.value.trim();
-    
-    // Seçilen mevkiye ismi yaz ve sahayı güncelle
-    if (activeEditingIndex !== null) {
-        currentSquad[activeEditingIndex] = inputVal !== "" ? inputVal.substring(0, 15) : "Seçilmedi";
-        
-        if (typeof renderPitch === 'function') {
-            renderPitch();
-        }
-    }
-    
-    // Modalı kapat
-    const modal = document.getElementById('player-select-modal');
-    if (modal) modal.style.display = 'none';
-    
-    // Titreşim ver
-    if (navigator.vibrate) navigator.vibrate(30);
-};
-
-// Takip edilenleri ve kendini listeleme motoru (Aynı kalıyor, sorunsuz)
 async function loadArenaFriendsForSelection() {
     const listContainer = document.getElementById('arena-friends-list');
     listContainer.innerHTML = '<p style="color:gray; font-size:11px; text-align:center; padding:10px;">Yükleniyor...</p>';
     
     try {
         const currentUser = auth.currentUser;
-        if (!currentUser) {
-            listContainer.innerHTML = '<p style="color:gray; font-size:11px; text-align:center; padding:10px;">Giriş yapılmamış.</p>';
-            return;
-        }
+        if (!currentUser) return;
 
         const myDoc = await db.collection("users").doc(currentUser.uid).get();
-        const myData = myDoc.exists ? myDoc.data() : { name: currentUser.displayName || "Ben", photo: currentUser.photoURL || "icon.png", uid: currentUser.uid };
+        const myData = myDoc.exists ? myDoc.data() : { name: currentUser.displayName || "Ben", photo: currentUser.photoURL, uid: currentUser.uid };
 
         let friends = [];
         try {
             const snapshot = await db.collection("users").limit(15).get();
             snapshot.forEach(doc => {
                 const data = doc.data();
-                if (data.name && data.uid !== currentUser.uid) {
-                    friends.push(data);
-                }
+                if (data.name && data.uid !== currentUser.uid) friends.push(data);
             });
-        } catch (err) {
-            console.log("Diğer kullanıcılar çekilemedi.");
-        }
+        } catch (err) {}
 
         listContainer.innerHTML = '';
 
@@ -2225,12 +2189,11 @@ async function loadArenaFriendsForSelection() {
         const selfItem = document.createElement('div');
         selfItem.className = 'friend-select-item';
         selfItem.style.border = '1px solid var(--goldnova)';
-        selfItem.innerHTML = `
-            <img src="${myData.photo || 'icon.png'}" class="friend-select-avatar">
-            <span style="color:var(--goldnova); font-size:13px; font-weight:bold;">${myData.name} (Sen)</span>
-        `;
+        selfItem.innerHTML = `<img src="${myData.photo || 'icon.png'}" class="friend-select-avatar"><span style="color:var(--goldnova); font-size:13px; font-weight:bold;">${myData.name} (Sen)</span>`;
         selfItem.onclick = () => {
-            document.getElementById('manual-player-input').value = myData.name;
+            const inputEl = document.getElementById('manual-player-input');
+            inputEl.value = myData.name;
+            inputEl.removeAttribute('data-target-uid'); // Kendimize bildirim atmaya gerek yok
             confirmPlayerSelection();
         };
         listContainer.appendChild(selfItem);
@@ -2240,23 +2203,131 @@ async function loadArenaFriendsForSelection() {
             friends.forEach(friend => {
                 const item = document.createElement('div');
                 item.className = 'friend-select-item';
-                item.innerHTML = `
-                    <img src="${friend.photo || 'icon.png'}" class="friend-select-avatar">
-                    <span style="color:#fff; font-size:13px; font-weight:bold;">${friend.name}</span>
-                `;
+                item.innerHTML = `<img src="${friend.photo || 'icon.png'}" class="friend-select-avatar"><span style="color:#fff; font-size:13px; font-weight:bold;">${friend.name}</span>`;
                 item.onclick = () => {
-                    document.getElementById('manual-player-input').value = friend.name;
+                    const inputEl = document.getElementById('manual-player-input');
+                    inputEl.value = friend.name;
+                    // YENİ: Seçtiğimiz kişinin ID'sini gizlice inputa gömüyoruz ki bildirim atabilelim!
+                    inputEl.setAttribute('data-target-uid', friend.uid); 
                     confirmPlayerSelection();
                 };
                 listContainer.appendChild(item);
             });
         }
-
     } catch (e) {
-        console.error("Liste yükleme hatası:", e);
-        listContainer.innerHTML = '<p style="color:#ff4444; font-size:11px; text-align:center; padding:10px;">Hata oluştu.</p>';
+        listContainer.innerHTML = '<p style="color:#ff4444; font-size:11px; text-align:center;">Hata oluştu.</p>';
     }
 }
+
+window.confirmPlayerSelection = async function() {
+    const inputEl = document.getElementById('manual-player-input');
+    if (!inputEl) return;
+    
+    const inputVal = inputEl.value.trim();
+    const targetUid = inputEl.getAttribute('data-target-uid'); // Gizli ID'yi al
+    
+    if (activeEditingIndex !== null) {
+        currentSquad[activeEditingIndex] = inputVal !== "" ? inputVal.substring(0, 15) : "Seçilmedi";
+        if (typeof renderPitch === 'function') renderPitch();
+        
+        // EĞER LİSTEDEN BİR ARKADAŞ SEÇİLDİYSE ONA BİLDİRİM GÖNDER!
+        if (targetUid && inputVal !== "") {
+            const myName = document.getElementById('profile-name-display').innerText;
+            const notifMsg = `⚽ ${myName}, seni Goldnova halı saha kadrosuna ekledi! Maça hazır ol.`;
+            
+            try {
+                await db.collection("users").doc(targetUid).update({
+                    notifications: firebase.firestore.FieldValue.arrayUnion({
+                        message: notifMsg,
+                        timestamp: Date.now(),
+                        read: false
+                    })
+                });
+                console.log("Bildirim başarıyla gönderildi!");
+            } catch(e) {
+                console.log("Bildirim gönderilemedi:", e);
+            }
+        }
+    }
+    
+    // İşlem bitince inputun içindeki gizli UID'yi temizle (sonraki seçimler karışmasın)
+    inputEl.removeAttribute('data-target-uid');
+    
+    const modal = document.getElementById('player-select-modal');
+    if (modal) modal.style.display = 'none';
+    if (navigator.vibrate) navigator.vibrate(30);
+};
+
+// ==========================================
+// BİLDİRİM (NOTIFICATION) MOTORU
+// ==========================================
+window.openNotifications = function() {
+    document.getElementById('notifications-modal').style.display = 'flex';
+    // Modalı açtığımızda bekleyen bildirim sayısını gizleyelim (okundu varsayalım)
+    const badge = document.getElementById('notif-badge');
+    if(badge) badge.style.display = 'none';
+};
+
+// Bu fonksiyon Firebase'den anlık bildirimleri dinler
+function listenForNotifications() {
+    if(!auth.currentUser) return;
+    
+    db.collection("users").doc(auth.currentUser.uid)
+      .onSnapshot((doc) => {
+          if (doc.exists) {
+              const data = doc.data();
+              const notifs = data.notifications || [];
+              renderNotifications(notifs);
+          }
+      });
+}
+
+function renderNotifications(notifs) {
+    const list = document.getElementById('notifications-list');
+    const badge = document.getElementById('notif-badge');
+    
+    list.innerHTML = '';
+    if (notifs.length === 0) {
+        list.innerHTML = '<p style="color:gray; font-size:12px; text-align:center;">Henüz yeni bildirim yok.</p>';
+        if(badge) badge.style.display = 'none';
+        return;
+    }
+
+    // En yeni bildirim en üstte görünsün diye tersine çeviriyoruz
+    notifs.slice().reverse().forEach(n => {
+        list.innerHTML += `
+            <div style="padding:12px; background:#1a1a1a; border-left:3px solid var(--goldnova); margin-bottom:8px; border-radius:8px;">
+                <p style="margin:0; font-size:13px; color:#fff; line-height:1.4;">${n.message}</p>
+                <span style="font-size:10px; color:#888; display:block; margin-top:5px;">${new Date(n.timestamp).toLocaleString('tr-TR')}</span>
+            </div>
+        `;
+    });
+
+    // Eğer bildirim varsa zildeki kırmızı rozeti (badge) göster
+    if (notifs.length > 0 && document.getElementById('notifications-modal').style.display !== 'flex') {
+        if(badge) {
+            badge.innerText = notifs.length;
+            badge.style.display = 'block';
+        }
+    }
+}
+
+window.clearNotifications = function() {
+    if(!auth.currentUser) return;
+    // Firebase'deki notifications dizisini tamamen temizle
+    db.collection("users").doc(auth.currentUser.uid).update({
+        notifications: []
+    }).then(() => {
+        if (navigator.vibrate) navigator.vibrate(30);
+    });
+};
+
+// Sayfa yüklendiğinde ve kullanıcı giriş yaptığında bildirim dinleyiciyi başlat
+auth.onAuthStateChanged(user => {
+    if (user) {
+        listenForNotifications();
+    }
+});
 
 
 
