@@ -2157,7 +2157,7 @@ window.editPlayer = function(index) {
 
 async function loadArenaFriendsForSelection() {
     const listContainer = document.getElementById('arena-friends-list');
-    listContainer.innerHTML = '<p style="color:gray; font-size:11px; text-align:center; padding:10px;">Arkadaşlar aranıyor...</p>';
+    listContainer.innerHTML = '<p style="color:gray; font-size:11px; text-align:center; padding:10px;">Yükleniyor...</p>';
     
     try {
         const currentUser = auth.currentUser;
@@ -2172,15 +2172,18 @@ async function loadArenaFriendsForSelection() {
 
         let friends = [];
         
-        // 2. DİĞER KULLANICILARI ÇEKELİM
-        const snapshot = await db.collection("users").limit(15).get();
-        snapshot.forEach(doc => {
-            const data = doc.data();
-            // Kendimiz hariç diğer kullanıcıları ekle
-            if (data.name && data.uid !== currentUser.uid) {
-                friends.push(data);
-            }
-        });
+        // 2. DİĞER KULLANICILARI ÇEKMEYİ DENEYELİM
+        try {
+            const snapshot = await db.collection("users").limit(15).get();
+            snapshot.forEach(doc => {
+                const data = doc.data();
+                if (data.name && data.uid !== currentUser.uid) {
+                    friends.push(data);
+                }
+            });
+        } catch (err) {
+            console.log("Diğer kullanıcılar çekilemedi, sadece ben gösterileceğim.");
+        }
 
         listContainer.innerHTML = '';
 
@@ -2198,25 +2201,28 @@ async function loadArenaFriendsForSelection() {
         };
         listContainer.appendChild(selfItem);
 
-        // 4. DİĞER ARKADAŞLARI LİSTELEYELİM
-        friends.forEach(friend => {
-            const item = document.createElement('div');
-            item.className = 'friend-select-item';
-            item.innerHTML = `
-                <img src="${friend.photo || 'icon.png'}" class="friend-select-avatar">
-                <span style="color:#fff; font-size:13px; font-weight:bold;">${friend.name}</span>
-            `;
-            item.onclick = () => {
-                document.getElementById('manual-player-input').value = friend.name;
-                confirmPlayerSelection();
-            };
-            listContainer.appendChild(item);
-        });
+        // 4. DİĞER ARKADAŞLARI LİSTELEYELİM (Varsa)
+        if (friends.length > 0) {
+            friends.forEach(friend => {
+                const item = document.createElement('div');
+                item.className = 'friend-select-item';
+                item.innerHTML = `
+                    <img src="${friend.photo || 'icon.png'}" class="friend-select-avatar">
+                    <span style="color:#fff; font-size:13px; font-weight:bold;">${friend.name}</span>
+                `;
+                item.onclick = () => {
+                    document.getElementById('manual-player-input').value = friend.name;
+                    confirmPlayerSelection();
+                };
+                listContainer.appendChild(item);
+            });
+        }
 
     } catch (e) {
-        console.error("Arkadaş listesi yüklenemedi:", e);
+        console.error("Liste yükleme hatası:", e);
         listContainer.innerHTML = '<p style="color:#ff4444; font-size:11px; text-align:center; padding:10px;">Liste yüklenirken hata oluştu.</p>';
     }
 }
+
 
 
