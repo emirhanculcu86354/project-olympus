@@ -1792,6 +1792,9 @@ window.saveNewMatchAdvanced = function() {
     renderMatchHistory();
 };
 
+// ==========================================
+// MAÇ GEÇMİŞİ VE ANLIK GERİ SAYIM MOTORu (DÜZELTİLMİŞ)
+// ==========================================
 function renderMatchHistory() {
     const container = document.getElementById('match-history-container');
     const history = JSON.parse(localStorage.getItem('goldnova_match_history')) || [];
@@ -1803,7 +1806,10 @@ function renderMatchHistory() {
     }
     
     history.forEach(match => {
-        const isFuture = new Date(match.datetime).getTime() > new Date().getTime();
+        const targetTime = new Date(match.datetime).getTime();
+        const now = new Date().getTime();
+        const isFuture = targetTime > now;
+        
         const dateStr = new Date(match.datetime).toLocaleString('tr-TR', { day:'2-digit', month:'2-digit', year:'numeric', hour:'2-digit', minute:'2-digit'});
         
         let innerCardHTML = '';
@@ -1833,12 +1839,9 @@ function renderMatchHistory() {
             </div>`;
         }
 
-        // Kaydırarak Silme Sarıcısı (Wrapper)
         const wrapper = document.createElement('div');
         wrapper.className = 'scoreboard-wrapper';
-        wrapper.innerHTML = `
-            <div class="scoreboard-delete-bg">SİL 🗑️</div>
-        `;
+        wrapper.innerHTML = `<div class="scoreboard-delete-bg">SİL 🗑️</div>`;
         
         const tempContainer = document.createElement('div');
         tempContainer.innerHTML = innerCardHTML;
@@ -1846,10 +1849,8 @@ function renderMatchHistory() {
         wrapper.appendChild(cardEl);
         container.appendChild(wrapper);
 
-        // Sola kaydırma (Swipe) Olayları
+        // Kaydırma (Swipe to delete) olayları
         let startX = 0;
-        let currentTranslate = 0;
-        
         cardEl.addEventListener('touchstart', (e) => {
             startX = e.touches[0].clientX;
             cardEl.style.transition = 'none';
@@ -1866,7 +1867,6 @@ function renderMatchHistory() {
             let endX = e.changedTouches[0].clientX;
             cardEl.style.transition = 'transform 0.3s ease';
             if (startX - endX > 70) {
-                // Sola yeterince kaydırıldıysa silme butonunu açık tut veya direkt sil
                 if(confirm("Bu maçı silmek istiyor musun?")) {
                     deleteMatch(match.id);
                     return;
@@ -1876,6 +1876,30 @@ function renderMatchHistory() {
         });
     });
 }
+
+// ANLIK GERİ SAYIM MOTORU (HER SANİYE GÜNCELLENİR)
+setInterval(() => {
+    document.querySelectorAll('.match-countdown').forEach(el => {
+        const targetStr = el.getAttribute('data-target');
+        if(!targetStr) return;
+        
+        const target = new Date(targetStr).getTime();
+        const now = new Date().getTime();
+        const diff = target - now;
+        
+        if(diff > 0) {
+            const d = Math.floor(diff / (1000 * 60 * 60 * 24));
+            const h = Math.floor((diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+            const m = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
+            const s = Math.floor((diff % (1000 * 60)) / 1000);
+            
+            el.innerText = `Maça: ${d}g ${h}s ${m}d ${s}sn`;
+        } else {
+            el.innerText = "⚽ MAÇ SAATİ GELDİ!";
+        }
+    });
+}, 1000);
+
 
 window.deleteMatch = function(matchId) {
     let history = JSON.parse(localStorage.getItem('goldnova_match_history')) || [];
