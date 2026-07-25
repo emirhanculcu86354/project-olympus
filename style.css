@@ -1868,3 +1868,23 @@ input:checked + .ios-slider:before {
 .tactic-num-text { position: relative; z-index: 2; margin-top: 6px; font-size: 13px; font-weight: 900; }
 .tactic-home .tactic-num-text { color: #000; } /* Yelek üstü siyah yazı */
 .tactic-away .tactic-num-text { color: #fff; } /* Mavi forma üstü beyaz yazı */
+
+/* SPOTIFY YÜZEN OYNATICI STİLLERİ */
+#spotify-floating-player {
+    position: fixed;
+    bottom: 75px; /* Alt barın hemen üstünde durması için */
+    left: 10px;
+    right: 10px;
+    z-index: 4000;
+    border-radius: 12px;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.7);
+    transition: transform 0.4s cubic-bezier(0.25, 0.8, 0.25, 1), opacity 0.4s ease;
+    background: #000; /* Çerçeve dışı boşluklar için */
+}
+
+/* Player gizlendiğinde aşağı doğru kayarak kaybolur */
+#spotify-floating-player.hidden {
+    transform: translateY(150%);
+    opacity: 0;
+    pointer-events: none;
+}

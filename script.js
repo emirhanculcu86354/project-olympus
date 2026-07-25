@@ -194,11 +194,14 @@ document.addEventListener("DOMContentLoaded", () => {
                 btnAll.style.display = 'none';
                 if (viewMode === 'all') { viewMode = 'today'; updateCalendarTabs(); }
                 dayTracker.style.display = 'flex';
+                document.getElementById('spotify-floating-player').classList.add('hidden'); // Müziği Gizle
             } else if (target === 'workout-sec') {
                 btnAll.style.display = 'block';
                 dayTracker.style.display = 'flex';
+                document.getElementById('spotify-floating-player').classList.remove('hidden'); // Müziği Göster
             } else {
                 dayTracker.style.display = 'none';
+                document.getElementById('spotify-floating-player').classList.add('hidden'); // Müziği Gizle
             }
 
             if (target === 'profile-sec') {
