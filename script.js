@@ -2166,40 +2166,39 @@ async function loadArenaFriendsForSelection() {
             return;
         }
 
-        // Kullanıcının takip ettiklerini al
-        const userDoc = await db.collection("users").doc(currentUser.uid).get();
-        const userData = userDoc.exists ? userDoc.data() : {};
-        const followingIds = userData.following || [];
+        // 1. KENDİ PROFİL BİLGİMİZİ ALALIM
+        const myDoc = await db.collection("users").doc(currentUser.uid).get();
+        const myData = myDoc.exists ? myDoc.data() : { name: currentUser.displayName || "Ben", photo: currentUser.photoURL || "icon.png", uid: currentUser.uid };
 
         let friends = [];
         
-        // Eğer takip ettiği kişiler varsa onları çek
-        if (followingIds.length > 0) {
-            // Firestore 'in' sorgusu en fazla 10 eleman alabilir, güvenli olması için chunk yapabiliriz veya genel kullanıcıları çekeriz
-            const snapshot = await db.collection("users").limit(15).get();
-            snapshot.forEach(doc => {
-                const data = doc.data();
-                if (data.name && data.uid !== currentUser.uid) {
-                    friends.push(data);
-                }
-            });
-        } else {
-            // Takip ettiği yoksa sistemdeki diğer kullanıcıları göster
-            const snapshot = await db.collection("users").limit(10).get();
-            snapshot.forEach(doc => {
-                const data = doc.data();
-                if (data.name && data.uid !== currentUser.uid) {
-                    friends.push(data);
-                }
-            });
-        }
+        // 2. DİĞER KULLANICILARI ÇEKELİM
+        const snapshot = await db.collection("users").limit(15).get();
+        snapshot.forEach(doc => {
+            const data = doc.data();
+            // Kendimiz hariç diğer kullanıcıları ekle
+            if (data.name && data.uid !== currentUser.uid) {
+                friends.push(data);
+            }
+        });
 
         listContainer.innerHTML = '';
-        if (friends.length === 0) {
-            listContainer.innerHTML = '<p style="color:gray; font-size:11px; text-align:center; padding:10px;">Henüz başka sporcu bulunamadı.</p>';
-            return;
-        }
 
+        // 3. EN BAŞA KENDİMİZİ EKLEYELİM
+        const selfItem = document.createElement('div');
+        selfItem.className = 'friend-select-item';
+        selfItem.style.border = '1px solid var(--goldnova)';
+        selfItem.innerHTML = `
+            <img src="${myData.photo || 'icon.png'}" class="friend-select-avatar">
+            <span style="color:var(--goldnova); font-size:13px; font-weight:bold;">${myData.name} (Sen)</span>
+        `;
+        selfItem.onclick = () => {
+            document.getElementById('manual-player-input').value = myData.name;
+            confirmPlayerSelection();
+        };
+        listContainer.appendChild(selfItem);
+
+        // 4. DİĞER ARKADAŞLARI LİSTELEYELİM
         friends.forEach(friend => {
             const item = document.createElement('div');
             item.className = 'friend-select-item';
@@ -2220,13 +2219,4 @@ async function loadArenaFriendsForSelection() {
     }
 }
 
-window.confirmPlayerSelection = function() {
-    const inputVal = document.getElementById('manual-player-input').value.trim();
-    if (activeEditingIndex !== null) {
-        currentSquad[activeEditingIndex] = inputVal !== "" ? inputVal.substring(0, 15) : "Seçilmedi";
-        renderPitch();
-    }
-    document.getElementById('player-select-modal').style.display = 'none';
-    if (navigator.vibrate) navigator.vibrate(30);
-};
 
