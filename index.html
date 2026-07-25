@@ -657,6 +657,31 @@
             <button class="edit-btn" style="width:100%; margin-top:10px;" onclick="document.getElementById('fut-edit-modal').style.display='none'">İptal</button>
         </div>
     </div>
+        <!-- OYUNCU SEÇİM / YAZMA MODALI -->
+    <div id="player-select-modal" class="modal">
+        <div class="modal-content" style="max-width: 350px;">
+            <h2 style="color:var(--goldnova); margin-bottom:10px; font-size:18px;">Mevki Oyuncusu</h2>
+            <p style="color:#888; font-size:12px; margin-bottom:15px;">İstersen listeden arkadaşını seç, istersen manuel yaz.</p>
+            
+            <div class="input-group" style="margin-bottom: 15px;">
+                <label>İsim Yaz</label>
+                <input type="text" id="manual-player-input" placeholder="Örn: Burak Yılmaz">
+            </div>
+
+            <div style="margin-bottom: 15px;">
+                <label style="color:var(--text-muted); font-size:12px; display:block; margin-bottom:5px;">Veya Takip Edilen Arkadaşlardan Seç</label>
+                <div id="arena-friends-list" style="max-height: 150px; overflow-y: auto; background: #151515; border: 1px solid #333; border-radius: 8px; padding: 5px;">
+                    <p style="color:gray; font-size:11px; text-align:center; padding:10px;">Yükleniyor...</p>
+                </div>
+            </div>
+
+            <div style="display: flex; gap: 10px;">
+                <button class="save-btn" onclick="confirmPlayerSelection()" style="background:var(--goldnova); color:#000; margin-top:0; flex:1;">Seçimi Kaydet</button>
+                <button class="edit-btn" style="border-color:#ff4444; color:#ff4444; flex:1; padding:0;" onclick="document.getElementById('player-select-modal').style.display='none'">İptal</button>
+            </div>
+        </div>
+    </div>
+
     <script src="config.js"></script>
     <script src="script.js"></script>
 </body>
