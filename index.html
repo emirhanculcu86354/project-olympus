@@ -74,12 +74,15 @@
         <header class="mobile-header" id="main-header">
             <div class="header-top">
                 <h2 class="brand-title">PROJECT OLYMPUS</h2>
-                <div class="header-right">
-                    <button onclick="logout()" class="edit-btn"
-                        style="border-color:#ff4444; color:#ff4444; font-size:10px; padding: 4px 8px;">Çıkış</button>
-                    <img id="header-profile-img" src="icon.png" class="header-avatar top-nav-btn"
-                        data-target="profile-sec" alt="Profil">
+                                <div class="header-right">
+                    <!-- YENİ BİLDİRİM BUTONU -->
+                    <button onclick="openNotifications()" class="edit-btn" style="border:none; font-size:22px; padding: 0 5px; position:relative; background:transparent;">
+                        🔔
+                        <span id="notif-badge" style="position:absolute; top:-2px; right:-2px; background:#ff4444; color:#fff; font-size:10px; font-weight:bold; padding:2px 6px; border-radius:10px; display:none;">0</span>
+                    </button>
+                    <img id="header-profile-img" src="icon.png" class="header-avatar top-nav-btn" data-target="profile-sec" alt="Profil">
                 </div>
+
             </div>
             <div class="day-tracker-container" id="day-tracker">
                 <div class="current-day-badge"><span id="display-day-text">GÜN 1</span></div>
