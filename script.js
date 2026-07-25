@@ -2140,21 +2140,58 @@ window.triggerCardCelebration = function() {
     }, 800);
 };
 // ==========================================
-// OYUNCU SEÇİM VE ARKADAŞ LİSTESİ MOTORU
+// OYUNCU SEÇİM VE ARKADAŞ LİSTESİ MOTORU (DÜZELTİLMİŞ KESİN ÇÖZÜM)
 // ==========================================
-let activeEditingIndex = null;
+var activeEditingIndex = null; // Global ve her yerden erişilebilir
 
 window.editPlayer = function(index) {
     activeEditingIndex = index;
+    
+    // Eğer currentSquad bir şekilde kaybolduysa güvenli şekilde geri çağır
+    if (typeof currentSquad === 'undefined' || !currentSquad) {
+        window.currentSquad = JSON.parse(localStorage.getItem('goldnova_squad_names')) || Array(7).fill("Seçilmedi");
+    }
+    
     const oldName = currentSquad[index] !== "Seçilmedi" ? currentSquad[index] : "";
     
-    document.getElementById('manual-player-input').value = oldName;
-    document.getElementById('player-select-modal').style.display = 'flex';
+    const inputEl = document.getElementById('manual-player-input');
+    if (inputEl) inputEl.value = oldName;
     
-    // Firebase'den takip edilen veya sistemdeki arkadaşları yükle
+    const modal = document.getElementById('player-select-modal');
+    if (modal) modal.style.display = 'flex';
+    
     loadArenaFriendsForSelection();
 };
 
+window.confirmPlayerSelection = function() {
+    const inputEl = document.getElementById('manual-player-input');
+    
+    // Güvenlik kontrolü
+    if (!inputEl) {
+        console.error("İsim girme alanı bulunamadı!");
+        return;
+    }
+    
+    const inputVal = inputEl.value.trim();
+    
+    // Seçilen mevkiye ismi yaz ve sahayı güncelle
+    if (activeEditingIndex !== null) {
+        currentSquad[activeEditingIndex] = inputVal !== "" ? inputVal.substring(0, 15) : "Seçilmedi";
+        
+        if (typeof renderPitch === 'function') {
+            renderPitch();
+        }
+    }
+    
+    // Modalı kapat
+    const modal = document.getElementById('player-select-modal');
+    if (modal) modal.style.display = 'none';
+    
+    // Titreşim ver
+    if (navigator.vibrate) navigator.vibrate(30);
+};
+
+// Takip edilenleri ve kendini listeleme motoru (Aynı kalıyor, sorunsuz)
 async function loadArenaFriendsForSelection() {
     const listContainer = document.getElementById('arena-friends-list');
     listContainer.innerHTML = '<p style="color:gray; font-size:11px; text-align:center; padding:10px;">Yükleniyor...</p>';
@@ -2166,13 +2203,10 @@ async function loadArenaFriendsForSelection() {
             return;
         }
 
-        // 1. KENDİ PROFİL BİLGİMİZİ ALALIM
         const myDoc = await db.collection("users").doc(currentUser.uid).get();
         const myData = myDoc.exists ? myDoc.data() : { name: currentUser.displayName || "Ben", photo: currentUser.photoURL || "icon.png", uid: currentUser.uid };
 
         let friends = [];
-        
-        // 2. DİĞER KULLANICILARI ÇEKMEYİ DENEYELİM
         try {
             const snapshot = await db.collection("users").limit(15).get();
             snapshot.forEach(doc => {
@@ -2182,12 +2216,12 @@ async function loadArenaFriendsForSelection() {
                 }
             });
         } catch (err) {
-            console.log("Diğer kullanıcılar çekilemedi, sadece ben gösterileceğim.");
+            console.log("Diğer kullanıcılar çekilemedi.");
         }
 
         listContainer.innerHTML = '';
 
-        // 3. EN BAŞA KENDİMİZİ EKLEYELİM
+        // KENDİMİZİ EKLEYELİM
         const selfItem = document.createElement('div');
         selfItem.className = 'friend-select-item';
         selfItem.style.border = '1px solid var(--goldnova)';
@@ -2201,7 +2235,7 @@ async function loadArenaFriendsForSelection() {
         };
         listContainer.appendChild(selfItem);
 
-        // 4. DİĞER ARKADAŞLARI LİSTELEYELİM (Varsa)
+        // ARKADAŞLARI EKLEYELİM
         if (friends.length > 0) {
             friends.forEach(friend => {
                 const item = document.createElement('div');
@@ -2220,7 +2254,7 @@ async function loadArenaFriendsForSelection() {
 
     } catch (e) {
         console.error("Liste yükleme hatası:", e);
-        listContainer.innerHTML = '<p style="color:#ff4444; font-size:11px; text-align:center; padding:10px;">Liste yüklenirken hata oluştu.</p>';
+        listContainer.innerHTML = '<p style="color:#ff4444; font-size:11px; text-align:center; padding:10px;">Hata oluştu.</p>';
     }
 }
 
