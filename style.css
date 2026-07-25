@@ -1756,3 +1756,28 @@ input:checked + .ios-slider:before {
     color: #fff;
     font-size: 12px;
 }
+/* OYUNCU SEÇİM LİSTESİ STİLLERİ */
+.friend-select-item {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 8px 10px;
+    background: #1f1f1f;
+    border-radius: 6px;
+    margin-bottom: 5px;
+    cursor: pointer;
+    transition: background 0.2s;
+}
+
+.friend-select-item:hover {
+    background: #2a2a2a;
+    border-color: var(--goldnova);
+}
+
+.friend-select-avatar {
+    width: 28px;
+    height: 28px;
+    border-radius: 50%;
+    object-fit: cover;
+}
+
