@@ -74,13 +74,16 @@
         <header class="mobile-header" id="main-header">
             <div class="header-top">
                 <h2 class="brand-title">PROJECT OLYMPUS</h2>
-                                <div class="header-right">
+                <div class="header-right">
                     <!-- YENİ BİLDİRİM BUTONU -->
-                    <button onclick="openNotifications()" class="edit-btn" style="border:none; font-size:22px; padding: 0 5px; position:relative; background:transparent;">
+                    <button onclick="openNotifications()" class="edit-btn"
+                        style="border:none; font-size:22px; padding: 0 5px; position:relative; background:transparent;">
                         🔔
-                        <span id="notif-badge" style="position:absolute; top:-2px; right:-2px; background:#ff4444; color:#fff; font-size:10px; font-weight:bold; padding:2px 6px; border-radius:10px; display:none;">0</span>
+                        <span id="notif-badge"
+                            style="position:absolute; top:-2px; right:-2px; background:#ff4444; color:#fff; font-size:10px; font-weight:bold; padding:2px 6px; border-radius:10px; display:none;">0</span>
                     </button>
-                    <img id="header-profile-img" src="icon.png" class="header-avatar top-nav-btn" data-target="profile-sec" alt="Profil">
+                    <img id="header-profile-img" src="icon.png" class="header-avatar top-nav-btn"
+                        data-target="profile-sec" alt="Profil">
                 </div>
 
             </div>
@@ -284,6 +287,9 @@
                             değiştirmek için formalara tıkla.</p>
                         <button class="save-btn" onclick="saveLineup()"
                             style="margin-top: 10px; background:#27ae60;">Kadroyu Kaydet</button>
+                        <button class="edit-btn" onclick="openTacticBoard()"
+                            style="width: 100%; margin-top: 10px; border-color: #00d2ff; color: #00d2ff;">📋 Taktik
+                            Tahtasını Aç</button>
 
                         <!-- FIFA UT TARZI OYUNCU KARTI -->
                         <div class="fifa-card-container" style="margin-top: 25px;">
@@ -296,6 +302,13 @@
                                     <div class="fut-pos" id="fut-position">ST</div>
                                     <div class="fut-nation">🇹🇷</div>
                                     <div class="fut-club">⚡</div>
+                                    <!-- YENİ: FORMA SİMGESİ VE NUMARASI -->
+                                    <div
+                                        style="position: relative; margin-top: 5px; text-align: center; line-height: 1;">
+                                        <span style="font-size: 24px;">👕</span>
+                                        <span id="fut-jersey-num"
+                                            style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -35%); font-size: 10px; font-weight: 900; color: #fff; text-shadow: 1px 1px 2px #000;">10</span>
+                                    </div>
                                 </div>
                                 <div class="fut-card-img-container">
                                     <img id="fut-avatar-img" src="icon.png" alt="Player" class="fut-player-img">
@@ -345,6 +358,17 @@
                     <div class="profile-info" style="margin-top:15px; text-align:center;">
                         <h2 id="profile-name-display" class="brand-title" style="font-size:24px;">Yükleniyor...</h2>
                         <p class="subtitle" style="margin-bottom:0; color:#888;">Project Olympus</p>
+                    </div>
+                </div>
+                <!-- TAKİPÇİ VE TAKİP EDİLEN İSTATİSTİKLERİ (TIKLANABİLİR) -->
+                <div style="display: flex; justify-content: center; gap: 40px; margin: 15px 0 20px 0;">
+                    <div style="text-align: center; cursor: pointer;" onclick="openFollowList('following')">
+                        <strong id="profile-following" style="color:var(--goldnova); font-size:20px;">0</strong><br>
+                        <span style="font-size:11px; color:#888;">Takip Edilen</span>
+                    </div>
+                    <div style="text-align: center; cursor: pointer;" onclick="openFollowList('followers')">
+                        <strong id="profile-followers" style="color:var(--goldnova); font-size:20px;">0</strong><br>
+                        <span style="font-size:11px; color:#888;">Takipçi</span>
                     </div>
                 </div>
 
@@ -447,7 +471,8 @@
                     </div>
                     <button class="save-btn" id="save-settings-btn">Kaydet & Kapat</button>
                     <!-- YENİ ÇIKIŞ YAP BUTONU -->
-                    <button onclick="logout()" class="edit-btn" style="width:100%; border-color:#ff4444; color:#ff4444; margin-top:10px;">🚪 Çıkış Yap</button> 
+                    <button onclick="logout()" class="edit-btn"
+                        style="width:100%; border-color:#ff4444; color:#ff4444; margin-top:10px;">🚪 Çıkış Yap</button>
                 </div>
             </div>
         </main>
@@ -641,62 +666,129 @@
         <div class="modal-content">
             <h2 style="color:var(--goldnova); margin-bottom:15px;">FIFA Kartını Özelleştir</h2>
             <div class="modal-body form-grid">
-                
+
                 <!-- YENİ: FOTOĞRAF DEĞİŞTİRME ALANI -->
                 <div class="input-group" style="grid-column: span 2; text-align: center; margin-bottom: 5px;">
                     <label>Kart Fotoğrafı</label>
-                    <input type="file" id="edit-card-img-file" accept="image/*" style="display:none;" onchange="previewCardImage(event)">
-                    <button type="button" class="edit-btn" onclick="document.getElementById('edit-card-img-file').click()" style="width:100%; border-color:var(--goldnova); color:var(--goldnova);">📷 Fotoğraf Dosyası Seç</button>
+                    <input type="file" id="edit-card-img-file" accept="image/*" style="display:none;"
+                        onchange="previewCardImage(event)">
+                    <button type="button" class="edit-btn"
+                        onclick="document.getElementById('edit-card-img-file').click()"
+                        style="width:100%; border-color:var(--goldnova); color:var(--goldnova);">📷 Fotoğraf Dosyası
+                        Seç</button>
                 </div>
 
-                <div class="input-group"><label>Reyting (OVR)</label><input type="number" id="edit-ovr" value="88"></div>
+                <div class="input-group"><label>Reyting (OVR)</label><input type="number" id="edit-ovr" value="88">
+                </div>
+                <div class="input-group"><label>Forma No</label><input type="number" id="edit-jersey" value="10"></div>
                 <div class="input-group"><label>Mevki</label><input type="text" id="edit-pos" value="ST"></div>
                 <div class="input-group"><label>Hız (PAC)</label><input type="number" id="edit-pace" value="90"></div>
                 <div class="input-group"><label>Şut (SHO)</label><input type="number" id="edit-shoot" value="85"></div>
                 <div class="input-group"><label>Pas (PAS)</label><input type="number" id="edit-pass" value="82"></div>
-                <div class="input-group"><label>Dribbling (DRI)</label><input type="number" id="edit-dribble" value="88"></div>
+                <div class="input-group"><label>Dribbling (DRI)</label><input type="number" id="edit-dribble"
+                        value="88"></div>
                 <div class="input-group"><label>Defans (DEF)</label><input type="number" id="edit-def" value="70"></div>
                 <div class="input-group"><label>Fizik (PHY)</label><input type="number" id="edit-phys" value="86"></div>
             </div>
-            <button class="save-btn" onclick="saveFutCardData()" style="background:var(--goldnova); color:#000;">Kartı Güncelle</button>
-            <button class="edit-btn" style="width:100%; margin-top:10px;" onclick="document.getElementById('fut-edit-modal').style.display='none'">İptal</button>
+            <button class="save-btn" onclick="saveFutCardData()" style="background:var(--goldnova); color:#000;">Kartı
+                Güncelle</button>
+            <button class="edit-btn" style="width:100%; margin-top:10px;"
+                onclick="document.getElementById('fut-edit-modal').style.display='none'">İptal</button>
         </div>
     </div>
-        <!-- OYUNCU SEÇİM / YAZMA MODALI -->
+    <!-- OYUNCU SEÇİM / YAZMA MODALI -->
     <div id="player-select-modal" class="modal">
         <div class="modal-content" style="max-width: 350px;">
             <h2 style="color:var(--goldnova); margin-bottom:10px; font-size:18px;">Mevki Oyuncusu</h2>
-            <p style="color:#888; font-size:12px; margin-bottom:15px;">İstersen listeden arkadaşını seç, istersen manuel yaz.</p>
-            
+            <p style="color:#888; font-size:12px; margin-bottom:15px;">İstersen listeden arkadaşını seç, istersen manuel
+                yaz.</p>
+
             <div class="input-group" style="margin-bottom: 15px;">
                 <label>İsim Yaz</label>
                 <input type="text" id="manual-player-input" placeholder="Örn: Burak Yılmaz">
             </div>
 
             <div style="margin-bottom: 15px;">
-                <label style="color:var(--text-muted); font-size:12px; display:block; margin-bottom:5px;">Veya Takip Edilen Arkadaşlardan Seç</label>
-                <div id="arena-friends-list" style="max-height: 150px; overflow-y: auto; background: #151515; border: 1px solid #333; border-radius: 8px; padding: 5px;">
+                <label style="color:var(--text-muted); font-size:12px; display:block; margin-bottom:5px;">Veya Takip
+                    Edilen Arkadaşlardan Seç</label>
+                <div id="arena-friends-list"
+                    style="max-height: 150px; overflow-y: auto; background: #151515; border: 1px solid #333; border-radius: 8px; padding: 5px;">
                     <p style="color:gray; font-size:11px; text-align:center; padding:10px;">Yükleniyor...</p>
                 </div>
             </div>
 
             <div style="display: flex; gap: 10px;">
-                <button class="save-btn" onclick="confirmPlayerSelection()" style="background:var(--goldnova); color:#000; margin-top:0; flex:1;">Seçimi Kaydet</button>
-                <button class="edit-btn" style="border-color:#ff4444; color:#ff4444; flex:1; padding:0;" onclick="document.getElementById('player-select-modal').style.display='none'">İptal</button>
+                <button class="save-btn" onclick="confirmPlayerSelection()"
+                    style="background:var(--goldnova); color:#000; margin-top:0; flex:1;">Seçimi Kaydet</button>
+                <button class="edit-btn" style="border-color:#ff4444; color:#ff4444; flex:1; padding:0;"
+                    onclick="document.getElementById('player-select-modal').style.display='none'">İptal</button>
             </div>
         </div>
     </div>
-        <!-- BİLDİRİMLER MODALI -->
+    <!-- BİLDİRİMLER MODALI -->
     <div id="notifications-modal" class="modal">
         <div class="modal-content">
             <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:15px;">
                 <h2 style="color:var(--goldnova); margin:0;">Bildirimler</h2>
-                <button onclick="clearNotifications()" class="edit-btn" style="font-size:11px; padding:4px 8px;">Temizle</button>
+                <button onclick="clearNotifications()" class="edit-btn"
+                    style="font-size:11px; padding:4px 8px;">Temizle</button>
             </div>
-            <div class="modal-body" id="notifications-list" style="max-height:300px; overflow-y:auto; padding-right:5px;">
+            <div class="modal-body" id="notifications-list"
+                style="max-height:300px; overflow-y:auto; padding-right:5px;">
                 <p style="color:gray; font-size:12px; text-align:center;">Henüz yeni bildirim yok.</p>
             </div>
-            <button class="save-btn" onclick="document.getElementById('notifications-modal').style.display='none'" style="margin-top:10px;">Kapat</button>
+            <button class="save-btn" onclick="document.getElementById('notifications-modal').style.display='none'"
+                style="margin-top:10px;">Kapat</button>
+        </div>
+    </div>
+    <!-- TAKTİK TAHTASI EKRANI (TAM SAHA VE HAMBURGER MENÜ) -->
+    <div id="tactic-board-screen" class="full-screen-overlay hidden" style="z-index: 5000; background: #245228;">
+        <canvas id="tactic-canvas"
+            style="position: absolute; top: 0; left: 0; z-index: 5002; pointer-events: none;"></canvas>
+
+        <div class="tactic-pitch-bg">
+            <div class="tactic-pitch-line-center"></div>
+            <div class="tactic-pitch-circle"></div>
+            <div class="tactic-box-top"></div>
+            <div class="tactic-goal-top"></div>
+            <div class="tactic-box-bottom"></div>
+            <div class="tactic-goal-bottom"></div>
+        </div>
+
+        <!-- YENİ: HAMBURGER MENÜ VE BUTONLAR -->
+        <div style="position: absolute; top: calc(env(safe-area-inset-top) + 15px); left: 15px; z-index: 5004;">
+            <button onclick="toggleTacticMenu()" class="edit-btn"
+                style="background: rgba(0,0,0,0.7); border: 1px solid #fff; color: #fff; font-size: 20px; padding: 4px 10px; border-radius: 8px;">☰</button>
+            <div id="tactic-tools-menu"
+                style="display: flex; flex-direction: column; gap: 8px; margin-top: 10px; transform: translateX(-150%); opacity: 0; transition: all 0.3s ease; pointer-events: none;">
+                <button id="tactic-pen-btn" onclick="toggleTacticPen()" class="edit-btn"
+                    style="background: rgba(0,0,0,0.8); border-color: white; color: white;">✏️ Kalem</button>
+                <button onclick="clearTacticCanvas()" class="edit-btn"
+                    style="background: rgba(0,0,0,0.8); border-color: #ff4444; color: #ff4444;">🗑️ Temizle</button>
+                <button onclick="resetTacticPlayers()" class="edit-btn"
+                    style="background: rgba(0,0,0,0.8); border-color: var(--goldnova); color: var(--goldnova);">🔄
+                    Yenile</button>
+            </div>
+        </div>
+
+        <!-- KAPATMA BUTONU -->
+        <div onclick="closeTacticBoard()"
+            style="position: absolute; top: calc(env(safe-area-inset-top) + 15px); right: 15px; font-size: 26px; cursor: pointer; filter: drop-shadow(0 2px 4px #000); z-index: 5004;">
+            ❌</div>
+
+        <div id="tactic-draggables"
+            style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; z-index: 5001;"></div>
+    </div>
+    <!-- TAKİP LİSTESİ MODALI -->
+    <div id="follow-list-modal" class="modal">
+        <div class="modal-content">
+            <h2 id="follow-modal-title" style="color:var(--goldnova); margin-bottom:15px; text-align:center;">Liste</h2>
+            <div class="modal-body" id="follow-list-container"
+                style="max-height:300px; overflow-y:auto; padding-right:5px;">
+                <p style="color:gray; font-size:12px; text-align:center;">Yükleniyor...</p>
+            </div>
+            <button class="save-btn" onclick="document.getElementById('follow-list-modal').style.display='none'"
+                style="margin-top:15px;">Kapat</button>
         </div>
     </div>
 
