@@ -245,7 +245,6 @@ document.addEventListener("DOMContentLoaded", () => {
     initDraggableOly()
 });
 
-// 4. UYGULAMA FONKSİYONLARI
 function calculateCurrentDay() {
     let isTomorrow = (viewMode === 'tomorrow');
     const startDate = new Date(document.getElementById('start-date').value);
@@ -258,14 +257,13 @@ function calculateCurrentDay() {
         calculatedDay = ((baseDay - 1) % 7) + 1;
         document.getElementById('display-day-text').innerText = `GÜN ${calculatedDay}`;
 
-        // YENİ: Pazartesi (Gün 1) olduğunda kasları otomatik temizle!
         if (calculatedDay === 1) {
             let lastReset = localStorage.getItem('olympus_muscle_reset_date');
             let todayStr = new Date().toLocaleDateString('tr-TR');
             if (lastReset !== todayStr) {
                 localStorage.removeItem('olympus_worked_muscles');
                 localStorage.setItem('olympus_muscle_reset_date', todayStr);
-                updateAnatomyView(); // Ekranda da temizle
+                updateAnatomyView(); 
             }
         }
 
@@ -275,8 +273,16 @@ function calculateCurrentDay() {
     } else {
         document.getElementById('display-day-text').innerText = `TÜMÜ`;
     }
-    renderWorkouts(); renderDiet();
+    
+    renderWorkouts(); 
+    renderDiet();
+    
+    // YENİ EKLENEN KISIM: GÜNLÜK BİLDİRİM MOTORUNU ÇALIŞTIR
+    if(typeof sendDailyWorkoutNotification === 'function') {
+        sendDailyWorkoutNotification();
+    }
 }
+
 
 function updateCalendarTabs() {
     document.getElementById('btn-today').classList.toggle('active', viewMode === 'today');
@@ -2328,6 +2334,44 @@ auth.onAuthStateChanged(user => {
         listenForNotifications();
     }
 });
+// ==========================================
+// GÜNLÜK ANTRENMAN BİLDİRİM MOTORU
+// ==========================================
+window.sendDailyWorkoutNotification = function() {
+    // Sadece giriş yapılmışsa ve takvim "Bugün" modundaysa çalışsın
+    if (!auth.currentUser || viewMode !== 'today') return;
+
+    const todayStr = new Date().toLocaleDateString('tr-TR');
+    const lastNotifDate = localStorage.getItem('olympus_daily_notif_date');
+
+    // Eğer bugün zaten bildirim gönderildiyse tekrar gönderme (Spam koruması)
+    if (lastNotifDate !== todayStr) {
+        // Bugünün idmanını programdan bul
+        const todayWorkout = programData[currentPhase].find(x => x.day == calculatedDay);
+        
+        if (todayWorkout) {
+            let msg = "";
+            if (todayWorkout.rest) {
+                msg = `🧘 Bugün dinlenme günün: ${todayWorkout.title}. Kaslarını toparla şampiyon!`;
+            } else {
+                msg = `🏋️‍♂️ Oly hatırlatıyor: Bugün ${todayWorkout.title}. Limitleri zorlama vakti geldi!`;
+            }
+
+            // Firebase'deki bildirimler dizisine otomatik mesajı ateşle
+            db.collection("users").doc(auth.currentUser.uid).update({
+                notifications: firebase.firestore.FieldValue.arrayUnion({
+                    message: msg,
+                    timestamp: Date.now(),
+                    read: false
+                })
+            }).then(() => {
+                // Bugünü hafızaya yaz ki aynı gün içinde sayfayı yeniledikçe tekrar bildirim atmasın
+                localStorage.setItem('olympus_daily_notif_date', todayStr);
+            }).catch(e => console.log("Günlük bildirim atılamadı:", e));
+        }
+    }
+};
+
 
 
 
