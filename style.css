@@ -1872,7 +1872,7 @@ input:checked + .ios-slider:before {
 /* SPOTIFY YÜZEN OYNATICI STİLLERİ (MOBİL UYUMLU) */
 #spotify-floating-player {
     position: fixed;
-    bottom: calc(env(safe-area-inset-bottom) + 90px); /* Telefonun alt çizgisi ve barından kurtarır */
+    bottom: calc(env(safe-area-inset-bottom) + 54px); /* Telefonun alt çizgisi ve barından kurtarır */
     left: 10px;
     right: 10px;
     z-index: 9999; /* Uygulamadaki HER ŞEYİN üstüne çıkarır */
