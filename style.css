@@ -1895,7 +1895,3 @@ input:checked + .ios-slider:before {
 #active-workout-screen {
     padding-bottom: 180px !important;
 }
-/* İDMAN DETAY LİSTESİ (MODAL) İÇİN SPOTIFY BOŞLUĞU */
-#workout-modal .modal-content {
-    padding-bottom: 180px !important;
-}

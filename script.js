@@ -57,7 +57,7 @@ auth.onAuthStateChanged(user => {
             if (workoutSec && workoutSec.classList.contains('active') && player) {
                 player.classList.remove('hidden');
             }
-        }, 850);
+        }, 3200);
     } else {
         // 2. DURUM: KULLANICI GİRİŞ YAPMAMIŞ (Uygulamayı ilk defa açıyor)
         const loadingScreen = document.getElementById('loading-screen');
