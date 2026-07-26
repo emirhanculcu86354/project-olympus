@@ -50,6 +50,14 @@ auth.onAuthStateChanged(user => {
         }, { merge: true });
         loadDataFromCloud(user.uid);
         listenForNotifications();
+        // YENİ EKLENEN: Yükleme ekranı (800ms) bittikten sonra Antrenman sekmesindeysek player'ı göster
+        setTimeout(() => {
+            const workoutSec = document.getElementById('workout-sec');
+            const player = document.getElementById('spotify-floating-player');
+            if (workoutSec && workoutSec.classList.contains('active') && player) {
+                player.classList.remove('hidden');
+            }
+        }, 850);
     } else {
         // 2. DURUM: KULLANICI GİRİŞ YAPMAMIŞ (Uygulamayı ilk defa açıyor)
         const loadingScreen = document.getElementById('loading-screen');
@@ -227,6 +235,9 @@ document.addEventListener("DOMContentLoaded", () => {
     document.querySelector('.close-modal-btn').addEventListener('click', () => {
         document.getElementById('workout-modal').style.display = 'none';
         document.getElementById('main-header').style.display = 'block';
+
+        const player = document.getElementById('spotify-floating-player');
+        if (player) player.classList.remove('hidden');
     });
 
     const editBtn = document.getElementById('edit-activity-btn');
@@ -335,6 +346,10 @@ function showWorkoutModal(dayData) {
     document.getElementById('main-header').style.display = 'none';
     document.getElementById('modal-title').innerText = dayData.title;
 
+    // YENİ EKLENEN: Listeyi açınca müzik çaları gizle (daha temiz bir görünüm için)
+    const player = document.getElementById('spotify-floating-player');
+    if (player) player.classList.add('hidden');
+
     const startBtn = document.getElementById('start-workout-btn');
     const newStartBtn = startBtn.cloneNode(true);
     startBtn.parentNode.replaceChild(newStartBtn, startBtn);
@@ -359,6 +374,9 @@ window.startActiveWorkout = function (dayData) {
     currentExIndex = 0;
     document.getElementById('workout-modal').style.display = 'none';
     document.getElementById('active-workout-screen').classList.remove('hidden');
+    const player = document.getElementById('spotify-floating-player');
+    if (player) player.classList.remove('hidden');
+
     renderActiveExercise();
 }
 

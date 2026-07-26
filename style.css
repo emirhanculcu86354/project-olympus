@@ -1869,22 +1869,33 @@ input:checked + .ios-slider:before {
 .tactic-home .tactic-num-text { color: #000; } /* Yelek üstü siyah yazı */
 .tactic-away .tactic-num-text { color: #fff; } /* Mavi forma üstü beyaz yazı */
 
-/* SPOTIFY YÜZEN OYNATICI STİLLERİ */
+/* SPOTIFY YÜZEN OYNATICI STİLLERİ (MOBİL UYUMLU) */
 #spotify-floating-player {
     position: fixed;
-    bottom: 75px; /* Alt barın hemen üstünde durması için */
+    bottom: calc(env(safe-area-inset-bottom) + 90px); /* Telefonun alt çizgisi ve barından kurtarır */
     left: 10px;
     right: 10px;
-    z-index: 4000;
+    z-index: 9999; /* Uygulamadaki HER ŞEYİN üstüne çıkarır */
     border-radius: 12px;
-    box-shadow: 0 4px 15px rgba(0,0,0,0.7);
+    box-shadow: 0 4px 15px rgba(0,0,0,0.9);
     transition: transform 0.4s cubic-bezier(0.25, 0.8, 0.25, 1), opacity 0.4s ease;
-    background: #000; /* Çerçeve dışı boşluklar için */
+    background: #000;
 }
 
-/* Player gizlendiğinde aşağı doğru kayarak kaybolur */
 #spotify-floating-player.hidden {
     transform: translateY(150%);
     opacity: 0;
     pointer-events: none;
+}
+/* MÜZİK ÇALAR BÜYÜDÜĞÜ İÇİN İDMAN EKRANININ ALTINA BOŞLUK EKLİYORUZ */
+#workout-sec {
+    padding-bottom: 180px !important;
+}
+
+#active-workout-screen {
+    padding-bottom: 180px !important;
+}
+/* İDMAN DETAY LİSTESİ (MODAL) İÇİN SPOTIFY BOŞLUĞU */
+#workout-modal .modal-content {
+    padding-bottom: 180px !important;
 }
