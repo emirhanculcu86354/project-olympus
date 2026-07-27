@@ -884,15 +884,35 @@
         </div>
 
         <div id="camp-book" class="camp-book">
+            <!-- 5. SAYFA: KAMP ANILARI (Geçmiş Günlükler) -->
+            <div class="book-page" id="page-5" style="z-index: 0;">
+                <div class="page-content">
+                    <h2 class="book-title">Eski Anılar</h2>
+                    <div id="saved-diary-list" style="flex: 1; overflow-y: auto; padding-right: 5px;">
+                        <p style="text-align:center; color:#a1887f;">Henüz anı yazılmadı.</p>
+                    </div>
+                    <div class="page-footer">Sayfa 5</div>
+                </div>
+            </div>
             <!-- 4. SAYFA: PLANLAR VE GEÇMİŞ ROTALAR -->
             <div class="book-page" id="page-4" style="z-index: 1;">
                 <div class="page-content">
                     <h2 class="book-title">Gelecek Planları</h2>
-                    <div id="camp-plans-list" style="margin-bottom: 10px; flex: 1; overflow-y: auto;">
+                    <div id="camp-plans-list" style="flex: 1; overflow-y: auto; margin-bottom: 5px; padding-right: 5px;">
                         <p style="text-align:center; color:#a1887f;">Henüz kamp planı yok.</p>
                     </div>
+                    
+                    <!-- GELİŞMİŞ YENİ PLAN EKLEME ALANI -->
+                    <div style="display:flex; flex-direction:column; gap:8px; margin-bottom:15px; border-top:1px dashed #8b5a2b; padding-top:10px;">
+                        <input type="text" id="new-plan-item" placeholder="Rota / Konum (Örn: Yedigöller)" style="background:transparent; border:none; border-bottom:1px solid #8b5a2b; outline:none; font-family:'Caveat', cursive; font-size:24px; color:#2c1a0e; width: 100%;">
+                        <div style="display:flex; gap:5px;">
+                            <input type="datetime-local" id="new-plan-date" style="flex:1; background:rgba(139, 90, 43, 0.1); border:1px solid #8b5a2b; border-radius:5px; outline:none; font-family:sans-serif; font-size:12px; color:#3e2723; padding:5px;">
+                            <button class="book-btn" style="margin-top:0; padding:2px 15px; font-size:16px;" onclick="addCampPlan()">Hedefi Kur</button>
+                        </div>
+                    </div>
+
                     <h2 class="book-title">Geçmiş Keşifler</h2>
-                    <div id="saved-routes-list" style="flex: 1; overflow-y: auto;">
+                    <div id="saved-routes-list" style="flex: 1; overflow-y: auto; padding-right: 5px;">
                         <p style="text-align:center; color:#a1887f;">Henüz rota kaydedilmedi.</p>
                     </div>
                     <div class="page-footer">Sayfa 4</div>

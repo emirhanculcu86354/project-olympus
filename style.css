@@ -2444,3 +2444,68 @@ input:checked+.ios-slider:before {
 .camp-book-anim {
     animation: bookPopIn 0.8s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
 }
+/* Kamp Defteri Scrollbar (Kaydırma Çubuğu) Özelleştirmesi */
+#camp-plans-list::-webkit-scrollbar, 
+#saved-routes-list::-webkit-scrollbar, 
+.camp-checklist::-webkit-scrollbar,
+#saved-diary-list::-webkit-scrollbar {
+    width: 4px;
+}
+#camp-plans-list::-webkit-scrollbar-thumb, 
+#saved-routes-list::-webkit-scrollbar-thumb, 
+.camp-checklist::-webkit-scrollbar-thumb,
+#saved-diary-list::-webkit-scrollbar-thumb {
+    background-color: #8b5a2b;
+    border-radius: 4px;
+}
+
+/* Defter Liste Elemanları ve Silgi (Eraser) */
+.camp-log-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-bottom: 1px dashed rgba(139, 90, 43, 0.4);
+    padding-bottom: 5px;
+    margin-bottom: 10px;
+    font-family: 'Caveat', cursive;
+    font-size: 22px;
+    color: #2c1a0e;
+}
+
+.eraser-btn {
+    background: transparent;
+    border: none;
+    font-size: 20px;
+    cursor: pointer;
+    transition: transform 0.2s;
+    filter: drop-shadow(0 2px 2px rgba(0,0,0,0.3));
+}
+
+.eraser-btn:active {
+    transform: rotate(-20deg) scale(1.2);
+}
+/* Çanta Kontrol Listesi Kesin El Yazısı Zorlaması */
+.camp-item span {
+    font-family: 'Caveat', cursive !important;
+    font-size: 26px !important;
+}
+#new-camp-item {
+    font-family: 'Caveat', cursive !important;
+    font-size: 24px !important;
+}
+
+/* Kamp Planı Geri Sayım Sayacı Stili */
+.camp-countdown {
+    font-family: 'Courier New', monospace;
+    font-size: 13px;
+    font-weight: bold;
+    background: rgba(139, 90, 43, 0.15);
+    color: #d35400;
+    padding: 4px 8px;
+    border-radius: 6px;
+    border: 1px dashed #d35400;
+    text-align: center;
+    margin-top: 5px;
+    width: 100%;
+    letter-spacing: -0.5px;
+}

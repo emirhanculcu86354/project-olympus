@@ -2819,7 +2819,7 @@ window.resetCareerStats = function () {
 // DOĞA GÜNLÜĞÜ (KAMP) SAYFA ÇEVİRME MOTORU
 // ==========================================
 let currentCampPage = 0; // Artık kapaktan (0. sayfa) başlıyor
-const totalCampPages = 4;
+const totalCampPages = 5;
 
 window.openCampBook = function () {
     document.getElementById('camp-book-screen').classList.remove('hidden');
@@ -2842,7 +2842,8 @@ window.openCampBook = function () {
     // YENİ: Hava durumunu çek ve Geçmiş rotaları yükle
     fetchCampWeatherData();
     renderSavedRoutes();
-
+    renderCampPlans();
+    renderCampDiary();
     setTimeout(() => {
         const cover = document.getElementById('page-0');
         if(cover) {
@@ -2913,11 +2914,63 @@ function loadCampData() {
     renderCampChecklist();
 }
 
-window.saveCampNotes = function () {
-    const notes = document.getElementById('camp-notes').value;
-    localStorage.setItem('olympus_camp_notes', notes);
-    if (navigator.vibrate) navigator.vibrate([50, 50, 50]);
-    alert("Günlük doğaya kazındı! 🌲🔥");
+window.saveCampNotes = function() {
+    const noteText = document.getElementById('camp-notes').value.trim();
+    if (noteText !== '') {
+        let entries = JSON.parse(localStorage.getItem('olympus_camp_diary_entries')) || [];
+        // 1. Sayfadaki anlık hava durumu ve tarih metnini çekiyoruz
+        const metaText = document.getElementById('camp-meta-info').innerText;
+        
+        entries.push({
+            id: Date.now(),
+            date: new Date().toLocaleDateString('tr-TR'),
+            meta: metaText,
+            text: noteText
+        });
+        
+        localStorage.setItem('olympus_camp_diary_entries', JSON.stringify(entries));
+        document.getElementById('camp-notes').value = ''; // Yazıyı temizle
+        
+        renderCampDiary(); // 5. Sayfayı güncelle
+        
+        if (navigator.vibrate) navigator.vibrate([50, 50, 50]);
+        alert("Günlük doğaya kazındı! 🌲🔥 (5. Sayfaya eklendi)");
+    } else {
+        alert("Sayfaya işlemek için önce kalemi eline alıp bir şeyler yazmalısın!");
+    }
+};
+window.renderCampDiary = function() {
+    const container = document.getElementById('saved-diary-list');
+    const entries = JSON.parse(localStorage.getItem('olympus_camp_diary_entries')) || [];
+    
+    container.innerHTML = '';
+    if (entries.length === 0) {
+        container.innerHTML = '<p style="text-align:center; color:#a1887f; font-family:\'Caveat\', cursive; font-size:24px;">Henüz anı yazılmadı.</p>';
+        return;
+    }
+
+    // En yeni anı en üstte
+    entries.reverse().forEach(entry => {
+        container.innerHTML += `
+            <div class="camp-log-item" style="flex-direction:column; align-items:flex-start; margin-bottom: 20px; border-bottom: 2px dashed rgba(139, 90, 43, 0.4); padding-bottom:15px;">
+                <div style="display:flex; justify-content:space-between; width:100%; margin-bottom: 5px;">
+                    <strong style="font-size:22px; color:#5d4037;">📅 ${entry.date}</strong>
+                    <button class="eraser-btn" onclick="deleteCampDiary(${entry.id})">🧽</button>
+                </div>
+                <div style="font-size:14px; color:#8b5a2b; margin-bottom: 10px; font-style: italic; font-family:sans-serif;">${entry.meta}</div>
+                <div style="font-size:24px; color:#2c1a0e; white-space: pre-wrap; line-height: 1.2;">${entry.text}</div>
+            </div>
+        `;
+    });
+};
+window.deleteCampDiary = function(id) {
+    if(confirm("Bu anıyı defterin yapraklarından silmek istediğine emin misin?")) {
+        let entries = JSON.parse(localStorage.getItem('olympus_camp_diary_entries')) || [];
+        entries = entries.filter(e => e.id !== id);
+        localStorage.setItem('olympus_camp_diary_entries', JSON.stringify(entries));
+        renderCampDiary();
+        if (navigator.vibrate) navigator.vibrate([30, 30]);
+    }
 };
 
 window.renderCampChecklist = function () {
@@ -3101,23 +3154,129 @@ window.fetchCampWeatherData = function() {
     });
 };
 
+// ==========================================
+// KAMP PLANLARI VE GEÇMİŞ ROTA YÖNETİMİ
+// ==========================================
+
+// 1. Gelecek Planları Yükle
+window.renderCampPlans = function() {
+    const container = document.getElementById('camp-plans-list');
+    const plans = JSON.parse(localStorage.getItem('olympus_camp_plans')) || [];
+    
+    container.innerHTML = '';
+    if (plans.length === 0) {
+        container.innerHTML = '<p style="text-align:center; color:#a1887f; font-family:\'Caveat\', cursive; font-size:24px;">Henüz kamp planı yok.</p>';
+        return;
+    }
+
+    plans.forEach(plan => {
+        container.innerHTML += `
+            <div class="camp-log-item" style="flex-direction:column; align-items:flex-start;">
+                <div style="display:flex; justify-content:space-between; width:100%;">
+                    <strong style="font-size:26px;">🏕️ ${plan.text}</strong>
+                    <button class="eraser-btn" onclick="deleteCampPlan(${plan.id})">🧽</button>
+                </div>
+                <div class="camp-countdown" data-target="${plan.datetime}">Hesaplanıyor...</div>
+            </div>
+        `;
+    });
+};
+
+// 2. Yeni Plan Ekle
+window.addCampPlan = function() {
+    const inputStr = document.getElementById('new-plan-item').value.trim();
+    const inputDate = document.getElementById('new-plan-date').value;
+
+    if (inputStr !== '' && inputDate !== '') {
+        let plans = JSON.parse(localStorage.getItem('olympus_camp_plans')) || [];
+        
+        plans.push({ 
+            id: Date.now(), 
+            text: inputStr,
+            datetime: new Date(inputDate).toISOString() 
+        });
+        
+        // Planları tarihe göre sırala (En yakın tarih en üstte)
+        plans.sort((a, b) => new Date(a.datetime) - new Date(b.datetime));
+
+        localStorage.setItem('olympus_camp_plans', JSON.stringify(plans));
+        
+        document.getElementById('new-plan-item').value = '';
+        document.getElementById('new-plan-date').value = '';
+        
+        renderCampPlans();
+        if (navigator.vibrate) navigator.vibrate(20);
+    } else {
+        alert("Hedefi kurabilmem için lütfen hem bir rota adı yaz hem de tarih seç!");
+    }
+};
+// ==========================================
+// KAMP GERİ SAYIM ANLIK GÜNCELLEME MOTORU
+// ==========================================
+setInterval(() => {
+    document.querySelectorAll('.camp-countdown').forEach(el => {
+        const targetStr = el.getAttribute('data-target');
+        if (!targetStr) return;
+
+        const target = new Date(targetStr).getTime();
+        const now = new Date().getTime();
+        const diff = target - now;
+
+        if (diff > 0) {
+            const d = Math.floor(diff / (1000 * 60 * 60 * 24));
+            const h = Math.floor((diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+            const m = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
+            const s = Math.floor((diff % (1000 * 60)) / 1000);
+            
+            el.innerText = `⏳ Kalkışa: ${d}g ${h}s ${m}d ${s}sn`;
+        } else {
+            el.innerText = "🔥 KAMP VAKTİ GELDİ!";
+            el.style.color = "#27ae60";
+            el.style.borderColor = "#27ae60";
+        }
+    });
+}, 1000);
+
+// 3. Plan Sil (Silgi)
+window.deleteCampPlan = function(id) {
+    let plans = JSON.parse(localStorage.getItem('olympus_camp_plans')) || [];
+    plans = plans.filter(p => p.id !== id);
+    localStorage.setItem('olympus_camp_plans', JSON.stringify(plans));
+    renderCampPlans();
+    if (navigator.vibrate) navigator.vibrate(20);
+};
+
+// 4. Geçmiş Keşifleri Yükle (Değiştirildi)
 window.renderSavedRoutes = function() {
     const container = document.getElementById('saved-routes-list');
     const routes = JSON.parse(localStorage.getItem('olympus_camp_routes')) || [];
     
+    container.innerHTML = '';
     if (routes.length === 0) {
-        container.innerHTML = '<p style="text-align:center; color:#a1887f;">Henüz deftere işlenen bir rota yok.</p>';
+        container.innerHTML = '<p style="text-align:center; color:#a1887f; font-family:\'Caveat\', cursive; font-size:22px;">Henüz rota kaydedilmedi.</p>';
         return;
     }
 
-    container.innerHTML = '';
-    // En yeni rotalar en üstte görünsün diye reverse yapıyoruz
     routes.reverse().forEach(r => {
         container.innerHTML += `
-            <div style="border-bottom: 2px solid rgba(139, 90, 43, 0.3); padding-bottom: 10px; margin-bottom: 15px;">
-                <strong style="color:#5d4037; font-size:28px;">🏕️ Keşif (${r.date})</strong><br>
-                <span style="font-size: 22px; color:#2c1a0e;">Mesafe: ${r.distance} km | Süre: ${r.duration}</span>
+            <div class="camp-log-item" style="flex-direction:column; align-items:flex-start;">
+                <div style="display:flex; justify-content:space-between; width:100%;">
+                    <strong>📍 ${r.date}</strong>
+                    <button class="eraser-btn" onclick="deleteSavedRoute(${r.id})">🧽</button>
+                </div>
+                <div style="font-size: 20px; color:#5d4037; font-family:'Caveat', cursive;">Mesafe: ${r.distance} km | Süre: ${r.duration}</div>
             </div>
         `;
     });
+};
+
+// 5. Geçmiş Keşfi Sil (Silgi)
+window.deleteSavedRoute = function(id) {
+    if(confirm("Bu keşif kaydını defterden silmek istediğine emin misin?")) {
+        let routes = JSON.parse(localStorage.getItem('olympus_camp_routes')) || [];
+        routes = routes.filter(r => r.id !== id);
+        localStorage.setItem('olympus_camp_routes', JSON.stringify(routes));
+        renderSavedRoutes();
+        if (navigator.vibrate) navigator.vibrate([30, 30]);
+    }
 };
