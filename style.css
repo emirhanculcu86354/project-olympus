@@ -2071,6 +2071,9 @@ input:checked+.ios-slider:before {
 /* ==========================================
    FIFA ULTIMATE TEAM (FUT) KARTI STİLLERİ VE 3D
    ========================================== */
+/* ==========================================
+   FIFA ULTIMATE TEAM (FUT) KARTI STİLLERİ VE 3D
+   ========================================== */
 .fut-card-container {
     perspective: 1000px;
     width: 240px;
@@ -2085,10 +2088,14 @@ input:checked+.ios-slider:before {
     height: 380px;
     transition: transform 0.6s cubic-bezier(0.4, 0.2, 0.2, 1);
     transform-style: preserve-3d;
+    -webkit-transform-style: preserve-3d;
+    /* Mobil Tarayıcı Desteği */
 }
 
 .fut-card-container.flipped .fut-card-inner {
     transform: rotateY(180deg);
+    -webkit-transform: rotateY(180deg);
+    /* Mobil Tarayıcı Desteği */
 }
 
 .fut-card-front,
@@ -2107,14 +2114,25 @@ input:checked+.ios-slider:before {
     overflow: hidden;
 }
 
+/* YENİ EKLENEN: Mobilde Aynalanmayı Önleyen Donanım İticileri (translateZ ve z-index) */
+.fut-card-front {
+    transform: rotateY(0deg) translateZ(1px);
+    -webkit-transform: rotateY(0deg) translateZ(1px);
+    z-index: 2;
+}
+
 .fut-card-back {
-    transform: rotateY(180deg);
+    transform: rotateY(180deg) translateZ(1px);
+    -webkit-transform: rotateY(180deg) translateZ(1px);
     display: flex;
     flex-direction: column;
     justify-content: center;
     align-items: center;
     padding: 15px;
+    z-index: 1;
 }
+
+/* Ön Yüz İçeriği */
 
 /* Ön Yüz İçeriği */
 .fut-stats-top {
@@ -2270,7 +2288,8 @@ input:checked+.ios-slider:before {
     height: 100%;
     display: flex;
     flex-direction: column;
-    color: #3e2723; /* Koyu kahverengi tüy kalem mürekkebi */
+    color: #3e2723;
+    /* Koyu kahverengi tüy kalem mürekkebi */
     /* Çizgili arka plan silindi, sadece temiz sararmış kağıt kaldı */
 }
 
@@ -2392,22 +2411,35 @@ input:checked+.ios-slider:before {
     text-align: center;
     padding: 15px;
 }
+
 /* Deri Kapak Tasarımı */
 .book-cover {
     background: linear-gradient(to right, #3e2723 0%, #4e342e 5%, #5d4037 100%);
-    border-left: 10px solid #271410; /* Kalın deri kitap sırtı */
-    box-shadow: inset -5px 0 20px rgba(0,0,0,0.5), 10px 10px 30px rgba(0,0,0,0.8);
+    border-left: 10px solid #271410;
+    /* Kalın deri kitap sırtı */
+    box-shadow: inset -5px 0 20px rgba(0, 0, 0, 0.5), 10px 10px 30px rgba(0, 0, 0, 0.8);
 }
 
 .cover-content {
-    display: flex; flex-direction: column; justify-content: center; align-items: center; 
-    height: 100%; text-align: center;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    height: 100%;
+    text-align: center;
 }
 
 /* Defterin Ekrana Zıplayarak Gelme Animasyonu */
 @keyframes bookPopIn {
-    0% { transform: scale(0.3) translateY(200px) rotate(-10deg); opacity: 0; }
-    100% { transform: scale(1) translateY(0) rotate(0deg); opacity: 1; }
+    0% {
+        transform: scale(0.3) translateY(200px) rotate(-10deg);
+        opacity: 0;
+    }
+
+    100% {
+        transform: scale(1) translateY(0) rotate(0deg);
+        opacity: 1;
+    }
 }
 
 .camp-book-anim {
