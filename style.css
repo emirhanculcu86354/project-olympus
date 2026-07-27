@@ -2071,68 +2071,56 @@ input:checked+.ios-slider:before {
 /* ==========================================
    FIFA ULTIMATE TEAM (FUT) KARTI STİLLERİ VE 3D
    ========================================== */
-/* ==========================================
-   FIFA ULTIMATE TEAM (FUT) KARTI STİLLERİ VE 3D
-   ========================================== */
-.fut-card-container {
-    perspective: 1000px;
-    width: 240px;
-    margin: 20px auto;
-    cursor: pointer;
-    user-select: none;
+.fut-card-container { perspective: 1000px; width: 240px; margin: 20px auto; cursor: pointer; user-select: none; }
+
+.fut-card-inner { 
+    position: relative; width: 100%; height: 380px; 
+    transition: transform 0.6s cubic-bezier(0.4, 0.2, 0.2, 1); 
+    transform-style: preserve-3d; 
+    -webkit-transform-style: preserve-3d; 
 }
 
-.fut-card-inner {
-    position: relative;
-    width: 100%;
-    height: 380px;
-    transition: transform 0.6s cubic-bezier(0.4, 0.2, 0.2, 1);
-    transform-style: preserve-3d;
-    -webkit-transform-style: preserve-3d;
-    /* Mobil Tarayıcı Desteği */
+.fut-card-container.flipped .fut-card-inner { 
+    transform: rotateY(180deg); 
+    -webkit-transform: rotateY(180deg); 
 }
 
-.fut-card-container.flipped .fut-card-inner {
-    transform: rotateY(180deg);
-    -webkit-transform: rotateY(180deg);
-    /* Mobil Tarayıcı Desteği */
+.fut-card-front, .fut-card-back { 
+    position: absolute; top: 0; left: 0; width: 100%; height: 100%; 
+    backface-visibility: hidden; 
+    -webkit-backface-visibility: hidden; 
+    border-radius: 16px; border: 3px solid var(--goldnova); 
+    background: linear-gradient(135deg, #2b2311 0%, #151515 50%, #3d3115 100%); 
+    box-shadow: 0 10px 30px rgba(246, 192, 0, 0.3); overflow: hidden; 
 }
 
-.fut-card-front,
-.fut-card-back {
-    position: absolute;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    backface-visibility: hidden;
-    -webkit-backface-visibility: hidden;
-    border-radius: 16px;
-    border: 3px solid var(--goldnova);
-    background: linear-gradient(135deg, #2b2311 0%, #151515 50%, #3d3115 100%);
-    box-shadow: 0 10px 30px rgba(246, 192, 0, 0.3);
-    overflow: hidden;
+.fut-card-front { 
+    transform: rotateY(0deg); 
+    -webkit-transform: rotateY(0deg); 
+    z-index: 2; 
 }
 
-/* YENİ EKLENEN: Mobilde Aynalanmayı Önleyen Donanım İticileri (translateZ ve z-index) */
-.fut-card-front {
-    transform: rotateY(0deg) translateZ(1px);
-    -webkit-transform: rotateY(0deg) translateZ(1px);
-    z-index: 2;
+.fut-card-back { 
+    transform: rotateY(180deg); 
+    -webkit-transform: rotateY(180deg); 
+    display: flex; flex-direction: column; justify-content: center; align-items: center; padding: 15px; 
+    z-index: 1; 
 }
 
-.fut-card-back {
-    transform: rotateY(180deg) translateZ(1px);
-    -webkit-transform: rotateY(180deg) translateZ(1px);
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
-    align-items: center;
-    padding: 15px;
-    z-index: 1;
+/* 🍏 İŞTE TELEFONLAR İÇİN KESİN ÇÖZÜM HİLESİ */
+.fut-card-container.flipped .fut-card-front {
+    opacity: 0;
+    visibility: hidden;
+    /* Kart tam yan döndüğü an (0.2s) ön yüzü tamamen yok et */
+    transition: opacity 0s 0.2s, visibility 0s 0.2s; 
 }
 
-/* Ön Yüz İçeriği */
+.fut-card-container:not(.flipped) .fut-card-front {
+    opacity: 1;
+    visibility: visible;
+    /* Kart geri dönerken ön yüzü tekrar geri getir */
+    transition: opacity 0s 0.2s, visibility 0s 0.2s; 
+}
 
 /* Ön Yüz İçeriği */
 .fut-stats-top {
