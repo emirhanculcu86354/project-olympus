@@ -1353,16 +1353,23 @@ window.followUser = async function (targetUid) {
     } catch (error) { console.error("Takip hatası:", error); }
 };
 
-window.updateProfileFollowStats = async function () {
+window.updateProfileFollowStats = function () {
     if (!auth.currentUser) return;
-    try {
-        const doc = await db.collection("users").doc(auth.currentUser.uid).get();
+
+    // YENİ: get() yerine onSnapshot kullanarak profili "canlı" dinliyoruz!
+    db.collection("users").doc(auth.currentUser.uid).onSnapshot((doc) => {
         if (doc.exists) {
             const data = doc.data();
-            document.getElementById('profile-following').innerText = data.following ? data.following.length : 0;
-            document.getElementById('profile-followers').innerText = data.followers ? data.followers.length : 0;
+            const followingCount = data.following ? data.following.length : 0;
+            const followersCount = data.followers ? data.followers.length : 0;
+
+            const elFollowing = document.getElementById('profile-following');
+            const elFollowers = document.getElementById('profile-followers');
+
+            if (elFollowing) elFollowing.innerText = followingCount;
+            if (elFollowers) elFollowers.innerText = followersCount;
         }
-    } catch (e) { }
+    });
 };
 // ==========================================
 // ARENA: KULLANICI ARAMA VE TAKİP HAFIZASI
@@ -1970,14 +1977,19 @@ function renderMatchHistory() {
         } else {
             let resultColor = match.scoreGoldnova > match.scoreOpponent ? '#27ae60' : (match.scoreGoldnova < match.scoreOpponent ? '#ff4444' : '#888');
             innerCardHTML = `
-            <div class="scoreboard-card" style="border-left-color: ${resultColor};" onclick="openMatchLineup(${match.id})">
+            <div class="scoreboard-card" style="border-left-color: ${resultColor};">
                 <div class="scoreboard-date">${dateStr}</div>
-                <div class="scoreboard-teams">
+                <!-- Sadece takımlara tıklayınca kadro açılır -->
+                <div class="scoreboard-teams" onclick="openMatchLineup(${match.id})" style="cursor:pointer;">
                     <div class="team-name" style="color: var(--goldnova);">GOLDNOVA</div>
                     <div class="team-score">${match.scoreGoldnova} - ${match.scoreOpponent}</div>
                     <div class="team-name">${match.opponent}</div>
                 </div>
-                <div class="match-location">📍 ${match.location} <span style="margin-left:auto; color:var(--goldnova); font-size:10px;">Kadro 👁️</span></div>
+                <!-- YENİ EKLENEN: Alt kısımdaki İstatistik ve Oylama butonu -->
+                <div style="display:flex; justify-content:space-between; align-items:center; margin-top:8px; border-top:1px solid rgba(255,255,255,0.1); padding-top:10px;">
+                    <span style="color:#888; font-size:10px;" onclick="openMatchLineup(${match.id})">📍 ${match.location} <span style="color:var(--goldnova); margin-left:5px;">👁️ Kadro</span></span>
+                    <button onclick="openMatchStatsModal(${match.id})" class="edit-btn" style="padding:6px 12px; font-size:11px; border-color:var(--goldnova); color:var(--goldnova); font-weight:bold;">📊 İstatistik Gir</button>
+                </div>
             </div>`;
         }
 
@@ -2140,16 +2152,17 @@ window.switchFootballTab = function (tab) {
 // FUT KARTI YÖNETİM MOTORU (FOTOĞRAF DESTEKLİ & EKSİZSİZ)
 // ==========================================
 let tempCustomCardImg = null;
+let futRadarInstance = null; // YENİ: Radar grafiği hafızası
 
-function renderFutCard() {
+window.renderFutCard = function () {
     const savedCard = JSON.parse(localStorage.getItem('goldnova_fut_card')) || {
         ovr: 88, pos: 'ST', jersey: 10, pace: 90, shoot: 85, pass: 82, dribble: 88, def: 70, phys: 86, img: null
     };
 
+    // Ön Yüz Verileri
     document.getElementById('fut-rating').innerText = savedCard.ovr;
     document.getElementById('fut-position').innerText = savedCard.pos;
     document.getElementById('fut-jersey-num').innerText = savedCard.jersey || 10;
-
     document.getElementById('stat-pace').innerText = savedCard.pace;
     document.getElementById('stat-shoot').innerText = savedCard.shoot;
     document.getElementById('stat-pass').innerText = savedCard.pass;
@@ -2162,8 +2175,56 @@ function renderFutCard() {
 
     const profileName = document.getElementById('profile-name-display').innerText;
     document.getElementById('fut-name').innerText = profileName !== "Yükleniyor..." ? profileName.toUpperCase() : "GOLDNOVA OYUNCU";
-}
 
+    // Arka Yüz Kariyer Verileri
+    const careerStats = JSON.parse(localStorage.getItem('goldnova_career_stats')) || { goals: 0, assists: 0, motm: 0 };
+    const elGoals = document.getElementById('career-goals');
+    const elAssists = document.getElementById('career-assists');
+    const elMotm = document.getElementById('career-motm');
+
+    if (elGoals) elGoals.innerText = careerStats.goals;
+    if (elAssists) elAssists.innerText = careerStats.assists;
+    if (elMotm) elMotm.innerText = careerStats.motm;
+
+    // RADAR GRAFİĞİNİ ÇİZ
+    drawFutRadar(savedCard);
+};
+
+function drawFutRadar(cardData) {
+    const ctx = document.getElementById('fut-radar-chart');
+    if (!ctx) return;
+
+    if (futRadarInstance) futRadarInstance.destroy();
+
+    futRadarInstance = new Chart(ctx.getContext('2d'), {
+        type: 'radar',
+        data: {
+            labels: ['HIZ', 'ŞUT', 'PAS', 'DRİB', 'DEF', 'FİZ'],
+            datasets: [{
+                label: 'Yetenekler',
+                data: [cardData.pace, cardData.shoot, cardData.pass, cardData.dribble, cardData.def, cardData.phys],
+                backgroundColor: 'rgba(0, 0, 0, 0.4)',
+                borderColor: '#f6c000',
+                borderWidth: 2,
+                pointBackgroundColor: '#fff',
+                pointBorderColor: '#000'
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            scales: {
+                r: {
+                    angleLines: { color: 'rgba(255,255,255,0.2)' },
+                    grid: { color: 'rgba(255,255,255,0.2)' },
+                    pointLabels: { color: '#fff', font: { size: 10, weight: 'bold' } },
+                    ticks: { display: false, max: 99, min: 0 }
+                }
+            },
+            plugins: { legend: { display: false } }
+        }
+    });
+}
 window.openFutEditModal = function () {
     const savedCard = JSON.parse(localStorage.getItem('goldnova_fut_card')) || {
         ovr: 88, pos: 'ST', jersey: 10, pace: 90, shoot: 85, pass: 82, dribble: 88, def: 70, phys: 86, img: null
@@ -2541,17 +2602,17 @@ function getPointers(e) {
     return { x: e.clientX - rect.left, y: e.clientY - rect.top };
 }
 
-window.toggleTacticMenu = function() {
+window.toggleTacticMenu = function () {
     document.getElementById('tactic-tools-menu').classList.toggle('open');
 };
 
 function spawnTacticPlayers() {
     const container = document.getElementById('tactic-draggables');
     container.innerHTML = '';
-    
+
     const formationKey = document.getElementById('formation-select').value || '2-3-1';
     const coords = formations7v7[formationKey];
-    
+
     const futCard = JSON.parse(localStorage.getItem('goldnova_fut_card')) || {};
     const myJerseyNum = futCard.jersey || 10;
     const myName = document.getElementById('profile-name-display').innerText.trim().toLowerCase();
@@ -2560,7 +2621,7 @@ function spawnTacticPlayers() {
     coords.forEach((pos, index) => {
         let pName = (currentSquad[index] || "").toLowerCase();
         let jerseyNum = (pName === myName && myName !== "yükleniyor..." && myName !== "") ? myJerseyNum : (index === 0 ? 1 : index + 2);
-        
+
         // isHome = true (Kendi takımımız altın/sarı olacak)
         createDraggableJersey(container, 'tactic-home', jerseyNum, pos.t, pos.l, true);
     });
@@ -2580,7 +2641,7 @@ function spawnTacticPlayers() {
 function createDraggableJersey(container, teamClass, num, topPercent, leftPercent, isHome) {
     const el = document.createElement('div');
     el.className = `tactic-player ${teamClass}`;
-    
+
     // Forma Renkleri: Ev sahibi Goldnova (Sarı-Siyah), Rakip (Kırmızı-Beyaz)
     const fillColor = isHome ? '#f6c000' : '#ff4444';
     const strokeColor = isHome ? '#000000' : '#ffffff';
@@ -2598,9 +2659,9 @@ function createDraggableJersey(container, teamClass, num, topPercent, leftPercen
         ${svgIcon}
         <span class="tactic-num-text" style="color:${textColor}; margin-top:2px; font-size:12px; z-index:2;">${num}</span>
     `;
-    el.style.top = topPercent + '%'; 
+    el.style.top = topPercent + '%';
     el.style.left = leftPercent + '%';
-    
+
     bindDragEvents(el);
     container.appendChild(el);
 }
@@ -2610,9 +2671,9 @@ function createDraggableEmoji(container, emoji, topPercent, leftPercent) {
     const el = document.createElement('div');
     el.className = 'tactic-player';
     el.innerHTML = `<span style="font-size:24px; filter:drop-shadow(0 2px 2px rgba(0,0,0,0.5));">${emoji}</span>`;
-    el.style.top = topPercent + '%'; 
+    el.style.top = topPercent + '%';
     el.style.left = leftPercent + '%';
-    
+
     bindDragEvents(el);
     container.appendChild(el);
 }
@@ -2689,7 +2750,296 @@ window.openFollowList = async function (type) {
         container.innerHTML = '<p style="color:#ff4444; font-size:12px; text-align:center;">Bir hata oluştu.</p>';
     }
 };
+// ==========================================
+// MAÇ SONU İSTATİSTİK VE OYLAMA MOTORU
+// ==========================================
+let activeMatchIdForStats = null;
 
+window.openMatchStatsModal = function (matchId) {
+    const history = JSON.parse(localStorage.getItem('goldnova_match_history')) || [];
+    const match = history.find(m => m.id === matchId);
+    if (!match) return;
 
+    activeMatchIdForStats = matchId;
+    document.getElementById('match-report-subtitle').innerText = `Goldnova vs ${match.opponent} (${new Date(match.datetime).toLocaleDateString('tr-TR')})`;
 
+    // Kadrodaki oyuncuları MOTM (Maçın Adamı) seçim kutusuna doldur
+    const motmSelect = document.getElementById('select-match-motm');
+    motmSelect.innerHTML = '<option value="">Seçim Yap...</option>';
+    match.squad.forEach(player => {
+        if (player && player !== "Seçilmedi" && player !== "Boş") {
+            motmSelect.innerHTML += `<option value="${player}">${player}</option>`;
+        }
+    });
+
+    document.getElementById('match-stats-modal').style.display = 'flex';
+};
+
+window.saveMatchStatsAndClose = function () {
+    const goalsToAdd = parseInt(document.getElementById('input-match-goals').value) || 0;
+    const assistsToAdd = parseInt(document.getElementById('input-match-assists').value) || 0;
+    const selectedMotm = document.getElementById('select-match-motm').value;
+
+    const myName = document.getElementById('profile-name-display').innerText.trim().toLowerCase();
+    let careerStats = JSON.parse(localStorage.getItem('goldnova_career_stats')) || { goals: 0, assists: 0, motm: 0 };
+
+    careerStats.goals += goalsToAdd;
+    careerStats.assists += assistsToAdd;
+
+    if (selectedMotm && selectedMotm.toLowerCase() === myName) {
+        careerStats.motm += 1;
+        if (typeof addOlympusPoints === 'function') addOlympusPoints(50, "Maçın Adamı Seçildi");
+    }
+
+    localStorage.setItem('goldnova_career_stats', JSON.stringify(careerStats));
+    document.getElementById('match-stats-modal').style.display = 'none';
+
+    if (typeof renderFutCard === 'function') renderFutCard();
+    if (navigator.vibrate) navigator.vibrate(50);
+    alert("Maç istatistikleri kariyerine işlendi! Kartının arkasını çevirip radarını kontrol edebilirsin. 🎴🔥");
+};
+// ==========================================
+// KARİYER İSTATİSTİKLERİNİ SIFIRLAMA MOTORU
+// ==========================================
+window.resetCareerStats = function () {
+    // Yanlışlıkla basılmalara karşı onay isteyelim
+    if (confirm("Tüm gol, asist ve MOTM istatistiklerin sıfırlanacak. Yeni bir sezona başlamaya emin misin?")) {
+        // İstatistikleri sıfırla
+        localStorage.setItem('goldnova_career_stats', JSON.stringify({ goals: 0, assists: 0, motm: 0 }));
+
+        // Modalı kapat ve kartı yeniden çiz
+        document.getElementById('fut-edit-modal').style.display = 'none';
+        if (typeof renderFutCard === 'function') renderFutCard();
+
+        if (navigator.vibrate) navigator.vibrate([50, 50, 50]);
+        alert("Kariyer istatistiklerin başarıyla sıfırlandı şampiyon!");
+    }
+};
+// ==========================================
+// DOĞA GÜNLÜĞÜ (KAMP) SAYFA ÇEVİRME MOTORU
+// ==========================================
+let currentCampPage = 0; // Artık kapaktan (0. sayfa) başlıyor
+const totalCampPages = 3;
+
+window.openCampBook = function () {
+    document.getElementById('camp-book-screen').classList.remove('hidden');
+
+    // Tüm sayfaları kapağa geri sar
+    for (let i = 0; i <= totalCampPages; i++) {
+        let p = document.getElementById('page-' + i);
+        if (p) p.classList.remove('turned');
+    }
+    currentCampPage = 0;
+
+    // Defterin zıplayarak ekrana gelme animasyonunu tetikle
+    const book = document.getElementById('camp-book');
+    book.classList.remove('camp-book-anim');
+    void book.offsetWidth; // Animasyonu sıfırlamak için ufak bir trick
+    book.classList.add('camp-book-anim');
+
+    loadCampData();
+    initCampSwipe();
+
+    // 1 saniye sonra deri kapağı otomatik aç!
+    setTimeout(() => {
+        const cover = document.getElementById('page-0');
+        if (cover) {
+            cover.classList.add('turned');
+            currentCampPage = 1;
+            if (navigator.vibrate) navigator.vibrate([40, 60]);
+        }
+    }, 1200); // 1.2 saniye kapağı gösterip açar
+};
+
+window.closeCampBook = function () {
+    document.getElementById('camp-book-screen').classList.add('hidden');
+};
+
+function initCampSwipe() {
+    const book = document.getElementById('camp-book');
+    let startX = 0;
+
+    // Önceki event listener'ları temizlemek için (üst üste binmeyi önler)
+    book.ontouchstart = (e) => { startX = e.touches[0].clientX; };
+
+    book.ontouchend = (e) => {
+        let endX = e.changedTouches[0].clientX;
+        let diff = startX - endX;
+
+        // Sola kaydırma (İleri git, sayfayı çevir)
+        if (diff > 50) {
+            if (currentCampPage < totalCampPages) {
+                document.getElementById('page-' + currentCampPage).classList.add('turned');
+                currentCampPage++;
+                if (navigator.vibrate) navigator.vibrate(30);
+            }
+        }
+        // Sağa kaydırma (Geri dön, sayfayı kapat)
+        else if (diff < -50) {
+            if (currentCampPage > 1) {
+                currentCampPage--;
+                document.getElementById('page-' + currentCampPage).classList.remove('turned');
+                if (navigator.vibrate) navigator.vibrate(30);
+            }
+        }
+    };
+}
+
+// ==========================================
+// KAMP VERİ VE CHECKLIST YÖNETİMİ
+// ==========================================
+let campItems = JSON.parse(localStorage.getItem('olympus_camp_items')) || [
+    { id: 1, text: "Çadır & Uyku Tulumu", done: false },
+    { id: 2, text: "Kafa Lambası & Pil", done: false },
+    { id: 3, text: "Kamp Ocağı & Gaz", done: false },
+    { id: 4, text: "Bıçak & Çakmak", done: false }
+];
+
+function loadCampData() {
+    const notes = localStorage.getItem('olympus_camp_notes');
+    if (notes) document.getElementById('camp-notes').value = notes;
+    renderCampChecklist();
+}
+
+window.saveCampNotes = function () {
+    const notes = document.getElementById('camp-notes').value;
+    localStorage.setItem('olympus_camp_notes', notes);
+    if (navigator.vibrate) navigator.vibrate([50, 50, 50]);
+    alert("Günlük doğaya kazındı! 🌲🔥");
+};
+
+window.renderCampChecklist = function () {
+    const container = document.getElementById('camp-checklist');
+    container.innerHTML = '';
+    campItems.forEach(item => {
+        container.innerHTML += `
+            <div class="camp-item ${item.done ? 'checked' : ''}" onclick="toggleCampItem(${item.id})">
+                <div class="camp-check"></div>
+                <span>${item.text}</span>
+            </div>
+        `;
+    });
+    localStorage.setItem('olympus_camp_items', JSON.stringify(campItems));
+};
+
+window.toggleCampItem = function (id) {
+    const item = campItems.find(i => i.id === id);
+    if (item) {
+        item.done = !item.done;
+        if (item.done && navigator.vibrate) navigator.vibrate(20);
+        renderCampChecklist();
+    }
+};
+
+window.addCampItem = function () {
+    const input = document.getElementById('new-camp-item');
+    if (input.value.trim() !== "") {
+        campItems.push({ id: Date.now(), text: input.value, done: false });
+        input.value = "";
+        renderCampChecklist();
+        if (navigator.vibrate) navigator.vibrate(20);
+    }
+};
+
+window.startGPS = function () {
+    alert("Harita motoru kalibre ediliyor... (Strava tarzı GPS ve rota çizimi eklentisini bir sonraki adımda inşa edeceğiz!) 🗺️🚀");
+};
+// ==========================================
+// KAMP GPS & HARİTA MOTORU (STRAVA STYLE)
+// ==========================================
+let map = null;
+let routeLine = null;
+let routeCoords = [];
+let gpsWatchId = null;
+let totalDistance = 0;
+let gpsStartTime = null;
+let gpsTimerInterval = null;
+
+window.startGPS = function() {
+    if (!navigator.geolocation) {
+        alert("Cihazınız GPS desteklemiyor veya izin verilmedi.");
+        return;
+    }
+
+    document.getElementById('btn-start-gps').classList.add('hidden');
+    document.getElementById('btn-stop-gps').classList.remove('hidden');
+
+    // Harita daha önce oluşturulmadıysa ilk kez oluştur (Performans için)
+    if (!map) {
+        // Haritayı başlat (İlk başta Ankara vb. merkezi bir yer seçilir, GPS gelince sana odaklanır)
+        map = L.map('gps-map-area').setView([39.92077, 32.85411], 15); 
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+            attribution: '© OpenStreetMap'
+        }).addTo(map);
+
+        // Kamp rotası çizgisi (Kamp ateşine uygun turuncu renk ve kalınlık)
+        routeLine = L.polyline([], {color: '#d35400', weight: 5, opacity: 0.8}).addTo(map);
+    }
+
+    // Yeni rota için verileri sıfırla
+    routeCoords = [];
+    routeLine.setLatLngs([]);
+    totalDistance = 0;
+    document.getElementById('gps-distance').innerText = "0.00";
+    
+    // Süre sayacını başlat
+    gpsStartTime = Date.now();
+    clearInterval(gpsTimerInterval);
+    gpsTimerInterval = setInterval(() => {
+        const diff = Math.floor((Date.now() - gpsStartTime) / 1000);
+        const m = String(Math.floor(diff / 60)).padStart(2, '0');
+        const s = String(diff % 60).padStart(2, '0');
+        document.getElementById('gps-time').innerText = `${m}:${s}`;
+    }, 1000);
+
+    // Leaflet'in div boyutlarını hesaplayabilmesi için ufak bir render tetikleyici
+    setTimeout(() => { map.invalidateSize(); }, 300);
+
+    // GPS Dinlemeye Başla (Kullanıcı hareket ettikçe burası çalışır)
+    gpsWatchId = navigator.geolocation.watchPosition(
+        (position) => {
+            const lat = position.coords.latitude;
+            const lng = position.coords.longitude;
+            const newLatLng = new L.LatLng(lat, lng);
+            
+            // Haritayı bulunduğun noktaya kaydır ve yakınlaştır
+            map.setView(newLatLng, 17);
+            
+            // İlk nokta değilse aradaki mesafeyi hesapla ve ekle
+            if (routeCoords.length > 0) {
+                const lastLatLng = routeCoords[routeCoords.length - 1];
+                const dist = lastLatLng.distanceTo(newLatLng); // Mesafe Metre cinsinden gelir
+                totalDistance += dist;
+                document.getElementById('gps-distance').innerText = (totalDistance / 1000).toFixed(2);
+            }
+            
+            // Koordinatı diziye ekle ve çizgiyi güncelle
+            routeCoords.push(newLatLng);
+            routeLine.setLatLngs(routeCoords);
+        },
+        (error) => {
+            console.log("GPS okuma hatası:", error);
+        },
+        { enableHighAccuracy: true, maximumAge: 5000, timeout: 5000 }
+    );
+    
+    if (navigator.vibrate) navigator.vibrate([50, 50]);
+};
+
+window.stopGPS = function() {
+    // GPS dinlemeyi ve sayacı durdur
+    if (gpsWatchId) navigator.geolocation.clearWatch(gpsWatchId);
+    clearInterval(gpsTimerInterval);
+    
+    document.getElementById('btn-stop-gps').classList.add('hidden');
+    document.getElementById('btn-start-gps').classList.remove('hidden');
+    document.getElementById('btn-start-gps').innerText = "📍 Yeni Rota";
+    
+    if (navigator.vibrate) navigator.vibrate(50);
+    
+    // Kamp başarı mesajı
+    setTimeout(() => {
+        alert(`Keşif tamamlandı!\n\n🌲 Toplam Yürünen Mesafe: ${(totalDistance/1000).toFixed(2)} km\n\nRota kamp defterine işlendi.`);
+    }, 500);
+};
 

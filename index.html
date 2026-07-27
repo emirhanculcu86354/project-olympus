@@ -16,6 +16,8 @@
 
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.8.1/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.8.1/firebase-auth-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.8.1/firebase-firestore-compat.js"></script>
@@ -251,14 +253,15 @@
                             <p>Kamp ve Rota Kayıtları</p>
                         </div>
                     </div>
-                    </div>
                 </div>
+
 
                 <!-- FUTBOL YÖNETİM MERKEZİ (İÇ EKRAN) -->
                 <div id="football-manager" class="hidden">
                     <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:15px;">
                         <button onclick="closeFootballManager()" class="edit-btn"
-                            style="border-color:#ff4444; color:#ff4444;">← Geri</button>
+                            style="border-color:#ff4444; color:#ff4444;">←
+                            Geri</button>
                         <h2 style="color: var(--goldnova); font-weight: 900; font-style: italic;">FC GOLDNOVA</h2>
                     </div>
 
@@ -294,52 +297,91 @@
                         <p style="text-align:center; color:#888; font-size:11px; margin-top:10px;">İsim girmek veya
                             değiştirmek için formalara tıkla.</p>
                         <button class="save-btn" onclick="saveLineup()"
-                            style="margin-top: 10px; background:#27ae60;">Kadroyu Kaydet</button>
+                            style="margin-top: 10px; background:#27ae60;">Kadroyu
+                            Kaydet</button>
                         <button class="edit-btn" onclick="openTacticBoard()"
                             style="width: 100%; margin-top: 10px; border-color: #00d2ff; color: #00d2ff;">📋 Taktik
                             Tahtasını Aç</button>
 
-                        <!-- FIFA UT TARZI OYUNCU KARTI -->
-                        <div class="fifa-card-container" style="margin-top: 25px;">
-                            <h3
-                                style="color: var(--goldnova); font-size: 14px; margin-bottom: 10px; text-align: center;">
-                                🎴 Oyuncu Kartın (FUT Style)</h3>
-                            <div class="fut-card" onclick="triggerCardCelebration()">
-                                <div class="fut-card-top">
-                                    <div class="fut-ovr" id="fut-rating">88</div>
-                                    <div class="fut-pos" id="fut-position">ST</div>
-                                    <div class="fut-nation">🇹🇷</div>
-                                    <div class="fut-club">⚡</div>
-                                    <!-- YENİ: FORMA SİMGESİ VE NUMARASI -->
-                                    <div
-                                        style="position: relative; margin-top: 5px; text-align: center; line-height: 1;">
-                                        <span style="font-size: 24px;">👕</span>
-                                        <span id="fut-jersey-num"
-                                            style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -35%); font-size: 10px; font-weight: 900; color: #fff; text-shadow: 1px 1px 2px #000;">10</span>
+                        <!-- 3D DÖNEBİLEN FUT KARTI -->
+                        <div class="fut-card-container"
+                            onclick="this.classList.toggle('flipped'); triggerCardCelebration();">
+                            <div class="fut-card-inner">
+                                <!-- KARTIN ÖN YÜZÜ -->
+                                <!-- KARTIN ÖN YÜZÜ -->
+                                <div class="fut-card-front fut-card">
+                                    <!-- Arka Plan Maskeli Resim -->
+                                    <div class="fut-card-img-container">
+                                        <img id="fut-avatar-img" src="icon.png" alt="oyuncu" class="fut-player-img">
+                                    </div>
+
+                                    <!-- Sol Üst Bilgiler (Resmin Üstünde Kalacak) -->
+                                    <div class="fut-stats-top">
+                                        <div id="fut-rating">88</div>
+                                        <div id="fut-position">ST</div>
+                                        <!-- YENİ EKLENEN: Uyruk ve Kimya (Şimşek) -->
+                                        <div class="fut-nation">🇹🇷</div>
+                                        <div class="fut-club">⚡</div>
+                                        <div class="fut-jersey-badge">
+                                            <span>👕</span>
+                                            <span id="fut-jersey-num">10</span>
+                                        </div>
+                                    </div>
+
+                                    <!-- Alt İstatistikler -->
+                                    <div class="fut-card-bottom">
+                                        <h3 id="fut-name">GOLDNOVA OYUNCU</h3>
+                                        <div class="fut-stats-grid">
+                                            <div><span id="stat-pace" class="stat-val">90</span> <span
+                                                    class="stat-lbl">PAC</span></div>
+                                            <div><span id="stat-dribble" class="stat-val">88</span> <span
+                                                    class="stat-lbl">DRI</span></div>
+                                            <div><span id="stat-shoot" class="stat-val">85</span> <span
+                                                    class="stat-lbl">SHO</span></div>
+                                            <div><span id="stat-def" class="stat-val">70</span> <span
+                                                    class="stat-lbl">DEF</span></div>
+                                            <div><span id="stat-pass" class="stat-val">82</span> <span
+                                                    class="stat-lbl">PAS</span></div>
+                                            <div><span id="stat-phys" class="stat-val">86</span> <span
+                                                    class="stat-lbl">PHY</span></div>
+                                        </div>
                                     </div>
                                 </div>
-                                <div class="fut-card-img-container">
-                                    <img id="fut-avatar-img" src="icon.png" alt="Player" class="fut-player-img">
-                                </div>
-                                <div class="fut-card-bottom">
-                                    <div class="fut-player-name" id="fut-name">EMİRHAN ÇULCU</div>
-                                    <div class="fut-stats-grid">
-                                        <div class="fut-stat"><span>HIZ</span> <strong id="stat-pace">90</strong></div>
-                                        <div class="fut-stat"><span>ŞUT</span> <strong id="stat-shoot">85</strong></div>
-                                        <div class="fut-stat"><span>PAS</span> <strong id="stat-pass">82</strong></div>
-                                        <div class="fut-stat"><span>DRB</span> <strong id="stat-dribble">88</strong>
+
+                                <!-- KARTIN ARKA YÜZÜ (RADAR VE İSTATİSTİKLER) -->
+                                <div class="fut-card-back fut-card"
+                                    style="display: flex; flex-direction: column; justify-content: center; align-items: center; padding: 15px;">
+                                    <h4
+                                        style="color: #000; margin-bottom: 5px; font-size: 14px; text-transform: uppercase;">
+                                        Performans Analizi</h4>
+                                    <div
+                                        style="width: 100%; height: 160px; background: rgba(255,255,255,0.1); border-radius: 10px; padding: 5px;">
+                                        <canvas id="fut-radar-chart"></canvas>
+                                    </div>
+                                    <div
+                                        style="width: 100%; margin-top: 15px; background: #000; color: #f6c000; border-radius: 8px; padding: 10px; text-align: center; box-shadow: inset 0 0 5px #f6c000;">
+                                        <div
+                                            style="display: flex; justify-content: space-around; font-size: 12px; font-weight: bold;">
+                                            <div>GOL<br><span id="career-goals"
+                                                    style="font-size: 16px; color: #fff;">0</span></div>
+                                            <div>ASİST<br><span id="career-assists"
+                                                    style="font-size: 16px; color: #fff;">0</span>
+                                            </div>
+                                            <div>MOTM<br><span id="career-motm"
+                                                    style="font-size: 16px; color: #fff;">0</span></div>
                                         </div>
-                                        <div class="fut-stat"><span>DEF</span> <strong id="stat-def">70</strong></div>
-                                        <div class="fut-stat"><span>FİZ</span> <strong id="stat-phys">86</strong></div>
                                     </div>
                                 </div>
                             </div>
-                            <button class="edit-btn" onclick="openFutEditModal()"
-                                style="width:100%; margin-top:12px; border-color:var(--goldnova); color:var(--goldnova);">⚙️
-                                Kart Özelliklerini Düzenle</button>
                         </div>
-                    </div>
+                        <button class="edit-btn" onclick="openFutEditModal()"
+                            style="width:100%; margin-top:12px; border-color:var(--goldnova); color:var(--goldnova);">⚙️
+                            Kart
+                            Özelliklerini Düzenle</button>
 
+                    </div> <!-- KADRO SEKMESİNİN DOĞRU KAPANIŞI -->
+
+                    <!-- 2. SEKME: GEÇMİŞ MAÇLAR -->
                     <!-- 2. SEKME: GEÇMİŞ MAÇLAR -->
                     <div id="fb-tab-history" class="hidden">
                         <button class="save-btn" onclick="addNewMatch()"
@@ -700,6 +742,9 @@
             </div>
             <button class="save-btn" onclick="saveFutCardData()" style="background:var(--goldnova); color:#000;">Kartı
                 Güncelle</button>
+            <button class="edit-btn" onclick="resetCareerStats()"
+                style="width:100%; margin-top:10px; border-color:#ff4444; color:#ff4444;">🗑️ Kariyer İstatistiklerini
+                Sıfırla</button>
             <button class="edit-btn" style="width:100%; margin-top:10px;"
                 onclick="document.getElementById('fut-edit-modal').style.display='none'">İptal</button>
         </div>
@@ -797,6 +842,117 @@
             </div>
             <button class="save-btn" onclick="document.getElementById('follow-list-modal').style.display='none'"
                 style="margin-top:15px;">Kapat</button>
+        </div>
+    </div>
+    <!-- MAÇ SONU VERİ GİRİŞİ VE İSTATİSTİK MODALI -->
+    <div id="match-stats-modal" class="modal">
+        <div class="modal-content" style="max-width: 400px;">
+            <h2 style="color:var(--goldnova); margin-bottom:15px; text-align:center;">Maç Raporu & Veri Girişi</h2>
+            <p id="match-report-subtitle" style="color:#aaa; font-size:12px; text-align:center; margin-bottom:15px;">
+            </p>
+
+            <div class="form-grid">
+                <div class="input-group"><label>Attığın Gol</label><input type="number" id="input-match-goals" value="0"
+                        min="0"></div>
+                <div class="input-group"><label>Yaptığın Asist</label><input type="number" id="input-match-assists"
+                        value="0" min="0"></div>
+            </div>
+
+            <div style="margin-top: 15px;">
+                <label style="color:#fff; font-size:12px; display:block; margin-bottom:5px;">Maçın Adamı (MOTM) Kim
+                    oldu?</label>
+                <select id="select-match-motm"
+                    style="width:100%; padding:10px; background:#151515; color:#fff; border:1px solid #333; border-radius:8px; outline:none; font-weight:bold;"></select>
+            </div>
+
+            <div style="display:flex; gap:10px; margin-top:20px;">
+                <button class="save-btn" onclick="saveMatchStatsAndClose()" style="flex:1; margin-top:0;">Kaydet ve
+                    Kapat</button>
+                <button class="edit-btn" onclick="document.getElementById('match-stats-modal').style.display='none'"
+                    style="flex:1; border-color:#ff4444; color:#ff4444;">İptal</button>
+            </div>
+        </div>
+    </div>
+    <!-- ================= DOĞA GÜNLÜĞÜ (KAMP) EKRANI ================= -->
+    <div id="camp-book-screen" class="full-screen-overlay hidden"
+        style="z-index: 6000; background: rgba(20, 15, 5, 0.95); perspective: 1200px;">
+        <!-- Kapatma Butonu -->
+        <div style="position:absolute; top:calc(env(safe-area-inset-top) + 20px); right:20px; z-index:6010;">
+            <button onclick="closeCampBook()"
+                style="background:transparent; border:none; font-size:30px; color:#f39c12; cursor:pointer;">✖</button>
+        </div>
+
+        <div id="camp-book" class="camp-book">
+            <!-- 3. SAYFA: GPS ROTA (En altta durmalı) -->
+            <<!-- 3. SAYFA: GPS ROTA (En altta durmalı) -->
+                <div class="book-page" id="page-3" style="z-index: 1;">
+                    <div class="page-content">
+                        <h2 class="book-title">Keşif Rotası</h2>
+
+                        <!-- Mesafe ve Süre Paneli -->
+                        <div
+                            style="display:flex; justify-content:space-between; font-size:13px; font-weight:bold; margin-bottom:5px; color:#8b5a2b; font-family:'Courier New', monospace;">
+                            <span>Mesafe: <span id="gps-distance">0.00</span> km</span>
+                            <span>Süre: <span id="gps-time">00:00</span></span>
+                        </div>
+
+                        <!-- Harita Alanı -->
+                        <div id="gps-map-area"
+                            style="flex:1; width:100%; border:2px solid #8b5a2b; border-radius:8px; z-index:0;"></div>
+
+                        <!-- Kontrol Butonları -->
+                        <div style="display:flex; gap:10px;">
+                            <button id="btn-start-gps" class="book-btn" style="flex:1; background:#27ae60; color:#fff;"
+                                onclick="startGPS()">📍 Başlat</button>
+                            <button id="btn-stop-gps" class="book-btn hidden"
+                                style="flex:1; background:#e74c3c; color:#fff;" onclick="stopGPS()">🛑 Bitir</button>
+                        </div>
+
+                        <div class="page-footer">Sayfa 3</div>
+                    </div>
+                </div>
+
+                <!-- 2. SAYFA: MALZEME LİSTESİ -->
+                <div class="book-page" id="page-2" style="z-index: 2;">
+                    <div class="page-content">
+                        <h2 class="book-title">Çanta Kontrolü</h2>
+                        <div class="camp-checklist" id="camp-checklist">
+                            <!-- JS ile dolacak -->
+                        </div>
+                        <div
+                            style="display:flex; gap:5px; margin-top:15px; border-top:2px solid #8b5a2b; padding-top:10px;">
+                            <input type="text" id="new-camp-item" placeholder="Yeni malzeme..."
+                                style="flex:1; background:transparent; border:none; border-bottom:1px solid #8b5a2b; color:#3e2723; outline:none; font-family:'Courier New'; font-weight:bold;">
+                            <button class="book-btn" style="margin-top:0;" onclick="addCampItem()">Ekle</button>
+                        </div>
+                        <div class="page-footer">Sayfa 2 <br> <span style="font-size:10px;">(Sola Kaydır ⬅)</span></div>
+                    </div>
+                </div>
+                <!-- YENİ: KİTAP KAPAĞI (Otomatik Açılacak) -->
+                <div class="book-page book-cover" id="page-0" style="z-index: 4;">
+                    <div class="cover-content">
+                        <h1
+                            style="color:var(--goldnova); font-family:'Georgia', serif; font-style:italic; font-size: 32px; margin-bottom: 20px; text-shadow: 2px 2px 4px #000;">
+                            OLYMPUS</h1>
+                        <div
+                            style="font-size: 70px; margin-bottom: 20px; filter: drop-shadow(0 5px 5px rgba(0,0,0,0.5));">
+                            🏕️</div>
+                        <h2
+                            style="color:#fff; font-family:'Georgia', serif; font-size: 20px; letter-spacing: 3px; text-shadow: 2px 2px 4px #000;">
+                            DOĞA GÜNLÜĞÜ</h2>
+                    </div>
+                </div>
+                <!-- 1. SAYFA: KAMP GÜNLÜĞÜ (Kapak - En üstte durmalı) -->
+                <div class="book-page" id="page-1" style="z-index: 3;">
+                    <div class="page-content">
+                        <h2 class="book-title">Kamp Günlüğü</h2>
+                        <p class="book-subtitle">Ateşin başında ne hissediyorsun?</p>
+                        <textarea id="camp-notes"
+                            placeholder="Bugün doğa harikaydı, ateşin sıcaklığı ve ormanın sessizliği..."></textarea>
+                        <button class="book-btn" onclick="saveCampNotes()">Notu Deriye Kazı</button>
+                        <div class="page-footer">Sayfa 1 <br> <span style="font-size:10px;">(Sola Kaydır ⬅)</span></div>
+                    </div>
+                </div>
         </div>
     </div>
 
