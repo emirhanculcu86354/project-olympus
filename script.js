@@ -1863,6 +1863,9 @@ window.saveNewMatchAdvanced = function () {
 
     document.getElementById('new-match-modal').style.display = 'none';
     renderMatchHistory();
+
+    // YENİ EKLENEN: Maçı kaydettikten sonra kadrodaki arkadaşlarına dağıt
+    distributeMatchToSquad(matchObj);
 };
 async function syncSharedMatches() {
     if (!auth.currentUser) return;
@@ -2213,13 +2216,8 @@ window.previewCardImage = function (event) {
 };
 
 
+// DÜZELTİLMİŞ: Sadece konfeti atar ve titreşim verir. Dönme işini (Flipped) CSS ve HTML yönetir.
 window.triggerCardCelebration = function () {
-    const card = document.querySelector('.fut-card');
-    if (!card) return;
-
-    if (card.classList.contains('flipping')) return;
-    card.classList.add('flipping');
-
     if (typeof confetti === 'function') {
         confetti({
             particleCount: 120,
@@ -2230,10 +2228,6 @@ window.triggerCardCelebration = function () {
     }
 
     if (navigator.vibrate) navigator.vibrate([50, 50, 100]);
-
-    setTimeout(() => {
-        card.classList.remove('flipping');
-    }, 800);
 };
 // ==========================================
 // OYUNCU SEÇİM VE ARKADAŞ LİSTESİ MOTORU (DÜZELTİLMİŞ KESİN ÇÖZÜM)
