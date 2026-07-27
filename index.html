@@ -17,6 +17,7 @@
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <link href="https://fonts.googleapis.com/css2?family=Caveat:wght@400..700&display=swap" rel="stylesheet">
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.8.1/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.8.1/firebase-auth-compat.js"></script>
@@ -883,79 +884,97 @@
         </div>
 
         <div id="camp-book" class="camp-book">
-            <!-- 3. SAYFA: GPS ROTA (En altta durmalı) -->
-            <<!-- 3. SAYFA: GPS ROTA (En altta durmalı) -->
-                <div class="book-page" id="page-3" style="z-index: 1;">
-                    <div class="page-content">
-                        <h2 class="book-title">Keşif Rotası</h2>
-
-                        <!-- Mesafe ve Süre Paneli -->
-                        <div
-                            style="display:flex; justify-content:space-between; font-size:13px; font-weight:bold; margin-bottom:5px; color:#8b5a2b; font-family:'Courier New', monospace;">
-                            <span>Mesafe: <span id="gps-distance">0.00</span> km</span>
-                            <span>Süre: <span id="gps-time">00:00</span></span>
-                        </div>
-
-                        <!-- Harita Alanı -->
-                        <div id="gps-map-area"
-                            style="flex:1; width:100%; border:2px solid #8b5a2b; border-radius:8px; z-index:0;"></div>
-
-                        <!-- Kontrol Butonları -->
-                        <div style="display:flex; gap:10px;">
-                            <button id="btn-start-gps" class="book-btn" style="flex:1; background:#27ae60; color:#fff;"
-                                onclick="startGPS()">📍 Başlat</button>
-                            <button id="btn-stop-gps" class="book-btn hidden"
-                                style="flex:1; background:#e74c3c; color:#fff;" onclick="stopGPS()">🛑 Bitir</button>
-                        </div>
-
-                        <div class="page-footer">Sayfa 3</div>
+            <!-- 4. SAYFA: PLANLAR VE GEÇMİŞ ROTALAR -->
+            <div class="book-page" id="page-4" style="z-index: 1;">
+                <div class="page-content">
+                    <h2 class="book-title">Gelecek Planları</h2>
+                    <div id="camp-plans-list" style="margin-bottom: 10px; flex: 1; overflow-y: auto;">
+                        <p style="text-align:center; color:#a1887f;">Henüz kamp planı yok.</p>
                     </div>
+                    <h2 class="book-title">Geçmiş Keşifler</h2>
+                    <div id="saved-routes-list" style="flex: 1; overflow-y: auto;">
+                        <p style="text-align:center; color:#a1887f;">Henüz rota kaydedilmedi.</p>
+                    </div>
+                    <div class="page-footer">Sayfa 4</div>
                 </div>
+            </div>
 
-                <!-- 2. SAYFA: MALZEME LİSTESİ -->
-                <div class="book-page" id="page-2" style="z-index: 2;">
-                    <div class="page-content">
-                        <h2 class="book-title">Çanta Kontrolü</h2>
-                        <div class="camp-checklist" id="camp-checklist">
-                            <!-- JS ile dolacak -->
-                        </div>
-                        <div
-                            style="display:flex; gap:5px; margin-top:15px; border-top:2px solid #8b5a2b; padding-top:10px;">
-                            <input type="text" id="new-camp-item" placeholder="Yeni malzeme..."
-                                style="flex:1; background:transparent; border:none; border-bottom:1px solid #8b5a2b; color:#3e2723; outline:none; font-family:'Courier New'; font-weight:bold;">
-                            <button class="book-btn" style="margin-top:0;" onclick="addCampItem()">Ekle</button>
-                        </div>
-                        <div class="page-footer">Sayfa 2 <br> <span style="font-size:10px;">(Sola Kaydır ⬅)</span></div>
+            <!-- 3. SAYFA: GPS ROTA VE HARİTA -->
+            <div class="book-page" id="page-3" style="z-index: 2;">
+                <div class="page-content">
+                    <h2 class="book-title">Keşif Rotası</h2>
+                    <div
+                        style="display:flex; justify-content:space-between; font-weight:bold; margin-bottom:5px; color:#5d4037;">
+                        <span>Mesafe: <span id="gps-distance" style="font-family:sans-serif;">0.00</span> km</span>
+                        <span>Süre: <span id="gps-time" style="font-family:sans-serif;">00:00</span></span>
                     </div>
-                </div>
-                <!-- YENİ: KİTAP KAPAĞI (Otomatik Açılacak) -->
-                <div class="book-page book-cover" id="page-0" style="z-index: 4;">
-                    <div class="cover-content">
-                        <h1
-                            style="color:var(--goldnova); font-family:'Georgia', serif; font-style:italic; font-size: 32px; margin-bottom: 20px; text-shadow: 2px 2px 4px #000;">
-                            OLYMPUS</h1>
-                        <div
-                            style="font-size: 70px; margin-bottom: 20px; filter: drop-shadow(0 5px 5px rgba(0,0,0,0.5));">
-                            🏕️</div>
-                        <h2
-                            style="color:#fff; font-family:'Georgia', serif; font-size: 20px; letter-spacing: 3px; text-shadow: 2px 2px 4px #000;">
-                            DOĞA GÜNLÜĞÜ</h2>
+
+                    <div id="gps-map-area"
+                        style="flex:1; width:100%; border:2px solid #8b5a2b; border-radius:8px; position:relative; z-index:0;">
+                        <!-- YENİ: Konumuma Dön Butonu -->
+                        <button onclick="centerMapToUser()"
+                            style="position:absolute; bottom:15px; right:10px; z-index:400; background:#fff; border:2px solid #8b5a2b; border-radius:50%; width:35px; height:35px; cursor:pointer; font-size:16px; box-shadow:0 2px 5px rgba(0,0,0,0.3);">🎯</button>
                     </div>
-                </div>
-                <!-- 1. SAYFA: KAMP GÜNLÜĞÜ (Kapak - En üstte durmalı) -->
-                <div class="book-page" id="page-1" style="z-index: 3;">
-                    <div class="page-content">
-                        <h2 class="book-title">Kamp Günlüğü</h2>
-                        <p class="book-subtitle">Ateşin başında ne hissediyorsun?</p>
-                        <textarea id="camp-notes"
-                            placeholder="Bugün doğa harikaydı, ateşin sıcaklığı ve ormanın sessizliği..."></textarea>
-                        <button class="book-btn" onclick="saveCampNotes()">Notu Deriye Kazı</button>
-                        <div class="page-footer">Sayfa 1 <br> <span style="font-size:10px;">(Sola Kaydır ⬅)</span></div>
+
+                    <div style="display:flex; gap:8px; margin-top:10px;">
+                        <button id="btn-start-gps" class="book-btn" style="flex:2; background:#27ae60; color:#fff;"
+                            onclick="startGPS()">📍 Başlat</button>
+                        <button id="btn-reset-gps" class="book-btn hidden"
+                            style="flex:1; background:#f39c12; color:#fff;" onclick="resetGPS()">🔄 Sıfırla</button>
+                        <button id="btn-stop-gps" class="book-btn hidden"
+                            style="flex:2; background:#e74c3c; color:#fff;" onclick="stopGPS()">🛑 Kaydet</button>
                     </div>
+                    <div class="page-footer">Sayfa 3 <br> <span style="font-size:10px;">(Sola Kaydır ⬅)</span></div>
                 </div>
+            </div>
+
+            <!-- 2. SAYFA: MALZEME LİSTESİ -->
+            <div class="book-page" id="page-2" style="z-index: 3;">
+                <div class="page-content">
+                    <h2 class="book-title">Çanta Kontrolü</h2>
+                    <div class="camp-checklist" id="camp-checklist"></div>
+                    <div
+                        style="display:flex; gap:5px; margin-top:15px; border-top:2px solid #8b5a2b; padding-top:10px;">
+                        <input type="text" id="new-camp-item" placeholder="Yeni malzeme..."
+                            style="flex:1; background:transparent; border:none; border-bottom:1px solid #8b5a2b; outline:none;">
+                        <button class="book-btn" style="margin-top:0; padding:5px 15px;"
+                            onclick="addCampItem()">Ekle</button>
+                    </div>
+                    <div class="page-footer">Sayfa 2 <br> <span style="font-size:10px;">(Sola Kaydır ⬅)</span></div>
+                </div>
+            </div>
+
+            <!-- 1. SAYFA: KAMP GÜNLÜĞÜ (Anılar ve Hava Durumu) -->
+            <div class="book-page" id="page-1" style="z-index: 4;">
+                <div class="page-content">
+                    <h2 class="book-title">Kamp Günlüğü</h2>
+                    <!-- YENİ EKLENEN: Otomatik Hava Durumu ve Konum Bilgisi Alanı -->
+                    <div id="camp-meta-info"
+                        style="font-size: 18px; color: #8b5a2b; margin-bottom: 10px; border-bottom:1px dashed #8b5a2b; padding-bottom:5px;">
+                        ⛅ Veriler doğadan çekiliyor...
+                    </div>
+                    <textarea id="camp-notes"
+                        placeholder="Sevgili günlük, bugün ateşin sıcaklığı ve ormanın sessizliği..."></textarea>
+                    <button class="book-btn" onclick="saveCampNotes()">Notu Deriye Kazı</button>
+                    <div class="page-footer">Sayfa 1 <br> <span style="font-size:10px;">(Sola Kaydır ⬅)</span></div>
+                </div>
+            </div>
+
+            <!-- 0. SAYFA: KAPAK -->
+            <div class="book-page book-cover" id="page-0" style="z-index: 5;">
+                <div class="cover-content">
+                    <h1
+                        style="color:var(--goldnova); font-family:'Georgia', serif; font-style:italic; font-size: 32px; margin-bottom: 20px; text-shadow: 2px 2px 4px #000;">
+                        OLYMPUS</h1>
+                    <div style="font-size: 70px; margin-bottom: 20px; filter: drop-shadow(0 5px 5px rgba(0,0,0,0.5));">
+                        🏕️</div>
+                    <h2
+                        style="color:#fff; font-family:'Georgia', serif; font-size: 20px; letter-spacing: 3px; text-shadow: 2px 2px 4px #000;">
+                        DOĞA GÜNLÜĞÜ</h2>
+                </div>
+            </div>
         </div>
     </div>
-
     <div id="spotify-floating-player" class="hidden">
         <iframe style="border-radius:12px"
             src="https://open.spotify.com/embed/playlist/4aJ0qKBiSMEI8ldn589iNr?utm_source=generator&theme=0&si=45eee92065144cb7"

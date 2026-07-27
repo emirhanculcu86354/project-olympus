@@ -2819,7 +2819,7 @@ window.resetCareerStats = function () {
 // DOĞA GÜNLÜĞÜ (KAMP) SAYFA ÇEVİRME MOTORU
 // ==========================================
 let currentCampPage = 0; // Artık kapaktan (0. sayfa) başlıyor
-const totalCampPages = 3;
+const totalCampPages = 4;
 
 window.openCampBook = function () {
     document.getElementById('camp-book-screen').classList.remove('hidden');
@@ -2839,6 +2839,18 @@ window.openCampBook = function () {
 
     loadCampData();
     initCampSwipe();
+    // YENİ: Hava durumunu çek ve Geçmiş rotaları yükle
+    fetchCampWeatherData();
+    renderSavedRoutes();
+
+    setTimeout(() => {
+        const cover = document.getElementById('page-0');
+        if(cover) {
+            cover.classList.add('turned');
+            currentCampPage = 1;
+            if (navigator.vibrate) navigator.vibrate([40, 60]);
+        }
+    }, 1200);
 
     // 1 saniye sonra deri kapağı otomatik aç!
     setTimeout(() => {
@@ -2945,101 +2957,167 @@ window.startGPS = function () {
     alert("Harita motoru kalibre ediliyor... (Strava tarzı GPS ve rota çizimi eklentisini bir sonraki adımda inşa edeceğiz!) 🗺️🚀");
 };
 // ==========================================
-// KAMP GPS & HARİTA MOTORU (STRAVA STYLE)
+// KAMP GPS & HARİTA MOTORU (NİHAİ SÜRÜM)
 // ==========================================
 let map = null;
 let routeLine = null;
+let userMarker = null; // Haritadaki mavi nokta
 let routeCoords = [];
 let gpsWatchId = null;
 let totalDistance = 0;
 let gpsStartTime = null;
 let gpsTimerInterval = null;
+let lastTimeStr = "00:00"; // Kaydetmek için süreyi tutuyoruz
 
 window.startGPS = function() {
-    if (!navigator.geolocation) {
-        alert("Cihazınız GPS desteklemiyor veya izin verilmedi.");
-        return;
-    }
+    if (!navigator.geolocation) { alert("Cihazınız GPS desteklemiyor."); return; }
 
     document.getElementById('btn-start-gps').classList.add('hidden');
     document.getElementById('btn-stop-gps').classList.remove('hidden');
+    document.getElementById('btn-reset-gps').classList.remove('hidden');
 
-    // Harita daha önce oluşturulmadıysa ilk kez oluştur (Performans için)
     if (!map) {
-        // Haritayı başlat (İlk başta Ankara vb. merkezi bir yer seçilir, GPS gelince sana odaklanır)
         map = L.map('gps-map-area').setView([39.92077, 32.85411], 15); 
-        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-            attribution: '© OpenStreetMap'
-        }).addTo(map);
-
-        // Kamp rotası çizgisi (Kamp ateşine uygun turuncu renk ve kalınlık)
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', { attribution: '© OpenStreetMap' }).addTo(map);
         routeLine = L.polyline([], {color: '#d35400', weight: 5, opacity: 0.8}).addTo(map);
+        
+        // Mavi konum yuvarlağını (Marker) oluştur
+        userMarker = L.circleMarker([0, 0], { color: '#2980b9', fillColor: '#3498db', fillOpacity: 1, radius: 8 }).addTo(map);
     }
 
-    // Yeni rota için verileri sıfırla
-    routeCoords = [];
-    routeLine.setLatLngs([]);
-    totalDistance = 0;
-    document.getElementById('gps-distance').innerText = "0.00";
-    
-    // Süre sayacını başlat
     gpsStartTime = Date.now();
     clearInterval(gpsTimerInterval);
     gpsTimerInterval = setInterval(() => {
         const diff = Math.floor((Date.now() - gpsStartTime) / 1000);
         const m = String(Math.floor(diff / 60)).padStart(2, '0');
         const s = String(diff % 60).padStart(2, '0');
-        document.getElementById('gps-time').innerText = `${m}:${s}`;
+        lastTimeStr = `${m}:${s}`;
+        document.getElementById('gps-time').innerText = lastTimeStr;
     }, 1000);
 
-    // Leaflet'in div boyutlarını hesaplayabilmesi için ufak bir render tetikleyici
     setTimeout(() => { map.invalidateSize(); }, 300);
 
-    // GPS Dinlemeye Başla (Kullanıcı hareket ettikçe burası çalışır)
     gpsWatchId = navigator.geolocation.watchPosition(
         (position) => {
             const lat = position.coords.latitude;
             const lng = position.coords.longitude;
             const newLatLng = new L.LatLng(lat, lng);
             
-            // Haritayı bulunduğun noktaya kaydır ve yakınlaştır
+            // Mavi noktayı ve haritayı güncelle
+            userMarker.setLatLng(newLatLng);
             map.setView(newLatLng, 17);
             
-            // İlk nokta değilse aradaki mesafeyi hesapla ve ekle
             if (routeCoords.length > 0) {
-                const lastLatLng = routeCoords[routeCoords.length - 1];
-                const dist = lastLatLng.distanceTo(newLatLng); // Mesafe Metre cinsinden gelir
-                totalDistance += dist;
+                totalDistance += routeCoords[routeCoords.length - 1].distanceTo(newLatLng);
                 document.getElementById('gps-distance').innerText = (totalDistance / 1000).toFixed(2);
             }
-            
-            // Koordinatı diziye ekle ve çizgiyi güncelle
             routeCoords.push(newLatLng);
             routeLine.setLatLngs(routeCoords);
         },
-        (error) => {
-            console.log("GPS okuma hatası:", error);
-        },
+        (error) => { console.log("GPS hatası:", error); },
         { enableHighAccuracy: true, maximumAge: 5000, timeout: 5000 }
     );
-    
     if (navigator.vibrate) navigator.vibrate([50, 50]);
 };
 
+// YENİ: Konumuma Geri Dön Butonu
+window.centerMapToUser = function() {
+    if (map && routeCoords.length > 0) {
+        map.setView(routeCoords[routeCoords.length - 1], 17);
+        if (navigator.vibrate) navigator.vibrate(20);
+    } else {
+        alert("Henüz konum verisi alınamadı. Rotayı başlatmalısın.");
+    }
+};
+
+// YENİ: Rotayı Sıfırlama Butonu
+window.resetGPS = function() {
+    if(confirm("Mevcut rota çizimini sıfırlamak istediğine emin misin?")) {
+        routeCoords = [];
+        totalDistance = 0;
+        if(routeLine) routeLine.setLatLngs([]);
+        document.getElementById('gps-distance').innerText = "0.00";
+        gpsStartTime = Date.now(); // Süreyi başa sar
+        if (navigator.vibrate) navigator.vibrate(30);
+    }
+};
+
 window.stopGPS = function() {
-    // GPS dinlemeyi ve sayacı durdur
     if (gpsWatchId) navigator.geolocation.clearWatch(gpsWatchId);
     clearInterval(gpsTimerInterval);
     
     document.getElementById('btn-stop-gps').classList.add('hidden');
+    document.getElementById('btn-reset-gps').classList.add('hidden');
     document.getElementById('btn-start-gps').classList.remove('hidden');
     document.getElementById('btn-start-gps').innerText = "📍 Yeni Rota";
     
+    // Rotayı Hafızaya (Geçmiş Keşiflere) Kaydet
+    if (totalDistance > 0 || lastTimeStr !== "00:00") {
+        let routes = JSON.parse(localStorage.getItem('olympus_camp_routes')) || [];
+        routes.push({
+            id: Date.now(),
+            date: new Date().toLocaleDateString('tr-TR'),
+            distance: (totalDistance / 1000).toFixed(2),
+            duration: lastTimeStr
+        });
+        localStorage.setItem('olympus_camp_routes', JSON.stringify(routes));
+        renderSavedRoutes(); // 4. Sayfayı anında güncelle
+    }
+
     if (navigator.vibrate) navigator.vibrate(50);
-    
-    // Kamp başarı mesajı
-    setTimeout(() => {
-        alert(`Keşif tamamlandı!\n\n🌲 Toplam Yürünen Mesafe: ${(totalDistance/1000).toFixed(2)} km\n\nRota kamp defterine işlendi.`);
-    }, 500);
+    setTimeout(() => { alert(`Keşif tamamlandı!\n\n🌲 Mesafe: ${(totalDistance/1000).toFixed(2)} km\n⏱️ Süre: ${lastTimeStr}\n\nRota 4. Sayfaya (Geçmiş Keşifler) işlendi!`); }, 500);
+};
+// ==========================================
+// KAMP HAVA DURUMU VE GEÇMİŞ ROTA MOTORU
+// ==========================================
+window.fetchCampWeatherData = function() {
+    const metaInfo = document.getElementById('camp-meta-info');
+    if (!navigator.geolocation) {
+        metaInfo.innerHTML = "Doğa ruhu (GPS) kapalı. 🌲";
+        return;
+    }
+
+    // Telefonun anlık konumunu alıyoruz
+    navigator.geolocation.getCurrentPosition(async (pos) => {
+        const lat = pos.coords.latitude;
+        const lon = pos.coords.longitude;
+        try {
+            // Şifresiz ve ücretsiz Open-Meteo uydusuna bağlanıyoruz
+            const weatherRes = await fetch(`https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}&current_weather=true`);
+            const weatherData = await weatherRes.json();
+            const temp = weatherData.current_weather.temperature;
+            const wind = weatherData.current_weather.windspeed;
+            
+            const now = new Date();
+            const dateStr = now.toLocaleDateString('tr-TR');
+            const timeStr = now.toLocaleTimeString('tr-TR', {hour: '2-digit', minute:'2-digit'});
+
+            metaInfo.innerHTML = `📅 ${dateStr} - ${timeStr} <br> ⛅ Sıcaklık: ${temp}°C | 💨 Rüzgar: ${wind} km/h`;
+        } catch (err) {
+            metaInfo.innerHTML = `📍 Koordinatlar: ${lat.toFixed(2)}, ${lon.toFixed(2)} (Hava durumu alınamadı)`;
+        }
+    }, () => {
+        metaInfo.innerHTML = "Doğa ruhu (GPS) izni reddedildi. 🌲";
+    });
 };
 
+window.renderSavedRoutes = function() {
+    const container = document.getElementById('saved-routes-list');
+    const routes = JSON.parse(localStorage.getItem('olympus_camp_routes')) || [];
+    
+    if (routes.length === 0) {
+        container.innerHTML = '<p style="text-align:center; color:#a1887f;">Henüz deftere işlenen bir rota yok.</p>';
+        return;
+    }
+
+    container.innerHTML = '';
+    // En yeni rotalar en üstte görünsün diye reverse yapıyoruz
+    routes.reverse().forEach(r => {
+        container.innerHTML += `
+            <div style="border-bottom: 2px solid rgba(139, 90, 43, 0.3); padding-bottom: 10px; margin-bottom: 15px;">
+                <strong style="color:#5d4037; font-size:28px;">🏕️ Keşif (${r.date})</strong><br>
+                <span style="font-size: 22px; color:#2c1a0e;">Mesafe: ${r.distance} km | Süre: ${r.duration}</span>
+            </div>
+        `;
+    });
+};
