@@ -3482,63 +3482,164 @@ window.closeArcadeTerminal = function () {
     if (oly) oly.style.display = 'flex';
 };
 
-window.loadArcadeGame = function() {
+// ==========================================
+// 🕹️ YEREL (NATIVE) ARCADE TERMINAL MOTORU
+// ==========================================
+window.loadArcadeGame = function () {
     const game = document.getElementById('arcade-game-select').value;
     const container = document.getElementById('game-container');
     const placeholder = document.getElementById('arcade-placeholder-text');
-    
-    if(!game) {
+
+    if (!game) {
         container.style.display = 'none';
         placeholder.style.display = 'block';
         container.innerHTML = '';
-        return;
+        return; // Burada dosya yükleme temizleniyor.
     }
 
-    // Kaset takılıyor animasyonu
     placeholder.style.display = 'none';
     container.style.display = 'block';
-    container.innerHTML = '<div style="display:flex; justify-content:center; align-items:center; height:100%; color:#0f0; font-family:\'Courier New\', monospace; font-weight:bold;">[ARCHIVE.ORG BAĞLANTISI KURULUYOR...]</div>';
+    container.innerHTML = '<div style="display:flex; justify-content:center; align-items:center; height:100%; color:#0f0; font-family:\'Courier New\', monospace; font-weight:bold; font-size:14px;">[SİSTEM HAZIRLANIYOR...]</div>';
 
-    // Telif hakkı yemeyen (Shareware), kesin çalışan Archive.org kasetleri
-    let iframeSrc = "";
-    if (game === 'doom') iframeSrc = "https://archive.org/embed/msdos_Doom_1993";
-    else if (game === 'pop') iframeSrc = "https://archive.org/embed/msdos_Prince_of_Persia_1990";
-    else if (game === 'wolf3d') iframeSrc = "https://archive.org/embed/msdos_Wolfenstein_3D_1992";
-    else if (game === 'aladdin') iframeSrc = "https://archive.org/embed/msdos_Disney_Aladdin_1994";
-    else if (game === 'simcity') iframeSrc = "https://archive.org/embed/msdos_SimCity_1989";
-    else if (game === 'pacman') iframeSrc = "https://archive.org/embed/msdos_Pac-Man_1983";
+    // Kendi sunucumuzdan Pop.zip dosyasını okuyoruz!
+    if (game === 'pop') {
+        container.innerHTML = '<canvas id="jsdos-canvas" style="width:100%; height:100%; border-radius:8px;"></canvas>';
 
-    // 1 saniye kaset yükleme efekti için bekle
-    setTimeout(() => {
-        container.innerHTML = `<iframe src="${iframeSrc}" width="100%" height="100%" frameborder="0" allowfullscreen="true" webkitallowfullscreen="true" mozallowfullscreen="true" style="border-radius: 8px;"></iframe>`;
-        if (navigator.vibrate) navigator.vibrate([100, 50, 100]);
-    }, 1000);
+        Dos(document.getElementById("jsdos-canvas"), { wdosboxUrl: "https://js-dos.com/6.22/current/wdosbox.js" }).ready(function (fs, main) {
+            fs.extract("pop.zip").then(function () {
+                // ALTIN DOKUNUŞ BURASI: 'ci' (Command Interface) ile oyunun beynini yakalıyoruz
+                main(["-c", "PRINCE.EXE"]).then(function (ci) {
+                    window.dosCommandInterface = ci; // Emülatörün kontrollerini global değişkene kaydet
+                    console.log("Oyun başarıyla başlatıldı ve kontroller bağlandı!");
+                });
+            });
+        });
+    }
+    // DOOM İçin Örnek:
+    else if (game === 'doom') {
+        container.innerHTML = '<canvas id="jsdos-canvas" style="width:100%; height:100%; border-radius:8px;"></canvas>';
+        Dos(document.getElementById("jsdos-canvas"), { wdosboxUrl: "https://js-dos.com/6.22/current/wdosbox.js" }).ready(function (fs, main) {
+            fs.extract("DOOM.zip").then(function () {
+                main(["-c", "DOOM.EXE"]).then(function (ci) {
+                    window.dosCommandInterface = ci;
+                });
+            });
+        });
+        
+    }
+    else if (game === 'ssf2t') {
+        container.innerHTML = '<canvas id="jsdos-canvas" style="width:100%; height:100%; border-radius:8px;"></canvas>';
+        Dos(document.getElementById("jsdos-canvas"), { wdosboxUrl: "https://js-dos.com/6.22/current/wdosbox.js" }).ready(function (fs, main) {
+            fs.extract("SSF2T.zip").then(function () {
+                main(["-c", "SSF2T.BAT"]).then(function (ci) {
+                    window.dosCommandInterface = ci;
+                });
+            });
+        });
+        
+    }
+    else if (game === 'mspac') {
+        container.innerHTML = '<canvas id="jsdos-canvas" style="width:100%; height:100%; border-radius:8px;"></canvas>';
+        Dos(document.getElementById("jsdos-canvas"), { wdosboxUrl: "https://js-dos.com/6.22/current/wdosbox.js" }).ready(function (fs, main) {
+            fs.extract("MSPAC.zip").then(function () {
+                main(["-c", "MSPAC.EXE"]).then(function (ci) {
+                    window.dosCommandInterface = ci;
+                });
+            });
+        });
+        
+    }
+    else if (game === 'wolf3d') {
+        container.innerHTML = '<canvas id="jsdos-canvas" style="width:100%; height:100%; border-radius:8px;"></canvas>';
+        Dos(document.getElementById("jsdos-canvas"), { wdosboxUrl: "https://js-dos.com/6.22/current/wdosbox.js" }).ready(function (fs, main) {
+            fs.extract("WOLF3D.zip").then(function () {
+                main(["-c", "WOLF3D.EXE"]).then(function (ci) {
+                    window.dosCommandInterface = ci;
+                });
+            });
+        });
+        
+    }
+    else if (game === 'tomb') {
+        container.innerHTML = '<canvas id="jsdos-canvas" style="width:100%; height:100%; border-radius:8px;"></canvas>';
+        Dos(document.getElementById("jsdos-canvas"), { wdosboxUrl: "https://js-dos.com/6.22/current/wdosbox.js" }).ready(function (fs, main) {
+            fs.extract("TOMB.zip").then(function () {
+                main(["-c", "TOMB.EXE"]).then(function (ci) {
+                    window.dosCommandInterface = ci;
+                });
+            });
+        });
+        
+    }
+    else if (game === 'mk2') {
+        container.innerHTML = '<canvas id="jsdos-canvas" style="width:100%; height:100%; border-radius:8px;"></canvas>';
+        Dos(document.getElementById("jsdos-canvas"), { wdosboxUrl: "https://js-dos.com/6.22/current/wdosbox.js" }).ready(function (fs, main) {
+            fs.extract("MK2.zip").then(function () {
+                main(["-c", "MKII.EXE"]).then(function (ci) {
+                    window.dosCommandInterface = ci;
+                });
+            });
+        });
+        
+    }
+    else if (game === 'pop2') {
+        container.innerHTML = '<canvas id="jsdos-canvas" style="width:100%; height:100%; border-radius:8px;"></canvas>';
+        Dos(document.getElementById("jsdos-canvas"), { wdosboxUrl: "https://js-dos.com/6.22/current/wdosbox.js" }).ready(function (fs, main) {
+            fs.extract("POP2.zip").then(function () {
+                main(["-c", "PRINCE.EXE"]).then(function (ci) {
+                    window.dosCommandInterface = ci;
+                });
+            });
+        });
+        
+    }
 };
 // ==========================================
-// 🕹️ GAMEPAD KLAVYE SİNYAL MOTORU
+// 🕹️ ÇİFT KATMANLI GAMEPAD & EFEKT MOTORU
 // ==========================================
-window.pressKey = function(keyCode) {
-    const iframe = document.querySelector('#game-container iframe');
-    if(iframe) {
-        iframe.focus(); // Oyunu odaklar
-        try {
-            // İlgili tuşa basıldı (Örn: 32 = Space, 13 = Enter)
-            const event = new KeyboardEvent('keydown', { keyCode: keyCode, which: keyCode, bubbles: true });
-            iframe.contentWindow.document.dispatchEvent(event);
-        } catch (e) {
-            console.log("Güvenlik Duvarı (CORS): Dış sunucuya tuş basılamadı.", e);
-        }
+let activeGamepadKeys = {};
+
+function triggerEmulatorKey(keyCode, isPressed) {
+    // 1. Birinci Katman: JS-DOS Donanım Sinyali
+    if (window.dosCommandInterface) {
+        window.dosCommandInterface.simulateKeyEvent(keyCode, isPressed);
     }
-    if (navigator.vibrate) navigator.vibrate(15); // Tuş hissiyatı
+    
+    // 2. İkinci Katman: Modern Emscripten Canvas Sinyali (Yedek Güvenlik)
+    const canvas = document.getElementById('jsdos-canvas');
+    if (canvas) {
+        const e = new KeyboardEvent(isPressed ? 'keydown' : 'keyup', {
+            bubbles: true, cancelable: true, keyCode: keyCode, which: keyCode
+        });
+        Object.defineProperty(e, 'keyCode', {get: () => keyCode});
+        Object.defineProperty(e, 'which', {get: () => keyCode});
+        canvas.dispatchEvent(e);
+    }
+}
+
+window.pressKey = function(e, keyCode) {
+    if(e) {
+        e.preventDefault();
+        e.currentTarget.classList.add('btn-pressed'); // Tuşa basılma efekti ekle
+    }
+    
+    // Tuş zaten basılıysa tekrar sinyal gönderip sistemi boğma
+    if (activeGamepadKeys[keyCode]) return; 
+    activeGamepadKeys[keyCode] = true;
+    
+    triggerEmulatorKey(keyCode, true);
+    if (navigator.vibrate) navigator.vibrate(20); // Titreşim hissi
 };
 
-window.releaseKey = function(keyCode) {
-    const iframe = document.querySelector('#game-container iframe');
-    if(iframe) {
-        try {
-            // İlgili tuş bırakıldı
-            const event = new KeyboardEvent('keyup', { keyCode: keyCode, which: keyCode, bubbles: true });
-            iframe.contentWindow.document.dispatchEvent(event);
-        } catch (e) {}
+window.releaseKey = function(e, keyCode) {
+    if(e) {
+        e.preventDefault();
+        e.currentTarget.classList.remove('btn-pressed'); // Tuş bırakılınca efekti kaldır
     }
+    
+    // Tuş zaten bırakılmışsa işlem yapma
+    if (!activeGamepadKeys[keyCode]) return;
+    activeGamepadKeys[keyCode] = false;
+    
+    triggerEmulatorKey(keyCode, false);
 };
