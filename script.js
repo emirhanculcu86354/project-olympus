@@ -354,7 +354,7 @@ function showWorkoutModal(dayData) {
 
     const startBtn = document.getElementById('start-workout-btn');
     const panicBtn = document.getElementById('save-the-day-btn');
-    
+
     // Butonları resetle
     startBtn.innerText = "🚀 İdmanı Başlat";
     startBtn.style.background = "var(--goldnova)";
@@ -419,7 +419,7 @@ window.saveSetAndRest = function () {
     document.getElementById('player-timer-display').classList.remove('hidden');
     document.getElementById('player-next-btn').classList.remove('hidden');
 
-    let sec = isExpressMode ? 45 : 90; 
+    let sec = isExpressMode ? 45 : 90;
     document.getElementById('timer-seconds').innerText = sec;
 
     clearInterval(timerInterval);
@@ -2771,14 +2771,14 @@ window.openFollowList = async function (type) {
 // ==========================================
 let activeMatchIdForStats = null;
 
-window.openMatchStatsModal = function(matchId) {
+window.openMatchStatsModal = function (matchId) {
     const history = JSON.parse(localStorage.getItem('goldnova_match_history')) || [];
     const match = history.find(m => m.id === matchId);
     if (!match) return;
 
     activeMatchIdForStats = matchId;
     document.getElementById('match-report-subtitle').innerText = `Goldnova vs ${match.opponent} (${new Date(match.datetime).toLocaleDateString('tr-TR')})`;
-    
+
     // YENİ: Varsa eski skoru doldur, yoksa (null ise) 0 yap
     document.getElementById('input-team-score-goldnova').value = (match.scoreGoldnova !== null && match.scoreGoldnova !== undefined) ? match.scoreGoldnova : 0;
     document.getElementById('input-team-score-opponent').value = (match.scoreOpponent !== null && match.scoreOpponent !== undefined) ? match.scoreOpponent : 0;
@@ -2790,7 +2790,7 @@ window.openMatchStatsModal = function(matchId) {
     // Kadrodaki oyuncuları MOTM (Maçın Adamı) seçim kutusuna doldur
     const motmSelect = document.getElementById('select-match-motm');
     motmSelect.innerHTML = '<option value="">Seçim Yap...</option>';
-    if(match.squad) {
+    if (match.squad) {
         match.squad.forEach(player => {
             if (player && player !== "Seçilmedi" && player !== "Boş") {
                 motmSelect.innerHTML += `<option value="${player}">${player}</option>`;
@@ -2801,7 +2801,7 @@ window.openMatchStatsModal = function(matchId) {
     document.getElementById('match-stats-modal').style.display = 'flex';
 };
 
-window.saveMatchStatsAndClose = function() {
+window.saveMatchStatsAndClose = function () {
     // 1. TAKIM SKORLARINI AL
     const scoreGoldnova = parseInt(document.getElementById('input-team-score-goldnova').value) || 0;
     const scoreOpponent = parseInt(document.getElementById('input-team-score-opponent').value) || 0;
@@ -2823,7 +2823,7 @@ window.saveMatchStatsAndClose = function() {
     // 4. KİŞİSEL KARİYERE (FUT KARTI) EKLE
     const myName = document.getElementById('profile-name-display').innerText.trim().toLowerCase();
     let careerStats = JSON.parse(localStorage.getItem('goldnova_career_stats')) || { goals: 0, assists: 0, motm: 0 };
-    
+
     careerStats.goals += goalsToAdd;
     careerStats.assists += assistsToAdd;
 
@@ -2833,11 +2833,11 @@ window.saveMatchStatsAndClose = function() {
 
     localStorage.setItem('goldnova_career_stats', JSON.stringify(careerStats));
     document.getElementById('match-stats-modal').style.display = 'none';
-    
+
     // EKRANLARI YENİLE
     if (typeof renderFutCard === 'function') renderFutCard();
     if (typeof renderMatchHistory === 'function') renderMatchHistory(); // 'null' yazısını anında silip skoru yazdırır!
-    
+
     if (navigator.vibrate) navigator.vibrate(50);
     alert("Maç skoru ve istatistikler başarıyla işlendi! 🎴🔥");
 };
@@ -2889,7 +2889,7 @@ window.openCampBook = function () {
     renderCampDiary();
     setTimeout(() => {
         const cover = document.getElementById('page-0');
-        if(cover) {
+        if (cover) {
             cover.classList.add('turned');
             currentCampPage = 1;
             if (navigator.vibrate) navigator.vibrate([40, 60]);
@@ -2957,35 +2957,35 @@ function loadCampData() {
     renderCampChecklist();
 }
 
-window.saveCampNotes = function() {
+window.saveCampNotes = function () {
     const noteText = document.getElementById('camp-notes').value.trim();
     if (noteText !== '') {
         let entries = JSON.parse(localStorage.getItem('olympus_camp_diary_entries')) || [];
         // 1. Sayfadaki anlık hava durumu ve tarih metnini çekiyoruz
         const metaText = document.getElementById('camp-meta-info').innerText;
-        
+
         entries.push({
             id: Date.now(),
             date: new Date().toLocaleDateString('tr-TR'),
             meta: metaText,
             text: noteText
         });
-        
+
         localStorage.setItem('olympus_camp_diary_entries', JSON.stringify(entries));
         document.getElementById('camp-notes').value = ''; // Yazıyı temizle
-        
+
         renderCampDiary(); // 5. Sayfayı güncelle
-        
+
         if (navigator.vibrate) navigator.vibrate([50, 50, 50]);
         alert("Günlük doğaya kazındı! 🌲🔥 (5. Sayfaya eklendi)");
     } else {
         alert("Sayfaya işlemek için önce kalemi eline alıp bir şeyler yazmalısın!");
     }
 };
-window.renderCampDiary = function() {
+window.renderCampDiary = function () {
     const container = document.getElementById('saved-diary-list');
     const entries = JSON.parse(localStorage.getItem('olympus_camp_diary_entries')) || [];
-    
+
     container.innerHTML = '';
     if (entries.length === 0) {
         container.innerHTML = '<p style="text-align:center; color:#a1887f; font-family:\'Caveat\', cursive; font-size:24px;">Henüz anı yazılmadı.</p>';
@@ -3006,8 +3006,8 @@ window.renderCampDiary = function() {
         `;
     });
 };
-window.deleteCampDiary = function(id) {
-    if(confirm("Bu anıyı defterin yapraklarından silmek istediğine emin misin?")) {
+window.deleteCampDiary = function (id) {
+    if (confirm("Bu anıyı defterin yapraklarından silmek istediğine emin misin?")) {
         let entries = JSON.parse(localStorage.getItem('olympus_camp_diary_entries')) || [];
         entries = entries.filter(e => e.id !== id);
         localStorage.setItem('olympus_camp_diary_entries', JSON.stringify(entries));
@@ -3065,7 +3065,7 @@ let gpsStartTime = null;
 let gpsTimerInterval = null;
 let lastTimeStr = "00:00"; // Kaydetmek için süreyi tutuyoruz
 
-window.startGPS = function() {
+window.startGPS = function () {
     if (!navigator.geolocation) { alert("Cihazınız GPS desteklemiyor."); return; }
 
     document.getElementById('btn-start-gps').classList.add('hidden');
@@ -3073,10 +3073,10 @@ window.startGPS = function() {
     document.getElementById('btn-reset-gps').classList.remove('hidden');
 
     if (!map) {
-        map = L.map('gps-map-area').setView([39.92077, 32.85411], 15); 
+        map = L.map('gps-map-area').setView([39.92077, 32.85411], 15);
         L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', { attribution: '© OpenStreetMap' }).addTo(map);
-        routeLine = L.polyline([], {color: '#d35400', weight: 5, opacity: 0.8}).addTo(map);
-        
+        routeLine = L.polyline([], { color: '#d35400', weight: 5, opacity: 0.8 }).addTo(map);
+
         // Mavi konum yuvarlağını (Marker) oluştur
         userMarker = L.circleMarker([0, 0], { color: '#2980b9', fillColor: '#3498db', fillOpacity: 1, radius: 8 }).addTo(map);
     }
@@ -3098,11 +3098,11 @@ window.startGPS = function() {
             const lat = position.coords.latitude;
             const lng = position.coords.longitude;
             const newLatLng = new L.LatLng(lat, lng);
-            
+
             // Mavi noktayı ve haritayı güncelle
             userMarker.setLatLng(newLatLng);
             map.setView(newLatLng, 17);
-            
+
             if (routeCoords.length > 0) {
                 totalDistance += routeCoords[routeCoords.length - 1].distanceTo(newLatLng);
                 document.getElementById('gps-distance').innerText = (totalDistance / 1000).toFixed(2);
@@ -3117,7 +3117,7 @@ window.startGPS = function() {
 };
 
 // YENİ: Konumuma Geri Dön Butonu
-window.centerMapToUser = function() {
+window.centerMapToUser = function () {
     if (map && routeCoords.length > 0) {
         map.setView(routeCoords[routeCoords.length - 1], 17);
         if (navigator.vibrate) navigator.vibrate(20);
@@ -3127,26 +3127,26 @@ window.centerMapToUser = function() {
 };
 
 // YENİ: Rotayı Sıfırlama Butonu
-window.resetGPS = function() {
-    if(confirm("Mevcut rota çizimini sıfırlamak istediğine emin misin?")) {
+window.resetGPS = function () {
+    if (confirm("Mevcut rota çizimini sıfırlamak istediğine emin misin?")) {
         routeCoords = [];
         totalDistance = 0;
-        if(routeLine) routeLine.setLatLngs([]);
+        if (routeLine) routeLine.setLatLngs([]);
         document.getElementById('gps-distance').innerText = "0.00";
         gpsStartTime = Date.now(); // Süreyi başa sar
         if (navigator.vibrate) navigator.vibrate(30);
     }
 };
 
-window.stopGPS = function() {
+window.stopGPS = function () {
     if (gpsWatchId) navigator.geolocation.clearWatch(gpsWatchId);
     clearInterval(gpsTimerInterval);
-    
+
     document.getElementById('btn-stop-gps').classList.add('hidden');
     document.getElementById('btn-reset-gps').classList.add('hidden');
     document.getElementById('btn-start-gps').classList.remove('hidden');
     document.getElementById('btn-start-gps').innerText = "📍 Yeni Rota";
-    
+
     // Rotayı Hafızaya (Geçmiş Keşiflere) Kaydet
     if (totalDistance > 0 || lastTimeStr !== "00:00") {
         let routes = JSON.parse(localStorage.getItem('olympus_camp_routes')) || [];
@@ -3161,12 +3161,12 @@ window.stopGPS = function() {
     }
 
     if (navigator.vibrate) navigator.vibrate(50);
-    setTimeout(() => { alert(`Keşif tamamlandı!\n\n🌲 Mesafe: ${(totalDistance/1000).toFixed(2)} km\n⏱️ Süre: ${lastTimeStr}\n\nRota 4. Sayfaya (Geçmiş Keşifler) işlendi!`); }, 500);
+    setTimeout(() => { alert(`Keşif tamamlandı!\n\n🌲 Mesafe: ${(totalDistance / 1000).toFixed(2)} km\n⏱️ Süre: ${lastTimeStr}\n\nRota 4. Sayfaya (Geçmiş Keşifler) işlendi!`); }, 500);
 };
 // ==========================================
 // KAMP HAVA DURUMU VE GEÇMİŞ ROTA MOTORU
 // ==========================================
-window.fetchCampWeatherData = function() {
+window.fetchCampWeatherData = function () {
     const metaInfo = document.getElementById('camp-meta-info');
     if (!navigator.geolocation) {
         metaInfo.innerHTML = "Doğa ruhu (GPS) kapalı. 🌲";
@@ -3183,10 +3183,10 @@ window.fetchCampWeatherData = function() {
             const weatherData = await weatherRes.json();
             const temp = weatherData.current_weather.temperature;
             const wind = weatherData.current_weather.windspeed;
-            
+
             const now = new Date();
             const dateStr = now.toLocaleDateString('tr-TR');
-            const timeStr = now.toLocaleTimeString('tr-TR', {hour: '2-digit', minute:'2-digit'});
+            const timeStr = now.toLocaleTimeString('tr-TR', { hour: '2-digit', minute: '2-digit' });
 
             metaInfo.innerHTML = `📅 ${dateStr} - ${timeStr} <br> ⛅ Sıcaklık: ${temp}°C | 💨 Rüzgar: ${wind} km/h`;
         } catch (err) {
@@ -3202,10 +3202,10 @@ window.fetchCampWeatherData = function() {
 // ==========================================
 
 // 1. Gelecek Planları Yükle
-window.renderCampPlans = function() {
+window.renderCampPlans = function () {
     const container = document.getElementById('camp-plans-list');
     const plans = JSON.parse(localStorage.getItem('olympus_camp_plans')) || [];
-    
+
     container.innerHTML = '';
     if (plans.length === 0) {
         container.innerHTML = '<p style="text-align:center; color:#a1887f; font-family:\'Caveat\', cursive; font-size:24px;">Henüz kamp planı yok.</p>';
@@ -3226,27 +3226,27 @@ window.renderCampPlans = function() {
 };
 
 // 2. Yeni Plan Ekle
-window.addCampPlan = function() {
+window.addCampPlan = function () {
     const inputStr = document.getElementById('new-plan-item').value.trim();
     const inputDate = document.getElementById('new-plan-date').value;
 
     if (inputStr !== '' && inputDate !== '') {
         let plans = JSON.parse(localStorage.getItem('olympus_camp_plans')) || [];
-        
-        plans.push({ 
-            id: Date.now(), 
+
+        plans.push({
+            id: Date.now(),
             text: inputStr,
-            datetime: new Date(inputDate).toISOString() 
+            datetime: new Date(inputDate).toISOString()
         });
-        
+
         // Planları tarihe göre sırala (En yakın tarih en üstte)
         plans.sort((a, b) => new Date(a.datetime) - new Date(b.datetime));
 
         localStorage.setItem('olympus_camp_plans', JSON.stringify(plans));
-        
+
         document.getElementById('new-plan-item').value = '';
         document.getElementById('new-plan-date').value = '';
-        
+
         renderCampPlans();
         if (navigator.vibrate) navigator.vibrate(20);
     } else {
@@ -3270,7 +3270,7 @@ setInterval(() => {
             const h = Math.floor((diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
             const m = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
             const s = Math.floor((diff % (1000 * 60)) / 1000);
-            
+
             el.innerText = `⏳ Kalkışa: ${d}g ${h}s ${m}d ${s}sn`;
         } else {
             el.innerText = "🔥 KAMP VAKTİ GELDİ!";
@@ -3281,7 +3281,7 @@ setInterval(() => {
 }, 1000);
 
 // 3. Plan Sil (Silgi)
-window.deleteCampPlan = function(id) {
+window.deleteCampPlan = function (id) {
     let plans = JSON.parse(localStorage.getItem('olympus_camp_plans')) || [];
     plans = plans.filter(p => p.id !== id);
     localStorage.setItem('olympus_camp_plans', JSON.stringify(plans));
@@ -3290,10 +3290,10 @@ window.deleteCampPlan = function(id) {
 };
 
 // 4. Geçmiş Keşifleri Yükle (Değiştirildi)
-window.renderSavedRoutes = function() {
+window.renderSavedRoutes = function () {
     const container = document.getElementById('saved-routes-list');
     const routes = JSON.parse(localStorage.getItem('olympus_camp_routes')) || [];
-    
+
     container.innerHTML = '';
     if (routes.length === 0) {
         container.innerHTML = '<p style="text-align:center; color:#a1887f; font-family:\'Caveat\', cursive; font-size:22px;">Henüz rota kaydedilmedi.</p>';
@@ -3314,8 +3314,8 @@ window.renderSavedRoutes = function() {
 };
 
 // 5. Geçmiş Keşfi Sil (Silgi)
-window.deleteSavedRoute = function(id) {
-    if(confirm("Bu keşif kaydını defterden silmek istediğine emin misin?")) {
+window.deleteSavedRoute = function (id) {
+    if (confirm("Bu keşif kaydını defterden silmek istediğine emin misin?")) {
         let routes = JSON.parse(localStorage.getItem('olympus_camp_routes')) || [];
         routes = routes.filter(r => r.id !== id);
         localStorage.setItem('olympus_camp_routes', JSON.stringify(routes));
@@ -3337,9 +3337,9 @@ const matrixText = document.getElementById('matrix-text');
 if (secretTrigger) {
     secretTrigger.addEventListener('click', () => {
         secretClickCount++;
-        
+
         clearTimeout(secretClickTimer);
-        
+
         // 1.5 saniye içinde 3 kere tıklanırsa terminali aç
         secretClickTimer = setTimeout(() => {
             secretClickCount = 0;
@@ -3374,7 +3374,7 @@ if (matrixPassword) {
                 matrixText.style.color = "#fff";
                 matrixPassword.style.display = "none";
                 if (navigator.vibrate) navigator.vibrate([50, 50, 200]);
-                
+
                 // 1 Saniye sonra CULbase klasörüne ışınla
                 setTimeout(() => {
                     window.location.href = "culbase_system/index.html";
@@ -3385,7 +3385,7 @@ if (matrixPassword) {
                 matrixText.classList.add('matrix-glitch');
                 matrixPassword.value = '';
                 if (navigator.vibrate) navigator.vibrate([200, 200, 200]);
-                
+
                 setTimeout(() => {
                     matrixText.classList.remove('matrix-glitch');
                     matrixText.innerText = "GİZLİ PROTOKOL BAŞLATILDI.";
@@ -3398,7 +3398,7 @@ if (matrixPassword) {
 }
 // Geri Dönüş / İptal Butonu
 const matrixCancelBtn = document.getElementById('matrix-cancel-btn');
-if(matrixCancelBtn) {
+if (matrixCancelBtn) {
     matrixCancelBtn.addEventListener('click', () => {
         matrixTerminal.classList.remove('active');
         setTimeout(() => matrixTerminal.classList.add('hidden'), 500);
@@ -3409,18 +3409,18 @@ if(matrixCancelBtn) {
     });
 }
 // GÜNÜ KURTAR MOTORU (FİLTRELEME)
-window.activateSaveTheDay = function(dayData, startBtn, panicBtn) {
-    if(!confirm("Günü Kurtar moduna geçilsin mi? İzolasyon hareketleri silinecek ve dinlenme süreleri 45 saniyeye düşecek!")) return;
+window.activateSaveTheDay = function (dayData, startBtn, panicBtn) {
+    if (!confirm("Günü Kurtar moduna geçilsin mi? İzolasyon hareketleri silinecek ve dinlenme süreleri 45 saniyeye düşecek!")) return;
 
     isExpressMode = true;
-    panicBtn.style.display = 'none'; 
+    panicBtn.style.display = 'none';
     startBtn.innerText = "⚡ EXPRESS İDMANI BAŞLAT";
     startBtn.style.background = "linear-gradient(135deg, #ea580c, #dc2626)";
     startBtn.style.color = "white";
 
     // Vücudu inşaa eden ANA hareketler (Compound)
     const compounds = ['bench', 'squat', 'deadlift', 'pull-up', 'row', 'press', 'pulldown', 'lunge', 'dips'];
-    
+
     // Hareketleri filtrele (Deep Copy yapıyoruz ki asıl program bozulmasın)
     let expressEx = JSON.parse(JSON.stringify(dayData.ex));
     expressEx = expressEx.filter(ex => {
@@ -3429,8 +3429,8 @@ window.activateSaveTheDay = function(dayData, startBtn, panicBtn) {
     });
 
     // Eğer filtre sonucu boş çıkarsa (örneğin tamamen kol günüyse) en baştaki 3 hareketi al
-    if(expressEx.length === 0) expressEx = dayData.ex.slice(0, 3);
-    
+    if (expressEx.length === 0) expressEx = dayData.ex.slice(0, 3);
+
     // Maksimum 4 harekete düşür
     expressEx = expressEx.slice(0, 4);
 
@@ -3442,16 +3442,103 @@ window.activateSaveTheDay = function(dayData, startBtn, panicBtn) {
     });
 
     let expressDayData = { ...dayData, ex: expressEx };
-    
+
     const newStartBtn = startBtn.cloneNode(true);
     startBtn.parentNode.replaceChild(newStartBtn, startBtn);
     newStartBtn.addEventListener('click', () => { startActiveWorkout(expressDayData); });
 
     renderModalExercises(expressDayData.ex);
-    
+
     // Uyarı mesajı ekle
     const holder = document.getElementById('modal-exercises');
     holder.insertAdjacentHTML('afterbegin', `<div style="background:rgba(234, 88, 12, 0.1); border:1px dashed #ea580c; padding:10px; border-radius:8px; margin-bottom:15px; color:#ffedd5; font-size:12px; text-align:center;">İzolasyon hareketleri iptal edildi. Set araları 45 saniyeye kilitlendi. Sadece temel kasları yıkıp çıkıyoruz!</div>`);
+
+    if (navigator.vibrate) navigator.vibrate([100, 50, 100]);
+};
+// ==========================================
+// 🕹️ ARCADE TERMINAL MOTORU
+// ==========================================
+window.openArcadeTerminal = function () {
+    document.getElementById('arcade-screen').classList.remove('hidden');
+
+    // Oly'yi oyundayken gizle
+    const oly = document.getElementById('oly-avatar');
+    if (oly) oly.style.display = 'none';
+
+    if (navigator.vibrate) navigator.vibrate([50, 100]); // Cihazı sars
+};
+
+window.closeArcadeTerminal = function () {
+    document.getElementById('arcade-screen').classList.add('hidden');
+
+    // Oyunu (Kaseti) çıkart
+    document.getElementById('game-container').innerHTML = '';
+    document.getElementById('arcade-game-select').value = '';
+    document.getElementById('arcade-placeholder-text').style.display = 'block';
+    document.getElementById('game-container').style.display = 'none';
+
+    // Oly'yi geri getir
+    const oly = document.getElementById('oly-avatar');
+    if (oly) oly.style.display = 'flex';
+};
+
+window.loadArcadeGame = function() {
+    const game = document.getElementById('arcade-game-select').value;
+    const container = document.getElementById('game-container');
+    const placeholder = document.getElementById('arcade-placeholder-text');
     
-    if(navigator.vibrate) navigator.vibrate([100, 50, 100]);
+    if(!game) {
+        container.style.display = 'none';
+        placeholder.style.display = 'block';
+        container.innerHTML = '';
+        return;
+    }
+
+    // Kaset takılıyor animasyonu
+    placeholder.style.display = 'none';
+    container.style.display = 'block';
+    container.innerHTML = '<div style="display:flex; justify-content:center; align-items:center; height:100%; color:#0f0; font-family:\'Courier New\', monospace; font-weight:bold;">[ARCHIVE.ORG BAĞLANTISI KURULUYOR...]</div>';
+
+    // Telif hakkı yemeyen (Shareware), kesin çalışan Archive.org kasetleri
+    let iframeSrc = "";
+    if (game === 'doom') iframeSrc = "https://archive.org/embed/msdos_Doom_1993";
+    else if (game === 'pop') iframeSrc = "https://archive.org/embed/msdos_Prince_of_Persia_1990";
+    else if (game === 'wolf3d') iframeSrc = "https://archive.org/embed/msdos_Wolfenstein_3D_1992";
+    else if (game === 'aladdin') iframeSrc = "https://archive.org/embed/msdos_Disney_Aladdin_1994";
+    else if (game === 'simcity') iframeSrc = "https://archive.org/embed/msdos_SimCity_1989";
+    else if (game === 'pacman') iframeSrc = "https://archive.org/embed/msdos_Pac-Man_1983";
+
+    // 1 saniye kaset yükleme efekti için bekle
+    setTimeout(() => {
+        container.innerHTML = `<iframe src="${iframeSrc}" width="100%" height="100%" frameborder="0" allowfullscreen="true" webkitallowfullscreen="true" mozallowfullscreen="true" style="border-radius: 8px;"></iframe>`;
+        if (navigator.vibrate) navigator.vibrate([100, 50, 100]);
+    }, 1000);
+};
+// ==========================================
+// 🕹️ GAMEPAD KLAVYE SİNYAL MOTORU
+// ==========================================
+window.pressKey = function(keyCode) {
+    const iframe = document.querySelector('#game-container iframe');
+    if(iframe) {
+        iframe.focus(); // Oyunu odaklar
+        try {
+            // İlgili tuşa basıldı (Örn: 32 = Space, 13 = Enter)
+            const event = new KeyboardEvent('keydown', { keyCode: keyCode, which: keyCode, bubbles: true });
+            iframe.contentWindow.document.dispatchEvent(event);
+        } catch (e) {
+            console.log("Güvenlik Duvarı (CORS): Dış sunucuya tuş basılamadı.", e);
+        }
+    }
+    if (navigator.vibrate) navigator.vibrate(15); // Tuş hissiyatı
+};
+
+window.releaseKey = function(keyCode) {
+    const iframe = document.querySelector('#game-container iframe');
+    if(iframe) {
+        try {
+            // İlgili tuş bırakıldı
+            const event = new KeyboardEvent('keyup', { keyCode: keyCode, which: keyCode, bubbles: true });
+            iframe.contentWindow.document.dispatchEvent(event);
+        } catch (e) {}
+    }
 };

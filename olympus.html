@@ -258,6 +258,12 @@
                             <h4 style="color: #f39c12;">Doğa Günlüğü</h4>
                             <p>Kamp ve Rota Kayıtları</p>
                         </div>
+                        <div class="track-card" onclick="openArcadeTerminal()"
+                            style="background: linear-gradient(145deg, #1a0033, #0a0a0a); border-color: #8a2be2;">
+                            <div class="track-icon">🕹️</div>
+                            <h4 style="color: #d1a3ff;">Arcade Terminal</h4>
+                            <p>Retro E-Spor Klasikleri</p>
+                        </div>
                     </div>
                 </div>
 
@@ -1042,6 +1048,88 @@
                 onmouseover="this.style.background='#0f0'; this.style.color='#000';"
                 onmouseout="this.style.background='transparent'; this.style.color='#0f0';">[ PROTOKOLÜ İPTAL ET
                 ]</button>
+        </div>
+    </div>
+    <!-- ================= ARCADE TERMINAL EKRANI ================= -->
+    <div id="arcade-screen" class="full-screen-overlay hidden" style="z-index: 10000; background: #050505;">
+        <div class="header-top"
+            style="width:100%; padding: calc(env(safe-area-inset-top) + 15px) 20px 15px 20px; background:#000; border-bottom: 2px solid #8a2be2; display: flex; justify-content: space-between; align-items: center;">
+            <h2
+                style="color:#d1a3ff; font-family:'Courier New', monospace; font-weight:900; margin:0; text-shadow: 0 0 10px #8a2be2;">
+                ARCADE_TERMINAL_</h2>
+            <button onclick="closeArcadeTerminal()" class="edit-btn" style="border-color:#ff4444; color:#ff4444;">[X]
+                ÇIKIŞ</button>
+        </div>
+
+        <div
+            style="padding: 10px; width: 100%; max-width: 800px; margin: 0 auto; display: flex; flex-direction: column; align-items: center; gap: 15px;">
+            <!-- OYUN SEÇİCİ -->
+            <div class="input-group" style="width: 100%;">
+                <select id="arcade-game-select" onchange="loadArcadeGame()"
+                    style="width:100%; padding:12px; background:#111; border:1px solid #8a2be2; color:#d1a3ff; border-radius:8px; font-weight:bold; outline:none; font-family:'Courier New', monospace;">
+                    <option value="">-- KONSOL KASETİ SEÇİNİZ --</option>
+                    <option value="doom">DOOM (1993)</option>
+                    <option value="pop">Prince of Persia (1990)</option>
+                    <option value="wolf3d">Wolfenstein 3D (1992)</option>
+                    <option value="aladdin">Disney's Aladdin (1994)</option>
+                    <option value="simcity">SimCity (1989)</option>
+                    <option value="pacman">Pac-Man (1983)</option>
+                </select>
+            </div>
+
+            <!-- OYUN EKRANI -->
+            <div id="arcade-display"
+                style="width: 100%; height: 60vh; min-height: 400px; background: #111; border: 4px solid #333; border-radius: 8px; position: relative; box-shadow: inset 0 0 30px #000, 0 0 20px rgba(138, 43, 226, 0.4); overflow: hidden;">
+
+                <!-- Tüplü TV Efekti (Tıklamayı engellememesi için !important eklendi) -->
+                <div class="crt-scanlines" style="pointer-events: none !important;"></div>
+
+                <div id="arcade-placeholder-text"
+                    style="position:absolute; top:50%; left:50%; transform:translate(-50%, -50%); color:#444; font-family:'Courier New', monospace; font-size: 16px; text-align: center; width: 100%;">
+                    [KASET YUVASI BOŞ]<br><small style="font-size:10px;">Lütfen bir oyun seçin</small>
+                </div>
+
+                <!-- Oyun Container -->
+                <div id="game-container"
+                    style="width:100%; height:100%; display:none; position:absolute; top:0; left:0; z-index:5;"></div>
+            </div>
+
+            <p style="color:#0f0; font-family:'Courier New', monospace; font-size:11px; text-align:center;">
+                [BİLGİ]: Seçilen oyunların kendi sanal dokunmatik kontrolleri mevcuttur.<br>Ekrana bir kez tıklayarak
+                oyunu başlatın.
+            </p>
+        </div>
+        <!-- SANAL KONTROLCÜ (Retro Gamepad) -->
+        <div class="arcade-controls" id="arcade-controls"
+            style="display: flex; flex-wrap: wrap; gap: 30px; width: 100%; justify-content: center; margin-top: 20px; z-index: 10001;">
+
+            <!-- Yön Tuşları (D-Pad) -->
+            <div class="d-pad" style="display: grid; grid-template-columns: 50px 50px 50px; gap: 5px;">
+                <div></div>
+                <button class="arcade-btn" onmousedown="pressKey(38)" onmouseup="releaseKey(38)"
+                    ontouchstart="pressKey(38)" ontouchend="releaseKey(38)">▲</button>
+                <div></div>
+                <button class="arcade-btn" onmousedown="pressKey(37)" onmouseup="releaseKey(37)"
+                    ontouchstart="pressKey(37)" ontouchend="releaseKey(37)">◀</button>
+                <button class="arcade-btn" onmousedown="pressKey(40)" onmouseup="releaseKey(40)"
+                    ontouchstart="pressKey(40)" ontouchend="releaseKey(40)">▼</button>
+                <button class="arcade-btn" onmousedown="pressKey(39)" onmouseup="releaseKey(39)"
+                    ontouchstart="pressKey(39)" ontouchend="releaseKey(39)">▶</button>
+            </div>
+
+            <!-- Aksiyon Tuşları (A, B ve Start) -->
+            <div class="action-buttons" style="display: flex; flex-direction: column; align-items: center; gap: 15px;">
+                <div style="display: flex; gap: 15px;">
+                    <button class="arcade-btn round" style="background:#ff4444;" onmousedown="pressKey(17)"
+                        onmouseup="releaseKey(17)" ontouchstart="pressKey(17)" ontouchend="releaseKey(17)">B</button>
+                    <button class="arcade-btn round" style="background:#00d2ff;" onmousedown="pressKey(32)"
+                        onmouseup="releaseKey(32)" ontouchstart="pressKey(32)" ontouchend="releaseKey(32)">A</button>
+                </div>
+                <button class="arcade-btn"
+                    style="width: 90px; height: 35px; font-size: 14px; border-radius: 20px; background: #555;"
+                    onmousedown="pressKey(13)" onmouseup="releaseKey(13)" ontouchstart="pressKey(13)"
+                    ontouchend="releaseKey(13)">START</button>
+            </div>
         </div>
     </div>
     <script src="script.js"></script>
