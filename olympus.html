@@ -1,0 +1,1046 @@
+<!DOCTYPE html>
+<html lang="tr">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport"
+        content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <title>Project Olympus</title>
+    <link rel="apple-touch-icon" href="icon.png">
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,400..900;1,400..900&display=swap"
+        rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
+
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <link href="https://fonts.googleapis.com/css2?family=Caveat:wght@400..700&display=swap" rel="stylesheet">
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.8.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.8.1/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.8.1/firebase-firestore-compat.js"></script>
+   
+</head>
+
+<body>
+    <!-- Yükleme Ekranı -->
+    <div id="loading-screen" class="loading-screen">
+        <h1 id="loading-text" class="loading-text"></h1>
+    </div>
+
+    <div id="login-screen" class="full-screen-overlay">
+        <div class="login-box">
+            <h1 class="brand-title">PROJECT OLYMPUS</h1>
+            <p style="color:var(--text-muted); margin-bottom:30px; font-size:14px;">Kendi limitlerini aşmaya hazır
+                mısın?</p>
+            <button id="google-login-btn" class="save-btn"
+                style="display:flex; justify-content:center; align-items:center; gap:10px; font-size:16px; width: 100%;">
+                <img src="https://upload.wikimedia.org/wikipedia/commons/c/c1/Google_%22G%22_logo.svg" alt="G"
+                    style="width:22px; background: white; border-radius: 50%; padding: 2px;">
+                Google İle Giriş Yap
+            </button>
+        </div>
+    </div>
+
+    <div id="active-workout-screen" class="full-screen-overlay hidden" style="background-color: #000; z-index: 2000;">
+        <div class="workout-player-header">
+            <span id="player-progress">1 / 6 Hareket</span>
+            <button class="close-player-btn" onclick="exitWorkoutPlayer()">Kapat X</button>
+        </div>
+        <div class="workout-player-body">
+            <h2 id="player-ex-name"
+                style="color:var(--goldnova); font-size:28px; text-align:center; margin-bottom:5px;">Bench Press</h2>
+            <p id="player-ex-details" style="color:#888; text-align:center; margin-bottom:30px;">Set: 4 x 8 | Tempo:
+                3-1-1-0 | RPE: 8.5</p>
+            <div class="form-grid" style="max-width: 300px; margin: 0 auto; gap:15px;">
+                <div class="input-group"><label style="text-align:center;">Ağırlık (kg)</label><input type="number"
+                        id="player-weight" style="font-size:24px; text-align:center; font-weight:bold;"></div>
+                <div class="input-group"><label style="text-align:center;">Tekrar</label><input type="number"
+                        id="player-reps" style="font-size:24px; text-align:center; font-weight:bold;"></div>
+            </div>
+            <div id="player-timer-display" class="hidden" style="text-align:center; margin-top:30px;">
+                <p style="color:#888;">Dinlenme Süresi</p>
+                <h1 style="color:var(--goldnova); font-size:48px;" id="timer-seconds">90</h1>
+            </div>
+        </div>
+        <div class="workout-player-footer">
+            <button id="player-save-btn" class="save-btn" onclick="saveSetAndRest()">Seti Kaydet & Dinlen</button>
+            <button id="player-next-btn" class="edit-btn hidden"
+                style="width:100%; padding:15px; font-size:16px; margin-top:10px;" onclick="nextExercise()">Sonraki
+                Harekete Geç</button>
+        </div>
+    </div>
+
+    <div id="app-content" class="hidden">
+        <header class="mobile-header" id="main-header">
+            <div class="header-top">
+                <h1 class="brand-title"><span id="secret-trigger" style="cursor:pointer;">PROJECT OLYMPUS</span></h1>
+                <div class="header-right">
+                    <!-- YENİ BİLDİRİM BUTONU -->
+                    <button onclick="openNotifications()" class="edit-btn"
+                        style="border:none; font-size:22px; padding: 0 5px; position:relative; background:transparent;">
+                        🔔
+                        <span id="notif-badge"
+                            style="position:absolute; top:-2px; right:-2px; background:#ff4444; color:#fff; font-size:10px; font-weight:bold; padding:2px 6px; border-radius:10px; display:none;">0</span>
+                    </button>
+                    <img id="header-profile-img" src="icon.png" class="header-avatar top-nav-btn"
+                        data-target="profile-sec" alt="Profil">
+                </div>
+
+            </div>
+            <div class="day-tracker-container" id="day-tracker">
+                <div class="current-day-badge"><span id="display-day-text">GÜN 1</span></div>
+                <div class="toggle-container">
+                    <button id="btn-today" class="day-toggle active">Bugün</button>
+                    <button id="btn-tomorrow" class="day-toggle">Yarın</button>
+                    <button id="btn-all" class="day-toggle">Tümü</button>
+                </div>
+            </div>
+        </header>
+
+        <main class="content">
+            <section id="workout-sec" class="screen active">
+                <div class="phase-selector">
+                    <button class="phase-btn active" data-phase="p1">Faz 1</button>
+                    <button class="phase-btn" data-phase="p2">Faz 2</button>
+                    <button class="phase-btn" data-phase="p3">Faz 3</button>
+                </div>
+                <h1 id="workout-day-title">Antrenman</h1>
+                <p class="subtitle" id="workout-day-desc">Program yükleniyor...</p>
+                <div id="days-container" class="grid-container"></div>
+                <div id="workout-modal" class="modal">
+                    <div class="modal-content" style="height: 85vh;">
+                        <h2 id="modal-title" style="margin-bottom: 15px; color:var(--goldnova);">Detay</h2>
+                        <button class="save-btn" id="start-workout-btn" style="margin-bottom: 15px; font-size: 16px;">🚀
+                            İdmanı Başlat</button>
+                        <div id="modal-exercises" class="modal-body"></div>
+                        <button class="save-btn close-modal-btn" style="background:#333; color:white;">Listeyi
+                            Kapat</button>
+                    </div>
+                </div>
+            </section>
+
+            <section id="diet-sec" class="screen">
+                <div style="display:flex; justify-content:space-between; align-items:center;">
+                    <h1 id="diet-day-title">Beslenme</h1>
+                    <button class="edit-btn" onclick="resetDietUI()">Sıfırla</button>
+                </div>
+                <p class="subtitle" id="diet-day-desc" style="margin-bottom:10px;">Bugünün Menüsü</p>
+                <p style="font-size:11px; color:#888; text-align:center; margin-bottom:15px;">Yediğin öğünü sağa,
+                    kaçırdığını sola kaydır. Alternatifler için karta tıkla.</p>
+                <div id="diet-container" class="supp-container" style="margin-bottom: 30px;"></div>
+
+                <h3 style="margin-bottom: 10px;">Supplement Protokolü</h3>
+                <div class="supp-container">
+                    <div class="supp-item">
+                        <div class="supp-icon">☀️</div>
+                        <div class="supp-details">
+                            <h4>Sabah</h4>
+                            <p>Filtre Kahve (Dinlenmede: 5g Kreatin)</p>
+                        </div>
+                    </div>
+                    <div class="supp-item">
+                        <div class="supp-icon">⚡</div>
+                        <div class="supp-details">
+                            <h4>Pre-Workout</h4>
+                            <p>Filtre Kahve + Elektrolit</p>
+                        </div>
+                    </div>
+                    <div class="supp-item">
+                        <div class="supp-icon">💪</div>
+                        <div class="supp-details">
+                            <h4>Post-Workout</h4>
+                            <p>Whey Protein + 5g Kreatin (Varsa)</p>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <section id="activity-sec" class="screen">
+                <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom: 5px;">
+                    <h1>Günlük Aktivite</h1>
+                    <button id="edit-activity-btn" class="edit-btn">Düzenle</button>
+                </div>
+                <p class="subtitle">Manifestoya Sadakat Kontrolü</p>
+                <div id="add-activity-container" class="add-activity-container hidden">
+                    <input type="text" id="new-activity-input" placeholder="Yeni görev ekle...">
+                    <button id="add-activity-btn">+</button>
+                </div>
+                <div id="success-banner" class="success-banner hidden">🔥 GÜNLÜK HEDEFE ULAŞILDI!</div>
+                <div id="activity-list" class="checklist-container"></div>
+            </section>
+
+            <section id="tracking-sec" class="screen">
+                <h1>Takip Merkezi</h1>
+                <p class="subtitle">İlerleme Grafikleri ve Veri Girişi</p>
+                <div class="tracking-grid">
+                    <div class="track-card" onclick="openTrackingModal('fat')">
+                        <div class="track-icon">🧬</div>
+                        <h4>Yağ Oranı</h4>
+                        <p>US Navy Formülü</p>
+                    </div>
+                    <div class="track-card" onclick="openTrackingModal('measurements')">
+                        <div class="track-icon">📏</div>
+                        <h4>Ölçülerim</h4>
+                        <p>Mezura Kaydı</p>
+                    </div>
+                    <div class="track-card" onclick="openTrackingModal('volume')">
+                        <div class="track-icon">📊</div>
+                        <h4>İdman Hacmi</h4>
+                        <p>5 Temel Hareket</p>
+                    </div>
+                    <div class="track-card" onclick="openTrackingModal('weight')">
+                        <div class="track-icon">⚖️</div>
+                        <h4>Ağırlık</h4>
+                        <p>Kilo Grafiği</p>
+                    </div>
+                    <div class="track-card" onclick="openTrackingModal('water')">
+                        <div class="track-icon">💧</div>
+                        <h4>Su Tüketimi</h4>
+                        <p>Hedef Takibi</p>
+                    </div>
+                    <div class="track-card" onclick="openTrackingModal('macros')">
+                        <div class="track-icon">🍱</div>
+                        <h4>Öğün Takibi</h4>
+                        <p>Kalori Grafiği</p>
+                    </div>
+                    <div class="track-card spec-track-card" onclick="openTrackingModal('deload_info')">
+                        <div class="track-icon">⚙️</div>
+                        <h4>Deload Motoru</h4>
+                    </div>
+                    <div class="track-card spec-track-card" onclick="openTrackingModal('macro_info')">
+                        <div class="track-icon">🚀</div>
+                        <h4>Makro Manipülasyon</h4>
+                    </div>
+                </div>
+                <div id="tracking-modal" class="modal">
+                    <div class="modal-content">
+                        <h2 id="track-modal-title" style="margin-bottom: 15px; color:var(--goldnova);">Başlık</h2>
+                        <div id="track-modal-body" class="modal-body" style="min-height: 150px;"></div>
+                        <button class="save-btn"
+                            onclick="document.getElementById('tracking-modal').style.display='none'">Kapat</button>
+                    </div>
+                </div>
+            </section>
+            <!-- ================= SPORLAR EKRANI ================= -->
+            <section id="sports-sec" class="screen">
+                <div id="sports-home">
+                    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom: 5px;">
+                        <h1 style="margin:0;">Sporlar</h1>
+                        <button onclick="closeSportsScreen()" class="edit-btn"
+                            style="border-color:#ff4444; color:#ff4444;">← Profil'e Dön</button>
+                    </div>
+                    <p class="subtitle">Takım oyunları ve taktiksel yönetim.</p>
+
+                    <div class="tracking-grid" style="margin-top: 20px;">
+                        <div class="track-card" onclick="openFootballManager()"
+                            style="background: linear-gradient(145deg, #0d3617, #151515); border-color: #27ae60;">
+                            <div class="track-icon">⚽</div>
+                            <h4>Futbol (Halı Saha)</h4>
+                            <p>Kadro ve Skorlar</p>
+                        </div>
+                        <div class="track-card" style="opacity: 0.5; cursor: not-allowed;">
+                            <div class="track-icon">🏀</div>
+                            <h4>Basketbol</h4>
+                            <p>Yakında Eklenecek</p>
+                        </div>
+                        <!-- YENİ EKLENEN: KAMP BUTONU -->
+                        <div class="track-card" onclick="openCampBook()"
+                            style="background: linear-gradient(145deg, #3a2e12, #151515); border-color: #d35400; grid-column: span 2;">
+                            <div class="track-icon">🏕️</div>
+                            <h4 style="color: #f39c12;">Doğa Günlüğü</h4>
+                            <p>Kamp ve Rota Kayıtları</p>
+                        </div>
+                    </div>
+                </div>
+
+
+                <!-- FUTBOL YÖNETİM MERKEZİ (İÇ EKRAN) -->
+                <div id="football-manager" class="hidden">
+                    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:15px;">
+                        <button onclick="closeFootballManager()" class="edit-btn"
+                            style="border-color:#ff4444; color:#ff4444;">←
+                            Geri</button>
+                        <h2 style="color: var(--goldnova); font-weight: 900; font-style: italic;">FC GOLDNOVA</h2>
+                    </div>
+
+                    <!-- SEKME KONTROLLERİ -->
+                    <div class="toggle-container" style="width: 100%; margin-bottom: 20px;">
+                        <button id="btn-tab-lineup" class="day-toggle active" style="flex:1; font-size:13px;"
+                            onclick="switchFootballTab('lineup')">Kadro & Taktik</button>
+                        <button id="btn-tab-history" class="day-toggle" style="flex:1; font-size:13px;"
+                            onclick="switchFootballTab('history')">Geçmiş Maçlar</button>
+                    </div>
+
+                    <!-- 1. SEKME: KADRO & TAKTİK -->
+                    <div id="fb-tab-lineup">
+                        <div class="input-group" style="margin-bottom: 15px;">
+                            <label style="color:var(--goldnova);">7v7 Diziliş Seçimi</label>
+                            <select id="formation-select" onchange="changeFormation()"
+                                style="width:100%; padding:12px; background:#151515; border:1px solid #333; color:#fff; border-radius:8px; font-weight:bold; outline:none;">
+                                <option value="2-3-1">2-3-1 (Dengeli)</option>
+                                <option value="3-2-1">3-2-1 (Defansif)</option>
+                                <option value="2-2-2">2-2-2 (Ofansif)</option>
+                                <option value="1-3-2">1-3-2 (Hücum Pres)</option>
+                            </select>
+                        </div>
+
+                        <!-- FUTBOL SAHASI -->
+                        <div class="football-pitch" id="pitch-container">
+                            <div class="pitch-lines center-circle"></div>
+                            <div class="pitch-lines penalty-box-top"></div>
+                            <div class="pitch-lines penalty-box-bottom"></div>
+
+                            <!-- Formalar JS tarafından buraya basılacak -->
+                        </div>
+                        <p style="text-align:center; color:#888; font-size:11px; margin-top:10px;">İsim girmek veya
+                            değiştirmek için formalara tıkla.</p>
+                        <button class="save-btn" onclick="saveLineup()"
+                            style="margin-top: 10px; background:#27ae60;">Kadroyu
+                            Kaydet</button>
+                        <button class="edit-btn" onclick="openTacticBoard()"
+                            style="width: 100%; margin-top: 10px; border-color: #00d2ff; color: #00d2ff;">📋 Taktik
+                            Tahtasını Aç</button>
+
+                        <!-- 3D DÖNEBİLEN FUT KARTI -->
+                        <div class="fut-card-container"
+                            onclick="this.classList.toggle('flipped'); triggerCardCelebration();">
+                            <div class="fut-card-inner">
+                                <!-- KARTIN ÖN YÜZÜ -->
+                                <!-- KARTIN ÖN YÜZÜ -->
+                                <div class="fut-card-front fut-card">
+                                    <!-- Arka Plan Maskeli Resim -->
+                                    <div class="fut-card-img-container">
+                                        <img id="fut-avatar-img" src="icon.png" alt="oyuncu" class="fut-player-img">
+                                    </div>
+
+                                    <!-- Sol Üst Bilgiler (Resmin Üstünde Kalacak) -->
+                                    <div class="fut-stats-top">
+                                        <div id="fut-rating">88</div>
+                                        <div id="fut-position">ST</div>
+                                        <!-- YENİ EKLENEN: Uyruk ve Kimya (Şimşek) -->
+                                        <div class="fut-nation">🇹🇷</div>
+                                        <div class="fut-club">⚡</div>
+                                        <div class="fut-jersey-badge">
+                                            <span>👕</span>
+                                            <span id="fut-jersey-num">10</span>
+                                        </div>
+                                    </div>
+
+                                    <!-- Alt İstatistikler -->
+                                    <div class="fut-card-bottom">
+                                        <h3 id="fut-name">GOLDNOVA OYUNCU</h3>
+                                        <div class="fut-stats-grid">
+                                            <div><span id="stat-pace" class="stat-val">90</span> <span
+                                                    class="stat-lbl">PAC</span></div>
+                                            <div><span id="stat-dribble" class="stat-val">88</span> <span
+                                                    class="stat-lbl">DRI</span></div>
+                                            <div><span id="stat-shoot" class="stat-val">85</span> <span
+                                                    class="stat-lbl">SHO</span></div>
+                                            <div><span id="stat-def" class="stat-val">70</span> <span
+                                                    class="stat-lbl">DEF</span></div>
+                                            <div><span id="stat-pass" class="stat-val">82</span> <span
+                                                    class="stat-lbl">PAS</span></div>
+                                            <div><span id="stat-phys" class="stat-val">86</span> <span
+                                                    class="stat-lbl">PHY</span></div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- KARTIN ARKA YÜZÜ (RADAR VE İSTATİSTİKLER) -->
+                                <div class="fut-card-back fut-card"
+                                    style="display: flex; flex-direction: column; justify-content: center; align-items: center; padding: 15px;">
+                                    <h4
+                                        style="color: #000; margin-bottom: 5px; font-size: 14px; text-transform: uppercase;">
+                                        Performans Analizi</h4>
+                                    <div
+                                        style="width: 100%; height: 160px; background: rgba(255,255,255,0.1); border-radius: 10px; padding: 5px;">
+                                        <canvas id="fut-radar-chart"></canvas>
+                                    </div>
+                                    <div
+                                        style="width: 100%; margin-top: 15px; background: #000; color: #f6c000; border-radius: 8px; padding: 10px; text-align: center; box-shadow: inset 0 0 5px #f6c000;">
+                                        <div
+                                            style="display: flex; justify-content: space-around; font-size: 12px; font-weight: bold;">
+                                            <div>GOL<br><span id="career-goals"
+                                                    style="font-size: 16px; color: #fff;">0</span></div>
+                                            <div>ASİST<br><span id="career-assists"
+                                                    style="font-size: 16px; color: #fff;">0</span>
+                                            </div>
+                                            <div>MOTM<br><span id="career-motm"
+                                                    style="font-size: 16px; color: #fff;">0</span></div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <button class="edit-btn" onclick="openFutEditModal()"
+                            style="width:100%; margin-top:12px; border-color:var(--goldnova); color:var(--goldnova);">⚙️
+                            Kart
+                            Özelliklerini Düzenle</button>
+
+                    </div> <!-- KADRO SEKMESİNİN DOĞRU KAPANIŞI -->
+
+                    <!-- 2. SEKME: GEÇMİŞ MAÇLAR -->
+                    <!-- 2. SEKME: GEÇMİŞ MAÇLAR -->
+                    <div id="fb-tab-history" class="hidden">
+                        <button class="save-btn" onclick="addNewMatch()"
+                            style="margin-bottom: 20px; background:var(--goldnova); color:#000;">+ Yeni Maç Skoru
+                            Ekle</button>
+
+                        <div id="match-history-container" class="grid-container">
+                            <!-- Skorlar JS tarafından buraya basılacak -->
+                        </div>
+                    </div>
+                </div>
+            </section>
+            <section id="profile-sec" class="screen">
+                <div class="profile-header" style="position: relative; padding-top: 20px;">
+                    <button id="open-anatomy-btn" onclick="openAnatomy()"
+                        style="position: absolute; right: 0; top: 0; background: transparent; border: none; color: var(--goldnova); font-size: 28px; cursor: pointer; padding: 5px;">☰</button>
+                    <div class="profile-img-container">
+                        <input type="file" id="profile-img-upload" accept="image/*" style="display:none;">
+                        <img id="profile-image-large" src="icon.png" alt="Profil"
+                            style="width: 90px; height: 90px; border-radius: 50%; border: 3px solid var(--goldnova);">
+                        <button onclick="document.getElementById('profile-img-upload').click();" class="edit-btn"
+                            style="margin-top:10px;">Fotoğrafı Değiştir</button>
+                    </div>
+                    <div class="profile-info" style="margin-top:15px; text-align:center;">
+                        <h2 id="profile-name-display" class="brand-title" style="font-size:24px;">Yükleniyor...</h2>
+                        <p class="subtitle" style="margin-bottom:0; color:#888;">Project Olympus</p>
+                    </div>
+                </div>
+                <!-- TAKİPÇİ VE TAKİP EDİLEN İSTATİSTİKLERİ (TIKLANABİLİR) -->
+                <div style="display: flex; justify-content: center; gap: 40px; margin: 15px 0 20px 0;">
+                    <div style="text-align: center; cursor: pointer;" onclick="openFollowList('following')">
+                        <strong id="profile-following" style="color:var(--goldnova); font-size:20px;">0</strong><br>
+                        <span style="font-size:11px; color:#888;">Takip Edilen</span>
+                    </div>
+                    <div style="text-align: center; cursor: pointer;" onclick="openFollowList('followers')">
+                        <strong id="profile-followers" style="color:var(--goldnova); font-size:20px;">0</strong><br>
+                        <span style="font-size:11px; color:#888;">Takipçi</span>
+                    </div>
+                </div>
+
+                <!-- GÜNCELLENMİŞ BAŞARI SKORU (Tıklanabilir) -->
+                <div class="score-container" onclick="openBadgesModal()" style="cursor: pointer; transition: 0.2s;">
+                    <div class="score-circle"><span id="weekly-score">100</span><small>%</small></div>
+                    <div class="score-text">
+                        Haftalık Başarı Skoru
+                        <br><span style="font-size:10px; color:var(--goldnova);">🏆 Rozetleri Görmek İçin Dokun</span>
+                    </div>
+                </div>
+                <!-- OLYMPUS ARENA GİRİŞ BUTONU -->
+                <button class="arena-entry-btn" onclick="openArenaScreen()">
+                    <span style="font-size: 22px;">⚔️</span>
+                    <span>OLYMPUS ARENA'YA GİR</span>
+                </button>
+                <button class="arena-entry-btn" onclick="openSportsScreen()"
+                    style="margin-top: 15px; background: linear-gradient(45deg, #0d3617, #151515); border-color: #27ae60; color: #fff;">
+                    <span style="font-size: 22px;">⚽</span>
+                    <span>FC OLYMPUS</span>
+                </button>
+
+                <button class="save-btn"
+                    style="background:#252525; color:var(--goldnova); border: 1px solid var(--goldnova); margin-top:20px;"
+                    onclick="document.getElementById('settings-modal').style.display='flex'">Ayarlar &
+                    Tercihler</button>
+
+                <h3 style="margin-top: 30px; margin-bottom: 10px;">Güncel İstatistikler</h3>
+                <div class="form-grid">
+                    <div class="read-only-stat"><span>Kilo:</span> <strong id="ro-weight">-- kg</strong></div>
+                    <div class="read-only-stat"><span>Boy:</span> <strong id="ro-height">-- cm</strong></div>
+                    <div class="read-only-stat"><span>Bel:</span> <strong id="ro-waist">-- cm</strong></div>
+                    <div class="read-only-stat"><span>Göğüs:</span> <strong id="ro-chest">-- cm</strong></div>
+                    <div class="read-only-stat"><span>Omuz:</span> <strong id="ro-shoulder">-- cm</strong></div>
+                    <div class="read-only-stat"><span>Kol:</span> <strong id="ro-arm">-- cm</strong></div>
+                    <div class="read-only-stat"><span>Basen:</span> <strong id="ro-hips">-- cm</strong></div>
+                    <div class="read-only-stat"><span>Kalf:</span> <strong id="ro-calf">-- cm</strong></div>
+                </div>
+                <div style="height: 80px;"></div>
+            </section>
+            <!-- OLYMPUS ARENA EKRANI (Buraya Ekliyoruz) -->
+            <section id="arena-sec" class="screen">
+                <div class="header-section" style="padding-top: 20px; text-align: center; position: relative;">
+                    <button onclick="closeArenaScreen()"
+                        style="position: absolute; left: 15px; top: 20px; background: none; border: none; color: var(--goldnova); font-size: 24px; cursor: pointer;">←</button>
+                    <h2 style="color: var(--goldnova); letter-spacing: 2px;">OLYMPUS ARENA</h2>
+                    <p style="color: var(--text-muted); font-size: 14px;">Diğer sporcuları bul ve rekabete katıl.</p>
+                </div>
+                <!-- GÜNÜN OYUNU BUTONU -->
+                <button class="arena-entry-btn" onclick="openMiniGame()"
+                    style="margin-top:0; margin-bottom: 20px; background: linear-gradient(45deg, #001f3f, #00d2ff); border-color: #00d2ff; color: #fff;">
+                    <span style="font-size: 22px;">🎮</span>
+                    <span>GÜNÜN OYUNU (GÖKTEN DÜŞENLER)</span>
+                </button>
+                <div class="arena-search-box">
+                    <input type="text" id="user-search-input" placeholder="Sporcu ara (Örn: Emirhan)...">
+                    <button onclick="searchUsers()">Bul</button>
+                </div>
+
+                <div id="search-results" class="arena-list"></div>
+
+                <hr style="border-color: #333; margin: 25px 0;">
+
+                <h3
+                    style="color: #fff; font-size: 16px; margin-bottom: 45px; text-align: center; text-transform: uppercase; letter-spacing: 1px;">
+                    🏆 Olympus Liderleri 🏆</h3>
+                <div id="arena-leaderboard" class="podium-container">
+                    <p style="color: gray; text-align: center; width: 100%; font-size: 12px;">Puanlar yükleniyor...</p>
+                </div>
+
+                <hr style="border-color: #333; margin: 25px 0;">
+
+                <h3 style="color: #fff; font-size: 16px; margin-bottom: 15px;">Canlı Akış (Feed)</h3>
+                <div id="arena-feed" class="arena-list">
+                    <p style="color: gray; text-align: center; font-size: 14px;">Henüz bir hareket yok. Birilerini takip
+                        etmeye başla!</p>
+                </div>
+                <div style="height: 80px;"></div>
+            </section>
+            <!-- ARENA EKRANI SONU -->
+
+            <div id="settings-modal" class="modal">
+                <div class="modal-content">
+                    <h2 style="color:var(--goldnova); margin-bottom:15px;">Ayarlar</h2>
+                    <div class="modal-body">
+                        <div class="input-group"><label>Ad Soyad</label><input type="text" id="profile-name-input">
+                        </div>
+                        <div class="input-group" style="margin-top:15px;"><label>Program Başlangıç Tarihi</label><input
+                                type="date" id="start-date" class="date-input" style="width:100%; padding:14px;"></div>
+                    </div>
+                    <!-- YENİ: iOS TARZI TEMA DEĞİŞTİRİCİ (TOGGLE) -->
+                    <div class="input-group"
+                        style="margin-top: 25px; display: flex; justify-content: space-between; align-items: center; background: #151515; padding: 12px 15px; border-radius: 12px; border: 1px solid #333;">
+                        <label style="margin: 0; font-size: 14px; color: #fff; font-weight: bold;">Açık Tema (Gündüz
+                            Modu)</label>
+                        <label class="ios-switch">
+                            <input type="checkbox" id="theme-toggle-checkbox" onchange="toggleTheme()">
+                            <span class="ios-slider"></span>
+                        </label>
+                    </div>
+                    <button class="save-btn" id="save-settings-btn">Kaydet & Kapat</button>
+                    <!-- YENİ ÇIKIŞ YAP BUTONU -->
+                    <button onclick="logout()" class="edit-btn"
+                        style="width:100%; border-color:#ff4444; color:#ff4444; margin-top:10px;">🚪 Çıkış Yap</button>
+                </div>
+            </div>
+        </main>
+
+        <nav class="bottom-nav">
+            <button class="nav-btn active" data-target="workout-sec"><span class="icon">🏋️</span><span
+                    class="text">İdman</span></button>
+            <button class="nav-btn" data-target="diet-sec"><span class="icon">🍽️</span><span
+                    class="text">Diyet</span></button>
+            <button class="nav-btn" data-target="activity-sec"><span class="icon">✅</span><span
+                    class="text">Görev</span></button>
+            <button class="nav-btn" data-target="tracking-sec"><span class="icon">🎯</span><span
+                    class="text">Takip</span></button>
+        </nav>
+    </div>
+
+    <!-- APP CONTENT DIŞINDA KALAN, TEK ANATOMİ MODALI -->
+    <div id="anatomy-modal" style="display: none;">
+        <div class="modal-content">
+            <h2 style="color: var(--goldnova); margin-bottom: 15px; text-align: center;">Haftalık Anatomi & Analiz</h2>
+
+            <div
+                style="background: #1a1a1a; border-radius: 12px; padding: 20px; margin-bottom: 20px; text-align: center; position: relative;">
+                <svg viewBox="0 0 200 340"
+                    style="width: 100%; max-width: 220px; height: auto; margin: 0 auto; display: block; filter: drop-shadow(0 0 15px rgba(0,0,0,0.5));">
+                    <g fill="#2a2a2a" stroke="#151515" stroke-width="2">
+                        <polygon points="90,20 110,20 115,40 100,55 85,40" />
+                        <polygon points="95,55 105,55 110,70 90,70" />
+                    </g>
+                    <g id="muscle-chest" class="muscle-group" data-name="Göğüs (Chest)">
+                        <polygon points="98,72 65,72 70,105 98,110" />
+                        <polygon points="102,72 135,72 130,105 102,110" />
+                    </g>
+                    <g id="muscle-core" class="muscle-group" data-name="Karın (Core)">
+                        <polygon points="98,112 72,108 77,155 98,165" />
+                        <polygon points="102,112 128,108 123,155 102,165" />
+                    </g>
+                    <g id="muscle-arms-l" class="muscle-group" data-name="Sol Kol & Omuz">
+                        <polygon points="63,72 40,85 45,105 68,90" />
+                        <polygon points="45,107 30,140 45,145 60,110" />
+                        <polygon points="30,142 20,185 35,190 45,147" />
+                    </g>
+                    <g id="muscle-arms-r" class="muscle-group" data-name="Sağ Kol & Omuz">
+                        <polygon points="137,72 160,85 155,105 132,90" />
+                        <polygon points="155,107 170,140 155,145 140,110" />
+                        <polygon points="170,142 180,185 165,190 155,147" />
+                    </g>
+                    <g id="muscle-legs-l" class="muscle-group" data-name="Sol Bacak (Legs)">
+                        <polygon points="75,160 45,230 70,240 95,170" />
+                        <polygon points="48,245 45,310 65,315 72,245" />
+                    </g>
+                    <g id="muscle-legs-r" class="muscle-group" data-name="Sağ Bacak (Legs)">
+                        <polygon points="125,160 155,230 130,240 105,170" />
+                        <polygon points="152,245 155,310 135,315 128,245" />
+                    </g>
+                </svg>
+
+                <div id="muscle-name-display"
+                    style="height: 20px; color: var(--goldnova); font-weight: 800; font-size: 16px; margin-top: 15px; opacity: 0; transition: opacity 0.3s ease;">
+                    Kas Adı
+                </div>
+                <p style="font-size: 10px; color: #666; margin-top: 5px;">İsmini görmek için kasın üzerine basılı tutun.
+                </p>
+            </div>
+
+            <div id="all-charts-container" class="modal-body" style="text-align: left;">
+            </div>
+
+            <button class="save-btn" onclick="closeAnatomy()" style="margin-top: 15px;">Kapat</button>
+        </div>
+    </div>
+    <!-- BAŞARI ROZETLERİ MODALI -->
+    <div id="badges-modal" class="modal">
+        <div class="modal-content" style="max-height: 85vh; width: 95%; max-width: 500px;">
+            <h2 style="color:var(--goldnova); text-align:center; margin-bottom: 15px;">Başarı Rozetleri</h2>
+            <p style="text-align: center; color: var(--text-muted); font-size: 12px; margin-bottom: 15px;">Sistem
+                gelişimini takip eder. Görevleri tamamlayarak rozetleri aydınlat!</p>
+            <div class="modal-body badge-grid" id="badge-grid-container">
+                <!-- Rozetler JS ile buraya yüklenecek -->
+            </div>
+            <button class="save-btn"
+                onclick="document.getElementById('badges-modal').style.display='none'">Kapat</button>
+        </div>
+    </div>
+    <!-- YENİ MAÇ EKLEME MODALI -->
+    <div id="new-match-modal" class="modal">
+        <div class="modal-content">
+            <h2 style="color:var(--goldnova); margin-bottom:15px;">Fikstür / Maç Ekle</h2>
+            <div class="modal-body form-grid">
+                <div class="input-group"><label>Rakip Takım</label><input type="text" id="match-opp"
+                        placeholder="Örn: Real Mardin"></div>
+                <div class="input-group"><label>Tarih</label><input type="date" id="match-date" class="date-input">
+                </div>
+                <div class="input-group"><label>Saat</label><input type="time" id="match-time" class="date-input"></div>
+                <div class="input-group"><label>Saha Konumu</label><input type="text" id="match-loc"
+                        placeholder="Örn: Merkez Halı Saha"></div>
+                <div class="input-group"><label>Bizim Skor (Oynandıysa)</label><input type="number" id="match-score-my">
+                </div>
+                <div class="input-group"><label>Rakip Skor (Oynandıysa)</label><input type="number"
+                        id="match-score-opp"></div>
+            </div>
+            <p style="font-size:11px; color:var(--text-muted); text-align:center; margin:10px 0;">Not: Şu an "Kadro &
+                Taktik" sekmesinde kurulu olan diziliş bu maça kalıcı olarak kaydedilecektir.</p>
+            <button class="save-btn" onclick="saveNewMatchAdvanced()" style="background:#27ae60;">Maçı Kaydet</button>
+            <button class="edit-btn" style="width:100%; margin-top:10px;"
+                onclick="document.getElementById('new-match-modal').style.display='none'">İptal</button>
+        </div>
+    </div>
+
+    <!-- GEÇMİŞ MAÇ KADROSU İZLEME MODALI -->
+    <div id="view-match-modal" class="modal">
+        <div class="modal-content" style="max-width: 500px;">
+            <h2 id="view-match-title" style="color:var(--goldnova); text-align:center; margin-bottom:5px;">Maç Detayı
+            </h2>
+            <p id="view-match-subtitle" style="text-align:center; font-size:12px; color:#888; margin-bottom:15px;"></p>
+            <div class="football-pitch" id="view-pitch-container">
+                <div class="pitch-lines center-circle"></div>
+                <div class="pitch-lines penalty-box-top"></div>
+                <div class="pitch-lines penalty-box-bottom"></div>
+                <!-- Oyuncular buraya basılacak -->
+            </div>
+            <button class="save-btn" onclick="document.getElementById('view-match-modal').style.display='none'"
+                style="margin-top:15px;">Kapat</button>
+        </div>
+    </div>
+    <div id="oly-avatar">
+        <div class="oly-eyes">
+            <div class="oly-eye"></div>
+            <div class="oly-eye"></div>
+        </div>
+    </div>
+
+    <div id="oly-chat-window">
+        <div class="oly-chat-header">
+            <div style="display: flex; align-items: center; gap: 10px;">
+                <div class="oly-chat-avatar-mini">🤖</div>
+                <div>
+                    <h4 style="color: var(--goldnova); font-size: 14px; margin: 0;">Oly</h4>
+                    <span style="color: #00ff00; font-size: 10px; font-weight: bold;">● Çevrimiçi Yapay Zeka</span>
+                </div>
+            </div>
+            <!-- Ayar İkonu Burada -->
+            <button onclick="updateOlyKey()"
+                style="background:none; border:none; color:var(--goldnova); cursor:pointer; margin-left: auto; margin-right: 10px;">⚙️</button>
+            <button class="oly-close-btn" onclick="closeOlyChat()">✕</button>
+        </div>
+
+        <div class="oly-chat-messages" id="oly-messages-container">
+            <div class="oly-message oly-ai">
+                Merhaba! Ben kişisel yapay zeka antrenörün <strong>Oly</strong>. İdman programın, beslenmen,
+                supplementler veya genel spor teorisi hakkında bana her şeyi sorabilirsin! 🏋️‍♂️🔥
+            </div>
+        </div>
+
+        <div class="oly-chat-footer">
+            <input type="text" id="oly-input" placeholder="Oly'ye bir şey sor..." onkeypress="handleOlyKey(event)">
+            <button id="oly-send-btn" onclick="sendOlyMessage()">Gönder</button>
+        </div>
+    </div>
+    <!-- MİNİ OYUN EKRANI -->
+    <div id="minigame-screen" class="full-screen-overlay hidden" style="background:#111; z-index:4000;">
+        <!-- GÜNCELLENMİŞ MİNİ OYUN HEADER'I -->
+        <div class="header-top"
+            style="width:100%; padding: calc(env(safe-area-inset-top) + 15px) 20px 15px 20px; background:#1a1a1a; border-bottom: 2px solid #00d2ff; display: flex; justify-content: space-between; align-items: center;">
+            <h2 style="color:#00d2ff; font-weight:900; font-style:italic; margin:0;">OLYMPUS CATCH</h2>
+            <button onclick="closeMiniGame()" class="edit-btn"
+                style="border-color:#ff4444; color:#ff4444;">Kapat</button>
+        </div>
+        <div
+            style="display:flex; justify-content:space-between; width:90%; font-size:24px; font-weight:bold; margin-top:15px;">
+            <span style="color:#fff;">Süre: <span id="game-time" style="color:#ff4444;">60</span>s</span>
+            <span style="color:#fff;">Puan: <span id="game-score" style="color:var(--goldnova);">0</span></span>
+        </div>
+        <div id="game-area"
+            style="flex:1; width:100%; position:relative; overflow:hidden; background:#0a0a0a; margin-top:15px; border-top: 2px solid #333;">
+            <button id="start-game-btn" class="save-btn"
+                style="position:absolute; top:40%; left:50%; transform:translate(-50%, -50%); width:250px; background:#00d2ff; color:#000;"
+                onclick="startMiniGame()">
+                ▶ OYUNU BAŞLAT (1 DK)
+            </button>
+            <p id="game-info"
+                style="position:absolute; top:55%; left:0; width:100%; text-align:center; color:#888; font-size:12px; padding:0 20px;">
+                Sağlıklı gıdaları ve spor aletlerini yakala (+15).<br>Fast food'a dokunursan puan kaybedersin
+                (-15).<br><strong style="color:var(--goldnova);">Hedef: 200 Puan</strong>
+            </p>
+        </div>
+    </div>
+    <!-- FUT KARTI DÜZENLEME MODALI -->
+    <!-- FUT KARTI DÜZENLEME MODALI (GÜNCELLENMİŞ) -->
+    <div id="fut-edit-modal" class="modal">
+        <div class="modal-content">
+            <h2 style="color:var(--goldnova); margin-bottom:15px;">FIFA Kartını Özelleştir</h2>
+            <div class="modal-body form-grid">
+
+                <!-- YENİ: FOTOĞRAF DEĞİŞTİRME ALANI -->
+                <div class="input-group" style="grid-column: span 2; text-align: center; margin-bottom: 5px;">
+                    <label>Kart Fotoğrafı</label>
+                    <input type="file" id="edit-card-img-file" accept="image/*" style="display:none;"
+                        onchange="previewCardImage(event)">
+                    <button type="button" class="edit-btn"
+                        onclick="document.getElementById('edit-card-img-file').click()"
+                        style="width:100%; border-color:var(--goldnova); color:var(--goldnova);">📷 Fotoğraf Dosyası
+                        Seç</button>
+                </div>
+
+                <div class="input-group"><label>Reyting (OVR)</label><input type="number" id="edit-ovr" value="88">
+                </div>
+                <div class="input-group"><label>Forma No</label><input type="number" id="edit-jersey" value="10"></div>
+                <div class="input-group"><label>Mevki</label><input type="text" id="edit-pos" value="ST"></div>
+                <div class="input-group"><label>Hız (PAC)</label><input type="number" id="edit-pace" value="90"></div>
+                <div class="input-group"><label>Şut (SHO)</label><input type="number" id="edit-shoot" value="85"></div>
+                <div class="input-group"><label>Pas (PAS)</label><input type="number" id="edit-pass" value="82"></div>
+                <div class="input-group"><label>Dribbling (DRI)</label><input type="number" id="edit-dribble"
+                        value="88"></div>
+                <div class="input-group"><label>Defans (DEF)</label><input type="number" id="edit-def" value="70"></div>
+                <div class="input-group"><label>Fizik (PHY)</label><input type="number" id="edit-phys" value="86"></div>
+            </div>
+            <button class="save-btn" onclick="saveFutCardData()" style="background:var(--goldnova); color:#000;">Kartı
+                Güncelle</button>
+            <button class="edit-btn" onclick="resetCareerStats()"
+                style="width:100%; margin-top:10px; border-color:#ff4444; color:#ff4444;">🗑️ Kariyer İstatistiklerini
+                Sıfırla</button>
+            <button class="edit-btn" style="width:100%; margin-top:10px;"
+                onclick="document.getElementById('fut-edit-modal').style.display='none'">İptal</button>
+        </div>
+    </div>
+    <!-- OYUNCU SEÇİM / YAZMA MODALI -->
+    <div id="player-select-modal" class="modal">
+        <div class="modal-content" style="max-width: 350px;">
+            <h2 style="color:var(--goldnova); margin-bottom:10px; font-size:18px;">Mevki Oyuncusu</h2>
+            <p style="color:#888; font-size:12px; margin-bottom:15px;">İstersen listeden arkadaşını seç, istersen manuel
+                yaz.</p>
+
+            <div class="input-group" style="margin-bottom: 15px;">
+                <label>İsim Yaz</label>
+                <input type="text" id="manual-player-input" placeholder="Örn: Burak Yılmaz">
+            </div>
+
+            <div style="margin-bottom: 15px;">
+                <label style="color:var(--text-muted); font-size:12px; display:block; margin-bottom:5px;">Veya Takip
+                    Edilen Arkadaşlardan Seç</label>
+                <div id="arena-friends-list"
+                    style="max-height: 150px; overflow-y: auto; background: #151515; border: 1px solid #333; border-radius: 8px; padding: 5px;">
+                    <p style="color:gray; font-size:11px; text-align:center; padding:10px;">Yükleniyor...</p>
+                </div>
+            </div>
+
+            <div style="display: flex; gap: 10px;">
+                <button class="save-btn" onclick="confirmPlayerSelection()"
+                    style="background:var(--goldnova); color:#000; margin-top:0; flex:1;">Seçimi Kaydet</button>
+                <button class="edit-btn" style="border-color:#ff4444; color:#ff4444; flex:1; padding:0;"
+                    onclick="document.getElementById('player-select-modal').style.display='none'">İptal</button>
+            </div>
+        </div>
+    </div>
+    <!-- BİLDİRİMLER MODALI -->
+    <div id="notifications-modal" class="modal">
+        <div class="modal-content">
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:15px;">
+                <h2 style="color:var(--goldnova); margin:0;">Bildirimler</h2>
+                <button onclick="clearNotifications()" class="edit-btn"
+                    style="font-size:11px; padding:4px 8px;">Temizle</button>
+            </div>
+            <div class="modal-body" id="notifications-list"
+                style="max-height:300px; overflow-y:auto; padding-right:5px;">
+                <p style="color:gray; font-size:12px; text-align:center;">Henüz yeni bildirim yok.</p>
+            </div>
+            <button class="save-btn" onclick="document.getElementById('notifications-modal').style.display='none'"
+                style="margin-top:10px;">Kapat</button>
+        </div>
+    </div>
+    <!-- TAKTİK TAHTASI EKRANI (TAM SAHA VE HAMBURGER MENÜ) -->
+    <div id="tactic-board-screen" class="full-screen-overlay hidden" style="z-index: 5000; background: #245228;">
+        <canvas id="tactic-canvas"
+            style="position: absolute; top: 0; left: 0; z-index: 5002; pointer-events: none;"></canvas>
+
+        <div class="tactic-pitch-bg">
+            <div class="tactic-pitch-line-center"></div>
+            <div class="tactic-pitch-circle"></div>
+            <div class="tactic-box-top"></div>
+            <div class="tactic-goal-top"></div>
+            <div class="tactic-box-bottom"></div>
+            <div class="tactic-goal-bottom"></div>
+        </div>
+
+        <!-- YENİ: HAMBURGER MENÜ VE BUTONLAR -->
+        <div style="position: absolute; top: calc(env(safe-area-inset-top) + 15px); left: 15px; z-index: 5004;">
+            <button onclick="toggleTacticMenu()" class="edit-btn"
+                style="background: rgba(0,0,0,0.7); border: 1px solid #fff; color: #fff; font-size: 20px; padding: 4px 10px; border-radius: 8px;">☰</button>
+            <div id="tactic-tools-menu"
+                style="display: flex; flex-direction: column; gap: 8px; margin-top: 10px; transform: translateX(-150%); opacity: 0; transition: all 0.3s ease; pointer-events: none;">
+                <button id="tactic-pen-btn" onclick="toggleTacticPen()" class="edit-btn"
+                    style="background: rgba(0,0,0,0.8); border-color: white; color: white;">✏️ Kalem</button>
+                <button onclick="clearTacticCanvas()" class="edit-btn"
+                    style="background: rgba(0,0,0,0.8); border-color: #ff4444; color: #ff4444;">🗑️ Temizle</button>
+                <button onclick="resetTacticPlayers()" class="edit-btn"
+                    style="background: rgba(0,0,0,0.8); border-color: var(--goldnova); color: var(--goldnova);">🔄
+                    Yenile</button>
+            </div>
+        </div>
+
+        <!-- KAPATMA BUTONU -->
+        <div onclick="closeTacticBoard()"
+            style="position: absolute; top: calc(env(safe-area-inset-top) + 15px); right: 15px; font-size: 26px; cursor: pointer; filter: drop-shadow(0 2px 4px #000); z-index: 5004;">
+            ❌</div>
+
+        <div id="tactic-draggables"
+            style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; z-index: 5001;"></div>
+    </div>
+    <!-- TAKİP LİSTESİ MODALI -->
+    <div id="follow-list-modal" class="modal">
+        <div class="modal-content">
+            <h2 id="follow-modal-title" style="color:var(--goldnova); margin-bottom:15px; text-align:center;">Liste</h2>
+            <div class="modal-body" id="follow-list-container"
+                style="max-height:300px; overflow-y:auto; padding-right:5px;">
+                <p style="color:gray; font-size:12px; text-align:center;">Yükleniyor...</p>
+            </div>
+            <button class="save-btn" onclick="document.getElementById('follow-list-modal').style.display='none'"
+                style="margin-top:15px;">Kapat</button>
+        </div>
+    </div>
+    <!-- MAÇ SONU VERİ GİRİŞİ VE İSTATİSTİK MODALI -->
+    <div id="match-stats-modal" class="modal">
+        <div class="modal-content" style="max-width: 400px;">
+            <h2 style="color:var(--goldnova); margin-bottom:15px; text-align:center;">Maç Raporu & Veri Girişi</h2>
+            <p id="match-report-subtitle" style="color:#aaa; font-size:12px; text-align:center; margin-bottom:15px;">
+            </p>
+
+            <div class="form-grid" style="margin-bottom: 15px; border-bottom: 1px dashed #444; padding-bottom: 15px;">
+                <div class="input-group">
+                    <label style="color:var(--goldnova); font-weight:bold;">Goldnova Skoru</label>
+                    <input type="number" id="input-team-score-goldnova" value="0" min="0">
+                </div>
+                <div class="input-group">
+                    <label>Rakip Skoru</label>
+                    <input type="number" id="input-team-score-opponent" value="0" min="0">
+                </div>
+            </div>
+
+            <div class="form-grid">
+                <div class="input-group"><label>Attığın Gol</label><input type="number" id="input-match-goals" value="0"
+                        min="0"></div>
+                <div class="input-group"><label>Yaptığın Asist</label><input type="number" id="input-match-assists"
+                        value="0" min="0"></div>
+            </div>
+
+            <div style="margin-top: 15px;">
+                <label style="color:#fff; font-size:12px; display:block; margin-bottom:5px;">Maçın Adamı (MOTM) Kim
+                    oldu?</label>
+                <select id="select-match-motm"
+                    style="width:100%; padding:10px; background:#151515; color:#fff; border:1px solid #333; border-radius:8px; outline:none; font-weight:bold;"></select>
+            </div>
+
+            <div style="display:flex; gap:10px; margin-top:20px;">
+                <button class="save-btn" onclick="saveMatchStatsAndClose()" style="flex:1; margin-top:0;">Kaydet ve
+                    Kapat</button>
+                <button class="edit-btn" onclick="document.getElementById('match-stats-modal').style.display='none'"
+                    style="flex:1; border-color:#ff4444; color:#ff4444;">İptal</button>
+            </div>
+        </div>
+    </div>
+    <!-- ================= DOĞA GÜNLÜĞÜ (KAMP) EKRANI ================= -->
+    <div id="camp-book-screen" class="full-screen-overlay hidden"
+        style="z-index: 6000; background: rgba(20, 15, 5, 0.95); perspective: 1200px;">
+        <!-- Kapatma Butonu -->
+        <div style="position:absolute; top:calc(env(safe-area-inset-top) + 20px); right:20px; z-index:6010;">
+            <button onclick="closeCampBook()"
+                style="background:transparent; border:none; font-size:30px; color:#f39c12; cursor:pointer;">✖</button>
+        </div>
+
+        <div id="camp-book" class="camp-book">
+            <!-- 5. SAYFA: KAMP ANILARI (Geçmiş Günlükler) -->
+            <div class="book-page" id="page-5" style="z-index: 0;">
+                <div class="page-content">
+                    <h2 class="book-title">Eski Anılar</h2>
+                    <div id="saved-diary-list" style="flex: 1; overflow-y: auto; padding-right: 5px;">
+                        <p style="text-align:center; color:#a1887f;">Henüz anı yazılmadı.</p>
+                    </div>
+                    <div class="page-footer">Sayfa 5</div>
+                </div>
+            </div>
+            <!-- 4. SAYFA: PLANLAR VE GEÇMİŞ ROTALAR -->
+            <div class="book-page" id="page-4" style="z-index: 1;">
+                <div class="page-content">
+                    <h2 class="book-title">Gelecek Planları</h2>
+                    <div id="camp-plans-list"
+                        style="flex: 1; overflow-y: auto; margin-bottom: 5px; padding-right: 5px;">
+                        <p style="text-align:center; color:#a1887f;">Henüz kamp planı yok.</p>
+                    </div>
+
+                    <!-- GELİŞMİŞ YENİ PLAN EKLEME ALANI -->
+                    <div
+                        style="display:flex; flex-direction:column; gap:8px; margin-bottom:15px; border-top:1px dashed #8b5a2b; padding-top:10px;">
+                        <input type="text" id="new-plan-item" placeholder="Rota / Konum (Örn: Yedigöller)"
+                            style="background:transparent; border:none; border-bottom:1px solid #8b5a2b; outline:none; font-family:'Caveat', cursive; font-size:24px; color:#2c1a0e; width: 100%;">
+                        <div style="display:flex; gap:5px;">
+                            <input type="datetime-local" id="new-plan-date"
+                                style="flex:1; background:rgba(139, 90, 43, 0.1); border:1px solid #8b5a2b; border-radius:5px; outline:none; font-family:sans-serif; font-size:12px; color:#3e2723; padding:5px;">
+                            <button class="book-btn" style="margin-top:0; padding:2px 15px; font-size:16px;"
+                                onclick="addCampPlan()">Hedefi Kur</button>
+                        </div>
+                    </div>
+
+                    <h2 class="book-title">Geçmiş Keşifler</h2>
+                    <div id="saved-routes-list" style="flex: 1; overflow-y: auto; padding-right: 5px;">
+                        <p style="text-align:center; color:#a1887f;">Henüz rota kaydedilmedi.</p>
+                    </div>
+                    <div class="page-footer">Sayfa 4</div>
+                </div>
+            </div>
+
+            <!-- 3. SAYFA: GPS ROTA VE HARİTA -->
+            <div class="book-page" id="page-3" style="z-index: 2;">
+                <div class="page-content">
+                    <h2 class="book-title">Keşif Rotası</h2>
+                    <div
+                        style="display:flex; justify-content:space-between; font-weight:bold; margin-bottom:5px; color:#5d4037;">
+                        <span>Mesafe: <span id="gps-distance" style="font-family:sans-serif;">0.00</span> km</span>
+                        <span>Süre: <span id="gps-time" style="font-family:sans-serif;">00:00</span></span>
+                    </div>
+
+                    <div id="gps-map-area"
+                        style="flex:1; width:100%; border:2px solid #8b5a2b; border-radius:8px; position:relative; z-index:0;">
+                        <!-- YENİ: Konumuma Dön Butonu -->
+                        <button onclick="centerMapToUser()"
+                            style="position:absolute; bottom:15px; right:10px; z-index:400; background:#fff; border:2px solid #8b5a2b; border-radius:50%; width:35px; height:35px; cursor:pointer; font-size:16px; box-shadow:0 2px 5px rgba(0,0,0,0.3);">🎯</button>
+                    </div>
+
+                    <div style="display:flex; gap:8px; margin-top:10px;">
+                        <button id="btn-start-gps" class="book-btn" style="flex:2; background:#27ae60; color:#fff;"
+                            onclick="startGPS()">📍 Başlat</button>
+                        <button id="btn-reset-gps" class="book-btn hidden"
+                            style="flex:1; background:#f39c12; color:#fff;" onclick="resetGPS()">🔄 Sıfırla</button>
+                        <button id="btn-stop-gps" class="book-btn hidden"
+                            style="flex:2; background:#e74c3c; color:#fff;" onclick="stopGPS()">🛑 Kaydet</button>
+                    </div>
+                    <div class="page-footer">Sayfa 3 <br> <span style="font-size:10px;">(Sola Kaydır ⬅)</span></div>
+                </div>
+            </div>
+
+            <!-- 2. SAYFA: MALZEME LİSTESİ -->
+            <div class="book-page" id="page-2" style="z-index: 3;">
+                <div class="page-content">
+                    <h2 class="book-title">Çanta Kontrolü</h2>
+                    <div class="camp-checklist" id="camp-checklist"></div>
+                    <div
+                        style="display:flex; gap:5px; margin-top:15px; border-top:2px solid #8b5a2b; padding-top:10px;">
+                        <input type="text" id="new-camp-item" placeholder="Yeni malzeme..."
+                            style="flex:1; background:transparent; border:none; border-bottom:1px solid #8b5a2b; outline:none;">
+                        <button class="book-btn" style="margin-top:0; padding:5px 15px;"
+                            onclick="addCampItem()">Ekle</button>
+                    </div>
+                    <div class="page-footer">Sayfa 2 <br> <span style="font-size:10px;">(Sola Kaydır ⬅)</span></div>
+                </div>
+            </div>
+
+            <!-- 1. SAYFA: KAMP GÜNLÜĞÜ (Anılar ve Hava Durumu) -->
+            <div class="book-page" id="page-1" style="z-index: 4;">
+                <div class="page-content">
+                    <h2 class="book-title">Kamp Günlüğü</h2>
+                    <!-- YENİ EKLENEN: Otomatik Hava Durumu ve Konum Bilgisi Alanı -->
+                    <div id="camp-meta-info"
+                        style="font-size: 18px; color: #8b5a2b; margin-bottom: 10px; border-bottom:1px dashed #8b5a2b; padding-bottom:5px;">
+                        ⛅ Veriler doğadan çekiliyor...
+                    </div>
+                    <textarea id="camp-notes"
+                        placeholder="Sevgili günlük, bugün ateşin sıcaklığı ve ormanın sessizliği..."></textarea>
+                    <button class="book-btn" onclick="saveCampNotes()">Notu Deriye Kazı</button>
+                    <div class="page-footer">Sayfa 1 <br> <span style="font-size:10px;">(Sola Kaydır ⬅)</span></div>
+                </div>
+            </div>
+
+            <!-- 0. SAYFA: KAPAK -->
+            <div class="book-page book-cover" id="page-0" style="z-index: 5;">
+                <div class="cover-content">
+                    <h1
+                        style="color:var(--goldnova); font-family:'Georgia', serif; font-style:italic; font-size: 32px; margin-bottom: 20px; text-shadow: 2px 2px 4px #000;">
+                        OLYMPUS</h1>
+                    <div style="font-size: 70px; margin-bottom: 20px; filter: drop-shadow(0 5px 5px rgba(0,0,0,0.5));">
+                        🏕️</div>
+                    <h2
+                        style="color:#fff; font-family:'Georgia', serif; font-size: 20px; letter-spacing: 3px; text-shadow: 2px 2px 4px #000;">
+                        DOĞA GÜNLÜĞÜ</h2>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div id="spotify-floating-player" class="hidden">
+        <iframe style="border-radius:12px"
+            src="https://open.spotify.com/embed/playlist/4aJ0qKBiSMEI8ldn589iNr?utm_source=generator&theme=0&si=45eee92065144cb7"
+            width="100%" height="152" frameBorder="0" allowfullscreen=""
+            allow="autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture" loading="lazy"></iframe>
+    </div>
+    <!-- GİZLİ GEÇİT: MATRIX TERMINALI (CULBASE) -->
+    <div id="matrix-terminal" class="hidden"
+        style="position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: rgba(0,0,0,0.95); z-index: 9999999; display: flex; flex-direction: column; justify-content: center; align-items: center; font-family: 'Courier New', monospace; color: #0f0; backdrop-filter: blur(10px);">
+        <div style="max-width: 600px; text-align: center;">
+            <svg viewBox="0 0 24 24" style="width: 80px; fill: #0f0; margin-bottom: 20px;">
+                <path
+                    d="M12 1L3 5v6c0 5.55 3.84 10.74 9 12 5.16-1.26 9-6.45 9-12V5l-9-4zm0 10.99h7c-.53 4.12-3.28 7.79-7 8.94V12H5V6.3l7-3.11v8.8z" />
+            </svg>
+            <h2 id="matrix-text"
+                style="font-size: 24px; font-weight: normal; margin-bottom: 20px; letter-spacing: 2px;">GİZLİ PROTOKOL
+                BAŞLATILDI.</h2>
+            <p style="font-size: 16px; margin-bottom: 30px;">CULBASE Sistemine erişim için yönetici yetkisi gerekiyor.
+            </p>
+            <input type="password" id="matrix-password" placeholder="_"
+                style="background: transparent; border: none; border-bottom: 2px solid #0f0; color: #0f0; font-family: 'Courier New', monospace; font-size: 32px; text-align: center; outline: none; width: 200px; letter-spacing: 5px;">
+            <button id="matrix-cancel-btn"
+                style="margin-top: 30px; background: transparent; border: 1px solid #0f0; color: #0f0; padding: 8px 20px; font-family: 'Courier New', monospace; cursor: pointer; transition: 0.3s; font-size: 16px; letter-spacing: 2px;"
+                onmouseover="this.style.background='#0f0'; this.style.color='#000';"
+                onmouseout="this.style.background='transparent'; this.style.color='#0f0';">[ PROTOKOLÜ İPTAL ET
+                ]</button>
+        </div>
+    </div>
+    <script src="script.js"></script>
+</body>
+
+</html>

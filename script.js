@@ -2755,48 +2755,75 @@ window.openFollowList = async function (type) {
 // ==========================================
 let activeMatchIdForStats = null;
 
-window.openMatchStatsModal = function (matchId) {
+window.openMatchStatsModal = function(matchId) {
     const history = JSON.parse(localStorage.getItem('goldnova_match_history')) || [];
     const match = history.find(m => m.id === matchId);
     if (!match) return;
 
     activeMatchIdForStats = matchId;
     document.getElementById('match-report-subtitle').innerText = `Goldnova vs ${match.opponent} (${new Date(match.datetime).toLocaleDateString('tr-TR')})`;
+    
+    // YENİ: Varsa eski skoru doldur, yoksa (null ise) 0 yap
+    document.getElementById('input-team-score-goldnova').value = (match.scoreGoldnova !== null && match.scoreGoldnova !== undefined) ? match.scoreGoldnova : 0;
+    document.getElementById('input-team-score-opponent').value = (match.scoreOpponent !== null && match.scoreOpponent !== undefined) ? match.scoreOpponent : 0;
+
+    // Bireysel alanları sıfırla
+    document.getElementById('input-match-goals').value = 0;
+    document.getElementById('input-match-assists').value = 0;
 
     // Kadrodaki oyuncuları MOTM (Maçın Adamı) seçim kutusuna doldur
     const motmSelect = document.getElementById('select-match-motm');
     motmSelect.innerHTML = '<option value="">Seçim Yap...</option>';
-    match.squad.forEach(player => {
-        if (player && player !== "Seçilmedi" && player !== "Boş") {
-            motmSelect.innerHTML += `<option value="${player}">${player}</option>`;
-        }
-    });
+    if(match.squad) {
+        match.squad.forEach(player => {
+            if (player && player !== "Seçilmedi" && player !== "Boş") {
+                motmSelect.innerHTML += `<option value="${player}">${player}</option>`;
+            }
+        });
+    }
 
     document.getElementById('match-stats-modal').style.display = 'flex';
 };
 
-window.saveMatchStatsAndClose = function () {
+window.saveMatchStatsAndClose = function() {
+    // 1. TAKIM SKORLARINI AL
+    const scoreGoldnova = parseInt(document.getElementById('input-team-score-goldnova').value) || 0;
+    const scoreOpponent = parseInt(document.getElementById('input-team-score-opponent').value) || 0;
+
+    // 2. BİREYSEL İSTATİSTİKLERİ AL
     const goalsToAdd = parseInt(document.getElementById('input-match-goals').value) || 0;
     const assistsToAdd = parseInt(document.getElementById('input-match-assists').value) || 0;
     const selectedMotm = document.getElementById('select-match-motm').value;
 
+    // 3. MAÇ LİSTESİNDE SKORU GÜNCELLE
+    let history = JSON.parse(localStorage.getItem('goldnova_match_history')) || [];
+    const matchIndex = history.findIndex(m => m.id === activeMatchIdForStats);
+    if (matchIndex !== -1) {
+        history[matchIndex].scoreGoldnova = scoreGoldnova;
+        history[matchIndex].scoreOpponent = scoreOpponent;
+        localStorage.setItem('goldnova_match_history', JSON.stringify(history));
+    }
+
+    // 4. KİŞİSEL KARİYERE (FUT KARTI) EKLE
     const myName = document.getElementById('profile-name-display').innerText.trim().toLowerCase();
     let careerStats = JSON.parse(localStorage.getItem('goldnova_career_stats')) || { goals: 0, assists: 0, motm: 0 };
-
+    
     careerStats.goals += goalsToAdd;
     careerStats.assists += assistsToAdd;
 
     if (selectedMotm && selectedMotm.toLowerCase() === myName) {
         careerStats.motm += 1;
-        if (typeof addOlympusPoints === 'function') addOlympusPoints(50, "Maçın Adamı Seçildi");
     }
 
     localStorage.setItem('goldnova_career_stats', JSON.stringify(careerStats));
     document.getElementById('match-stats-modal').style.display = 'none';
-
+    
+    // EKRANLARI YENİLE
     if (typeof renderFutCard === 'function') renderFutCard();
+    if (typeof renderMatchHistory === 'function') renderMatchHistory(); // 'null' yazısını anında silip skoru yazdırır!
+    
     if (navigator.vibrate) navigator.vibrate(50);
-    alert("Maç istatistikleri kariyerine işlendi! Kartının arkasını çevirip radarını kontrol edebilirsin. 🎴🔥");
+    alert("Maç skoru ve istatistikler başarıyla işlendi! 🎴🔥");
 };
 // ==========================================
 // KARİYER İSTATİSTİKLERİNİ SIFIRLAMA MOTORU
@@ -3280,3 +3307,88 @@ window.deleteSavedRoute = function(id) {
         if (navigator.vibrate) navigator.vibrate([30, 30]);
     }
 };
+// ==========================================
+// CULBASE GİZLİ GEÇİT (MATRIX PROTOKOLÜ)
+// ==========================================
+let secretClickCount = 0;
+let secretClickTimer;
+
+const secretTrigger = document.getElementById('secret-trigger');
+const matrixTerminal = document.getElementById('matrix-terminal');
+const matrixPassword = document.getElementById('matrix-password');
+const matrixText = document.getElementById('matrix-text');
+
+if (secretTrigger) {
+    secretTrigger.addEventListener('click', () => {
+        secretClickCount++;
+        
+        clearTimeout(secretClickTimer);
+        
+        // 1.5 saniye içinde 3 kere tıklanırsa terminali aç
+        secretClickTimer = setTimeout(() => {
+            secretClickCount = 0;
+        }, 1500);
+
+        if (secretClickCount === 3) {
+            openSecretTerminal();
+            secretClickCount = 0;
+        }
+    });
+}
+
+function openSecretTerminal() {
+    matrixTerminal.classList.remove('hidden');
+    // Kısa bir gecikmeyle opacity transition'ı tetikle
+    setTimeout(() => {
+        matrixTerminal.classList.add('active');
+        matrixPassword.value = '';
+        matrixPassword.focus();
+        if (navigator.vibrate) navigator.vibrate([100, 50, 100]);
+    }, 50);
+}
+
+// Şifre Giriş Dinleyicisi
+if (matrixPassword) {
+    matrixPassword.addEventListener('keyup', (e) => {
+        if (e.key === 'Enter') {
+            const pass = matrixPassword.value;
+            // CULbase admin şifren veya belirlediğin başka bir şifre
+            if (pass === "183654" || pass === "admin") {
+                matrixText.innerText = "YETKİ ONAYLANDI. CULBASE YÜKLENİYOR...";
+                matrixText.style.color = "#fff";
+                matrixPassword.style.display = "none";
+                if (navigator.vibrate) navigator.vibrate([50, 50, 200]);
+                
+                // 1 Saniye sonra CULbase klasörüne ışınla
+                setTimeout(() => {
+                    window.location.href = "culbase_system/index.html";
+                }, 1200);
+            } else {
+                // Şifre yanlışsa glitch efekti ver ve kapat
+                matrixText.innerText = "ERİŞİM REDDEDİLDİ!";
+                matrixText.classList.add('matrix-glitch');
+                matrixPassword.value = '';
+                if (navigator.vibrate) navigator.vibrate([200, 200, 200]);
+                
+                setTimeout(() => {
+                    matrixText.classList.remove('matrix-glitch');
+                    matrixText.innerText = "GİZLİ PROTOKOL BAŞLATILDI.";
+                    matrixTerminal.classList.remove('active');
+                    setTimeout(() => matrixTerminal.classList.add('hidden'), 500);
+                }, 1000);
+            }
+        }
+    });
+}
+// Geri Dönüş / İptal Butonu
+const matrixCancelBtn = document.getElementById('matrix-cancel-btn');
+if(matrixCancelBtn) {
+    matrixCancelBtn.addEventListener('click', () => {
+        matrixTerminal.classList.remove('active');
+        setTimeout(() => matrixTerminal.classList.add('hidden'), 500);
+        matrixPassword.value = '';
+        matrixText.innerText = "GİZLİ PROTOKOL BAŞLATILDI.";
+        matrixText.classList.remove('matrix-glitch');
+        if (navigator.vibrate) navigator.vibrate(50);
+    });
+}

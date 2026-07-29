@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="tr">
+
+<head>
+    <meta charset="UTF-8">
+    <title>Pano Tasarım</title>
+    <link rel="stylesheet" href="css/style.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+</head>
+
+<body class="light-mode" >
+    <div class="toolbar">
+        <div class="toolbar-left"><button class="tool-btn" onclick="window.location.href='ana_sayfa.html'">&#8592; Geri
+                Dön</button>
+            <div class="view-switch" style="display: inline-block; margin-left:15px;"><button id="viewSacBtn"
+                    class="tool-btn active-view" onclick="switchView('sac')">İç Sac</button><button id="viewKapakBtn"
+                    class="tool-btn" onclick="switchView('kapak')">Pano Kapağı</button><button id="view3DBtn"
+                    class="tool-btn" onclick="switchView('3d')">3D Görünüm</button></div>
+        </div>
+        <div class="toolbar-right"><button class="tool-btn export-btn" onclick="exportMaterialExcel('pano')">&#128202;
+                Excel İndir</button><button class="tool-btn export-btn"
+                onclick="generateProfessionalPDF('pano')">&#128196; PDF İndir</button></div>
+    </div>
+    <div class="designer-layout">
+        <div class="designer-sidebar">
+            <h3 style="text-align: center; color:#198b1d;">Kütüphane</h3><button class="accordion">PLC &
+                Modüller</button>
+            <div class="panel">
+                <div class="lib-item plc" draggable="true" data-type="plc" data-w="120" data-h="160">Siemens S7-1200
+                </div>
+                <div class="lib-item plc" draggable="true" data-type="plc" data-w="100" data-h="120">Delta DVP-14SS2
+                </div>
+            </div><button class="accordion">Şalt & Koruma</button>
+            <div class="panel">
+                <div class="lib-item sigorta" draggable="true" data-type="sigorta" data-w="40" data-h="80">Siemens 1P
+                    Otomat</div>
+            </div><button class="accordion">Güç & Hareket</button>
+            <div class="panel">
+                <div class="lib-item surucu" draggable="true" data-type="surucu" data-w="150" data-h="200">Delta VFD
+                    Sürücü</div>
+                <div class="lib-item kontaktor" draggable="true" data-type="kontaktor" data-w="60" data-h="80">Kontaktör
+                </div>
+            </div><button class="accordion">Kanal & Ray</button>
+            <div class="panel">
+                <div class="lib-item kanal" draggable="true" data-type="kanal" data-w="600" data-h="40">Kablo Kanalı
+                </div>
+                <div class="lib-item ray" draggable="true" data-type="ray" data-w="600" data-h="20">DIN Rayı</div>
+            </div><button class="accordion">Kapak Ekipmanları</button>
+            <div class="panel">
+                <div class="lib-item hmi" draggable="true" data-type="hmi" data-w="200" data-h="150">Delta HMI Ekran
+                </div>
+                <div class="lib-item buton" draggable="true" data-type="buton" data-w="40" data-h="40">Start Butonu
+                </div>
+            </div>
+        </div>
+        <div class="designer-canvas-container" id="printableArea">
+            <div class="canvas-plate view-layer active" id="panoCanvas_sac">
+                <div class="panel-label">İÇ SAC</div>
+            </div>
+            <div class="canvas-plate view-layer" id="panoCanvas_kapak"
+                style="background: #d1d5db; border: 4px solid #7f8c8d; display: none;">
+                <div class="panel-label" style="color:#555;">KAPAK</div>
+            </div>
+            <div class="canvas-plate view-layer" id="panoCanvas_3d"
+                style="display: none; background: transparent; border: none; perspective: 1500px;">
+                <div id="pano3DBox" style="width: 100%; height: 100%; position: relative;">
+                    <div id="pano3D_sac"
+                        style="position: absolute; width: 100%; height: 100%; background: #e0e0e0; border: 2px solid #888; transform: translateZ(-50px);">
+                    </div>
+                    <div id="pano3D_kapak" onclick="toggle3DDoor()"
+                        style="position: absolute; width: 100%; height: 100%; background: rgba(209, 213, 219, 0.95); border: 4px solid #7f8c8d; transform-origin: left; transition: transform 1s; cursor: pointer;">
+                        <div class="door-handle"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="prop-panel">
+            <h3 style="color:#198b1d;">Pano Boyutları</h3>
+            <div class="prop-group"><label>Genişlik</label><input type="number" class="prop-input" id="panoWInput"
+                    value="600" step="50"></div>
+            <div class="prop-group"><label>Yükseklik</label><input type="number" class="prop-input" id="panoHInput"
+                    value="800" step="50"></div>
+            <hr>
+            <h3 style="color:#198b1d;">Öğe</h3>
+            <p id="propName" style="color:#2f81f7; font-weight:bold;">Seçili Yok</p>
+            <div class="prop-group"><label>X</label><input type="number" class="prop-input" id="propX" value="0"></div>
+            <div class="prop-group"><label>Y</label><input type="number" class="prop-input" id="propY" value="0"></div>
+            <div class="prop-group"><label>W</label><input type="number" class="prop-input" id="propW" value="0"></div>
+            <div class="prop-group"><label>H</label><input type="number" class="prop-input" id="propH" value="0"></div>
+        </div>
+    </div>
+    <script src="js/script.js"></script>
+</body>
+
+</html>

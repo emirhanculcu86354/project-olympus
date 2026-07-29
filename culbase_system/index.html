@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="tr">
+
+<head>
+    <meta charset="UTF-8">
+    <title>Giriş Yap</title>
+    <link rel="stylesheet" href="css/style.css">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+</head>
+
+<body class="light-mode">
+    <div class="nightmode"><label class="switch"><input id="checkbox" type="checkbox" /><span class="slider">
+                <div class="star star_1"></div>
+                <div class="star star_2"></div>
+                <div class="star star_3"></div>
+            </span></label></div>
+    <div class="container login-container">
+        <h2>CULBASE AUTOMATION</h2>
+        <div class="login-form">
+            <h3>Giriş Yap</h3>
+            <form id="staticLoginForm"><input type="text" id="username" placeholder="Kullanıcı Adı" required><input
+                    type="password" id="password" placeholder="Şifre" required><button type="submit"
+                    class="Login-btn">Sisteme Gir</button></form>
+        </div>
+        <div class="admin-login"><a href="admin.html"><button class="admin-login-btn">Yönetici Girişi</button></a></div>
+        <div class="admin-login" style="margin-top: 15px;">
+            <button onclick="window.location.href='../olympus.html'" class="admin-login-btn"
+                style="background-color: transparent; border: 2px dashed #e74c3c; color: #e74c3c;">[ PROTOKOLDEN ÇIK
+                ]</button>
+        </div>
+    </div>
+    <script src="js/script.js"></script>
+</body>
+
+</html>

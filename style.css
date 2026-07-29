@@ -2509,3 +2509,25 @@ input:checked+.ios-slider:before {
     width: 100%;
     letter-spacing: -0.5px;
 }
+/* Gizli Terminal Animasyonları */
+#matrix-terminal {
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.5s ease-in-out;
+}
+#matrix-terminal.active {
+    opacity: 1;
+    pointer-events: auto;
+}
+.matrix-glitch {
+    animation: glitch 0.2s linear infinite;
+    color: #ff0000 !important;
+}
+@keyframes glitch {
+    0% { transform: translate(0) }
+    20% { transform: translate(-2px, 2px) }
+    40% { transform: translate(-2px, -2px) }
+    60% { transform: translate(2px, 2px) }
+    80% { transform: translate(2px, -2px) }
+    100% { transform: translate(0) }
+}
