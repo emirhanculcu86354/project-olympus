@@ -2531,3 +2531,44 @@ input:checked+.ios-slider:before {
     80% { transform: translate(2px, -2px) }
     100% { transform: translate(0) }
 }
+/* ==========================================
+   ⚡ GÜNÜ KURTAR (PANİK BUTONU) STİLLERİ ⚡
+========================================== */
+.panic-btn {
+    background: linear-gradient(135deg, #ea580c, #dc2626);
+    color: white;
+    border: none;
+    padding: 12px;
+    border-radius: 10px;
+    font-size: 16px;
+    font-weight: 900;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    cursor: pointer;
+    box-shadow: 0 0 15px rgba(220, 38, 38, 0.4);
+    transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+}
+
+.panic-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 0 25px rgba(234, 88, 12, 0.6);
+}
+
+.panic-btn:active {
+    transform: translateY(2px);
+}
+
+.btn-subtext {
+    display: block;
+    font-size: 10px;
+    font-weight: normal;
+    margin-top: 3px;
+    color: #ffedd5;
+    text-transform: none;
+    letter-spacing: 0;
+}
+
+.express-move {
+    border-left-color: #ea580c !important;
+    background: rgba(234, 88, 12, 0.05) !important;
+}

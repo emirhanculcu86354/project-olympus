@@ -150,6 +150,7 @@ let editMode = false;
 let activeWorkout = [];
 let currentExIndex = 0;
 let timerInterval;
+let isExpressMode = false;
 
 let activities = JSON.parse(localStorage.getItem('olympus_acts')) || [
     { id: 1, text: "💧 Su Hedefi Tamam", done: false },
@@ -346,27 +347,42 @@ function showWorkoutModal(dayData) {
     document.getElementById('main-header').style.display = 'none';
     document.getElementById('modal-title').innerText = dayData.title;
 
-    // YENİ EKLENEN: Listeyi açınca müzik çaları gizle (daha temiz bir görünüm için)
     const player = document.getElementById('spotify-floating-player');
     if (player) player.classList.add('hidden');
 
+    isExpressMode = false; // Her açılışta sıfırla
+
     const startBtn = document.getElementById('start-workout-btn');
+    const panicBtn = document.getElementById('save-the-day-btn');
+    
+    // Butonları resetle
+    startBtn.innerText = "🚀 İdmanı Başlat";
+    startBtn.style.background = "var(--goldnova)";
+    startBtn.style.color = "#000";
+    panicBtn.style.display = 'block';
+
     const newStartBtn = startBtn.cloneNode(true);
     startBtn.parentNode.replaceChild(newStartBtn, startBtn);
-    newStartBtn.addEventListener('click', () => {
-        startActiveWorkout(dayData);
-    });
+    newStartBtn.addEventListener('click', () => { startActiveWorkout(dayData); });
 
+    const newPanicBtn = panicBtn.cloneNode(true);
+    panicBtn.parentNode.replaceChild(newPanicBtn, panicBtn);
+    newPanicBtn.addEventListener('click', () => { activateSaveTheDay(dayData, newStartBtn, newPanicBtn); });
+
+    renderModalExercises(dayData.ex);
+    document.getElementById('workout-modal').style.display = 'flex';
+}
+
+function renderModalExercises(exArray) {
     const holder = document.getElementById('modal-exercises');
     holder.innerHTML = '';
-    dayData.ex.forEach(e => {
+    exArray.forEach(e => {
         const videoUrl = `https://www.youtube.com/results?search_query=${encodeURIComponent(e.name + " form technique")}`;
-        holder.innerHTML += `<div class="exercise-row">
-            <a href="${videoUrl}" target="_blank" style="color:white;"><strong style="font-size:18px; text-decoration:underline;">${e.name} 📺</strong></a>
+        holder.innerHTML += `<div class="exercise-row ${isExpressMode ? 'express-move' : ''}">
+            <a href="${videoUrl}" target="_blank" style="color:white;"><strong style="font-size:18px; text-decoration:underline;">${isExpressMode ? '⚡ ' : ''}${e.name} 📺</strong></a>
             <span style="font-size:14px; color:var(--text-muted); margin-top:4px;">Set: <b style="color:#fff">${e.scheme}</b> | Tempo: <b style="color:#fff">${e.tempo}</b> | RPE: <b style="color:var(--goldnova)">${e.rpe}</b></span>
         </div>`;
     });
-    document.getElementById('workout-modal').style.display = 'flex';
 }
 
 window.startActiveWorkout = function (dayData) {
@@ -403,7 +419,7 @@ window.saveSetAndRest = function () {
     document.getElementById('player-timer-display').classList.remove('hidden');
     document.getElementById('player-next-btn').classList.remove('hidden');
 
-    let sec = 90;
+    let sec = isExpressMode ? 45 : 90; 
     document.getElementById('timer-seconds').innerText = sec;
 
     clearInterval(timerInterval);
@@ -3392,3 +3408,50 @@ if(matrixCancelBtn) {
         if (navigator.vibrate) navigator.vibrate(50);
     });
 }
+// GÜNÜ KURTAR MOTORU (FİLTRELEME)
+window.activateSaveTheDay = function(dayData, startBtn, panicBtn) {
+    if(!confirm("Günü Kurtar moduna geçilsin mi? İzolasyon hareketleri silinecek ve dinlenme süreleri 45 saniyeye düşecek!")) return;
+
+    isExpressMode = true;
+    panicBtn.style.display = 'none'; 
+    startBtn.innerText = "⚡ EXPRESS İDMANI BAŞLAT";
+    startBtn.style.background = "linear-gradient(135deg, #ea580c, #dc2626)";
+    startBtn.style.color = "white";
+
+    // Vücudu inşaa eden ANA hareketler (Compound)
+    const compounds = ['bench', 'squat', 'deadlift', 'pull-up', 'row', 'press', 'pulldown', 'lunge', 'dips'];
+    
+    // Hareketleri filtrele (Deep Copy yapıyoruz ki asıl program bozulmasın)
+    let expressEx = JSON.parse(JSON.stringify(dayData.ex));
+    expressEx = expressEx.filter(ex => {
+        const nameLow = ex.name.toLowerCase();
+        return compounds.some(comp => nameLow.includes(comp));
+    });
+
+    // Eğer filtre sonucu boş çıkarsa (örneğin tamamen kol günüyse) en baştaki 3 hareketi al
+    if(expressEx.length === 0) expressEx = dayData.ex.slice(0, 3);
+    
+    // Maksimum 4 harekete düşür
+    expressEx = expressEx.slice(0, 4);
+
+    // Set ve tekrarları vahşileştir
+    expressEx.forEach(ex => {
+        ex.scheme = "3 x 8-12 (Tükeniş)";
+        ex.tempo = "Dinamik (Patlayıcı)";
+        ex.rpe = "9.5";
+    });
+
+    let expressDayData = { ...dayData, ex: expressEx };
+    
+    const newStartBtn = startBtn.cloneNode(true);
+    startBtn.parentNode.replaceChild(newStartBtn, startBtn);
+    newStartBtn.addEventListener('click', () => { startActiveWorkout(expressDayData); });
+
+    renderModalExercises(expressDayData.ex);
+    
+    // Uyarı mesajı ekle
+    const holder = document.getElementById('modal-exercises');
+    holder.insertAdjacentHTML('afterbegin', `<div style="background:rgba(234, 88, 12, 0.1); border:1px dashed #ea580c; padding:10px; border-radius:8px; margin-bottom:15px; color:#ffedd5; font-size:12px; text-align:center;">İzolasyon hareketleri iptal edildi. Set araları 45 saniyeye kilitlendi. Sadece temel kasları yıkıp çıkıyoruz!</div>`);
+    
+    if(navigator.vibrate) navigator.vibrate([100, 50, 100]);
+};
