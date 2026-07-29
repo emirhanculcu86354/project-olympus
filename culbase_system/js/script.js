@@ -447,7 +447,7 @@ window.switchView = function(viewType) {
     const kapak = document.getElementById("panoCanvas_kapak");
     const view3d = document.getElementById("panoCanvas_3d");
     
-    document.querySelectorAll(".view-switch .tool-btn").forEach(btn => btn.classList.remove("active-view"));
+    document.querySelectorAll(".cad-view-switch .cad-tool-btn").forEach(btn => btn.classList.remove("active-view"));
 
     if(viewType === 'sac') {
         sac.style.display = "block"; kapak.style.display = "none"; view3d.style.display = "none";
@@ -608,23 +608,48 @@ function initCanvasDrag() {
 
     function selectElement(el) { document.querySelectorAll(".canvas-item").forEach(i => i.classList.remove("selected")); el.classList.add("selected"); updateProps(el); }
     function updateProps(el) {
-        document.getElementById("propName").textContent = el.textContent;
-        document.getElementById("propX").value = parseInt(el.style.left, 10) || 0; document.getElementById("propY").value = parseInt(el.style.top, 10) || 0;
-        document.getElementById("propW").value = parseInt(el.style.width, 10) || 0; document.getElementById("propH").value = parseInt(el.style.height, 10) || 0;
+        document.getElementById("propNameInput").value = el.textContent; // İsim inputa geçer
+        document.getElementById("propRotate").value = el.dataset.rotate || "0"; // Döndürme bilgisi alınır
+        document.getElementById("propX").value = parseInt(el.style.left, 10) || 0; 
+        document.getElementById("propY").value = parseInt(el.style.top, 10) || 0;
+        document.getElementById("propW").value = parseInt(el.style.width, 10) || 0; 
+        document.getElementById("propH").value = parseInt(el.style.height, 10) || 0;
         window.activeElement = el;
     }
+
     function clearProps() {
-        document.getElementById("propName").textContent = "Seçili Öğe Yok";
-        document.getElementById("propX").value = 0; document.getElementById("propY").value = 0;
-        document.getElementById("propW").value = 0; document.getElementById("propH").value = 0; window.activeElement = null;
+        document.getElementById("propNameInput").value = "";
+        document.getElementById("propRotate").value = "0";
+        document.getElementById("propX").value = 0; 
+        document.getElementById("propY").value = 0;
+        document.getElementById("propW").value = 0; 
+        document.getElementById("propH").value = 0; 
+        window.activeElement = null;
     }
 
+    // YENİ NESİL ÖZELLİKLER DİNLEYİCİSİ (İSİM, DÖNDÜRME VE BOYUT)
     document.querySelectorAll(".prop-input").forEach(inp => {
         inp.addEventListener("input", e => {
             if(window.activeElement) {
-                const val = e.target.value + "px";
-                if(e.target.id === "propX") window.activeElement.style.left = val; if(e.target.id === "propY") window.activeElement.style.top = val;
-                if(e.target.id === "propW") window.activeElement.style.width = val; if(e.target.id === "propH") window.activeElement.style.height = val;
+                const el = window.activeElement;
+                const id = e.target.id;
+                const val = e.target.value;
+                
+                // İsim (Etiket) Değiştirme
+                if(id === "propNameInput") { el.textContent = val; }
+                
+                // Elemanı Döndürme (Rotate)
+                if(id === "propRotate") {
+                    el.dataset.rotate = val;
+                    el.style.transform = `rotate(${val}deg)`;
+                }
+                
+                // Konum ve Boyut Değiştirme
+                const pxVal = val + "px";
+                if(id === "propX") el.style.left = pxVal; 
+                if(id === "propY") el.style.top = pxVal;
+                if(id === "propW") el.style.width = pxVal; 
+                if(id === "propH") el.style.height = pxVal;
             }
         });
     });
@@ -634,3 +659,267 @@ function initCanvasDrag() {
         canvas.addEventListener("touchstart", e => { if(e.target === canvas) { document.querySelectorAll(".canvas-item").forEach(i => i.classList.remove("selected")); clearProps(); } });
     });
 }
+// ==========================================
+// YENİ NESİL CAD ARAYÜZÜ FONKSİYONLARI
+// ==========================================
+
+// Çekmece (Drawer) Kontrolleri
+window.toggleLibrary = function() {
+    const lib = document.getElementById('libraryDrawer');
+    const prop = document.getElementById('propDrawer');
+    if (prop && prop.classList.contains('open')) prop.classList.remove('open');
+    if (lib) lib.classList.toggle('open');
+};
+
+window.toggleProps = function() {
+    const lib = document.getElementById('libraryDrawer');
+    const prop = document.getElementById('propDrawer');
+    if (lib && lib.classList.contains('open')) lib.classList.remove('open');
+    if (prop) prop.classList.toggle('open');
+};
+
+// TEKNİK ÇİZİMİ FOTOĞRAFLAYIP PDF'E BASMA MOTORU (GÜNCELLENDİ)
+window.exportTechnicalDrawingPDF = function() {
+    if (typeof showToast === "function") showToast("Teknik Çizim Hazırlanıyor... Lütfen bekleyin.");
+    
+    let activeCanvas = document.getElementById(activeCanvasId || 'panoCanvas_sac');
+    
+    if(!activeCanvas || activeCanvasId === 'panoCanvas_3d') {
+        if (typeof showToast === "function") showToast("Uyarı: 3D Görünüm PDF yapılamaz. Lütfen İç Sac veya Kapak seçin.");
+        else alert("Uyarı: 3D Görünüm PDF yapılamaz.");
+        return;
+    }
+
+    // Seçim çerçevesini PDF'te çıkmaması için temizle
+    document.querySelectorAll(".canvas-item").forEach(i => i.classList.remove("selected"));
+
+    // 1. Çizim alanının fotoğrafını çek
+    html2canvas(activeCanvas, {
+        scale: 2,
+        useCORS: true,
+        backgroundColor: null
+    }).then(canvas => {
+        const imgData = canvas.toDataURL('image/png');
+        let currentScren = activeCanvasId === 'panoCanvas_sac' ? "Iç Montaj Saci" : "Pano Kapagi";
+        let dateStr = new Date().toLocaleDateString('tr-TR');
+        
+        // 2. Sanal bir A4 (Yatay) kağıdı oluştur ve resmi içine yerleştir
+        let template = document.createElement("div");
+        template.style.width = "297mm"; 
+        template.style.minHeight = "210mm";
+        template.style.padding = "10mm";
+        template.style.boxSizing = "border-box";
+        template.style.backgroundColor = "#fff";
+        template.style.textAlign = "center";
+        template.style.fontFamily = "Arial, sans-serif";
+        
+        template.innerHTML = `
+            <h2 style="color: #198b1d; margin-top: 10px; margin-bottom: 5px; font-size: 24px;">CULBASE AUTOMATION - TEKNIK CIZIM RAPORU</h2>
+            <p style="color: #666; margin-top: 0; margin-bottom: 20px; font-size: 14px;">Görünüm: <strong>${currentScren}</strong> &nbsp;|&nbsp; Tarih: <strong>${dateStr}</strong></p>
+            
+            <div style="display: flex; justify-content: center; align-items: center; min-height: 140mm;">
+                <img src="${imgData}" style="max-width: 100%; max-height: 145mm; object-fit: contain; border: 2px solid #2c3e50; box-shadow: 0 5px 15px rgba(0,0,0,0.1);">
+            </div>
+            
+            <div style="margin-top: 20px; border-top: 1px solid #ddd; padding-top: 10px; font-size: 11px; color: #888;">
+                Bu teknik resim CULbase CAD Engine tarafindan otomatik olarak üretilmistir.
+            </div>
+        `;
+        
+        // 3. html2pdf Motorunu Çalıştır (Teklif sistemindeki gibi)
+        let opt = {
+            margin:       0,
+            filename:     'CULbase_Cizim_' + currentScren.replace(/\s+/g, '') + '_' + Math.floor(Math.random()*1000) + '.pdf',
+            image:        { type: 'jpeg', quality: 0.98 },
+            html2canvas:  { scale: 2, useCORS: true },
+            jsPDF:        { unit: 'mm', format: 'a4', orientation: 'landscape' } // Yatay A4 formatı
+        };
+        
+        html2pdf().set(opt).from(template).save().then(() => {
+            if (typeof showToast === "function") showToast("Teknik Çizim Başarıyla İndirildi!");
+        });
+        
+    }).catch(err => {
+        console.error("PDF Hatası:", err);
+        alert("PDF oluşturulurken bir hata oluştu.");
+    });
+};
+// ==========================================
+// PANO KAYDETME VE YÜKLEME (SAVE/LOAD) MOTORU
+// ==========================================
+
+window.savePanel = function() {
+    let projectName = prompt("Kaydedilecek projenin adını giriniz:", "Yeni Otomasyon Panosu");
+    if (!projectName) return;
+
+    let projectData = {
+        id: Date.now(),
+        name: projectName,
+        date: new Date().toLocaleString('tr-TR'),
+        width: document.getElementById("panoWInput").value,
+        height: document.getElementById("panoHInput").value,
+        sacItems: [], kapakItems: []
+    };
+
+    const extractItems = (canvasId, targetArray) => {
+        document.querySelectorAll(`#${canvasId} .canvas-item`).forEach(el => {
+            targetArray.push({
+                type: Array.from(el.classList).find(c => c !== 'canvas-item' && c !== 'selected'),
+                name: el.textContent,
+                left: el.style.left, top: el.style.top,
+                width: el.style.width, height: el.style.height,
+                rotate: el.dataset.rotate || "0"
+            });
+        });
+    };
+
+    extractItems("panoCanvas_sac", projectData.sacItems);
+    extractItems("panoCanvas_kapak", projectData.kapakItems);
+
+    let saved = JSON.parse(localStorage.getItem("culbase_panels")) || [];
+    saved.push(projectData);
+    localStorage.setItem("culbase_panels", JSON.stringify(saved));
+    if (typeof showToast === "function") showToast("Pano Başarıyla Kaydedildi!");
+};
+
+window.openPanelModal = function() {
+    const modal = document.getElementById("panelModal");
+    const list = document.getElementById("savedPanelsList");
+    let saved = JSON.parse(localStorage.getItem("culbase_panels")) || [];
+    
+    list.innerHTML = "";
+    if(saved.length === 0) {
+        list.innerHTML = "<p style='color:#555;'>Henüz kaydedilmiş bir pano projesi bulunmuyor.</p>";
+    } else {
+        saved.forEach(p => {
+            list.innerHTML += `
+                <div style="display:flex; justify-content:space-between; align-items:center; padding:15px; border:1px solid #ccc; margin-bottom:10px; border-radius:8px; background:#fff;">
+                    <div>
+                        <strong style="color:#2c3e50; font-size:16px;">${p.name}</strong><br>
+                        <small style="color:#7f8c8d;">${p.date}</small>
+                    </div>
+                    <div style="display:flex; gap:10px;">
+                        <button onclick="loadPanel(${p.id})" style="background:#2f81f7; color:white; border:none; padding:8px 15px; border-radius:5px; cursor:pointer; font-weight:bold;">Aç</button>
+                        <button onclick="deletePanel(${p.id})" style="background:#e74c3c; color:white; border:none; padding:8px 15px; border-radius:5px; cursor:pointer; font-weight:bold;">Sil</button>
+                    </div>
+                </div>
+            `;
+        });
+    }
+    modal.style.display = "flex";
+};
+
+window.closePanelModal = function() { document.getElementById("panelModal").style.display = "none"; };
+
+window.deletePanel = function(id) {
+    if(!confirm("Bu projeyi tamamen silmek istediğinize emin misiniz?")) return;
+    let saved = JSON.parse(localStorage.getItem("culbase_panels")) || [];
+    saved = saved.filter(p => p.id !== id);
+    localStorage.setItem("culbase_panels", JSON.stringify(saved));
+    openPanelModal(); 
+};
+
+window.loadPanel = function(id) {
+    let saved = JSON.parse(localStorage.getItem("culbase_panels")) || [];
+    let project = saved.find(p => p.id === id);
+    if(!project) return;
+
+    // Ölçüleri ayarla
+    document.getElementById("panoWInput").value = project.width;
+    document.getElementById("panoHInput").value = project.height;
+    document.getElementById("panoWInput").dispatchEvent(new Event('input')); // Tuvali boyutlandır
+
+    // Ekranı temizle
+    document.querySelectorAll("#panoCanvas_sac .canvas-item, #panoCanvas_kapak .canvas-item").forEach(e => e.remove());
+
+    // Öğeleri yeniden oluşturma ve Canlandırma
+    const recreateItem = (itemData, canvasId) => {
+        const canvas = document.getElementById(canvasId);
+        const el = document.createElement("div");
+        el.className = `canvas-item ${itemData.type}`;
+        el.textContent = itemData.name;
+        el.style.left = itemData.left; el.style.top = itemData.top;
+        el.style.width = itemData.width; el.style.height = itemData.height;
+        el.dataset.rotate = itemData.rotate;
+        if (itemData.rotate !== "0") el.style.transform = `rotate(${itemData.rotate}deg)`;
+        
+        canvas.appendChild(el);
+        bindLoadedItem(el); // Sürükleme özelliklerini yeniden ver
+    };
+
+    project.sacItems.forEach(i => recreateItem(i, "panoCanvas_sac"));
+    project.kapakItems.forEach(i => recreateItem(i, "panoCanvas_kapak"));
+
+    closePanelModal();
+    if (typeof showToast === "function") showToast("Proje Yüklendi!");
+};
+
+// Yüklenen öğelere sürükleme ve özellik (Ayarlar) panelini bağlama motoru
+window.bindLoadedItem = function(el) {
+    let offsetX = 0, offsetY = 0;
+    
+    const selectThis = () => {
+        document.querySelectorAll(".canvas-item").forEach(i => i.classList.remove("selected"));
+        el.classList.add("selected");
+        document.getElementById("propNameInput").value = el.textContent;
+        document.getElementById("propRotate").value = el.dataset.rotate || "0";
+        document.getElementById("propX").value = parseInt(el.style.left, 10) || 0;
+        document.getElementById("propY").value = parseInt(el.style.top, 10) || 0;
+        document.getElementById("propW").value = parseInt(el.style.width, 10) || 0;
+        document.getElementById("propH").value = parseInt(el.style.height, 10) || 0;
+        window.activeElement = el;
+    };
+
+    const onMove = (e) => {
+        const canvas = document.getElementById(activeCanvasId || 'panoCanvas_sac');
+        const rect = canvas.getBoundingClientRect();
+        let clientX = e.touches ? e.touches[0].clientX : e.clientX;
+        let clientY = e.touches ? e.touches[0].clientY : e.clientY;
+        let rawX = clientX - rect.left - offsetX; let rawY = clientY - rect.top - offsetY;
+        
+        let x = Math.round(rawX / 10) * 10; let y = Math.round(rawY / 10) * 10;
+        if(x < 0) x = 0; if(y < 0) y = 0;
+        el.style.left = x + "px"; el.style.top = y + "px";
+        selectThis();
+        if(e.touches) e.preventDefault();
+    };
+
+    const onEnd = () => {
+        document.removeEventListener("mousemove", onMove); document.removeEventListener("mouseup", onEnd);
+        document.removeEventListener("touchmove", onMove); document.removeEventListener("touchend", onEnd);
+    };
+
+    const onStart = (e) => {
+        selectThis();
+        const rect = el.getBoundingClientRect();
+        let clientX = e.touches ? e.touches[0].clientX : e.clientX;
+        let clientY = e.touches ? e.touches[0].clientY : e.clientY;
+        offsetX = clientX - rect.left; offsetY = clientY - rect.top;
+        
+        if(e.touches) { document.addEventListener("touchmove", onMove, {passive: false}); document.addEventListener("touchend", onEnd); } 
+        else { document.addEventListener("mousemove", onMove); document.addEventListener("mouseup", onEnd); }
+    };
+
+    el.addEventListener("mousedown", onStart);
+    el.addEventListener("touchstart", onStart, {passive: false});
+    el.addEventListener("dblclick", () => { if(confirm("Silmek istiyor musunuz?")) { el.remove(); window.activeElement = null; } });
+};
+// ÖĞE SİLME MOTORU (ÖZELLİKLER MENÜSÜNDEN)
+window.deleteActiveItem = function() {
+    if(window.activeElement) {
+        window.activeElement.remove(); // Ekrandan sil
+        window.activeElement = null; // Hafızadan sil
+        
+        // Sağ menüdeki yazıları sıfırla
+        document.getElementById("propNameInput").value = "";
+        document.getElementById("propRotate").value = "0";
+        document.getElementById("propX").value = 0; 
+        document.getElementById("propY").value = 0;
+        document.getElementById("propW").value = 0; 
+        document.getElementById("propH").value = 0;
+        
+        if(typeof showToast === "function") showToast("Öğe silindi!");
+    } else {
+        alert("Lütfen silmek istediğiniz öğeyi panodan seçin (Üzerine tıklayın).");
+    }
+};
