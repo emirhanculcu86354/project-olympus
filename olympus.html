@@ -1096,79 +1096,107 @@
                     style="width:100%; height:100%; display:none; position:absolute; top:0; left:0; z-index:5;"></div>
             </div>
 
-            <!-- TAM TEŞEKKÜLLÜ SANAL KONTROLCÜ (L1, R1, Select eklendi, D-Pad büyütüldü) -->
+            <!-- TAM TEŞEKKÜLLÜ SANAL KONTROLCÜ (Genişletilmiş Pro Layout) -->
             <div class="arcade-controls" id="arcade-controls"
-                style="display: flex; justify-content: space-between; align-items: center; width: 100%; max-width: 500px; padding: 5px 0; z-index: 10001;">
+                style="display: flex; flex-direction: column; width: 100%; max-width: 500px; padding: 10px 0; gap: 20px; z-index: 10001;">
 
-                <!-- Sol Taraf: D-Pad ve L1 Tetikleyici -->
-                <div style="display: flex; flex-direction: column; align-items: center; gap: 15px;">
-                    <!-- L1 Butonu (Örn: Q tuşu - KeyCode 81) -->
-                    <button class="arcade-btn"
-                        style="width: 80px; height: 25px; font-size: 12px; border-radius: 8px 8px 0 0; background: #444;"
-                        onpointerdown="pressKey(event, 81)" onpointerup="releaseKey(event, 81)"
-                        onpointerleave="releaseKey(event, 81)" onpointercancel="releaseKey(event, 81)">L1</button>
+                <!-- ÜST SATIR: D-Pad (Sol) ve Aksiyon Tuşları (Sağ) -->
+                <div
+                    style="display: flex; justify-content: space-between; align-items: flex-start; width: 100%; padding: 0 10px;">
 
-                    <!-- Büyütülmüş ve Aralığı Açılmış D-Pad -->
-                    <div class="d-pad" style="display: grid; grid-template-columns: 60px 60px 60px; gap: 10px;">
-                        <div></div>
-                        <button class="arcade-btn" style="width: 60px; height: 60px;"
-                            onpointerdown="pressKey(event, 38)" onpointerup="releaseKey(event, 38)"
-                            onpointerleave="releaseKey(event, 38)" onpointercancel="releaseKey(event, 38)">▲</button>
-                        <div></div>
-                        <button class="arcade-btn" style="width: 60px; height: 60px;"
-                            onpointerdown="pressKey(event, 37)" onpointerup="releaseKey(event, 37)"
-                            onpointerleave="releaseKey(event, 37)" onpointercancel="releaseKey(event, 37)">◀</button>
-                        <button class="arcade-btn" style="width: 60px; height: 60px;"
-                            onpointerdown="pressKey(event, 40)" onpointerup="releaseKey(event, 40)"
-                            onpointerleave="releaseKey(event, 40)" onpointercancel="releaseKey(event, 40)">▼</button>
-                        <button class="arcade-btn" style="width: 60px; height: 60px;"
-                            onpointerdown="pressKey(event, 39)" onpointerup="releaseKey(event, 39)"
-                            onpointerleave="releaseKey(event, 39)" onpointercancel="releaseKey(event, 39)">▶</button>
+                    <!-- SOL KONSOL: L1 ve Geniş D-Pad -->
+                    <div style="display: flex; flex-direction: column; align-items: center; gap: 25px;">
+                        <button class="arcade-btn"
+                            style="width: 80px; height: 25px; font-size: 12px; border-radius: 8px 8px 0 0; background: #444;"
+                            onpointerdown="pressKey(event, 81)" onpointerup="releaseKey(event, 81)"
+                            onpointerleave="releaseKey(event, 81)" onpointercancel="releaseKey(event, 81)">L1</button>
+
+                        <!-- Oklar 60x60 yapıldı ve aralıkları (gap) açıldı -->
+                        <div class="d-pad" style="display: grid; grid-template-columns: 60px 60px 60px; gap: 10px;">
+                            <div></div>
+                            <button class="arcade-btn" style="width: 60px; height: 60px; font-size: 24px;"
+                                onpointerdown="pressKey(event, 38)" onpointerup="releaseKey(event, 38)"
+                                onpointerleave="releaseKey(event, 38)"
+                                onpointercancel="releaseKey(event, 38)">▲</button>
+                            <div></div>
+                            <button class="arcade-btn" style="width: 60px; height: 60px; font-size: 24px;"
+                                onpointerdown="pressKey(event, 37)" onpointerup="releaseKey(event, 37)"
+                                onpointerleave="releaseKey(event, 37)"
+                                onpointercancel="releaseKey(event, 37)">◀</button>
+                            <button class="arcade-btn" style="width: 60px; height: 60px; font-size: 24px;"
+                                onpointerdown="pressKey(event, 40)" onpointerup="releaseKey(event, 40)"
+                                onpointerleave="releaseKey(event, 40)"
+                                onpointercancel="releaseKey(event, 40)">▼</button>
+                            <button class="arcade-btn" style="width: 60px; height: 60px; font-size: 24px;"
+                                onpointerdown="pressKey(event, 39)" onpointerup="releaseKey(event, 39)"
+                                onpointerleave="releaseKey(event, 39)"
+                                onpointercancel="releaseKey(event, 39)">▶</button>
+                        </div>
+                    </div>
+
+                    <!-- SAĞ KONSOL: R1 ve Aksiyon Elması -->
+                    <div style="display: flex; flex-direction: column; align-items: center; gap: 25px;">
+                        <button class="arcade-btn"
+                            style="width: 80px; height: 25px; font-size: 12px; border-radius: 8px 8px 0 0; background: #444;"
+                            onpointerdown="pressKey(event, 69)" onpointerup="releaseKey(event, 69)"
+                            onpointerleave="releaseKey(event, 69)" onpointercancel="releaseKey(event, 69)">R1</button>
+
+                        <div class="action-diamond"
+                            style="display: grid; grid-template-columns: 50px 50px 50px; grid-template-rows: 50px 50px 50px; gap: 8px; align-items: center; justify-items: center;">
+                            <button class="arcade-btn round btn-y" onpointerdown="pressKey(event, 78)"
+                                onpointerup="releaseKey(event, 78)" onpointerleave="releaseKey(event, 78)"
+                                onpointercancel="releaseKey(event, 78)">Y</button>
+                            <button class="arcade-btn round btn-x" onpointerdown="pressKey(event, 17)"
+                                onpointerup="releaseKey(event, 17)" onpointerleave="releaseKey(event, 17)"
+                                onpointercancel="releaseKey(event, 17)">X</button>
+                            <button class="arcade-btn round btn-a" onpointerdown="pressKey(event, 16)"
+                                onpointerup="releaseKey(event, 16)" onpointerleave="releaseKey(event, 16)"
+                                onpointercancel="releaseKey(event, 16)">A</button>
+                            <button class="arcade-btn round btn-b" onpointerdown="pressKey(event, 32)"
+                                onpointerup="releaseKey(event, 32)" onpointerleave="releaseKey(event, 32)"
+                                onpointercancel="releaseKey(event, 32)">B</button>
+                        </div>
                     </div>
                 </div>
 
-                <!-- Orta Taraf: Select ve Start Menü Tuşları -->
-                <div style="display: flex; flex-direction: column; gap: 15px; margin-top: 50px;">
-                    <button class="arcade-btn"
-                        style="width: 65px; height: 28px; font-size: 10px; border-radius: 15px; background: #333;"
-                        onpointerdown="pressKey(event, 27)" onpointerup="releaseKey(event, 27)"
-                        onpointerleave="releaseKey(event, 27)" onpointercancel="releaseKey(event, 27)">SELECT</button>
-                    <button class="arcade-btn"
-                        style="width: 65px; height: 28px; font-size: 10px; border-radius: 15px; background: #555;"
-                        onpointerdown="pressKey(event, 13)" onpointerup="releaseKey(event, 13)"
-                        onpointerleave="releaseKey(event, 13)" onpointercancel="releaseKey(event, 13)">START</button>
-                </div>
-
-                <!-- Sağ Taraf: Aksiyon Elması ve R1 Tetikleyici -->
-                <div style="display: flex; flex-direction: column; align-items: center; gap: 15px;">
-                    <!-- R1 Butonu (Örn: E tuşu - KeyCode 69) -->
-                    <button class="arcade-btn"
-                        style="width: 80px; height: 25px; font-size: 12px; border-radius: 8px 8px 0 0; background: #444;"
-                        onpointerdown="pressKey(event, 69)" onpointerup="releaseKey(event, 69)"
-                        onpointerleave="releaseKey(event, 69)" onpointercancel="releaseKey(event, 69)">R1</button>
-
-                    <div class="action-diamond">
-                        <!-- Y (78 - N) PacMan Bypass -->
-                        <button class="arcade-btn round btn-y" onpointerdown="pressKey(event, 78)"
-                            onpointerup="releaseKey(event, 78)" onpointerleave="releaseKey(event, 78)"
-                            onpointercancel="releaseKey(event, 78)">Y</button>
-                        <!-- X (17 - Ctrl) Ateş -->
-                        <button class="arcade-btn round btn-x" onpointerdown="pressKey(event, 17)"
-                            onpointerup="releaseKey(event, 17)" onpointerleave="releaseKey(event, 17)"
-                            onpointercancel="releaseKey(event, 17)">X</button>
-                        <!-- A (16 - Shift) Zıplama/Aksiyon -->
-                        <button class="arcade-btn round btn-a" onpointerdown="pressKey(event, 16)"
-                            onpointerup="releaseKey(event, 16)" onpointerleave="releaseKey(event, 16)"
-                            onpointercancel="releaseKey(event, 16)">A</button>
-                        <!-- B (32 - Space) Boşluk -->
-                        <button class="arcade-btn round btn-b" onpointerdown="pressKey(event, 32)"
-                            onpointerup="releaseKey(event, 32)" onpointerleave="releaseKey(event, 32)"
-                            onpointercancel="releaseKey(event, 32)">B</button>
+                <!-- ALT SATIR: Select, Start ve TUŞ REHBERİ Butonu -->
+                <div
+                    style="display: flex; flex-direction: column; align-items: center; gap: 15px; width: 100%; margin-top: -5px;">
+                    <div style="display: flex; justify-content: center; gap: 30px; width: 100%;">
+                        <button class="arcade-btn"
+                            style="width: 75px; height: 30px; font-size: 11px; border-radius: 15px; background: #333;"
+                            onpointerdown="pressKey(event, 27)" onpointerup="releaseKey(event, 27)"
+                            onpointerleave="releaseKey(event, 27)"
+                            onpointercancel="releaseKey(event, 27)">SELECT</button>
+                        <button class="arcade-btn"
+                            style="width: 75px; height: 30px; font-size: 11px; border-radius: 15px; background: #555; letter-spacing: 2px;"
+                            onpointerdown="pressKey(event, 13)" onpointerup="releaseKey(event, 13)"
+                            onpointerleave="releaseKey(event, 13)"
+                            onpointercancel="releaseKey(event, 13)">START</button>
                     </div>
+                    <!-- YENİ: Tuş Rehberi Butonu -->
+                    <button class="edit-btn"
+                        style="border-color: #00d2ff; color: #00d2ff; font-size: 12px; padding: 6px 15px;"
+                        onclick="showKeyConfig()">ℹ️ Tuş Rehberini Göster</button>
                 </div>
             </div>
+
+            <!-- YENİ: TUŞ REHBERİ MODALI -->
+            <div id="key-config-modal" class="modal" style="z-index: 10005;">
+                <div class="modal-content" style="max-width: 350px;">
+                    <h2 style="color:var(--goldnova); margin-bottom:15px; text-align:center;">🎮 Tuş Rehberi</h2>
+                    <div id="key-config-text"
+                        style="color:#ddd; font-family:'Courier New', monospace; font-size:13px; line-height:1.6; background:#111; padding:15px; border-radius:8px; border:1px solid #333;">
+                        Lütfen önce bir oyun seçin.
+                    </div>
+                    <button class="save-btn" onclick="document.getElementById('key-config-modal').style.display='none'"
+                        style="margin-top:15px;">Kapat</button>
+                </div>
+            </div>
+
         </div>
     </div>
+
     <script src="script.js"></script>
 </body>
 

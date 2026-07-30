@@ -3527,14 +3527,15 @@ window.loadArcadeGame = function () {
         });
     };
 
-    if (game === 'pop') runGame('pop.zip', 'PRINCE.EXE');
-    else if (game === 'doom') runGame('doom.zip', 'DOOM.EXE');
-    else if (game === 'ssf2t') runGame('ssf2t.zip', 'SSF2T.BAT');
-    else if (game === 'mspac') runGame('mspac.zip', 'MSPAC.EXE');
-    else if (game === 'wolf3d') runGame('wolf3d.zip', 'WOLF3D.EXE');
-    else if (game === 'tr') runGame('tr.zip', 'TOMB.EXE');
-    else if (game === 'mk2') runGame('mk2.zip', 'MK2.EXE');
-    else if (game === 'pop2') runGame('pop2.zip', 'PRINCE.EXE');
+    // OYUN BİLGİLERİ (GitHub'daki uzantılara göre .ZIP veya .zip olarak hassas ayarlandı)
+    if (game === 'pop') runGame('pop.ZIP', 'PRINCE.EXE');
+    else if (game === 'doom') runGame('doom.ZIP', 'DOOM.EXE');
+    else if (game === 'ssf2t') runGame('ssf2t.ZIP', 'SSF2T.BAT');
+    else if (game === 'mspac') runGame('mspac.zip', 'MSPAC.EXE'); // mspac küçük .zip kalmış
+    else if (game === 'wolf3d') runGame('wolf3d.ZIP', 'WOLF3D.EXE');
+    else if (game === 'tr') runGame('tr.ZIP', 'TOMB.EXE');
+    else if (game === 'mk2') runGame('mk2.ZIP', 'MK2.EXE');
+    else if (game === 'pop2') runGame('pop2.zip', 'PRINCE.EXE'); // pop2 küçük .zip kalmış
 };
 // ==========================================
 // 🕹️ ÇİFT KATMANLI GAMEPAD & EFEKT MOTORU
@@ -3584,4 +3585,39 @@ window.releaseKey = function(e, keyCode) {
     activeGamepadKeys[keyCode] = false;
     
     triggerEmulatorKey(keyCode, false);
+};
+// ==========================================
+// 🕹️ OYUNLARA ÖZEL TUŞ REHBERİ (KEY CONFIG)
+// ==========================================
+window.showKeyConfig = function() {
+    const game = document.getElementById('arcade-game-select').value;
+    const configText = document.getElementById('key-config-text');
+    
+    // Oyunların kısaltmalarına göre tuş haritaları
+    const configs = {
+        'pop': "<b style='color:var(--goldnova); font-size:16px;'>Prince of Persia</b><br><br><b>X (Ctrl) :</b> Kılıç Vurma / Eşya Alma<br><b>A (Shift):</b> Dikkatli Adım / Çıkıntıya Tutunma<br><b>B (Space):</b> Zıplama<br><b>Yön Tuşları:</b> Hareket, Zıplama, Eğilme ve Kılıçla Korunma",
+        
+        'pop2': "<b style='color:var(--goldnova); font-size:16px;'>Prince of Persia 2</b><br><br><b>X (Ctrl) :</b> Kılıç Vurma / Eşya Alma<br><b>A (Shift):</b> Dikkatli Adım / Çıkıntıya Tutunma<br><b>B (Space):</b> Zıplama<br><b>Yön Tuşları:</b> Hareket ve Zıplama",
+        
+        'doom': "<b style='color:var(--goldnova); font-size:16px;'>DOOM</b><br><br><b>X (Ctrl) :</b> Ateş Etme (Tetik)<br><b>B (Space):</b> Kapı Açma / Düğmeye Basma<br><b>A (Shift):</b> Hızlı Koşma (Run)<br><b>Y (N)    :</b> Menülerde 'Hayır' (No) demek içindir<br><b>Yön Tuşları:</b> İleri/Geri ve Sağa/Sola Dönüş",
+        
+        'mspac': "<b style='color:var(--goldnova); font-size:16px;'>Pac-Man</b><br><br><b>Y (N)    :</b> Oyun başında 'Use Joystick?' sorusuna Hayır (N) demek için basılır.<br><b>Yön Tuşları:</b> Pac-Man'i yönlendirir.",
+        
+        'ssf2t': "<b style='color:var(--goldnova); font-size:16px;'>Street Fighter 2</b><br><br><b>X, A, B  :</b> Standart Yumruk ve Tekme saldırıları<br><b>Yön Tuşları:</b> Zıplama, Eğilme, Hareket ve Kombolar (Örn: Aşağı, İleri + Yumruk = Hadouken)",
+        
+        'wolf3d': "<b style='color:var(--goldnova); font-size:16px;'>Wolfenstein 3D</b><br><br><b>X (Ctrl) :</b> Ateş Etme<br><b>B (Space):</b> Kapı Açma<br><b>A (Shift):</b> Hızlı Koşma<br><b>Yön Tuşları:</b> Hareket ve Dönüş",
+        
+        'tr': "<b style='color:var(--goldnova); font-size:16px;'>Tomb Raider</b><br><br><b>X (Ctrl) :</b> Aksiyon / Silahla Ateş Etme<br><b>B (Space):</b> Silah Çekme / Kaldırma<br><b>A (Shift):</b> Yürüme (Uçurumdan düşmemek için kilitlenir)<br><b>Yön Tuşları:</b> Hareket, Geri Zıplama",
+        
+        'mk2': "<b style='color:var(--goldnova); font-size:16px;'>Mortal Kombat 2</b><br><br><b>X, A, B, Y:</b> Yüksek/Alçak Yumruk ve Tekmeler ile Blok<br><b>Yön Tuşları:</b> Hareket ve Zıplama"
+    };
+
+    if (!game) {
+        configText.innerHTML = "Lütfen önce yukarıdaki menüden bir kaset (oyun) seçin.";
+    } else {
+        configText.innerHTML = configs[game] || "Bu oyun için sistemde kayıtlı bir tuş rehberi bulunmuyor.";
+    }
+    
+    document.getElementById('key-config-modal').style.display = 'flex';
+    if (navigator.vibrate) navigator.vibrate(30);
 };
