@@ -3471,7 +3471,13 @@ window.openArcadeTerminal = function () {
 window.closeArcadeTerminal = function () {
     document.getElementById('arcade-screen').classList.add('hidden');
 
-    // Oyunu (Kaseti) çıkart
+    // 1. ÖLÜM EMRİ: Arkada çalışan JS-DOS emülatörünü tamamen durdur (Sesi ve işlemi kes)
+    if (window.dosCommandInterface) {
+        try { window.dosCommandInterface.exit(); } catch(e) {}
+        window.dosCommandInterface = null;
+    }
+
+    // 2. Ekranı temizle
     document.getElementById('game-container').innerHTML = '';
     document.getElementById('arcade-game-select').value = '';
     document.getElementById('arcade-placeholder-text').style.display = 'block';
@@ -3490,109 +3496,45 @@ window.loadArcadeGame = function () {
     const container = document.getElementById('game-container');
     const placeholder = document.getElementById('arcade-placeholder-text');
 
+    // YENİ GÜVENLİK: Kaset değiştirmeden önce, eğer arkada çalışan bir oyun varsa FİŞİNİ ÇEK!
+    if (window.dosCommandInterface) {
+        try { window.dosCommandInterface.exit(); } catch(e) {}
+        window.dosCommandInterface = null;
+    }
+
     if (!game) {
         container.style.display = 'none';
         placeholder.style.display = 'block';
         container.innerHTML = '';
-        return; // Burada dosya yükleme temizleniyor.
+        return;
     }
 
     placeholder.style.display = 'none';
     container.style.display = 'block';
-    container.innerHTML = '<div style="display:flex; justify-content:center; align-items:center; height:100%; color:#0f0; font-family:\'Courier New\', monospace; font-weight:bold; font-size:14px;">[SİSTEM HAZIRLANIYOR...]</div>';
+    container.innerHTML = '<div style="display:flex; justify-content:center; align-items:center; height:100%; color:#0f0; font-family:\'Courier New\', monospace; font-weight:bold; font-size:14px; text-align:center;">[SİSTEM HAZIRLANIYOR...]</div>';
 
-    // Kendi sunucumuzdan Pop.zip dosyasını okuyoruz!
-    if (game === 'pop') {
-        container.innerHTML = '<canvas id="jsdos-canvas" style="width:100%; height:100%; border-radius:8px;"></canvas>';
+    const runGame = (zipName, exeName) => {
+        // EKRANA TAM SIĞDIRMA DÜZELTMESİ: 'object-fit: contain;' ve 'display: block;' eklendi. 
+        // Bu sayede oyun taşmaz, kutuya mükemmel oranda oturur.
+        container.innerHTML = '<canvas id="jsdos-canvas" style="width: 100%; height: 100%; display: block; object-fit: contain; border-radius: 8px; image-rendering: pixelated;"></canvas>';
+        
+        Dos(document.getElementById("jsdos-canvas"), { wdosboxUrl: "https://js-dos.com/6.22/current/wdosbox.js" }).ready(function (fs, main) {
+            fs.extract(`./games/${zipName}`).then(function () {
+                main(["-c", exeName]).then(function (ci) { 
+                    window.dosCommandInterface = ci; 
+                });
+            }).catch(err => alert(`Hata: ${zipName} dosyası 'games' klasöründe bulunamadı! Lütfen dosyanın yüklü olduğundan emin ol.`));
+        });
+    };
 
-        Dos(document.getElementById("jsdos-canvas"), { wdosboxUrl: "https://js-dos.com/6.22/current/wdosbox.js" }).ready(function (fs, main) {
-            fs.extract("pop.zip").then(function () {
-                // ALTIN DOKUNUŞ BURASI: 'ci' (Command Interface) ile oyunun beynini yakalıyoruz
-                main(["-c", "PRINCE.EXE"]).then(function (ci) {
-                    window.dosCommandInterface = ci; // Emülatörün kontrollerini global değişkene kaydet
-                    console.log("Oyun başarıyla başlatıldı ve kontroller bağlandı!");
-                });
-            });
-        });
-    }
-    // DOOM İçin Örnek:
-    else if (game === 'doom') {
-        container.innerHTML = '<canvas id="jsdos-canvas" style="width:100%; height:100%; border-radius:8px;"></canvas>';
-        Dos(document.getElementById("jsdos-canvas"), { wdosboxUrl: "https://js-dos.com/6.22/current/wdosbox.js" }).ready(function (fs, main) {
-            fs.extract("DOOM.zip").then(function () {
-                main(["-c", "DOOM.EXE"]).then(function (ci) {
-                    window.dosCommandInterface = ci;
-                });
-            });
-        });
-        
-    }
-    else if (game === 'ssf2t') {
-        container.innerHTML = '<canvas id="jsdos-canvas" style="width:100%; height:100%; border-radius:8px;"></canvas>';
-        Dos(document.getElementById("jsdos-canvas"), { wdosboxUrl: "https://js-dos.com/6.22/current/wdosbox.js" }).ready(function (fs, main) {
-            fs.extract("SSF2T.zip").then(function () {
-                main(["-c", "SSF2T.BAT"]).then(function (ci) {
-                    window.dosCommandInterface = ci;
-                });
-            });
-        });
-        
-    }
-    else if (game === 'mspac') {
-        container.innerHTML = '<canvas id="jsdos-canvas" style="width:100%; height:100%; border-radius:8px;"></canvas>';
-        Dos(document.getElementById("jsdos-canvas"), { wdosboxUrl: "https://js-dos.com/6.22/current/wdosbox.js" }).ready(function (fs, main) {
-            fs.extract("MSPAC.zip").then(function () {
-                main(["-c", "MSPAC.EXE"]).then(function (ci) {
-                    window.dosCommandInterface = ci;
-                });
-            });
-        });
-        
-    }
-    else if (game === 'wolf3d') {
-        container.innerHTML = '<canvas id="jsdos-canvas" style="width:100%; height:100%; border-radius:8px;"></canvas>';
-        Dos(document.getElementById("jsdos-canvas"), { wdosboxUrl: "https://js-dos.com/6.22/current/wdosbox.js" }).ready(function (fs, main) {
-            fs.extract("WOLF3D.zip").then(function () {
-                main(["-c", "WOLF3D.EXE"]).then(function (ci) {
-                    window.dosCommandInterface = ci;
-                });
-            });
-        });
-        
-    }
-    else if (game === 'tomb') {
-        container.innerHTML = '<canvas id="jsdos-canvas" style="width:100%; height:100%; border-radius:8px;"></canvas>';
-        Dos(document.getElementById("jsdos-canvas"), { wdosboxUrl: "https://js-dos.com/6.22/current/wdosbox.js" }).ready(function (fs, main) {
-            fs.extract("TOMB.zip").then(function () {
-                main(["-c", "TOMB.EXE"]).then(function (ci) {
-                    window.dosCommandInterface = ci;
-                });
-            });
-        });
-        
-    }
-    else if (game === 'mk2') {
-        container.innerHTML = '<canvas id="jsdos-canvas" style="width:100%; height:100%; border-radius:8px;"></canvas>';
-        Dos(document.getElementById("jsdos-canvas"), { wdosboxUrl: "https://js-dos.com/6.22/current/wdosbox.js" }).ready(function (fs, main) {
-            fs.extract("MK2.zip").then(function () {
-                main(["-c", "MKII.EXE"]).then(function (ci) {
-                    window.dosCommandInterface = ci;
-                });
-            });
-        });
-        
-    }
-    else if (game === 'pop2') {
-        container.innerHTML = '<canvas id="jsdos-canvas" style="width:100%; height:100%; border-radius:8px;"></canvas>';
-        Dos(document.getElementById("jsdos-canvas"), { wdosboxUrl: "https://js-dos.com/6.22/current/wdosbox.js" }).ready(function (fs, main) {
-            fs.extract("POP2.zip").then(function () {
-                main(["-c", "PRINCE.EXE"]).then(function (ci) {
-                    window.dosCommandInterface = ci;
-                });
-            });
-        });
-        
-    }
+    if (game === 'pop') runGame('pop.zip', 'PRINCE.EXE');
+    else if (game === 'doom') runGame('doom.zip', 'DOOM.EXE');
+    else if (game === 'ssf2t') runGame('ssf2t.zip', 'SSF2T.BAT');
+    else if (game === 'mspac') runGame('mspac.zip', 'MSPAC.EXE');
+    else if (game === 'wolf3d') runGame('wolf3d.zip', 'WOLF3D.EXE');
+    else if (game === 'tr') runGame('tr.zip', 'TOMB.EXE');
+    else if (game === 'mk2') runGame('mk2.zip', 'MK2.EXE');
+    else if (game === 'pop2') runGame('pop2.zip', 'PRINCE.EXE');
 };
 // ==========================================
 // 🕹️ ÇİFT KATMANLI GAMEPAD & EFEKT MOTORU
