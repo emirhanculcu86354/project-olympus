@@ -2661,3 +2661,62 @@ input:checked+.ios-slider:before {
     box-shadow: 0 0 0 rgba(0,0,0,0.8) !important;
     filter: brightness(1.3) !important;
 }
+/* ==========================================
+   🌟 HUB (MERKEZ ÜS) VE ANİMASYON STİLLERİ
+========================================== */
+.hub-card {
+    border-radius: 16px;
+    padding: 15px;
+    cursor: pointer;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.4);
+    transition: transform 0.2s cubic-bezier(0.25, 0.8, 0.25, 1), filter 0.2s;
+    overflow: hidden;
+}
+
+.hub-card:active {
+    transform: scale(0.92);
+    filter: brightness(1.2);
+}
+
+.hub-slide img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+/* SİNEMATİK ZOOM ANİMASYONU */
+.zoom-fly-animation {
+    /* Yazıyı devasa büyütürken aynı anda şeffaflaştırarak içinden geçme hissi verir */
+    transform: scale(150) !important; 
+    opacity: 0 !important;
+    transition: transform 1.2s cubic-bezier(0.7, 0, 0.3, 1), opacity 0.9s ease-in !important;
+}
+/* ==========================================
+   🌟 ALT BAR MERKEZ ÜS (HUB) BUTONU
+========================================== */
+.hub-nav-btn {
+    background: linear-gradient(135deg, var(--goldnova), #e6b800);
+    border: 4px solid #050505;
+    border-radius: 50%;
+    width: 60px;
+    height: 60px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    transform: translateY(-15px); /* Butonu barın üstüne doğru kaldırır */
+    cursor: pointer;
+    box-shadow: 0 4px 15px rgba(246, 192, 0, 0.4);
+    color: #000;
+    z-index: 100;
+    transition: transform 0.2s cubic-bezier(0.25, 0.8, 0.25, 1), filter 0.2s;
+}
+
+.hub-nav-btn:active {
+    transform: translateY(-15px) scale(0.9);
+    filter: brightness(1.2);
+}
+
+.hub-icon {
+    font-size: 32px;
+    font-weight: 900;
+}

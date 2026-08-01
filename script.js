@@ -27,13 +27,19 @@ auth.onAuthStateChanged(user => {
         // Eğer uygulama ilk kez yükleniyorsa daktilo animasyonunu başlat
         if (!isAppInitialized) {
             playSplashAnimation(() => {
-                // Animasyon bitince ana ekranı göster
-                document.getElementById('app-content').classList.remove('hidden');
+                // Animasyon bitince ARTIK APP DEĞİL, HUB (MERKEZ ÜS) AÇILACAK!
+                document.getElementById('hub-screen').classList.remove('hidden');
+                document.getElementById('hub-screen').style.display = 'flex';
+                document.getElementById('app-content').classList.add('hidden');
+                initHubCarousel();
             });
             isAppInitialized = true;
         } else {
-            // Animasyon zaten oynadıysa direkt göster
-            document.getElementById('app-content').classList.remove('hidden');
+            // Animasyon zaten oynadıysa direkt HUB göster
+            document.getElementById('hub-screen').classList.remove('hidden');
+            document.getElementById('hub-screen').style.display = 'flex';
+            document.getElementById('app-content').classList.add('hidden');
+            initHubCarousel();
         }
 
         const photo = user.photoURL || 'icon.png';
@@ -42,29 +48,25 @@ auth.onAuthStateChanged(user => {
         document.getElementById('profile-image-large').src = photo;
         document.getElementById('profile-name-display').innerText = name;
         document.getElementById('profile-name-input').value = name;
+
         db.collection("users").doc(user.uid).set({
             uid: user.uid,
             name: name,
             photo: photo,
             lastActive: firebase.firestore.FieldValue.serverTimestamp()
         }, { merge: true });
+
         loadDataFromCloud(user.uid);
         listenForNotifications();
-        // YENİ EKLENEN: Yükleme ekranı (800ms) bittikten sonra Antrenman sekmesindeysek player'ı göster
-        setTimeout(() => {
-            const workoutSec = document.getElementById('workout-sec');
-            const player = document.getElementById('spotify-floating-player');
-            if (workoutSec && workoutSec.classList.contains('active') && player) {
-                player.classList.remove('hidden');
-            }
-        }, 3200);
+
     } else {
-        // 2. DURUM: KULLANICI GİRİŞ YAPMAMIŞ (Uygulamayı ilk defa açıyor)
+        // 2. DURUM: KULLANICI GİRİŞ YAPMAMIŞ (SADECE LOGIN EKRANI GÖSTERİLMELİ)
         const loadingScreen = document.getElementById('loading-screen');
         if (loadingScreen) loadingScreen.style.display = 'none'; // Animasyonu iptal et
 
         document.getElementById('login-screen').classList.remove('hidden');
         document.getElementById('app-content').classList.add('hidden');
+        document.getElementById('hub-screen').classList.add('hidden');
         isAppInitialized = true;
     }
     updateProfileFollowStats();
@@ -3473,7 +3475,7 @@ window.closeArcadeTerminal = function () {
 
     // 1. ÖLÜM EMRİ: Arkada çalışan JS-DOS emülatörünü tamamen durdur (Sesi ve işlemi kes)
     if (window.dosCommandInterface) {
-        try { window.dosCommandInterface.exit(); } catch(e) {}
+        try { window.dosCommandInterface.exit(); } catch (e) { }
         window.dosCommandInterface = null;
     }
 
@@ -3486,6 +3488,11 @@ window.closeArcadeTerminal = function () {
     // Oly'yi geri getir
     const oly = document.getElementById('oly-avatar');
     if (oly) oly.style.display = 'flex';
+
+    // 3. YENİ: İşlemler bitince Merkez Üsse (Hub) geri dön!
+    if (typeof returnToHub === 'function') {
+        returnToHub();
+    }
 };
 
 // ==========================================
@@ -3498,7 +3505,7 @@ window.loadArcadeGame = function () {
 
     // YENİ GÜVENLİK: Kaset değiştirmeden önce, eğer arkada çalışan bir oyun varsa FİŞİNİ ÇEK!
     if (window.dosCommandInterface) {
-        try { window.dosCommandInterface.exit(); } catch(e) {}
+        try { window.dosCommandInterface.exit(); } catch (e) { }
         window.dosCommandInterface = null;
     }
 
@@ -3517,11 +3524,11 @@ window.loadArcadeGame = function () {
         // EKRANA TAM SIĞDIRMA DÜZELTMESİ: 'object-fit: contain;' ve 'display: block;' eklendi. 
         // Bu sayede oyun taşmaz, kutuya mükemmel oranda oturur.
         container.innerHTML = '<canvas id="jsdos-canvas" style="width: 100%; height: 100%; display: block; object-fit: contain; border-radius: 8px; image-rendering: pixelated;"></canvas>';
-        
+
         Dos(document.getElementById("jsdos-canvas"), { wdosboxUrl: "https://js-dos.com/6.22/current/wdosbox.js" }).ready(function (fs, main) {
             fs.extract(`./games/${zipName}`).then(function () {
-                main(["-c", exeName]).then(function (ci) { 
-                    window.dosCommandInterface = ci; 
+                main(["-c", exeName]).then(function (ci) {
+                    window.dosCommandInterface = ci;
                 });
             }).catch(err => alert(`Hata: ${zipName} dosyası 'games' klasöründe bulunamadı! Lütfen dosyanın yüklü olduğundan emin ol.`));
         });
@@ -3547,68 +3554,68 @@ function triggerEmulatorKey(keyCode, isPressed) {
     if (window.dosCommandInterface) {
         window.dosCommandInterface.simulateKeyEvent(keyCode, isPressed);
     }
-    
+
     // 2. İkinci Katman: Modern Emscripten Canvas Sinyali (Yedek Güvenlik)
     const canvas = document.getElementById('jsdos-canvas');
     if (canvas) {
         const e = new KeyboardEvent(isPressed ? 'keydown' : 'keyup', {
             bubbles: true, cancelable: true, keyCode: keyCode, which: keyCode
         });
-        Object.defineProperty(e, 'keyCode', {get: () => keyCode});
-        Object.defineProperty(e, 'which', {get: () => keyCode});
+        Object.defineProperty(e, 'keyCode', { get: () => keyCode });
+        Object.defineProperty(e, 'which', { get: () => keyCode });
         canvas.dispatchEvent(e);
     }
 }
 
-window.pressKey = function(e, keyCode) {
-    if(e) {
+window.pressKey = function (e, keyCode) {
+    if (e) {
         e.preventDefault();
         e.currentTarget.classList.add('btn-pressed'); // Tuşa basılma efekti ekle
     }
-    
+
     // Tuş zaten basılıysa tekrar sinyal gönderip sistemi boğma
-    if (activeGamepadKeys[keyCode]) return; 
+    if (activeGamepadKeys[keyCode]) return;
     activeGamepadKeys[keyCode] = true;
-    
+
     triggerEmulatorKey(keyCode, true);
     if (navigator.vibrate) navigator.vibrate(20); // Titreşim hissi
 };
 
-window.releaseKey = function(e, keyCode) {
-    if(e) {
+window.releaseKey = function (e, keyCode) {
+    if (e) {
         e.preventDefault();
         e.currentTarget.classList.remove('btn-pressed'); // Tuş bırakılınca efekti kaldır
     }
-    
+
     // Tuş zaten bırakılmışsa işlem yapma
     if (!activeGamepadKeys[keyCode]) return;
     activeGamepadKeys[keyCode] = false;
-    
+
     triggerEmulatorKey(keyCode, false);
 };
 // ==========================================
 // 🕹️ OYUNLARA ÖZEL TUŞ REHBERİ (KEY CONFIG)
 // ==========================================
-window.showKeyConfig = function() {
+window.showKeyConfig = function () {
     const game = document.getElementById('arcade-game-select').value;
     const configText = document.getElementById('key-config-text');
-    
+
     // Oyunların kısaltmalarına göre tuş haritaları
     const configs = {
         'pop': "<b style='color:var(--goldnova); font-size:16px;'>Prince of Persia</b><br><br><b>X (Ctrl) :</b> Kılıç Vurma / Eşya Alma<br><b>A (Shift):</b> Dikkatli Adım / Çıkıntıya Tutunma<br><b>B (Space):</b> Zıplama<br><b>Yön Tuşları:</b> Hareket, Zıplama, Eğilme ve Kılıçla Korunma",
-        
+
         'pop2': "<b style='color:var(--goldnova); font-size:16px;'>Prince of Persia 2</b><br><br><b>X (Ctrl) :</b> Kılıç Vurma / Eşya Alma<br><b>A (Shift):</b> Dikkatli Adım / Çıkıntıya Tutunma<br><b>B (Space):</b> Zıplama<br><b>Yön Tuşları:</b> Hareket ve Zıplama",
-        
+
         'doom': "<b style='color:var(--goldnova); font-size:16px;'>DOOM</b><br><br><b>X (Ctrl) :</b> Ateş Etme (Tetik)<br><b>B (Space):</b> Kapı Açma / Düğmeye Basma<br><b>A (Shift):</b> Hızlı Koşma (Run)<br><b>Y (N)    :</b> Menülerde 'Hayır' (No) demek içindir<br><b>Yön Tuşları:</b> İleri/Geri ve Sağa/Sola Dönüş",
-        
+
         'mspac': "<b style='color:var(--goldnova); font-size:16px;'>Pac-Man</b><br><br><b>Y (N)    :</b> Oyun başında 'Use Joystick?' sorusuna Hayır (N) demek için basılır.<br><b>Yön Tuşları:</b> Pac-Man'i yönlendirir.",
-        
+
         'ssf2t': "<b style='color:var(--goldnova); font-size:16px;'>Street Fighter 2</b><br><br><b>X, A, B  :</b> Standart Yumruk ve Tekme saldırıları<br><b>Yön Tuşları:</b> Zıplama, Eğilme, Hareket ve Kombolar (Örn: Aşağı, İleri + Yumruk = Hadouken)",
-        
+
         'wolf3d': "<b style='color:var(--goldnova); font-size:16px;'>Wolfenstein 3D</b><br><br><b>X (Ctrl) :</b> Ateş Etme<br><b>B (Space):</b> Kapı Açma<br><b>A (Shift):</b> Hızlı Koşma<br><b>Yön Tuşları:</b> Hareket ve Dönüş",
-        
+
         'tr': "<b style='color:var(--goldnova); font-size:16px;'>Tomb Raider</b><br><br><b>X (Ctrl) :</b> Aksiyon / Silahla Ateş Etme<br><b>B (Space):</b> Silah Çekme / Kaldırma<br><b>A (Shift):</b> Yürüme (Uçurumdan düşmemek için kilitlenir)<br><b>Yön Tuşları:</b> Hareket, Geri Zıplama",
-        
+
         'mk2': "<b style='color:var(--goldnova); font-size:16px;'>Mortal Kombat 2</b><br><br><b>X, A, B, Y:</b> Yüksek/Alçak Yumruk ve Tekmeler ile Blok<br><b>Yön Tuşları:</b> Hareket ve Zıplama"
     };
 
@@ -3617,7 +3624,374 @@ window.showKeyConfig = function() {
     } else {
         configText.innerHTML = configs[game] || "Bu oyun için sistemde kayıtlı bir tuş rehberi bulunmuyor.";
     }
-    
+
     document.getElementById('key-config-modal').style.display = 'flex';
     if (navigator.vibrate) navigator.vibrate(30);
+};
+
+// ==========================================
+// 🌟 MERKEZ ÜS (HUB) MOTORU
+// ==========================================
+let hubSlideIndex = 0;
+let hubCarouselInterval;
+
+function initHubCarousel() {
+    updateHubGreeting();
+    loadHubPhotos();
+    clearInterval(hubCarouselInterval);
+
+    // 3 Saniye logoda bekledikten sonra fotoğrafları döndürmeye başla
+    setTimeout(() => {
+        hubCarouselInterval = setInterval(nextHubSlide, 4000); // Her 4 saniyede bir değişir
+    }, 3000);
+}
+
+function nextHubSlide() {
+    const track = document.getElementById('hub-carousel-track');
+    const slides = track.children;
+    if (slides.length <= 1) return; // Sadece logo varsa dönme
+
+    hubSlideIndex = (hubSlideIndex + 1) % slides.length;
+    track.style.transform = `translateX(-${hubSlideIndex * 100}%)`;
+}
+
+window.addHubPhoto = function (event) {
+    const file = event.target.files[0];
+    if (file) {
+        const reader = new FileReader();
+        reader.onload = function (e) {
+            let photos = JSON.parse(localStorage.getItem('olympus_hub_photos')) || [];
+            photos.push(e.target.result); // Fotoğrafı tarayıcı hafızasına (Base64) kaydet
+            localStorage.setItem('olympus_hub_photos', JSON.stringify(photos));
+            loadHubPhotos();
+            alert("Fotoğraf başarıyla eklendi! Döngüye alındı.");
+        };
+        reader.readAsDataURL(file);
+    }
+};
+
+function loadHubPhotos() {
+    const track = document.getElementById('hub-carousel-track');
+    // 1. Sabit Logo Slaytı
+    track.innerHTML = `
+        <div class="hub-slide" style="min-width: 100%; height: 100%; display: flex; justify-content: center; align-items: center; background: #000;">
+            <img src="icon.png" style="width: 120px; height: 120px; object-fit: contain; filter: drop-shadow(0 0 30px var(--goldnova));">
+        </div>
+    `;
+
+    // 2. Kullanıcının Yüklediği Özel Fotoğraflar
+    const photos = JSON.parse(localStorage.getItem('olympus_hub_photos')) || [];
+    photos.forEach(p => {
+        track.innerHTML += `
+            <div class="hub-slide" style="min-width: 100%; height: 100%;">
+                <img src="${p}">
+            </div>
+        `;
+    });
+}
+
+// 🚀 SİNEMATİK GEÇİŞ MOTORU
+window.enterAppFromHub = function (targetId, textString) {
+    const overlay = document.getElementById('hub-zoom-overlay');
+    const zoomText = document.getElementById('hub-zoom-text');
+    const hubScreen = document.getElementById('hub-screen');
+
+    // Rengine göre metin ve parlama ayarla
+    let textColor = "var(--goldnova)";
+    if (targetId === 'arcade-screen') textColor = "#d1a3ff";
+    if (targetId === 'business-screen') textColor = "#00d2ff";
+
+    zoomText.style.color = textColor;
+    zoomText.style.textShadow = `0 0 30px ${textColor}`;
+    zoomText.innerText = textString;
+
+    // Animasyonu sıfırla
+    zoomText.style.transform = 'scale(1)';
+    zoomText.style.opacity = '1';
+    zoomText.classList.remove('zoom-fly-animation');
+
+    overlay.classList.remove('hidden'); // Siyah ekranı ve metni göster
+
+    if (navigator.vibrate) navigator.vibrate([40, 60, 40]);
+
+    // 50ms sonra CSS Animasyonunu (Büyüme) tetikle
+    setTimeout(() => {
+        zoomText.classList.add('zoom-fly-animation');
+    }, 50);
+
+    // Animasyon (1.2 saniye) bittiğinde asıl ekrana geç
+    setTimeout(() => {
+        hubScreen.classList.add('hidden'); // Hub'ı kapat
+        overlay.classList.add('hidden'); // Siyah geçişi kapat
+
+        // Hedef uygulamayı aç
+        const target = document.getElementById(targetId);
+        if (target) {
+            target.classList.remove('hidden');
+            if (targetId === 'app-content') {
+                target.style.display = 'flex';
+
+                // YENİ: Olympus'a giriş yapıldığı an Spotify'ı sahneye al!
+                const player = document.getElementById('spotify-floating-player');
+                if (player) player.classList.remove('hidden');
+            }
+        }
+    }, 1200);
+};
+// ==========================================
+// 🚀 HUB'A (MERKEZ ÜSSE) GERİ DÖNÜŞ MOTORU
+// ==========================================
+window.returnToHub = function () {
+    updateHubGreeting();
+    // 1. Müzik çaları gizle
+    const player = document.getElementById('spotify-floating-player');
+    if (player) player.classList.add('hidden');
+
+    // 2. Tüm açık olabilecek modülleri (Odaları) gizle
+    const appContent = document.getElementById('app-content');
+    if (appContent) appContent.classList.add('hidden');
+
+    const arcadeScreen = document.getElementById('arcade-screen');
+    if (arcadeScreen) arcadeScreen.classList.add('hidden');
+
+    const businessScreen = document.getElementById('business-screen');
+    if (businessScreen) businessScreen.classList.add('hidden');
+
+    // 3. Hub ekranını tekrar göster
+    const hubScreen = document.getElementById('hub-screen');
+    if (hubScreen) {
+        hubScreen.classList.remove('hidden');
+        hubScreen.style.display = 'flex';
+    }
+
+    if (navigator.vibrate) navigator.vibrate(30);
+};
+// ==========================================
+// 🌟 HUB KARŞILAMA MOTORU (DİNAMİK SAAT VE İSİM)
+// ==========================================
+window.updateHubGreeting = function () {
+    // 1. Saate Göre Selamlama
+    const hour = new Date().getHours();
+    let greeting = "İyi Geceler";
+
+    if (hour >= 5 && hour < 12) {
+        greeting = "Günaydın";
+    } else if (hour >= 12 && hour < 18) {
+        greeting = "İyi Günler";
+    } else if (hour >= 18 && hour < 22) {
+        greeting = "İyi Akşamlar";
+    }
+
+    const greetingEl = document.getElementById('hub-greeting-text');
+    if (greetingEl) greetingEl.innerText = greeting + ",";
+
+    // 2. Kullanıcı Profil Verisini Çek
+    const user = firebase.auth().currentUser;
+    let name = "Şampiyon";
+    let photo = "icon.png";
+
+    if (user && user.displayName) {
+        name = user.displayName;
+        photo = user.photoURL || "icon.png";
+    } else {
+        // Yedek: Eğer henüz yüklenmediyse localStorage'dan al
+        const localName = document.getElementById('profile-name-display');
+        if (localName && localName.innerText !== "Yükleniyor...") {
+            name = localName.innerText;
+        }
+        const localImg = document.getElementById('header-profile-img');
+        if (localImg && localImg.src) {
+            photo = localImg.src;
+        }
+    }
+
+    const nameEl = document.getElementById('hub-greeting-name');
+    if (nameEl) nameEl.innerText = name;
+
+    const imgEl = document.getElementById('hub-header-img');
+    if (imgEl) imgEl.src = photo;
+};
+// ==========================================
+// 💼 BUSINESS CENTER MOTORU (CULBASE)
+// ==========================================
+let pomodoroInterval;
+let pomodoroTime = 25 * 60; // 25 dakika
+let isPomodoroRunning = false;
+
+window.startPomodoro = function () {
+    if (isPomodoroRunning) return;
+    isPomodoroRunning = true;
+
+    if (navigator.vibrate) navigator.vibrate(30);
+
+    pomodoroInterval = setInterval(() => {
+        pomodoroTime--;
+        let m = Math.floor(pomodoroTime / 60);
+        let s = pomodoroTime % 60;
+        document.getElementById('pomodoro-time').innerText = `${m.toString().padStart(2, '0')}:${s.toString().padStart(2, '0')}`;
+
+        // Saniye her ilerlediğinde ince bir görsel geribildirim eklenebilir
+
+        if (pomodoroTime <= 0) {
+            clearInterval(pomodoroInterval);
+            isPomodoroRunning = false;
+            if (navigator.vibrate) navigator.vibrate([500, 200, 500]);
+            alert("🔥 Derin çalışma seansı tamamlandı! Şampiyon şimdi kısa bir mola hak etti.");
+            resetPomodoro();
+        }
+    }, 1000);
+};
+
+window.resetPomodoro = function () {
+    clearInterval(pomodoroInterval);
+    isPomodoroRunning = false;
+    pomodoroTime = 25 * 60;
+    document.getElementById('pomodoro-time').innerText = "25:00";
+    if (navigator.vibrate) navigator.vibrate(30);
+};
+
+// Varsayılan Projeler (Sistem ilk açıldığında gösterilir, sonra localStorage'dan silip eklenebilir)
+let bProjects = JSON.parse(localStorage.getItem('culbase_projects')) || [
+    { id: 1, name: "SolidWorks Makine Çizimi (Fiverr)", status: "Aktif", color: "#f39c12" },
+    { id: 2, name: "Kaynak Makinesi PLC Kodlama", status: "Beklemede", color: "#3498db" }
+];
+
+window.renderBusinessProjects = function () {
+    const list = document.getElementById('business-projects-list');
+    if (!list) return;
+    list.innerHTML = '';
+
+    if (bProjects.length === 0) {
+        list.innerHTML = '<p style="color:#888; font-size:12px; text-align:center;">Şu an aktif bir proje yok.</p>';
+        return;
+    }
+
+    bProjects.forEach(p => {
+        list.innerHTML += `
+            <div class="business-project-card" style="background: #1a1a1a; border-left: 4px solid ${p.color}; padding: 12px 15px; border-radius: 6px; display: flex; justify-content: space-between; align-items: center; transition: 0.2s;">
+                
+                <!-- YENİ: Yazı alanına tıklandığında detayları açar -->
+                <div onclick="openProjectDetails(${p.id})" style="flex: 1; cursor: pointer;">
+                    <h4 style="color: #fff; margin: 0 0 4px 0; font-size: 14px;">${p.name}</h4>
+                    <span style="color: ${p.color}; font-size: 11px; font-weight: bold; padding: 2px 6px; background: rgba(255,255,255,0.05); border-radius: 4px;">${p.status}</span>
+                </div>
+                
+                <!-- Silme Butonu (Değişmedi) -->
+                <button onclick="deleteBusinessProject(${p.id})" style="background: transparent; border: none; color: #ff4444; font-size: 18px; cursor: pointer; padding: 5px; margin-left: 10px;">🗑️</button>
+            </div>
+        `;
+    });
+};
+// YENİ: PROJE DETAYLARINI DOLDURAN VE AÇAN MOTOR
+window.openProjectDetails = function (id) {
+    const p = bProjects.find(x => x.id === id);
+    if (!p) return;
+
+    // Verileri HTML'e yazdır
+    document.getElementById('pd-title').innerText = p.name;
+    document.getElementById('pd-status').innerText = p.status;
+    document.getElementById('pd-status').style.color = p.color;
+    document.getElementById('pd-status').style.border = `1px solid ${p.color}`;
+    document.getElementById('pd-status').style.background = 'rgba(255,255,255,0.05)';
+
+    // Projenin ilerlemesini simüle eden dinamik bar (Görsellik katar)
+    const randomProgress = Math.floor(Math.random() * 50) + 30; // %30 ile %80 arası
+    document.getElementById('pd-progress').style.width = '0%'; // Animasyon sıfırlaması
+    document.getElementById('pd-progress').style.background = p.color;
+
+    document.getElementById('project-detail-modal').style.display = 'flex';
+
+    // Ufak bir gecikmeyle barı doldur (Animasyon hissi)
+    setTimeout(() => {
+        document.getElementById('pd-progress').style.width = randomProgress + '%';
+    }, 100);
+
+    if (navigator.vibrate) navigator.vibrate(20);
+};
+
+window.addBusinessProject = function () {
+    const name = prompt("Yeni Projenin Adı veya Görevi:");
+    if (name && name.trim() !== "") {
+        // Duruma göre rastgele bir mavi/yeşil/sarı renk atar
+        const colors = ["#00d2ff", "#27ae60", "#f6c000", "#e74c3c"];
+        const randomColor = colors[Math.floor(Math.random() * colors.length)];
+
+        bProjects.push({ id: Date.now(), name: name, status: "Aktif", color: randomColor });
+        localStorage.setItem('culbase_projects', JSON.stringify(bProjects));
+        renderBusinessProjects();
+        if (navigator.vibrate) navigator.vibrate(20);
+    }
+};
+
+window.deleteBusinessProject = function (id) {
+    if (confirm("Bu projeyi tamamladın veya silmek mi istiyorsun?")) {
+        bProjects = bProjects.filter(p => p.id !== id);
+        localStorage.setItem('culbase_projects', JSON.stringify(bProjects));
+        renderBusinessProjects();
+        if (navigator.vibrate) navigator.vibrate([30, 30]);
+    }
+};
+
+// Sayfa yüklendiğinde projeleri listele
+setTimeout(() => {
+    if (typeof renderBusinessProjects === 'function') renderBusinessProjects();
+}, 1000);
+// ==========================================
+// 🚀 GITHUB ACTIONS (DEPLOY LOGLARI) API MOTORU
+// ==========================================
+window.openDeployLogs = async function () {
+    // 1. Modalı Aç ve Yükleniyor Yazısı Göster
+    document.getElementById('deploy-logs-modal').style.display = 'flex';
+    const terminal = document.getElementById('deploy-terminal');
+    terminal.innerHTML = "<span style='color:#fff;'>> API'ye Bağlanılıyor:</span> github.com/emirhanculcu86354/project-olympus...<br>";
+
+    try {
+        // 2. GitHub REST API'sine İstek At (Son 5 İşlemi Çek)
+        const response = await fetch("https://api.github.com/repos/emirhanculcu86354/project-olympus/actions/runs?per_page=5");
+
+        if (!response.ok) throw new Error(`HTTP Hata Kodu: ${response.status}`);
+
+        const data = await response.json();
+
+        // 3. Terminal Ekranını Temizle ve Verileri Bas
+        terminal.innerHTML += `<span style="color:#00d2ff;">> Bağlantı Başarılı. Son ${data.workflow_runs.length} işlem paketi çözümleniyor:</span><br><br>`;
+
+        data.workflow_runs.forEach(run => {
+            // Tarihi okunabilir formata çevir
+            const date = new Date(run.created_at).toLocaleString('tr-TR');
+
+            // Başarı durumuna göre renk ve metin belirle
+            let statusColor = "#f6c000"; // Beklemede (Sarı)
+            let statusText = "IN_PROGRESS";
+
+            if (run.conclusion === "success") {
+                statusColor = "#27ae60"; // Başarılı (Yeşil)
+                statusText = "SUCCESS";
+            } else if (run.conclusion === "failure") {
+                statusColor = "#ff4444"; // Hatalı (Kırmızı)
+                statusText = "FAILED";
+            }
+
+            // Commit başlığını çok uzunsa kırp
+            let commitMsg = run.head_commit.message.split('\n')[0];
+            if (commitMsg.length > 40) commitMsg = commitMsg.substring(0, 40) + "...";
+
+            // HTML olarak terminale satır satır yazdır
+            terminal.innerHTML += `
+                <div style="border-left: 2px solid ${statusColor}; padding-left: 10px; margin-bottom: 12px; background: rgba(255,255,255,0.02); padding-top: 5px; padding-bottom: 5px;">
+                    <span style="color:#aaa;">[${date}]</span><br>
+                    <span style="color:#fff;">Olay:</span> ${run.name}<br>
+                    <span style="color:#fff;">Kayıt (Commit):</span> <span style="color:#ccc;">${commitMsg}</span><br>
+                    <span style="color:#fff;">Durum:</span> <strong style="color:${statusColor}; text-shadow: 0 0 5px ${statusColor};">${statusText}</strong>
+                </div>
+            `;
+        });
+
+        // Titreşim geribildirimi
+        if (navigator.vibrate) navigator.vibrate([30, 30]);
+
+    } catch (error) {
+        terminal.innerHTML += `<br><br><span style="color:#ff4444;">[FATAL ERROR] Loglar çekilemedi! İnternet bağlantını veya GitHub kısıtlamalarını kontrol et.</span><br><span style="color:#888;">${error.message}</span>`;
+        console.error("Deploy Log Hatası:", error);
+    }
 };

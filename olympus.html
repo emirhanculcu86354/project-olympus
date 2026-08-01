@@ -75,7 +75,104 @@
                 Harekete Geç</button>
         </div>
     </div>
+    <!-- ==========================================
+         🌟 MERKEZ ÜS (HUB / SUPER APP ANA MENÜ) 
+         ========================================== -->
+    <div id="hub-screen" class="full-screen-overlay hidden"
+        style="display: flex; background-color: #050505; z-index: 3000; flex-direction: column; justify-content: flex-start;">
 
+        <!-- ÜST BAR: Sadece Logo ve Profil -->
+        <div
+            style="width:100%; padding: calc(env(safe-area-inset-top) + 15px) 20px 15px 20px; display: flex; justify-content: space-between; align-items: center; z-index: 10;">
+            <h1
+                style="color:var(--goldnova); font-family:'Courier New', monospace; font-weight:900; margin:0; font-size: 22px; letter-spacing: 1px; text-shadow: 0 0 10px rgba(246, 192, 0, 0.4);">
+                PROJECT OLYMPUS</h1>
+            <div
+                style="width: 40px; height: 40px; border-radius: 50%; overflow: hidden; border: 2px solid var(--goldnova); box-shadow: 0 0 10px rgba(246, 192, 0, 0.3);">
+                <img id="hub-header-img" src="icon.png" style="width: 100%; height: 100%; object-fit: cover;">
+            </div>
+        </div>
+
+        <!-- ÜST KISIM: Fotoğraf Karuseli (Biraz Genişletildi) -->
+        <div class="hub-carousel-container"
+            style="position: relative; width: 100%; height: 32vh; min-height: 220px; overflow: hidden; border-bottom: 2px solid var(--goldnova); border-top: 1px solid #222; box-shadow: 0 4px 15px rgba(246, 192, 0, 0.2);">
+            <div id="hub-carousel-track"
+                style="display: flex; height: 100%; transition: transform 0.6s cubic-bezier(0.25, 0.8, 0.25, 1);">
+                <!-- 1. Slayt (Her Zaman Uygulama Logosu) -->
+                <div class="hub-slide"
+                    style="min-width: 100%; height: 100%; display: flex; justify-content: center; align-items: center; background: #000;">
+                    <img src="icon.png"
+                        style="width: 120px; height: 120px; object-fit: contain; filter: drop-shadow(0 0 30px var(--goldnova));">
+                </div>
+            </div>
+
+            <!-- Gizli Fotoğraf Yükleme Butonu -->
+            <button onclick="document.getElementById('hub-photo-upload').click()" class="edit-btn"
+                style="position: absolute; bottom: 10px; right: 10px; background: rgba(0,0,0,0.7); font-size: 10px; padding: 5px 10px; border-color: #fff; color: #fff; border-radius: 15px;">📷
+                Anı Ekle</button>
+            <input type="file" id="hub-photo-upload" accept="image/*" style="display: none;"
+                onchange="addHubPhoto(event)">
+        </div>
+
+        <!-- ORTA VE ALT KISIM: Modüller ve Karşılama İmzası -->
+        <div style="padding: 20px; display: flex; flex-direction: column; flex: 1; overflow-y: auto;">
+            <h2 style="color: #fff; margin-bottom: 15px; font-size: 18px;">Modüller</h2>
+
+            <div class="hub-grid" style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px;">
+                <!-- 1. OLYMPUS KARTI -->
+                <div class="hub-card" onclick="enterAppFromHub('app-content', 'OLYMPUS')"
+                    style="background: linear-gradient(135deg, #151515, #2a2a2a); border: 1px solid var(--goldnova);">
+                    <h3 style="color: var(--goldnova); margin: 0; font-size: 18px;">Olympus</h3>
+                    <p style="font-size: 11px; color: #888; margin-top: 5px;">Kişisel Gelişim & Spor</p>
+                    <div style="font-size: 45px; text-align: right; margin-top: 15px;">🏋️‍♂️</div>
+                </div>
+
+                <!-- 2. ARCADE KARTI -->
+                <div class="hub-card" onclick="enterAppFromHub('arcade-screen', 'ARCADE')"
+                    style="background: linear-gradient(135deg, #1a0033, #3a0066); border: 1px solid #8a2be2;">
+                    <h3 style="color: #d1a3ff; margin: 0; font-size: 18px;">Arcade</h3>
+                    <p style="font-size: 11px; color: #d1a3ff; opacity: 0.7; margin-top: 5px;">Retro Terminal</p>
+                    <div style="font-size: 45px; text-align: right; margin-top: 15px;">🕹️</div>
+                </div>
+
+                <!-- 3. BUSINESS KARTI -->
+                <div class="hub-card" onclick="enterAppFromHub('business-screen', 'BUSINESS')"
+                    style="background: linear-gradient(135deg, #001f3f, #003366); border: 1px solid #00d2ff;">
+                    <h3 style="color: #00d2ff; margin: 0; font-size: 18px;">Business</h3>
+                    <p style="font-size: 11px; color: #00d2ff; opacity: 0.7; margin-top: 5px;">Üretkenlik & İş</p>
+                    <div style="font-size: 45px; text-align: right; margin-top: 15px;">💼</div>
+                </div>
+
+                <!-- 4. GELECEK MODÜL -->
+                <div class="hub-card"
+                    style="background: linear-gradient(135deg, #111, #222); border: 1px dashed #444; opacity: 0.6;">
+                    <h3 style="color: #666; margin: 0; font-size: 18px;">Yakında</h3>
+                    <p style="font-size: 11px; color: #555; margin-top: 5px;">Yeni Ufuklar</p>
+                    <div style="font-size: 45px; text-align: right; margin-top: 15px;">🚀</div>
+                </div>
+            </div>
+
+            <!-- ZARİF KARŞILAMA İMZASI (Sayfanın En Altında) -->
+            <div style="margin-top: auto; padding-top: 40px; padding-bottom: 20px; text-align: center;">
+                <!-- Font-weight: 300 ile çok ince ve zarif yapıldı -->
+                <h2 id="hub-greeting-text"
+                    style="color: #888; font-size: 16px; margin: 0; font-weight: 300; letter-spacing: 1px;">İyi Günler,
+                </h2>
+                <!-- İsim kısmı biraz daha vurgulu ama yine abartısız -->
+                <p id="hub-greeting-name"
+                    style="color: #fff; font-size: 20px; margin-top: 4px; font-weight: 400; font-style: italic;">Sporcu
+                </p>
+            </div>
+        </div>
+    </div>
+
+    <!-- SİNEMATİK GEÇİŞ EKRANI (Harflerin İçinden Uçma Animasyonu İçin) -->
+    <div id="hub-zoom-overlay" class="hidden"
+        style="position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: #050505; z-index: 5000; display: flex; justify-content: center; align-items: center; overflow: hidden; pointer-events: none;">
+        <h1 id="hub-zoom-text"
+            style="color: var(--goldnova); font-family: 'Courier New', monospace; font-size: 60px; font-weight: 900; margin: 0; white-space: nowrap; text-shadow: 0 0 30px rgba(255,255,255,0.5);">
+            TEXT</h1>
+    </div>
     <div id="app-content" class="hidden">
         <header class="mobile-header" id="main-header">
             <div class="header-top">
@@ -546,6 +643,9 @@
                     class="text">İdman</span></button>
             <button class="nav-btn" data-target="diet-sec"><span class="icon">🍽️</span><span
                     class="text">Diyet</span></button>
+            <div class="hub-nav-btn" onclick="returnToHub()">
+                <span class="hub-icon">⊞</span>
+            </div>
             <button class="nav-btn" data-target="activity-sec"><span class="icon">✅</span><span
                     class="text">Görev</span></button>
             <button class="nav-btn" data-target="tracking-sec"><span class="icon">🎯</span><span
@@ -1194,6 +1294,107 @@
                 </div>
             </div>
 
+        </div>
+    </div>
+    <!-- ==========================================
+         💼 BUSINESS / CULBASE KOMUTA MERKEZİ
+         ========================================== -->
+    <div id="business-screen" class="full-screen-overlay hidden" style="z-index: 10000; background: #000a12; flex-direction: column; justify-content: flex-start; overflow-y: auto;">
+        
+        <!-- ÜST BAR -->
+        <div class="header-top" style="width:100%; padding: calc(env(safe-area-inset-top) + 15px) 20px 15px 20px; background:#000; border-bottom: 2px solid #00d2ff; display: flex; justify-content: space-between; align-items: center; position: sticky; top: 0; z-index: 10;">
+            <h2 style="color:#00d2ff; font-family:'Courier New', monospace; font-weight:900; margin:0; text-shadow: 0 0 10px #00d2ff; letter-spacing: 1px;">CULBASE_COMMAND_</h2>
+            <button onclick="returnToHub(); document.getElementById('business-screen').classList.add('hidden');" class="edit-btn" style="border-color:#ff4444; color:#ff4444;">[X] ÇIKIŞ</button>
+        </div>
+        
+        <div style="padding: 20px; display: flex; flex-direction: column; gap: 20px; padding-bottom: 50px;">
+            
+            <!-- 1. POMODORO (DERİN ÇALIŞMA) MOTORU -->
+            <div style="background: #111; border: 1px solid #00d2ff; border-radius: 12px; padding: 20px; text-align: center; box-shadow: 0 4px 15px rgba(0, 210, 255, 0.1);">
+                <h3 style="color: #00d2ff; margin-bottom: 5px; font-size: 16px;">Derin Çalışma (Deep Work)</h3>
+                <p style="color: #888; font-size: 11px; margin-bottom: 10px;">Odaklan ve dünyayı dışarıda bırak.</p>
+                <h1 id="pomodoro-time" style="font-size: 56px; color: #fff; font-family: 'Courier New', monospace; margin: 10px 0; font-weight: 900;">25:00</h1>
+                <div style="display: flex; justify-content: center; gap: 10px;">
+                    <button class="save-btn" onclick="startPomodoro()" style="background: #00d2ff; color: #000; padding: 10px 25px; margin: 0; width: auto; font-weight: bold;">▶ Başlat</button>
+                    <button class="edit-btn" onclick="resetPomodoro()" style="border-color: #ff4444; color: #ff4444; padding: 10px 25px; margin: 0; font-weight: bold;">Sıfırla</button>
+                </div>
+            </div>
+
+            <!-- 2. PROJE & FREELANCE TAKİBİ -->
+            <div style="background: #111; border: 1px solid #333; border-radius: 12px; padding: 15px;">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
+                    <h3 style="color: #fff; font-size: 16px; margin: 0;">Aktif Projeler / Fiverr</h3>
+                    <button class="edit-btn" onclick="addBusinessProject()" style="padding: 4px 10px; font-size: 11px; border-color: #27ae60; color: #27ae60; font-weight: bold;">+ Yeni Ekle</button>
+                </div>
+                <div id="business-projects-list" style="display: flex; flex-direction: column; gap: 10px;">
+                    <!-- Projeler JS ile buraya yüklenecek -->
+                </div>
+            </div>
+
+            <!-- 3. OTOMASYON & YAZILIM ARAÇLARI (Gelecek Entegrasyonlar) -->
+            <h3 style="color: #fff; font-size: 16px; margin: 0;">Sistem Entegrasyonları</h3>
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px;">
+                <div style="background: linear-gradient(145deg, #1a1a1a, #0a0a0a); border: 1px solid #333; border-radius: 12px; padding: 15px; text-align: center; cursor: pointer;" onclick="alert('Yakında: Delta PLC ve HMI register verilerini buradan canlı okuyacağız!')">
+                    <span style="font-size: 32px; filter: drop-shadow(0 0 5px #fff);">⚙️</span>
+                    <h4 style="color: #fff; margin: 10px 0 5px 0; font-size: 14px;">PLC & HMI Paneli</h4>
+                    <p style="color: #888; font-size: 10px; margin: 0;">Bağlantı Bekleniyor</p>
+                </div>
+                <div style="background: linear-gradient(145deg, #1a1a1a, #0a0a0a); border: 1px solid #333; border-radius: 12px; padding: 15px; text-align: center; cursor: pointer;" onclick="openDeployLogs()">
+                    <span style="font-size: 32px; filter: drop-shadow(0 0 5px #00d2ff);">🚀</span>
+                    <h4 style="color: #fff; margin: 10px 0 5px 0; font-size: 14px;">Deploy Logları</h4>
+                    <p style="color: #27ae60; font-size: 10px; margin: 0; font-weight: bold;">Canlı API Bağlantısı</p>
+                </div>
+            </div>
+            
+        </div>
+    </div>
+    <!-- YENİ: GITHUB DEPLOY LOGLARI TERMINALİ -->
+    <div id="deploy-logs-modal" class="modal" style="z-index: 10005;">
+        <div class="modal-content" style="max-width: 500px; background: #050505; border: 1px solid #00d2ff;">
+            <h2 style="color:#00d2ff; font-family:'Courier New', monospace; text-shadow: 0 0 5px #00d2ff; margin-bottom:15px; font-size: 18px;">> GITHUB_ACTIONS_LOGS</h2>
+            
+            <div id="deploy-terminal" style="background: #000; padding: 15px; border-radius: 8px; border: 1px solid #333; font-family: 'Courier New', monospace; font-size: 12px; color: #27ae60; height: 300px; overflow-y: auto; text-align: left; line-height: 1.5;">
+                Sistem başlatılıyor...
+            </div>
+            
+            <button class="save-btn" onclick="document.getElementById('deploy-logs-modal').style.display='none'" style="margin-top:15px; background: #222; color: #fff; border: 1px solid #444;">Bağlantıyı Kes</button>
+        </div>
+    </div>
+    <!-- ==========================================
+         💼 BUSINESS: PROJE DETAY MODALI VE GİZLİ GEÇİT
+         ========================================== -->
+    <div id="project-detail-modal" class="modal" style="z-index: 10010;">
+        <div class="modal-content" style="max-width: 400px; background: #0a0a0a; border: 1px solid #333; text-align: left; padding: 25px;">
+            
+            <!-- Başlık ve Durum -->
+            <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #222; padding-bottom: 12px; margin-bottom: 15px;">
+                <h3 id="pd-title" style="color: #fff; margin: 0; font-size: 18px; font-family:'Courier New', monospace;">Proje Adı</h3>
+                <span id="pd-status" style="font-size: 11px; font-weight: bold; padding: 4px 8px; border-radius: 4px; letter-spacing: 1px;">Aktif</span>
+            </div>
+
+            <!-- Müşteri Bilgisi -->
+            <div style="margin-bottom: 15px;">
+                <label style="color: #888; font-size: 11px; text-transform: uppercase;">Müşteri / Platform:</label>
+                <div style="color: #00d2ff; font-size: 14px; margin-top: 3px; font-weight: bold;">Fiverr / Uluslararası</div>
+            </div>
+
+            <!-- İlerleme Çubuğu -->
+            <div style="margin-bottom: 25px;">
+                <label style="color: #888; font-size: 11px; text-transform: uppercase;">Geliştirme İlerlemesi:</label>
+                <div style="width: 100%; background: #222; height: 10px; border-radius: 5px; margin-top: 8px; overflow: hidden; box-shadow: inset 0 0 5px #000;">
+                    <div id="pd-progress" style="width: 65%; background: var(--goldnova); height: 100%; border-radius: 5px; transition: width 1s ease-in-out;"></div>
+                </div>
+            </div>
+
+            <!-- KÖPRÜ: GİZLİ MATRIX PROTOKOLÜNÜ TETİKLER -->
+            <div style="margin-top: 20px; padding: 15px; background: rgba(255, 68, 68, 0.05); border: 1px dashed #ff4444; border-radius: 8px; text-align: center;">
+                <span style="font-size: 24px; margin-bottom: 5px; display: block;">🔒</span>
+                <p style="color: #ff4444; font-size: 11px; margin: 0 0 12px 0;">Gizli Kaynak Kodları ve Müşteri Şifreleri CULBASE'de korunmaktadır.</p>
+                <!-- DİKKAT: Bu buton önce detay modalını kapatır, sonra gizli terminali açar! -->
+                <button onclick="document.getElementById('project-detail-modal').style.display='none'; openSecretTerminal();" class="edit-btn" style="border-color: #ff4444; color: #ff4444; width: 100%; font-weight: bold; letter-spacing: 1px; font-size: 12px;">CULBASE'E GEÇİŞ YAP</button>
+            </div>
+
+            <button class="save-btn" onclick="document.getElementById('project-detail-modal').style.display='none'" style="margin-top:15px; width:100%; background: #222; color: #fff; border: 1px solid #444;">Paneli Kapat</button>
         </div>
     </div>
 
