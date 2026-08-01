@@ -1,1056 +1,4006 @@
-
-// PWA Service Worker Registration
-if ('serviceWorker' in navigator) {
-    navigator.serviceWorker.register('sw.js').then(function (registration) {
-        console.log('ServiceWorker registration successful');
-    }).catch(function (err) {
-        console.log('ServiceWorker registration failed: ', err);
-    });
-}
-
-document.addEventListener("DOMContentLoaded", function () {
-    const body = document.body;
-    const checkbox = document.getElementById("checkbox");
-
-    if (checkbox) {
-        if (localStorage.getItem("darkMode") === "enabled") { body.classList.add("dark-mode"); body.classList.remove("light-mode"); checkbox.checked = true; }
-        else { body.classList.add("light-mode"); body.classList.remove("dark-mode"); checkbox.checked = false; }
-        checkbox.addEventListener("change", function () {
-            if (this.checked) { body.classList.remove("light-mode"); body.classList.add("dark-mode"); localStorage.setItem("darkMode", "enabled"); }
-            else { body.classList.remove("dark-mode"); body.classList.add("light-mode"); localStorage.setItem("darkMode", "disabled"); }
-        });
-    }
-
-    const globalWelcome = document.getElementById("globalWelcome");
-    if (globalWelcome) {
-        const user = sessionStorage.getItem("loggedInUser");
-        if (user) { globalWelcome.textContent = "Hoşgeldin, " + user; }
-    }
-
-    const loginForm = document.getElementById("staticLoginForm");
-    if (loginForm) {
-        loginForm.addEventListener("submit", function (e) {
-            e.preventDefault();
-            const user = document.getElementById("username").value;
-            if (user) { sessionStorage.setItem("loggedInUser", user); window.location.href = "ana_sayfa.html"; }
-        });
-    }
-
-    const adminForm = document.getElementById("staticAdminForm");
-    if (adminForm) {
-        adminForm.addEventListener("submit", function (e) {
-            e.preventDefault();
-            const pass = document.getElementById("admin_password").value;
-            if (pass === "183654" || pass === "admin123") {
-                sessionStorage.setItem("loggedInUser", "Yönetici"); window.location.href = "ana_sayfa.html";
-            } else { alert("Hatalı yönetici şifresi!"); }
-        });
-    }
-
-    const addRowBtn = document.getElementById("addRow");
-    const offerTableBody = document.getElementById("offerTableBody");
-    const saveBtn = document.getElementById("saveOffer");
-
-    if (addRowBtn && offerTableBody) {
-        addRowBtn.addEventListener("click", function (e) {
-            e.preventDefault();
-            let newRow = document.createElement("tr");
-            newRow.innerHTML = `
-                <td><input type="text" class="input-field item-name" placeholder="İsim"></td>
-                <td><input type="text" class="input-field item-desc" placeholder="Tanım"></td>
-                <td><input type="number" class="input-field quantity" value="1" min="1"></td>
-                <td><input type="number" class="input-field price" value="0" min="0"></td>
-                <td class="total-price" style="font-weight:bold; vertical-align: middle;">0.00 ₺</td>
-                <td style="vertical-align: middle;"><button type="button" class="delete-btn">Sil</button></td>
-            `;
-            offerTableBody.appendChild(newRow);
-            updateTotal();
-
-            newRow.querySelector(".delete-btn").addEventListener("click", function () { newRow.remove(); updateTotal(); });
-            newRow.querySelector(".quantity").addEventListener("input", updateTotal);
-            newRow.querySelector(".price").addEventListener("input", updateTotal);
-        });
-    }
-
-    function updateTotal() {
-        let total = 0;
-        document.querySelectorAll("#offerTableBody tr").forEach(row => {
-            const q = row.querySelector(".quantity"); const p = row.querySelector(".price"); const tp = row.querySelector(".total-price");
-            if (q && p && tp) {
-                let rowTot = parseFloat(q.value) * parseFloat(p.value);
-                total += rowTot; tp.textContent = rowTot.toFixed(2) + " ₺";
-            }
-        });
-        let kdv = total * 0.20; let grand = total + kdv;
-        let tAmt = document.getElementById("totalAmount"); if (tAmt) tAmt.textContent = total.toFixed(2) + " ₺";
-        let kAmt = document.getElementById("kdvAmount"); if (kAmt) kAmt.textContent = kdv.toFixed(2) + " ₺";
-        let gAmt = document.getElementById("grandTotal"); if (gAmt) gAmt.textContent = grand.toFixed(2) + " ₺";
-    }
-
-    if (saveBtn) {
-        saveBtn.addEventListener("click", function (e) {
-            e.preventDefault();
-            const cName = document.getElementById("companyName").value;
-            const oDate = document.getElementById("offerDate").value;
-            const oNum = document.getElementById("offerNumber").value;
-
-            if (!cName || !oDate || !oNum) { showToast("Lütfen firma adı, tarih ve teklif numarasını doldurun."); return; }
-
-            let items = [];
-            document.querySelectorAll("#offerTableBody tr").forEach(row => {
-                const nameInp = row.querySelector(".item-name");
-                if (!nameInp) return;
-                items.push({
-                    name: nameInp.value, desc: row.querySelector(".item-desc").value,
-                    qty: row.querySelector(".quantity").value, price: row.querySelector(".price").value, total: row.querySelector(".total-price").textContent
-                });
-            });
-
-            if (items.length === 0 || !items[0].name) { showToast("Lütfen teklife en az bir geçerli kalem ekleyin."); return; }
-
-            let grandTotal = document.getElementById("grandTotal").textContent;
-            let newOffer = { id: Date.now(), companyName: cName, offerDate: oDate, offerNumber: oNum, items: items, grandTotal: grandTotal };
-
-            let offers = JSON.parse(localStorage.getItem("culbase_offers")) || [];
-            offers.push(newOffer);
-            localStorage.setItem("culbase_offers", JSON.stringify(offers));
-            showToast("Teklif başarıyla kaydedildi!");
-            setTimeout(() => { window.location.href = "offers.html"; }, 1500);
-        });
-    }
-
-    const savedTable = document.getElementById("savedOffersTableBody");
-    if (savedTable) {
-        window.loadSavedOffers = function () {
-            let offers = JSON.parse(localStorage.getItem("culbase_offers")) || [];
-            savedTable.innerHTML = "";
-            if (offers.length === 0) {
-                savedTable.innerHTML = "<tr><td colspan='5' style='text-align:center;'>Henüz kayıtlı iş veya teklif bulunmamaktadır.</td></tr>";
-            } else {
-                // En yeni projeler en üstte listelensin
-                offers.reverse().forEach(off => {
-                    let fileCount = off.files ? off.files.length : 0;
-                    let tr = document.createElement("tr");
-                    tr.innerHTML = `
-                        <td>${off.offerNumber}</td>
-                        <td>${off.companyName}</td>
-                        <td>${off.offerDate}</td>
-                        <td>
-                            <strong style="color:#198b1d;">${off.grandTotal}</strong><br>
-                            <span style="font-size:10px; color:#2f81f7;">📎 ${fileCount} Dosya</span>
-                        </td>
-                        <td style="display:flex; gap:5px; flex-wrap:wrap;">
-                            <button class="delete-btn" style="background:#f39c12; border:none; border-radius:4px;" onclick="openEditOfferModal(${off.id})">Düzenle</button>
-                            <button class="delete-btn" style="background:#2980b9; border:none; border-radius:4px;" onclick="generateProfessionalPDF('kayitli', ${off.id})">PDF İndir</button>
-                            <button class="delete-btn" style="background:#e74c3c; border:none; border-radius:4px;" onclick="deleteOffer(${off.id})">Sil</button>
-                        </td>
-                    `;
-                    savedTable.appendChild(tr);
-                });
-            }
-        };
-        loadSavedOffers();
-    }
-
-    // --- DOSYA YÜKLEME VE DÜZENLEME MOTORU ---
-    let activeOfferEditId = null;
-    let tempOfferFiles = [];
-
-    window.openEditOfferModal = function (id) {
-        let offers = JSON.parse(localStorage.getItem("culbase_offers")) || [];
-        const off = offers.find(o => o.id === id);
-        if (!off) return;
-
-        activeOfferEditId = id;
-        tempOfferFiles = off.files || [];
-
-        document.getElementById('edit-company').value = off.companyName;
-        document.getElementById('edit-total').value = off.grandTotal;
-
-        updateOfferFileList();
-        document.getElementById('edit-offer-modal').style.display = 'flex';
-    };
-
-    window.attachOfferFile = function (event) {
-        const file = event.target.files[0];
-        if (file) {
-            const reader = new FileReader();
-            reader.onload = function (e) {
-                tempOfferFiles.push({
-                    name: file.name,
-                    data: e.target.result // Dosyayı CULbase hafızasına alır
-                });
-                updateOfferFileList();
-                showToast("Dosya eklendi!");
-            };
-            reader.readAsDataURL(file);
-        }
-    };
-
-    window.updateOfferFileList = function () {
-        const list = document.getElementById('attached-files-list');
-        list.innerHTML = '';
-        if (tempOfferFiles.length === 0) {
-            list.innerHTML = 'Henüz dosya eklenmedi.';
-            return;
-        }
-        tempOfferFiles.forEach((f, index) => {
-            // İndirme linki ile birlikte listele
-            list.innerHTML += `
-                <div style="display:flex; justify-content:space-between; align-items:center; border-bottom:1px solid #333; padding-bottom:5px; margin-bottom:5px;">
-                    <a href="${f.data}" download="${f.name}" style="color:#00d2ff; text-decoration:none; font-size:11px;">📄 ${f.name} (İndir)</a>
-                    <span style="color:#ff4444; cursor:pointer; font-weight:bold;" onclick="tempOfferFiles.splice(${index}, 1); updateOfferFileList();">[SİL]</span>
-                </div>
-            `;
-        });
-    };
-
-    window.saveOfferDetails = function () {
-        let offers = JSON.parse(localStorage.getItem("culbase_offers")) || [];
-        const index = offers.findIndex(o => o.id === activeOfferEditId);
-        if (index !== -1) {
-            offers[index].companyName = document.getElementById('edit-company').value;
-            offers[index].grandTotal = document.getElementById('edit-total').value;
-            // Eksik bilgileri tamamladıysak status'u güncelleyelim
-            offers[index].status = "Aktif";
-            offers[index].files = tempOfferFiles;
-
-            localStorage.setItem("culbase_offers", JSON.stringify(offers));
-            document.getElementById('edit-offer-modal').style.display = 'none';
-            loadSavedOffers();
-            showToast("Proje güncellendi ve dosyalar kaydedildi!");
-        }
-    };
-
-    // --- PDF MOTORUNA "KAYITLI" İŞLER ENTEGRASYONU ---
-    // generateProfessionalPDF fonksiyonunun başındaki if (type === 'teklif') bloğundan hemen sonra (veya o satırların arasına) şunu ekle:
-    /*
-    else if (type === 'kayitli') {
-        let offers = JSON.parse(localStorage.getItem("culbase_offers")) || [];
-        let offer = offers.find(o => o.id === arguments[1]); // 2. parametre ID'dir
-        if(offer) {
-            companyName = offer.companyName;
-            offerDate = offer.offerDate;
-            offerNumber = offer.offerNumber;
-            items = offer.items || [];
-            subTotal = 0; kdv = 0;
-            grandTotal = parseFloat(offer.grandTotal.replace('₺', '').trim()) || 0;
-        } else {
-            showToast("Kayıt bulunamadı!"); return;
-        }
-    }
-    */
-
-    const stokTable = document.getElementById("stokTableBody");
-    const addStokBtn = document.getElementById("addStokBtn");
-    if (stokTable) loadStok();
-
-    if (addStokBtn) {
-        addStokBtn.addEventListener("click", function (e) {
-            e.preventDefault();
-            const code = document.getElementById("stokCode").value;
-            const name = document.getElementById("stokName").value;
-            const cat = document.getElementById("stokCat").value;
-            const qty = document.getElementById("stokQty").value;
-
-            if (!code || !name || !qty) { showToast("Lütfen stok kodu, adı ve miktarını giriniz."); return; }
-
-            let stoks = JSON.parse(localStorage.getItem("culbase_stok")) || [];
-            stoks.push({ id: Date.now(), code: code, name: name, category: cat, qty: qty });
-            localStorage.setItem("culbase_stok", JSON.stringify(stoks));
-            document.getElementById("stokForm").reset();
-            loadStok();
-            showToast("Stok eklendi!");
-        });
-    }
-
-    function loadStok() {
-        let stoks = JSON.parse(localStorage.getItem("culbase_stok")) || [];
-        stokTable.innerHTML = "";
-        if (stoks.length === 0) {
-            stokTable.innerHTML = "<tr><td colspan='5'>Sistemde kayıtlı stok bulunmuyor.</td></tr>";
-        } else {
-            stoks.forEach(item => {
-                let tr = document.createElement("tr");
-                tr.innerHTML = `
-                    <td>${item.code}</td><td>${item.name}</td><td>${item.category}</td>
-                    <td><strong style="color:#2f81f7;">${item.qty}</strong></td>
-                    <td><button class="delete-btn" onclick="deleteStok(${item.id})">Sil</button></td>
-                `;
-                stokTable.appendChild(tr);
-            });
-        }
-    }
-
-    window.deleteStok = function (id) {
-        if (confirm("Bu stoğu silmek istediğinize emin misiniz?")) {
-            let stoks = JSON.parse(localStorage.getItem("culbase_stok")) || [];
-            stoks = stoks.filter(s => s.id !== id);
-            localStorage.setItem("culbase_stok", JSON.stringify(stoks));
-            loadStok();
-        }
-    };
-
-    initCanvasDrag();
-});
-
-window.showToast = function (message) {
-    let toast = document.getElementById("toastMsg");
-    if (!toast) {
-        toast = document.createElement("div");
-        toast.id = "toastMsg";
-        toast.className = "toast-msg";
-        document.body.appendChild(toast);
-    }
-    toast.textContent = message;
-    toast.className = "toast-msg show";
-    setTimeout(function () { toast.className = toast.className.replace("show", ""); }, 3000);
-}
-
-// ==== PWA / WEB TARAYICI İÇİN NATIVE İNDİRME ====
-window.exportMaterialExcel = function (type) {
-    showToast("Excel Cihazınıza İndiriliyor...");
-    let excelData = [
-        ["", "", "", "", "", "", ""],
-        ["", "TEKLİF (KİME) ;", "", "", "", "TEKLİF (KİMDEN) ;", ""],
-        ["", "", "", "", "", "CULBASE Automation", ""],
-        ["", "Tarih:", "", "", "", "Tel: +905362503300", ""],
-        ["", "Teklif No:", "", "", "", "Hazırlayan: Emirhan ÇULCU", ""],
-        ["", "", "", "", "", "", ""],
-        ["", "İSİM", "TANIM", "MİKTAR", "BİRİM FİYAT", "TOTAL", ""]
-    ];
-
-    let subTotal = 0, kdv = 0, grandTotal = 0;
-    let offerNumber = "TKLF-" + Math.floor(Math.random() * 10000);
-
-    if (type === 'pano') {
-        excelData[2][1] = "Pano Tasarım Projesi";
-        const allItems = document.querySelectorAll(".canvas-item");
-        if (allItems.length === 0) { showToast("Panoda malzeme yok!"); return; }
-
-        let materialCounts = {};
-        allItems.forEach(item => {
-            let name = item.textContent;
-            if (materialCounts[name]) { materialCounts[name]++; } else { materialCounts[name] = 1; }
-        });
-        for (const [name, count] of Object.entries(materialCounts)) {
-            excelData.push(["", name, "Pano Çiziminden Aktarıldı", count, 0, 0, ""]);
-        }
-    } else {
-        const companyName = document.getElementById("companyName").value || "Belirtilmedi";
-        const offerDate = document.getElementById("offerDate").value || "";
-        offerNumber = document.getElementById("offerNumber").value || offerNumber;
-
-        excelData[2][1] = companyName;
-        excelData[3][2] = offerDate;
-        excelData[4][2] = offerNumber;
-
-        const rows = document.querySelectorAll("#offerTableBody tr");
-        if (rows.length === 0) { showToast("Tabloda kalem yok!"); return; }
-
-        let hasItem = false;
-        rows.forEach(row => {
-            const nameInput = row.querySelector(".item-name");
-            if (!nameInput) return;
-            const name = nameInput.value;
-            const desc = row.querySelector(".item-desc").value;
-            const qty = parseFloat(row.querySelector(".quantity").value) || 0;
-            const price = parseFloat(row.querySelector(".price").value) || 0;
-            const rowTotal = qty * price;
-            if (name) {
-                excelData.push(["", name, desc, qty, price, rowTotal, ""]);
-                hasItem = true;
-            }
-        });
-
-        if (!hasItem) { showToast("Listede geçerli veri yok!"); return; }
-
-        subTotal = parseFloat(document.getElementById("totalAmount")?.textContent) || 0;
-        kdv = parseFloat(document.getElementById("kdvAmount")?.textContent) || 0;
-        grandTotal = parseFloat(document.getElementById("grandTotal")?.textContent) || 0;
-    }
-
-    excelData.push(["", "", "", "", "", "", ""]);
-    excelData.push(["", "", "", "", "ARA TOPLAM", subTotal, ""]);
-    excelData.push(["", "", "", "", "KDV %20", kdv, ""]);
-    excelData.push(["", "", "", "", "GENEL TOPLAM", grandTotal, ""]);
-
-    const ws = XLSX.utils.aoa_to_sheet(excelData);
-    ws['!cols'] = [{ wch: 2 }, { wch: 25 }, { wch: 45 }, { wch: 10 }, { wch: 15 }, { wch: 15 }];
-    const wb = XLSX.utils.book_new();
-    XLSX.utils.book_append_sheet(wb, ws, "Hesaptablosu.Net");
-
-    // Doğrudan Tarayıcı İndirmesi
-    XLSX.writeFile(wb, `CULbase_${offerNumber}.xlsx`);
-    showToast("Excel İndirildi!");
+// 1. FIREBASE KURULUMU
+const firebaseConfig = {
+    apiKey: "AIzaSyD8n3FxnxAjbEaq4TJRXoHBf_qwxpc0zy4",
+    authDomain: "project-olympusss.firebaseapp.com",
+    databaseURL: "https://project-olympusss-default-rtdb.europe-west1.firebasedatabase.app",
+    projectId: "project-olympusss",
+    storageBucket: "project-olympusss.firebasestorage.app",
+    messagingSenderId: "216436425298",
+    appId: "1:216436425298:web:3c4f87ac9fa35d0202558b",
+    measurementId: "G-RMV7ZFFTJK"
 };
 
-// PDF MOTORU - Tarayıcı Desteği İçin Perdeyi Görünür Yaparak Beyaz Sayfayı Çözer
-window.generateProfessionalPDF = function (type) {
-    let companyName = "Belirtilmedi", offerDate = new Date().toISOString().split('T')[0], offerNumber = "TKLF-" + Math.floor(Math.random() * 10000);
-    let items = [];
-    let subTotal = 0, kdv = 0, grandTotal = 0;
+firebase.initializeApp(firebaseConfig);
+const auth = firebase.auth();
+const db = firebase.firestore();
 
-    if (type === 'teklif') {
-        companyName = document.getElementById("companyName").value || "Belirtilmedi";
-        offerDate = document.getElementById("offerDate").value || offerDate;
-        offerNumber = document.getElementById("offerNumber").value || offerNumber;
+db.settings({ cacheSizeBytes: firebase.firestore.CACHE_SIZE_UNLIMITED });
 
-        document.querySelectorAll("#offerTableBody tr").forEach(row => {
-            const nameInput = row.querySelector(".item-name");
-            if (!nameInput) return;
-            const name = nameInput.value;
-            const desc = row.querySelector(".item-desc").value;
-            const qty = parseFloat(row.querySelector(".quantity").value) || 0;
-            const price = parseFloat(row.querySelector(".price").value) || 0;
-            const rowTotal = qty * price;
-            if (name) { items.push({ name, desc, qty, price, total: rowTotal }); }
-        });
-        subTotal = parseFloat(document.getElementById("totalAmount")?.textContent) || 0;
-        kdv = parseFloat(document.getElementById("kdvAmount")?.textContent) || 0;
-        grandTotal = parseFloat(document.getElementById("grandTotal")?.textContent) || 0;
+// YÜKLEME EKRANI KONTROLÜ İÇİN DEĞİŞKEN
+let isAppInitialized = false;
 
-    } else if (type === 'pano') {
-        companyName = "Pano Tasarım Projesi";
-        offerNumber = "PANO-" + Math.floor(Math.random() * 10000);
-        const allItems = document.querySelectorAll(".canvas-item");
-        let materialCounts = {};
-        allItems.forEach(item => {
-            let name = item.textContent;
-            if (materialCounts[name]) { materialCounts[name]++; } else { materialCounts[name] = 1; }
-        });
-        for (const [name, count] of Object.entries(materialCounts)) {
-            items.push({ name: name, desc: "Pano Montaj Ekipmanı", qty: count, price: 0, total: 0 });
-        }
-    }
-    else if (type === 'kayitli') {
-        let offers = JSON.parse(localStorage.getItem("culbase_offers")) || [];
-        let offer = offers.find(o => o.id === arguments[1]); // 2. parametre ID'dir
-        if(offer) {
-            companyName = offer.companyName;
-            offerDate = offer.offerDate;
-            offerNumber = offer.offerNumber;
-            items = offer.items || [];
-            subTotal = 0; kdv = 0;
-            grandTotal = parseFloat(offer.grandTotal.replace('₺', '').trim()) || 0;
+auth.onAuthStateChanged(user => {
+    if (user) {
+        // 1. DURUM: KULLANICI ZATEN GİRİŞ YAPMIŞ
+        document.getElementById('login-screen').classList.add('hidden');
+
+        // Eğer uygulama ilk kez yükleniyorsa daktilo animasyonunu başlat
+        if (!isAppInitialized) {
+            playSplashAnimation(() => {
+                // Animasyon bitince ARTIK APP DEĞİL, HUB (MERKEZ ÜS) AÇILACAK!
+                document.getElementById('hub-screen').classList.remove('hidden');
+                document.getElementById('hub-screen').style.display = 'flex';
+                document.getElementById('app-content').classList.add('hidden');
+                initHubCarousel();
+            });
+            isAppInitialized = true;
         } else {
-            showToast("Kayıt bulunamadı!"); return;
+            // Animasyon zaten oynadıysa direkt HUB göster
+            document.getElementById('hub-screen').classList.remove('hidden');
+            document.getElementById('hub-screen').style.display = 'flex';
+            document.getElementById('app-content').classList.add('hidden');
+            initHubCarousel();
         }
+
+        const photo = user.photoURL || 'icon.png';
+        const name = user.displayName || 'Sporcu';
+        document.getElementById('header-profile-img').src = photo;
+        document.getElementById('profile-image-large').src = photo;
+        document.getElementById('profile-name-display').innerText = name;
+        document.getElementById('profile-name-input').value = name;
+
+        db.collection("users").doc(user.uid).set({
+            uid: user.uid,
+            name: name,
+            photo: photo,
+            lastActive: firebase.firestore.FieldValue.serverTimestamp()
+        }, { merge: true });
+
+        loadDataFromCloud(user.uid);
+        listenForNotifications();
+
+    } else {
+        // 2. DURUM: KULLANICI GİRİŞ YAPMAMIŞ (SADECE LOGIN EKRANI GÖSTERİLMELİ)
+        const loadingScreen = document.getElementById('loading-screen');
+        if (loadingScreen) loadingScreen.style.display = 'none'; // Animasyonu iptal et
+
+        document.getElementById('login-screen').classList.remove('hidden');
+        document.getElementById('app-content').classList.add('hidden');
+        document.getElementById('hub-screen').classList.add('hidden');
+        isAppInitialized = true;
     }
+    updateProfileFollowStats();
+});
 
-    if (items.length === 0) { showToast("Uyarı: Listede hiç malzeme/kalem bulunmuyor!"); return; }
+document.getElementById('google-login-btn').addEventListener('click', () => {
+    const provider = new firebase.auth.GoogleAuthProvider();
+    auth.signInWithPopup(provider).catch(err => alert("Giriş Hatası: " + err.message));
+});
 
-    // 1. TAM EKRAN VE GÖRÜNÜR PERDE - iOS Safari dahi görsün diye
-    let overlay = document.createElement("div");
-    overlay.style.position = "fixed";
-    overlay.style.top = "0"; overlay.style.left = "0";
-    overlay.style.width = "100vw"; overlay.style.height = "100vh";
-    overlay.style.backgroundColor = "#fff";
-    overlay.style.zIndex = "999999";
-    overlay.style.overflow = "auto";
-    document.body.appendChild(overlay);
+window.logout = function () { auth.signOut(); }
 
-    let template = document.createElement("div");
-    template.id = "pdfExportArea";
-    template.style.width = "210mm";
-    template.style.minHeight = "297mm";
-    template.style.padding = "15mm";
-    template.style.margin = "0 auto";
-    template.style.backgroundColor = "#ffffff";
-    template.style.color = "#000000";
-    template.style.fontFamily = "Arial, sans-serif";
-    template.style.boxSizing = "border-box";
-    overlay.appendChild(template);
+async function loadDataFromCloud(uid) {
+    const docRef = db.collection("users").doc(uid);
+    const docSnap = await docRef.get();
+    if (docSnap.exists) {
+        const data = docSnap.data();
+        if (data.profile) localStorage.setItem('olympus_profile', JSON.stringify(data.profile));
+    }
+    loadProfileData();
+    calculateCurrentDay();
+}
 
-    let tbodyHTML = ""; let totalItemsCount = 0;
-    items.forEach(item => {
-        // Miktarı güvenli sayıya çevir
-        let qtyNum = parseFloat(item.qty) || 0;
-        totalItemsCount += qtyNum;
-        
-        // Fiyatı güvenli sayıya çevir (İçinde '₺' veya harf varsa temizler)
-        let priceNum = 0;
-        if (typeof item.price === 'number') priceNum = item.price;
-        else if (item.price) priceNum = parseFloat(String(item.price).replace(/[^0-9,-]+/g,"").replace(',','.')) || 0;
-        
-        // Toplamı güvenli sayıya çevir
-        let totalNum = 0;
-        if (typeof item.total === 'number') totalNum = item.total;
-        else if (item.total) totalNum = parseFloat(String(item.total).replace(/[^0-9,-]+/g,"").replace(',','.')) || 0;
+window.syncDataToCloud = function () {
+    const user = auth.currentUser;
+    if (!user) return;
+    const p = JSON.parse(localStorage.getItem('olympus_profile')) || {};
+    db.collection("users").doc(user.uid).set({ profile: p, lastSync: firebase.firestore.FieldValue.serverTimestamp() }, { merge: true })
+        .then(() => console.log("Veri Firestore'a eklendi!"))
+        .catch((error) => console.error("Kayıt başarısız:", error));
+}
 
-        tbodyHTML += `
-            <tr style="border-bottom: 1px solid #eee;">
-                <td style="padding: 10px; border-left: 1px solid #eee; border-right: 1px solid #eee;">${item.name || '-'}</td>
-                <td style="padding: 10px; border-right: 1px solid #eee;">${item.desc || '-'}</td>
-                <td style="padding: 10px; border-right: 1px solid #eee; text-align: center; font-weight:bold;">${qtyNum}</td>
-                <td style="padding: 10px; border-right: 1px solid #eee; text-align: right;">${priceNum.toFixed(2)} ₺</td>
-                <td style="padding: 10px; border-right: 1px solid #eee; text-align: right; font-weight:bold;">${totalNum.toFixed(2)} ₺</td>
-            </tr>
-        `;
+// 2. ANTRENMAN VE DİYET VERİLERİ (TAMAMI GERİ EKLENDİ)
+// 2. ANTRENMAN VE DİYET VERİLERİ
+const programData = {
+    p1: [
+        { day: 1, title: "Gün 1: İtme (Push)", muscles: ["chest", "arms-l", "arms-r", "core"], rest: false, ex: [{ name: "Bench Press", scheme: "4 x 6-8", tempo: "3-1-1-0", rpe: 8 }, { name: "Incline DB Press", scheme: "4 x 8-10", tempo: "3-0-1-0", rpe: 8.5 }, { name: "Machine Chest Press", scheme: "3 x 10-12", tempo: "2-0-1-1", rpe: 9 }, { name: "Cable Fly", scheme: "3 x 12-15", tempo: "2-0-1-2", rpe: 9 }, { name: "Lateral Raise", scheme: "5 x 12-15", tempo: "2-0-1-1", rpe: 9 }, { name: "Triceps Pushdown", scheme: "3 x 10-12", tempo: "2-0-1-1", rpe: 9 }, { name: "Overhead Rope Ext.", scheme: "3 x 12", tempo: "3-0-1-1", rpe: 9 }, { name: "Plank", scheme: "3 x 60 sn", tempo: "Statik", rpe: 8 }] },
+        { day: 2, title: "Gün 2: Çekme (Pull)", muscles: ["arms-l", "arms-r", "core"], rest: false, ex: [{ name: "Pull-up", scheme: "4 x Max", tempo: "2-1-1-0", rpe: 9 }, { name: "Lat Pulldown", scheme: "4 x 8-12", tempo: "3-0-1-1", rpe: 8 }, { name: "Barbell Row", scheme: "4 x 6-8", tempo: "2-1-1-0", rpe: 8.5 }, { name: "Seated Cable Row", scheme: "3 x 10-12", tempo: "2-0-1-2", rpe: 9 }, { name: "Face Pull", scheme: "4 x 15", tempo: "2-0-1-2", rpe: 9 }, { name: "Incline DB Curl", scheme: "3 x 10-12", tempo: "3-0-1-0", rpe: 9 }, { name: "Hammer Curl", scheme: "3 x 12", tempo: "2-0-1-0", rpe: 9 }] },
+        { day: 3, title: "Gün 3: Bacak (Legs)", muscles: ["legs-l", "legs-r", "core"], rest: false, ex: [{ name: "Squat", scheme: "4 x 6", tempo: "3-1-1-0", rpe: 8 }, { name: "Romanian Deadlift", scheme: "4 x 8", tempo: "3-0-1-0", rpe: 8.5 }, { name: "Leg Press", scheme: "3 x 10-12", tempo: "2-0-1-0", rpe: 9 }, { name: "Leg Extension", scheme: "3 x 15", tempo: "2-0-1-1", rpe: 9 }, { name: "Leg Curl", scheme: "3 x 15", tempo: "2-0-1-1", rpe: 9 }, { name: "Standing Calf Raise", scheme: "5 x 15-20", tempo: "2-1-1-1", rpe: 9 }, { name: "Hanging Leg Raise", scheme: "3 x 12", tempo: "2-0-1-0", rpe: 9 }, { name: "Cable Crunch", scheme: "3 x 15", tempo: "2-0-1-1", rpe: 9 }] },
+        { day: 4, title: "Gün 4: Aktif Dinlenme", muscles: [], rest: true, ex: [] },
+        { day: 5, title: "Gün 5: Push Hypertrophy", muscles: ["chest", "arms-l", "arms-r"], rest: false, ex: [{ name: "Incline DB Press", scheme: "4 x 10", tempo: "2-0-1-0", rpe: 9 }, { name: "Machine Chest Press", scheme: "4 x 12", tempo: "2-0-1-1", rpe: 9 }, { name: "Cable Fly", scheme: "4 x 15", tempo: "2-0-1-2", rpe: 9.5 }, { name: "Shoulder Press", scheme: "4 x 10", tempo: "3-0-1-0", rpe: 8.5 }, { name: "Lateral Raise", scheme: "5 x 15", tempo: "2-0-1-0", rpe: 10 }, { name: "Rear Delt Fly", scheme: "4 x 15", tempo: "2-0-1-1", rpe: 9.5 }, { name: "Triceps Rope Pushdown", scheme: "3 x 15", tempo: "2-0-1-1", rpe: 10 }] },
+        { day: 6, title: "Gün 6: Pull + Arms", muscles: ["arms-l", "arms-r", "core"], rest: false, ex: [{ name: "Lat Pulldown", scheme: "4 x 10-12", tempo: "2-0-1-1", rpe: 9 }, { name: "Chest Supported Row", scheme: "4 x 10", tempo: "2-0-1-1", rpe: 9 }, { name: "Straight Arm Pulldown", scheme: "3 x 15", tempo: "2-0-1-2", rpe: 9.5 }, { name: "Face Pull", scheme: "3 x 15", tempo: "2-0-1-2", rpe: 9 }, { name: "Barbell Curl", scheme: "3 x 10", tempo: "2-0-1-0", rpe: 9 }, { name: "Cable Curl", scheme: "3 x 12", tempo: "2-0-1-1", rpe: 9.5 }, { name: "Dips", scheme: "3 x Max", tempo: "3-0-1-0", rpe: 9 }, { name: "Lateral Raise Finisher", scheme: "100 tekrar", tempo: "Sürekli", rpe: "-" }] },
+        { day: 7, title: "Gün 7: Tam Dinlenme", muscles: [], rest: true, ex: [] }
+    ],
+    p2: [
+        { day: 1, title: "Gün 1: Upper Strength", muscles: ["chest", "arms-l", "arms-r"], rest: false, ex: [{ name: "Bench Press", scheme: "5 x 5", tempo: "4-0-1-0", rpe: 8.5 }, { name: "Incline Bench Press", scheme: "4 x 6-8", tempo: "3-1-1-0", rpe: 8.5 }, { name: "Weighted Pull-up", scheme: "4 x 6-8", tempo: "2-1-1-0", rpe: 8.5 }, { name: "Barbell Row", scheme: "4 x 6-8", tempo: "2-1-1-0", rpe: 8.5 }, { name: "Military Press", scheme: "4 x 6", tempo: "3-0-1-0", rpe: 8.5 }, { name: "Lateral Raise", scheme: "5 x 15", tempo: "2-0-1-1", rpe: 9 }, { name: "Face Pull", scheme: "4 x 15", tempo: "2-0-1-2", rpe: 9 }, { name: "Cable Curl", scheme: "3 x 12", tempo: "3-0-1-1", rpe: 9 }, { name: "Pushdown", scheme: "3 x 12", tempo: "2-0-1-1", rpe: 9 }] },
+        // ... (Diğer günlere de aynı mantıkla muscles: [...] ekleyebilirsin)
+        { day: 2, title: "Gün 2: Lower Strength", muscles: ["legs-l", "legs-r", "core"], rest: false, ex: [{ name: "Squat", scheme: "5 x 5", tempo: "3-1-1-0", rpe: 8.5 }, { name: "Romanian Deadlift", scheme: "4 x 8", tempo: "3-0-1-0", rpe: 8.5 }, { name: "Leg Press", scheme: "4 x 10", tempo: "3-0-1-0", rpe: 9 }, { name: "Leg Extension", scheme: "4 x 12", tempo: "2-0-1-1", rpe: 9 }, { name: "Leg Curl", scheme: "4 x 12", tempo: "2-0-1-1", rpe: 9 }, { name: "Standing Calf Raise", scheme: "5 x 15", tempo: "2-1-1-1", rpe: 9 }, { name: "Hanging Leg Raise", scheme: "4 x 12", tempo: "2-0-1-0", rpe: 9 }, { name: "Cable Crunch", scheme: "4 x 15", tempo: "2-0-1-1", rpe: 9 }] },
+        { day: 3, title: "Gün 3: Aktif Dinlenme", muscles: [], rest: true, ex: [] },
+        { day: 4, title: "Gün 4: Push Hypertrophy", muscles: ["chest", "arms-l", "arms-r"], rest: false, ex: [{ name: "Incline DB Press", scheme: "4 x 10", tempo: "3-0-1-0", rpe: 9 }, { name: "Machine Chest Press", scheme: "4 x 12", tempo: "2-0-1-1", rpe: 9 }, { name: "Cable Fly", scheme: "4 x 15", tempo: "2-0-1-2", rpe: 9.5 }, { name: "Shoulder Press", scheme: "4 x 10", tempo: "3-0-1-0", rpe: 9 }, { name: "Lateral Raise", scheme: "6 x 15", tempo: "2-0-1-0", rpe: 10 }, { name: "Rear Delt Fly", scheme: "5 x 15", tempo: "2-0-1-1", rpe: 9.5 }, { name: "Overhead Rope Ext.", scheme: "4 x 12", tempo: "3-0-1-1", rpe: 9 }, { name: "Pushdown", scheme: "3 x 15", tempo: "2-0-1-1", rpe: 10 }] },
+        { day: 5, title: "Gün 5: Pull Hypertrophy", muscles: ["arms-l", "arms-r", "core"], rest: false, ex: [{ name: "Pull-up", scheme: "4 x Max", tempo: "2-1-1-0", rpe: 9 }, { name: "Lat Pulldown", scheme: "4 x 12", tempo: "3-0-1-1", rpe: 9 }, { name: "Chest Supported Row", scheme: "4 x 10", tempo: "2-0-1-1", rpe: 9 }, { name: "Straight Arm Pulldown", scheme: "4 x 15", tempo: "2-0-1-2", rpe: 9.5 }, { name: "Face Pull", scheme: "4 x 15", tempo: "2-0-1-2", rpe: 9 }, { name: "Hammer Curl", scheme: "4 x 12", tempo: "2-0-1-0", rpe: 9.5 }, { name: "Incline Curl", scheme: "4 x 12", tempo: "3-0-1-0", rpe: 9.5 }] },
+        { day: 6, title: "Gün 6: Dinlenme", muscles: [], rest: true, ex: [] },
+        { day: 7, title: "Gün 7: Tam Dinlenme", muscles: [], rest: true, ex: [] }
+    ],
+    p3: [
+        // Aynı şekilde p3 için de çalışacak...
+        { day: 1, title: "Gün 1: Upper Pump", muscles: ["chest", "arms-l", "arms-r"], rest: false, ex: [{ name: "Bench Press", scheme: "4 x 8", tempo: "3-0-1-0", rpe: 8.5 }, { name: "Incline Press", scheme: "4 x 10", tempo: "3-0-1-0", rpe: 9 }, { name: "Machine Chest Press", scheme: "3 x 15", tempo: "2-0-1-1", rpe: 9.5 }, { name: "Cable Fly", scheme: "3 x 20", tempo: "2-0-1-2", rpe: 10 }, { name: "Lateral Raise", scheme: "7 x 15", tempo: "2-0-1-0", rpe: 9.5 }, { name: "Rear Delt Fly", scheme: "5 x 20", tempo: "2-0-1-1", rpe: 10 }, { name: "Pushdown", scheme: "4 x 15", tempo: "2-0-1-1", rpe: 10 }, { name: "Overhead Extension", scheme: "4 x 15", tempo: "3-0-1-1", rpe: 10 }] },
+        { day: 2, title: "Gün 2: Back Width", muscles: ["arms-l", "arms-r"], rest: false, ex: [{ name: "Wide Grip Lat Pulldown", scheme: "5 x 12", tempo: "3-0-1-1", rpe: 9 }, { name: "Pull-up", scheme: "4 x Max", tempo: "2-1-1-0", rpe: 9.5 }, { name: "Chest Supported Row", scheme: "4 x 12", tempo: "2-0-1-2", rpe: 9 }, { name: "Straight Arm Pulldown", scheme: "4 x 15", tempo: "2-0-1-2", rpe: 9.5 }, { name: "Face Pull", scheme: "5 x 20", tempo: "2-0-1-2", rpe: 10 }, { name: "Hammer Curl", scheme: "4 x 12", tempo: "2-0-1-0", rpe: 9.5 }, { name: "Cable Curl", scheme: "4 x 15", tempo: "2-0-1-1", rpe: 10 }] },
+        { day: 3, title: "Gün 3: Legs", muscles: ["legs-l", "legs-r"], rest: false, ex: [{ name: "Squat", scheme: "4 x 8", tempo: "3-1-1-0", rpe: 8.5 }, { name: "Romanian Deadlift", scheme: "4 x 10", tempo: "3-0-1-0", rpe: 8.5 }, { name: "Leg Press", scheme: "4 x 15", tempo: "2-0-1-0", rpe: 9.5 }, { name: "Walking Lunge", scheme: "3 x 15", tempo: "Dinamik", rpe: 9 }, { name: "Leg Extension", scheme: "4 x 20", tempo: "2-0-1-1", rpe: 10 }, { name: "Leg Curl", scheme: "4 x 20", tempo: "2-0-1-1", rpe: 10 }, { name: "Standing Calf Raise", scheme: "6 x 20", tempo: "2-1-1-1", rpe: 9.5 }] },
+        { day: 4, title: "Gün 4: Shoulder Specialization", muscles: ["arms-l", "arms-r"], rest: false, ex: [{ name: "Military Press", scheme: "4 x 8", tempo: "3-0-1-0", rpe: 8.5 }, { name: "Lateral Raise", scheme: "8 x 15", tempo: "2-0-1-0", rpe: 9.5 }, { name: "Cable Lateral Raise", scheme: "5 x 15", tempo: "2-0-1-1", rpe: 10 }, { name: "Rear Delt Fly", scheme: "6 x 20", tempo: "2-0-1-1", rpe: 10 }, { name: "Shrug", scheme: "4 x 12", tempo: "2-0-1-2", rpe: 9 }, { name: "Face Pull", scheme: "4 x 20", tempo: "2-0-1-2", rpe: 9.5 }] },
+        { day: 5, title: "Gün 5: Arms + Pump", muscles: ["arms-l", "arms-r", "chest"], rest: false, ex: [{ name: "Close Grip Bench Press", scheme: "4 x 8", tempo: "3-1-1-0", rpe: 8.5 }, { name: "EZ Bar Curl", scheme: "4 x 10", tempo: "3-0-1-0", rpe: 9 }, { name: "Rope Pushdown", scheme: "4 x 15", tempo: "2-0-1-1", rpe: 9.5 }, { name: "Incline Curl", scheme: "4 x 15", tempo: "3-0-1-0", rpe: 9.5 }, { name: "Hammer Curl", scheme: "4 x 15", tempo: "2-0-1-0", rpe: 9.5 }, { name: "Overhead Rope Ext.", scheme: "4 x 15", tempo: "2-0-1-1", rpe: 10 }] },
+        { day: 6, title: "Gün 6: Dinlenme", muscles: [], rest: true, ex: [] },
+        { day: 7, title: "Gün 7: Tam Dinlenme", muscles: [], rest: true, ex: [] }
+    ]
+};
+
+const dietData = {
+    1: { title: "Pzt: Yüksek Karb.", meals: [{ t: "1. Ana Öğün (12:00)", d: "4 Tam Yumurta, 100g Yulaf Ezmesi, 15g Şekersiz Fıstık Ezmesi, Kahve", alt: "Değişim: 250g Lor Peyniri, 100g Pirinç Unu", i: "🍳" }, { t: "Ara Öğün (16:30)", d: "1 Orta Boy Muz, Filtre Kahve", alt: "Değişim: 1 Yeşil Elma veya 2 Pirinç Patlağı", i: "🍌" }, { t: "Ara Öğün (18:30)", d: "1 Ölçek Whey Protein, 5g Kreatin", alt: "Değişim: 150g Süzme Yoğurt veya 4 Yumurta Beyazı", i: "🥤" }, { t: "2. Ana Öğün (19:30)", d: "250g Tavuk Göğsü, 150g Basmati Pirinç, Yeşil Salata", alt: "Değişim: 220g Kırmızı Et veya 180g Ton Balığı", i: "🍗" }, { t: "Gece Öğünü", d: "150g Lor Peyniri", alt: "Değişim: 250g Süzme Yoğurt veya 30g Badem", i: "🧀" }] },
+    2: { title: "Sal: Orta Karb.", meals: [{ t: "1. Ana Öğün (12:00)", d: "4 Yumurtalı Omlet, 50g Lor Peyniri, 2 Dilim Tam Buğday Ekmeği", alt: "Değişim: 3 Tam + 3 Beyaz Yumurta", i: "🍳" }, { t: "Ara Öğün (16:30)", d: "1 Elma, 15g Fıstık Ezmesi", alt: "Değişim: 10 Çiğ Badem veya 30g Kavrulmamış Yer Fıstığı", i: "🍎" }, { t: "Ara Öğün (18:30)", d: "1 Ölçek Whey Protein, 5g Kreatin", alt: "Değişim: 150g Süzme Yoğurt", i: "🥤" }, { t: "2. Ana Öğün (19:30)", d: "1 Kutu Süzülmüş Ton Balığı, 150g Kepekli Makarna, Salata", alt: "Değişim: 2 Porsiyon Yeşil Mercimek veya 200g Hindi", i: "🐟" }] },
+    3: { title: "Çar: Yüksek Karb.", meals: [{ t: "1. Ana Öğün (12:00)", d: "120g Yulaf Ezmesi, 4 Haşlanmış Yumurta, Tarçın", alt: "Değişim: 150g Pirinç Unu, 250g Lor Peyniri", i: "🥣" }, { t: "Ara Öğün (16:30)", d: "2 Pirinç Patlağı, 15g Bal, Kahve", alt: "Değişim: 1 Adet Muz ve Sade Soda", i: "🍯" }, { t: "Ara Öğün (18:30)", d: "1 Ölçek Whey Protein, 5g Kreatin", alt: "Değişim: 4 Yumurta Beyazı", i: "🥤" }, { t: "2. Ana Öğün (19:30)", d: "250g Tavuk Göğsü, 200g Fırın Patates, Mevsim Salata", alt: "Değişim: 220g Kırmızı Et, 150g Kepekli Makarna", i: "🍗" }] },
+    4: { title: "Per: Düşük Karb.", meals: [{ t: "1. Ana Öğün (12:00)", d: "4 Tam Yumurta (Tereyağında), Söğüş Salata (Karb. yok)", alt: "Değişim: 200g Izgara Tavuk Kalça", i: "🍳" }, { t: "Ara Öğün (16:00)", d: "1 Kase Yoğurt, 30g Kavrulmamış Yer Fıstığı", alt: "Değişim: 30g Çiğ Badem veya Ceviz", i: "🥜" }, { t: "2. Ana Öğün (19:00)", d: "1.5 Porsiyon Yeşil Mercimek veya Nohut Yemeği, Bol Salata", alt: "Değişim: 250g Izgara Levrek/Çipura", i: "🍲" }] },
+    5: { title: "Cum: Yüksek Karb.", meals: [{ t: "1. Ana Öğün (12:00)", d: "4 Tam Yumurta, 100g Yulaf Ezmesi, 1 YK Fıstık Ezmesi", alt: "Değişim: 250g Lor, 100g Pirinç Unu", i: "🍳" }, { t: "Ara Öğün (16:30)", d: "1 Muz, Pre-Workout veya Kahve", alt: "Değişim: 2 Pirinç Patlağı, Bal", i: "🍌" }, { t: "Ara Öğün (18:30)", d: "1 Ölçek Whey Protein, 5g Kreatin", alt: "Değişim: 150g Süzme Yoğurt", i: "🥤" }, { t: "2. Ana Öğün (19:30)", d: "200g Tavuk Göğsü Sote, 150g Pirinç Pilavı, Izgara Sebze", alt: "Değişim: 200g Yağsız Köfte, Patates", i: "🍗" }] },
+    6: { title: "Cmt: Orta Karb.", meals: [{ t: "1. Ana Öğün (12:00)", d: "3 Yumurtalı, 50g Yulaf Unlu Krep, 1 Tatlı Kaşığı Bal", alt: "Değişim: 3 Haşlanmış Yumurta, 2 Dilim Ekmek", i: "🥞" }, { t: "Ara Öğün (16:30)", d: "1 Porsiyon Meyve, 15g Yer Fıstığı", alt: "Değişim: 1 Yeşil Elma, 10 Çiğ Badem", i: "🍎" }, { t: "Ara Öğün (18:30)", d: "1 Ölçek Whey Protein (İdman yapıldıysa)", alt: "Değişim: Gerekirse 100g Lor", i: "🥤" }, { t: "2. Ana Öğün (19:30)", d: "200g Tavuk Göğsü, 100g Makarna, Havuç/Brokoli", alt: "Değişim: 180g Ton Balığı, 100g Pirinç", i: "🍗" }] },
+    7: { title: "Paz: Cheat Meal", meals: [{ t: "1. Ana Öğün (12:00)", d: "Menemen (4 Yumurta), 2 Dilim Ekmek, 50g Peynir", alt: "Değişim: Standart Türk Kahvaltısı", i: "🍳" }, { t: "Ara Öğün (16:00)", d: "1 Kase Yoğurt veya Sade Kahve", alt: "Değişim: Yeşil Çay", i: "☕" }, { t: "2. Ana Öğün (19:00)", d: "SERBEST ÖĞÜN: Pizza, Burger vb.", alt: "Değişim: İstenilen herhangi bir menü", i: "🍔" }] }
+};
+
+// 3. SİSTEM DEĞİŞKENLERİ VE BAŞLATMA
+let currentPhase = 'p1';
+let calculatedDay = 1;
+let viewMode = 'today';
+let modalChartInstance = null;
+let editMode = false;
+let activeWorkout = [];
+let currentExIndex = 0;
+let timerInterval;
+let isExpressMode = false;
+
+let activities = JSON.parse(localStorage.getItem('olympus_acts')) || [
+    { id: 1, text: "💧 Su Hedefi Tamam", done: false },
+    { id: 2, text: "🚶‍♂️ 10.000 Adım", done: false },
+    { id: 3, text: "🏋️ Antrenman Yapıldı", done: false }
+];
+
+document.addEventListener("DOMContentLoaded", () => {
+    document.getElementById('save-settings-btn').addEventListener('click', () => {
+        const d = document.getElementById('start-date').value;
+        const n = document.getElementById('profile-name-input').value;
+        localStorage.setItem('olympus_start_date', d);
+        if (n) document.getElementById('profile-name-display').innerText = n;
+        document.getElementById('settings-modal').style.display = 'none';
+        syncDataToCloud();
+        calculateCurrentDay();
+        checkWaterReset();
+        saveAndRenderActivities();
+        loadProfileData();
+        checkDeloadEngine();
+        // YENİ EKLENEN KISIM: Modal yüklendiğinde tıklama olaylarını dinlemeye başla
+        initMuscleInteractions();
     });
 
-    template.innerHTML = `
-        <div style="display: flex; justify-content: space-between; align-items: flex-end; border-bottom: 3px solid #198b1d; padding-bottom: 15px; margin-bottom: 30px;">
-            <img src="CULBASEpng.png" style="height: 70px; object-fit: contain;">
-            <div style="text-align: right; font-size: 14px; line-height: 1.5;">
-                <p style="margin:0;"><strong>Tarih:</strong> ${offerDate}</p>
-                <p style="margin:0;"><strong>Teklif No:</strong> ${offerNumber}</p>
+    const dateInput = document.getElementById('start-date');
+    const savedDate = localStorage.getItem('olympus_start_date');
+    if (savedDate) { dateInput.value = savedDate; } else { const today = new Date().toISOString().split('T')[0]; dateInput.value = today; localStorage.setItem('olympus_start_date', today); }
+
+    document.getElementById('btn-today').addEventListener('click', () => { viewMode = 'today'; updateCalendarTabs(); });
+    document.getElementById('btn-tomorrow').addEventListener('click', () => { viewMode = 'tomorrow'; updateCalendarTabs(); });
+    document.getElementById('btn-all').addEventListener('click', () => { viewMode = 'all'; updateCalendarTabs(); });
+
+    const navButtons = document.querySelectorAll('.nav-btn, .top-nav-btn');
+    const screens = document.querySelectorAll('.screen');
+    const dayTracker = document.getElementById('day-tracker');
+    const btnAll = document.getElementById('btn-all');
+
+    navButtons.forEach(btn => {
+        btn.addEventListener('click', () => {
+            if (navigator.vibrate) navigator.vibrate(50);
+            if (btn.classList.contains('nav-btn')) {
+                document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
+                btn.classList.add('active');
+            }
+            const target = btn.getAttribute('data-target');
+            screens.forEach(s => s.classList.remove('active'));
+            document.getElementById(target).classList.add('active');
+
+            if (target === 'diet-sec') {
+                btnAll.style.display = 'none';
+                if (viewMode === 'all') { viewMode = 'today'; updateCalendarTabs(); }
+                dayTracker.style.display = 'flex';
+                document.getElementById('spotify-floating-player').classList.add('hidden'); // Müziği Gizle
+            } else if (target === 'workout-sec') {
+                btnAll.style.display = 'block';
+                dayTracker.style.display = 'flex';
+                document.getElementById('spotify-floating-player').classList.remove('hidden'); // Müziği Göster
+            } else {
+                dayTracker.style.display = 'none';
+                document.getElementById('spotify-floating-player').classList.add('hidden'); // Müziği Gizle
+            }
+
+            if (target === 'profile-sec') {
+                updateWeeklyScore();
+                loadProfileData();
+                // YENİ EKLENEN: Profil sekmesi her açıldığında takipçi sayılarını güncelle!
+                if (typeof updateProfileFollowStats === 'function') {
+                    updateProfileFollowStats();
+                }
+            }
+        });
+    });
+
+    document.querySelectorAll('.phase-btn').forEach(btn => {
+        btn.addEventListener('click', () => {
+            document.querySelectorAll('.phase-btn').forEach(b => b.classList.remove('active'));
+            btn.classList.add('active');
+            currentPhase = btn.getAttribute('data-phase');
+            renderWorkouts();
+        });
+    });
+
+    document.querySelector('.close-modal-btn').addEventListener('click', () => {
+        document.getElementById('workout-modal').style.display = 'none';
+        document.getElementById('main-header').style.display = 'block';
+
+        const player = document.getElementById('spotify-floating-player');
+        if (player) player.classList.remove('hidden');
+    });
+
+    const editBtn = document.getElementById('edit-activity-btn');
+    const addContainer = document.getElementById('add-activity-container');
+    editBtn.addEventListener('click', () => {
+        editMode = !editMode;
+        editBtn.innerText = editMode ? "Bitti" : "Düzenle";
+        if (editMode) addContainer.classList.remove('hidden'); else addContainer.classList.add('hidden');
+        saveAndRenderActivities();
+    });
+
+    document.getElementById('add-activity-btn').addEventListener('click', () => {
+        const input = document.getElementById('new-activity-input');
+        if (input.value.trim() !== '') {
+            activities.push({ id: Date.now(), text: input.value, done: false });
+            input.value = '';
+            saveAndRenderActivities();
+        }
+    });
+
+    calculateCurrentDay();
+    checkWaterReset();
+    saveAndRenderActivities();
+    loadProfileData();
+    checkDeloadEngine();
+    initMuscleInteractions();
+    initDraggableOly()
+});
+
+function calculateCurrentDay() {
+    let isTomorrow = (viewMode === 'tomorrow');
+    const startDate = new Date(document.getElementById('start-date').value);
+    const today = new Date();
+    startDate.setHours(0, 0, 0, 0); today.setHours(0, 0, 0, 0);
+    const diffDays = Math.floor((today - startDate) / (1000 * 60 * 60 * 24));
+    let baseDay = diffDays >= 0 ? diffDays + 1 : 1;
+
+    if (viewMode === 'today') {
+        calculatedDay = ((baseDay - 1) % 7) + 1;
+        document.getElementById('display-day-text').innerText = `GÜN ${calculatedDay}`;
+
+        if (calculatedDay === 1) {
+            let lastReset = localStorage.getItem('olympus_muscle_reset_date');
+            let todayStr = new Date().toLocaleDateString('tr-TR');
+            if (lastReset !== todayStr) {
+                localStorage.removeItem('olympus_worked_muscles');
+                localStorage.setItem('olympus_muscle_reset_date', todayStr);
+                updateAnatomyView();
+            }
+        }
+
+    } else if (viewMode === 'tomorrow') {
+        calculatedDay = ((baseDay) % 7) + 1;
+        document.getElementById('display-day-text').innerText = `GÜN ${calculatedDay}`;
+    } else {
+        document.getElementById('display-day-text').innerText = `TÜMÜ`;
+    }
+
+    renderWorkouts();
+    renderDiet();
+
+    // YENİ EKLENEN KISIM: GÜNLÜK BİLDİRİM MOTORUNU ÇALIŞTIR
+    if (typeof sendDailyWorkoutNotification === 'function') {
+        sendDailyWorkoutNotification();
+    }
+}
+
+
+function updateCalendarTabs() {
+    document.getElementById('btn-today').classList.toggle('active', viewMode === 'today');
+    document.getElementById('btn-tomorrow').classList.toggle('active', viewMode === 'tomorrow');
+    document.getElementById('btn-all').classList.toggle('active', viewMode === 'all');
+    calculateCurrentDay();
+}
+
+function renderWorkouts() {
+    let isTomorrow = (viewMode === 'tomorrow');
+    const container = document.getElementById('days-container');
+    container.innerHTML = '';
+
+    if (viewMode === 'all') {
+        document.getElementById('workout-day-title').innerText = "Tüm Program";
+        document.getElementById('workout-day-desc').innerText = "Görmek istediğiniz güne dokunun.";
+        programData[currentPhase].forEach(d => {
+            const card = document.createElement('div');
+            card.className = `card ${d.rest ? 'rest-day' : ''}`;
+            card.innerHTML = `<h3>${d.title}</h3><p>${d.rest ? 'Dinlenme Günü' : 'Detayları görmek için dokun.'}</p>`;
+            if (!d.rest) card.addEventListener('click', () => showWorkoutModal(d));
+            container.appendChild(card);
+        });
+    } else {
+        const d = programData[currentPhase].find(x => x.day == calculatedDay);
+        if (d) {
+            document.getElementById('workout-day-title').innerText = d.title;
+            document.getElementById('workout-day-desc').innerText = viewMode === 'tomorrow' ? "Yarının Planı" : "Bugünün Planı";
+            const card = document.createElement('div');
+            card.className = `card ${d.rest ? 'rest-day' : ''}`;
+            card.innerHTML = `<h3>${d.title}</h3><p>${d.rest ? 'Dinlenme Günü.' : 'İçeriği görmek için dokun.'}</p>`;
+            if (!d.rest) card.addEventListener('click', () => showWorkoutModal(d));
+            container.appendChild(card);
+        }
+    }
+}
+
+function showWorkoutModal(dayData) {
+    document.getElementById('main-header').style.display = 'none';
+    document.getElementById('modal-title').innerText = dayData.title;
+
+    const player = document.getElementById('spotify-floating-player');
+    if (player) player.classList.add('hidden');
+
+    isExpressMode = false; // Her açılışta sıfırla
+
+    const startBtn = document.getElementById('start-workout-btn');
+    const panicBtn = document.getElementById('save-the-day-btn');
+
+    // Butonları resetle
+    startBtn.innerText = "🚀 İdmanı Başlat";
+    startBtn.style.background = "var(--goldnova)";
+    startBtn.style.color = "#000";
+    panicBtn.style.display = 'block';
+
+    const newStartBtn = startBtn.cloneNode(true);
+    startBtn.parentNode.replaceChild(newStartBtn, startBtn);
+    newStartBtn.addEventListener('click', () => { startActiveWorkout(dayData); });
+
+    const newPanicBtn = panicBtn.cloneNode(true);
+    panicBtn.parentNode.replaceChild(newPanicBtn, panicBtn);
+    newPanicBtn.addEventListener('click', () => { activateSaveTheDay(dayData, newStartBtn, newPanicBtn); });
+
+    renderModalExercises(dayData.ex);
+    document.getElementById('workout-modal').style.display = 'flex';
+}
+
+function renderModalExercises(exArray) {
+    const holder = document.getElementById('modal-exercises');
+    holder.innerHTML = '';
+    exArray.forEach(e => {
+        const videoUrl = `https://www.youtube.com/results?search_query=${encodeURIComponent(e.name + " form technique")}`;
+        holder.innerHTML += `<div class="exercise-row ${isExpressMode ? 'express-move' : ''}">
+            <a href="${videoUrl}" target="_blank" style="color:white;"><strong style="font-size:18px; text-decoration:underline;">${isExpressMode ? '⚡ ' : ''}${e.name} 📺</strong></a>
+            <span style="font-size:14px; color:var(--text-muted); margin-top:4px;">Set: <b style="color:#fff">${e.scheme}</b> | Tempo: <b style="color:#fff">${e.tempo}</b> | RPE: <b style="color:var(--goldnova)">${e.rpe}</b></span>
+        </div>`;
+    });
+}
+
+window.startActiveWorkout = function (dayData) {
+    activeWorkout = dayData.ex;
+    currentExIndex = 0;
+    document.getElementById('workout-modal').style.display = 'none';
+    document.getElementById('active-workout-screen').classList.remove('hidden');
+    const player = document.getElementById('spotify-floating-player');
+    if (player) player.classList.remove('hidden');
+
+    renderActiveExercise();
+}
+
+function renderActiveExercise() {
+    if (currentExIndex >= activeWorkout.length) {
+        finishWorkout();
+        return;
+    }
+    const ex = activeWorkout[currentExIndex];
+    document.getElementById('player-progress').innerText = `${currentExIndex + 1} / ${activeWorkout.length} Hareket`;
+    document.getElementById('player-ex-name').innerText = ex.name;
+    document.getElementById('player-ex-details').innerText = `Set: ${ex.scheme} | Tempo: ${ex.tempo} | RPE: ${ex.rpe}`;
+
+    document.getElementById('player-weight').value = '';
+    document.getElementById('player-reps').value = '';
+
+    document.getElementById('player-timer-display').classList.add('hidden');
+    document.getElementById('player-next-btn').classList.add('hidden');
+    document.getElementById('player-save-btn').classList.remove('hidden');
+}
+
+window.saveSetAndRest = function () {
+    document.getElementById('player-save-btn').classList.add('hidden');
+    document.getElementById('player-timer-display').classList.remove('hidden');
+    document.getElementById('player-next-btn').classList.remove('hidden');
+
+    let sec = isExpressMode ? 45 : 90;
+    document.getElementById('timer-seconds').innerText = sec;
+
+    clearInterval(timerInterval);
+    timerInterval = setInterval(() => {
+        sec--;
+        document.getElementById('timer-seconds').innerText = sec;
+        if (sec <= 0) {
+            clearInterval(timerInterval);
+            if (navigator.vibrate) navigator.vibrate([400, 200, 400]);
+            alert("Dinlenme Bitti! Sete Başla!");
+        }
+    }, 1000);
+}
+
+window.nextExercise = function () {
+    clearInterval(timerInterval);
+    currentExIndex++;
+    renderActiveExercise();
+}
+
+window.finishWorkout = function () {
+    clearInterval(timerInterval);
+    document.getElementById('active-workout-screen').classList.add('hidden');
+    document.getElementById('main-header').style.display = 'block';
+    confetti({ particleCount: 150, spread: 80, colors: ['#f6c000', '#fff'] });
+
+    const activeDayData = programData[currentPhase].find(x => x.day == calculatedDay);
+    if (activeDayData && activeDayData.muscles) {
+        let worked = JSON.parse(localStorage.getItem('olympus_worked_muscles')) || [];
+        activeDayData.muscles.forEach(m => {
+            if (!worked.includes(m)) worked.push(m);
+        });
+        localStorage.setItem('olympus_worked_muscles', JSON.stringify(worked));
+    }
+
+    // YENİ: İdman bitince 150 Puan Ekle
+    if (window.addOlympusPoints) window.addOlympusPoints(150, "İdman Tamamlandı");
+
+    alert("🔥 İDMAN TAMAMLANDI!\n🏆 KAS HARİTAN GÜNCELLENDİ VE 150 OLYMPUS KAZANDIN!");
+    toggleAct(3, true);
+}
+
+window.exitWorkoutPlayer = function () {
+    clearInterval(timerInterval);
+    document.getElementById('active-workout-screen').classList.add('hidden');
+    document.getElementById('main-header').style.display = 'block';
+}
+
+function renderDiet() {
+    let isTomorrow = (viewMode === 'tomorrow');
+    const container = document.getElementById('diet-container');
+    container.innerHTML = '';
+
+    let targetDay = viewMode === 'all' ? 1 : calculatedDay;
+    const d = dietData[targetDay];
+    document.getElementById('diet-day-desc').innerText = isTomorrow ? `Yarın: Gün ${targetDay} - ${d.title}` : `Bugün: Gün ${targetDay} - ${d.title}`;
+
+    d.meals.forEach((m, index) => {
+        const isDone = localStorage.getItem(`diet_${targetDay}_${index}`) || '';
+        container.innerHTML += `
+            <div class="diet-card ${isDone}" data-day="${targetDay}" data-index="${index}">
+                <div class="diet-card-inner">
+                    <div class="supp-icon" style="background:transparent; border:none;">${m.i}</div>
+                    <div class="supp-details"><h4>${m.t}</h4><p>${m.d}</p></div>
+                </div>
+                <div class="meal-alt">${m.alt || 'Alternatif bulunmuyor.'}</div>
             </div>
+        `;
+    });
+    initSwipeEngine();
+}
+
+function initSwipeEngine() {
+    document.querySelectorAll('.diet-card').forEach(card => {
+        let touchstartX = 0;
+        let isSwiping = false;
+
+        card.addEventListener('touchstart', e => {
+            touchstartX = e.changedTouches[0].screenX;
+            card.style.transition = 'none';
+            isSwiping = false;
+        }, { passive: true });
+
+        card.addEventListener('touchmove', e => {
+            let currentX = e.changedTouches[0].screenX;
+            let moveX = currentX - touchstartX;
+            if (Math.abs(moveX) > 10) isSwiping = true;
+            if (Math.abs(moveX) < 120) {
+                card.style.transform = `translateX(${moveX}px)`;
+                if (moveX > 30) card.style.background = 'rgba(0, 255, 0, 0.15)';
+                else if (moveX < -30) card.style.background = 'rgba(255, 0, 0, 0.15)';
+            }
+        }, { passive: true });
+
+        card.addEventListener('touchend', e => {
+            let diff = e.changedTouches[0].screenX - touchstartX;
+            if (!isSwiping || Math.abs(diff) < 10) {
+                card.style.transform = 'translateX(0px)';
+                card.classList.toggle('expanded');
+                if (navigator.vibrate) navigator.vibrate(30);
+                return;
+            }
+            card.style.transition = 'transform 0.4s cubic-bezier(0.25, 0.8, 0.25, 1), background 0.4s ease';
+            card.style.transform = 'translateX(0px)';
+
+            const d = card.getAttribute('data-day');
+            const i = card.getAttribute('data-index');
+
+            if (diff > 60) {
+                card.className = 'diet-card completed';
+                localStorage.setItem(`diet_${d}_${i}`, 'completed');
+                if (navigator.vibrate) navigator.vibrate(40);
+            } else if (diff < -60) {
+                card.className = 'diet-card skipped';
+                localStorage.setItem(`diet_${d}_${i}`, 'skipped');
+                if (navigator.vibrate) navigator.vibrate(40);
+            } else {
+                const oldStatus = localStorage.getItem(`diet_${d}_${i}`) || '';
+                card.className = `diet-card ${oldStatus}`;
+                card.style.background = '';
+            }
+        });
+    });
+}
+
+window.resetDietUI = function () {
+    document.querySelectorAll('.diet-card').forEach(card => {
+        card.className = 'diet-card';
+        card.style.background = '';
+        card.style.transform = 'translateX(0px)';
+        const d = card.getAttribute('data-day');
+        const i = card.getAttribute('data-index');
+        localStorage.removeItem(`diet_${d}_${i}`);
+    });
+    if (navigator.vibrate) navigator.vibrate(50);
+}
+
+function saveAndRenderActivities() {
+    localStorage.setItem('olympus_acts', JSON.stringify(activities));
+    const container = document.getElementById('activity-list');
+    container.innerHTML = '';
+    activities.forEach(act => {
+        const div = document.createElement('div');
+        div.className = 'checklist-item';
+        div.onclick = (e) => { if (e.target.tagName !== 'INPUT' && e.target.tagName !== 'BUTTON') toggleAct(act.id, !act.done); };
+        div.innerHTML = `
+            <div class="check-left">
+                <input type="checkbox" ${act.done ? 'checked' : ''} onchange="toggleAct(${act.id}, this.checked)">
+                <span style="text-decoration: ${act.done ? 'line-through' : 'none'}; color: ${act.done ? 'gray' : 'white'}">${act.text}</span>
+            </div>
+            ${editMode ? `<button class="delete-btn" onclick="deleteAct(${act.id})">Sil</button>` : ''}
+        `;
+        container.appendChild(div);
+    });
+    checkGlobalSuccess();
+}
+
+function toggleAct(id, status) {
+    const act = activities.find(a => a.id === id);
+    if (act) { act.done = status; if (status && navigator.vibrate) navigator.vibrate(40); }
+    saveAndRenderActivities();
+}
+
+function deleteAct(id) { activities = activities.filter(a => a.id !== id); saveAndRenderActivities(); }
+
+function checkGlobalSuccess() {
+    const completed = activities.filter(a => a.done).length;
+    const banner = document.getElementById('success-banner');
+    if (activities.length > 0 && completed === activities.length) {
+        banner.classList.remove('hidden');
+        if (navigator.vibrate) navigator.vibrate([100, 50, 100, 50, 200]);
+        confetti({ particleCount: 120, spread: 70, origin: { y: 0.6 }, colors: ['#f6c000', '#ffffff', '#222222'] });
+    } else {
+        banner.classList.add('hidden');
+    }
+    updateWeeklyScore();
+}
+
+function updateWeeklyScore() {
+    if (activities.length === 0) return;
+    const score = Math.round((activities.filter(a => a.done).length / activities.length) * 100);
+    const scoreEl = document.getElementById('weekly-score');
+    if (scoreEl) scoreEl.innerText = score;
+}
+
+function checkWaterReset() {
+    let wData = JSON.parse(localStorage.getItem('olympus_water_obj')) || { date: new Date().toLocaleDateString('tr-TR'), amount: 0, yesterday: 0 };
+    if (wData.date !== new Date().toLocaleDateString('tr-TR')) {
+        wData.yesterday = wData.amount;
+        wData.amount = 0;
+        wData.date = new Date().toLocaleDateString('tr-TR');
+        localStorage.setItem('olympus_water_obj', JSON.stringify(wData));
+    }
+}
+
+window.addWater = function (amount) {
+    let wData = JSON.parse(localStorage.getItem('olympus_water_obj')) || { date: new Date().toLocaleDateString('tr-TR'), amount: 0, yesterday: 0 };
+    wData.amount = Math.max(0, wData.amount + amount);
+    localStorage.setItem('olympus_water_obj', JSON.stringify(wData));
+    openTrackingModal('water');
+}
+
+window.resetWater = function () {
+    let wData = JSON.parse(localStorage.getItem('olympus_water_obj')) || { date: new Date().toLocaleDateString('tr-TR'), amount: 0, yesterday: 0 };
+    wData.amount = 0;
+    localStorage.setItem('olympus_water_obj', JSON.stringify(wData));
+    if (navigator.vibrate) navigator.vibrate(50);
+    openTrackingModal('water');
+}
+
+window.editWaterGoal = function () {
+    let currentGoal = localStorage.getItem('olympus_water_goal') || 3000;
+    let newGoal = prompt("Günlük Hedef (ml):", currentGoal);
+    if (newGoal && !isNaN(newGoal)) { localStorage.setItem('olympus_water_goal', newGoal); openTrackingModal('water'); }
+}
+
+function checkDeloadEngine() {
+    let volHistory = JSON.parse(localStorage.getItem('olympus_vol_history')) || [];
+    if (volHistory.length >= 3) {
+        const last1 = parseFloat(volHistory[volHistory.length - 1].bench) || 0;
+        const last2 = parseFloat(volHistory[volHistory.length - 2].bench) || 0;
+        const last3 = parseFloat(volHistory[volHistory.length - 3].bench) || 0;
+        if (last1 > 0 && last1 <= last2 && last2 <= last3) {
+            const lastWarn = localStorage.getItem('olympus_deload_warn');
+            const today = new Date().toLocaleDateString('tr-TR');
+            if (lastWarn !== today) {
+                alert("⚠️ AKILLI KOÇ UYARISI:\nBench Press ağırlıklarında plato tespit edildi. Bu hafta %10-15 'Deload' yapmanı öneririm.");
+                localStorage.setItem('olympus_deload_warn', today);
+            }
+        }
+    }
+}
+
+window.openTrackingModal = function (type) {
+    const title = document.getElementById('track-modal-title');
+    const body = document.getElementById('track-modal-body');
+    const p = JSON.parse(localStorage.getItem('olympus_profile')) || {};
+
+    if (type === 'measurements') {
+        title.innerText = "Ölçülerim";
+        body.innerHTML = `
+            <div class="form-grid">
+                <div class="input-group"><label>Kilo (kg)</label><input type="number" id="m-w" value="${p.w || ''}"></div>
+                <div class="input-group"><label>Boy (cm)</label><input type="number" id="m-height" value="${p.height || ''}"></div>
+                <div class="input-group"><label>Boyun (cm)</label><input type="number" id="m-neck" value="${p.neck || ''}"></div>
+                <div class="input-group"><label>Omuz (cm)</label><input type="number" id="m-shoulder" value="${p.shoulder || ''}"></div>
+                <div class="input-group"><label>Göğüs (cm)</label><input type="number" id="m-chest" value="${p.chest || ''}"></div>
+                <div class="input-group"><label>Bel (cm)</label><input type="number" id="m-waist" value="${p.waist || ''}"></div>
+                <div class="input-group"><label>Basen (cm)</label><input type="number" id="m-hips" value="${p.hips || ''}"></div>
+                <div class="input-group"><label>Kol (cm)</label><input type="number" id="m-arm" value="${p.arm || ''}"></div>
+                <div class="input-group"><label>İç Bacak (cm)</label><input type="number" id="m-thigh" value="${p.thigh || ''}"></div>
+                <div class="input-group"><label>Kalf (cm)</label><input type="number" id="m-calf" value="${p.calf || ''}"></div>
+            </div>
+            <button class="save-btn" onclick="saveMeasurements()">Kaydet</button>
+        `;
+    }
+    else if (type === 'fat') {
+        title.innerText = "Yağ Oranı (US Navy)";
+        let fatHistory = JSON.parse(localStorage.getItem('olympus_fat_history')) || [];
+        if (p.w && p.waist && p.neck && p.height) {
+            const wst = parseFloat(p.waist); const nck = parseFloat(p.neck); const hgt = parseFloat(p.height);
+            const bodyFat = 495 / (1.0324 - 0.19077 * Math.log10(wst - nck) + 0.15456 * Math.log10(hgt)) - 450;
+            body.innerHTML = `
+                <div class="card" style="text-align:center; margin-bottom:15px; border:none;"><h3>Oran: <span style="color:var(--goldnova);">%${Math.max(bodyFat, 4).toFixed(1)}</span></h3></div>
+                <button class="edit-btn" style="width:100%; margin-bottom:15px;" onclick="saveFatData(${bodyFat.toFixed(1)})">Grafiğe Kaydet</button>
+                <div style="background:#151515; padding:5px; border-radius:10px;"><canvas id="modalChart"></canvas></div>
+            `;
+            setTimeout(() => drawModalChart(fatHistory, 'Yağ Oranı %', '#00d2ff'), 100);
+        } else { body.innerHTML = `<p style="color:#ff4444; text-align:center;">Lütfen önce Ölçülerim alanından Kilo, Boy, Bel ve Boyun girin.</p>`; }
+    }
+    else if (type === 'weight') {
+        title.innerText = "Ağırlık Takibi";
+        let wHistory = JSON.parse(localStorage.getItem('olympus_history')) || [];
+        body.innerHTML = `<div style="background:#151515; padding:5px; border-radius:10px;"><canvas id="modalChart"></canvas></div>`;
+        setTimeout(() => drawModalChart(wHistory.map(h => ({ date: h.date, val: h.weight })), 'Kilo (kg)', '#f6c000'), 100);
+    }
+    else if (type === 'volume') {
+        title.innerText = "İdman Hacmi (1RM)";
+        let volHistory = JSON.parse(localStorage.getItem('olympus_vol_history')) || [];
+        body.innerHTML = `
+            <div class="form-grid">
+                <div class="input-group"><label>Bench Press</label><input type="number" id="m-bench" value="${p.bench || ''}"></div>
+                <div class="input-group"><label>Squat</label><input type="number" id="m-squat" value="${p.squat || ''}"></div>
+                <div class="input-group"><label>Deadlift</label><input type="number" id="m-dl" value="${p.dl || ''}"></div>
+            </div>
+            <button class="save-btn" onclick="save1RM()">Kaydet</button>
+            <div style="background:#151515; padding:5px; border-radius:10px; margin-top:10px;"><canvas id="modalChart"></canvas></div>
+        `;
+        setTimeout(() => {
+            const ctx = document.getElementById('modalChart'); if (!ctx) return;
+            if (modalChartInstance) modalChartInstance.destroy();
+            modalChartInstance = new Chart(ctx.getContext('2d'), {
+                type: 'line',
+                data: {
+                    labels: volHistory.map(h => h.date),
+                    datasets: [
+                        { label: 'Bench', data: volHistory.map(h => h.bench), borderColor: '#00d2ff', backgroundColor: 'transparent' },
+                        { label: 'Squat', data: volHistory.map(h => h.squat), borderColor: '#f6c000', backgroundColor: 'transparent' }
+                    ]
+                },
+                options: { responsive: true }
+            });
+        }, 100);
+    }
+    else if (type === 'water') {
+        let wData = JSON.parse(localStorage.getItem('olympus_water_obj')) || { amount: 0, yesterday: 0 };
+        let goal = parseInt(localStorage.getItem('olympus_water_goal') || 3000);
+        title.innerText = "Su Tüketimi";
+        body.innerHTML = `
+            <div class="water-stats"><p>Hedef: ${goal} ml</p><p>Dün: ${wData.yesterday} ml</p><p>Kalan: ${Math.max(goal - wData.amount, 0)} ml</p></div>
+            <div class="progress-bar-bg"><div class="progress-bar-fill" style="width:${Math.min((wData.amount / goal) * 100, 100)}%"></div></div>
+            <h3 style="text-align:center; color:#00d2ff; font-size:28px; margin-bottom:15px;">${wData.amount} ml</h3>
+            <div style="display:flex; justify-content:center; gap:8px;">
+                <button class="edit-btn" onclick="addWater(250)">+250ml</button>
+                <button class="edit-btn" onclick="addWater(500)">+500ml</button>
+                <button class="delete-btn" onclick="resetWater()">Sıfırla</button>
+                <button class="edit-btn" style="border-color:#aaa; color:#aaa;" onclick="editWaterGoal()">Hedef</button>
+            </div>
+        `;
+    }
+    else if (type === 'macros') {
+        title.innerText = "Öğün Takibi";
+        let calHistory = JSON.parse(localStorage.getItem('olympus_cal_history')) || [];
+        body.innerHTML = `
+            <div class="input-group"><label>Bugün Alınan Kalori (kcal)</label><input type="number" id="m-cal" placeholder="2500"></div>
+            <button class="save-btn" onclick="saveMacros()">Kaydet</button>
+            <div style="background:#151515; padding:5px; border-radius:10px; margin-top:10px;"><canvas id="modalChart"></canvas></div>
+        `;
+        setTimeout(() => drawModalChart(calHistory, 'Kalori (kcal)', '#44ff44'), 100);
+    }
+    else if (type === 'deload_info') {
+        title.innerText = "Deload Motoru Yapısı";
+        body.innerHTML = `<p style="color:var(--text-muted); font-size:14px; line-height:1.5;"><strong>Çalışma Prensibi:</strong> Sistem, İdman Hacmi alanına girdiğin Bench Press ve Squat 1RM verilerini analiz eder.<br><br>Eğer 3 ardışık kayıt boyunca güç artışı yaşanmadıysa veya gerileme varsa, sinir sisteminin aşırı zorlandığını fark ederek profil ekranında sana otomatik bir <strong>Deload (Aktif Dinlenme Haftası)</strong> uyarısı fırlatır.</p>`;
+    }
+    else if (type === 'macro_info') {
+        title.innerText = "Makro Manipülasyonu";
+        body.innerHTML = `<p style="color:var(--text-muted); font-size:14px; line-height:1.5;"><strong>Strateji Mantığı:</strong> US Navy formülüyle hesaplanan yağ oranındaki değişim trendine göre kalori hedefini dinamik yönetir.<br><br>Yağ oranının %12'nin altına düşmesi durumunda kas kütlesini korumak için karbonhidrat kaynaklarını otomatik artırmanı tavsiye ederken, platolarda temiz definisyon için makroları manipüle etmeni sağlar.</p>`;
+    }
+    document.getElementById('tracking-modal').style.display = 'flex';
+}
+
+function drawModalChart(dataArray, labelText, colorStr) {
+    const ctx = document.getElementById('modalChart'); if (!ctx) return;
+    if (modalChartInstance) modalChartInstance.destroy();
+    modalChartInstance = new Chart(ctx.getContext('2d'), {
+        type: 'line',
+        data: {
+            labels: dataArray.map(h => h.date),
+            datasets: [{ label: labelText, data: dataArray.map(h => h.val), borderColor: colorStr, backgroundColor: 'transparent', tension: 0.2 }]
+        },
+        options: { responsive: true }
+    });
+}
+
+window.saveFatData = function (fatVal) {
+    let fatHistory = JSON.parse(localStorage.getItem('olympus_fat_history')) || [];
+    fatHistory.push({ date: new Date().toLocaleDateString('tr-TR'), val: fatVal });
+    localStorage.setItem('olympus_fat_history', JSON.stringify(fatHistory));
+
+    syncDataToCloud();
+    openTrackingModal('fat');
+}
+
+window.saveMeasurements = function () {
+    const p = JSON.parse(localStorage.getItem('olympus_profile')) || {};
+    p.w = document.getElementById('m-w').value; p.height = document.getElementById('m-height').value;
+    p.waist = document.getElementById('m-waist').value; p.neck = document.getElementById('m-neck').value;
+    p.chest = document.getElementById('m-chest').value; p.shoulder = document.getElementById('m-shoulder').value;
+    p.hips = document.getElementById('m-hips').value; p.arm = document.getElementById('m-arm').value;
+    p.thigh = document.getElementById('m-thigh').value; p.calf = document.getElementById('m-calf').value;
+    localStorage.setItem('olympus_profile', JSON.stringify(p));
+
+    if (p.w) {
+        let history = JSON.parse(localStorage.getItem('olympus_history')) || [];
+        history.push({ date: new Date().toLocaleDateString('tr-TR'), weight: p.w }); localStorage.setItem('olympus_history', JSON.stringify(history));
+    }
+
+    syncDataToCloud();
+    document.getElementById('tracking-modal').style.display = 'none'; loadProfileData();
+}
+
+window.save1RM = function () {
+    const p = JSON.parse(localStorage.getItem('olympus_profile')) || {};
+    const b = document.getElementById('m-bench').value; const s = document.getElementById('m-squat').value; const dl = document.getElementById('m-dl').value;
+    p.bench = b; p.squat = s; p.dl = dl; localStorage.setItem('olympus_profile', JSON.stringify(p));
+    let volHistory = JSON.parse(localStorage.getItem('olympus_vol_history')) || [];
+    volHistory.push({ date: new Date().toLocaleDateString('tr-TR'), bench: b, squat: s, dl: dl });
+    localStorage.setItem('olympus_vol_history', JSON.stringify(volHistory));
+
+    syncDataToCloud();
+    openTrackingModal('volume');
+}
+
+window.saveMacros = function () {
+    const cal = document.getElementById('m-cal').value;
+    if (cal) {
+        let calHistory = JSON.parse(localStorage.getItem('olympus_cal_history')) || [];
+        calHistory.push({ date: new Date().toLocaleDateString('tr-TR'), val: cal }); localStorage.setItem('olympus_cal_history', JSON.stringify(calHistory));
+        syncDataToCloud();
+        openTrackingModal('macros');
+    }
+}
+
+function loadProfileData() {
+    const p = JSON.parse(localStorage.getItem('olympus_profile'));
+    if (p) {
+        if (p.w) document.getElementById('ro-weight').innerText = `${p.w} kg`;
+        if (p.height) document.getElementById('ro-height').innerText = `${p.height} cm`;
+        if (p.waist) document.getElementById('ro-waist').innerText = `${p.waist} cm`;
+        if (p.chest) document.getElementById('ro-chest').innerText = `${p.chest} cm`;
+        if (p.shoulder) document.getElementById('ro-shoulder').innerText = `${p.shoulder} cm`;
+        if (p.arm) document.getElementById('ro-arm').innerText = `${p.arm} cm`;
+        if (p.hips) document.getElementById('ro-hips').innerText = `${p.hips} cm`;
+        if (p.calf) document.getElementById('ro-calf').innerText = `${p.calf} cm`;
+    }
+}
+
+// 5. ANATOMİ MODALI VE YÖNETİMİ
+window.openAnatomy = function () {
+    const modal = document.getElementById('anatomy-modal');
+    modal.style.display = 'block';
+    setTimeout(() => { modal.classList.add('open'); }, 10);
+
+    updateAnatomyView();
+
+    // TÜM GRAFİKLERİ BURAYA EKLİYORUZ
+    const container = document.getElementById('all-charts-container');
+    container.innerHTML = `
+        <div style="margin-bottom: 25px;">
+            <h4 style="color:var(--goldnova); font-size:12px; margin-bottom:5px;">AĞIRLIK DEĞİŞİMİ (KG)</h4>
+            <div style="height: 150px; background:#151515; padding:5px; border-radius:10px;"><canvas id="chart-weight"></canvas></div>
         </div>
-        <div style="display: flex; justify-content: space-between; margin-bottom: 30px; font-size: 14px; line-height: 1.5;">
-            <div style="width: 48%; background: #f9f9f9; padding: 15px; border-radius: 5px;">
-                <h4 style="margin:0 0 10px 0; color: #555; border-bottom: 1px solid #ccc; padding-bottom: 5px;">TEKLİF (KİME):</h4>
-                <strong style="font-size:16px; color:#198b1d;">${companyName}</strong>
-            </div>
-            <div style="width: 48%; background: #f9f9f9; padding: 15px; border-radius: 5px; text-align: right;">
-                <h4 style="margin:0 0 10px 0; color: #555; border-bottom: 1px solid #ccc; padding-bottom: 5px;">TEKLİF (KİMDEN):</h4>
-                <strong style="font-size:16px; color:#198b1d;">CULBASE AUTOMATION</strong><br>
-                Tel: +905362503300<br>
-                Hazırlayan: Emirhan ÇULCU
-            </div>
+        <div style="margin-bottom: 25px;">
+            <h4 style="color:var(--goldnova); font-size:12px; margin-bottom:5px;">GÜNLÜK KALORİ (KCAL)</h4>
+            <div style="height: 150px; background:#151515; padding:5px; border-radius:10px;"><canvas id="chart-cal"></canvas></div>
         </div>
-        <h3 style="text-align:center; color:#333; margin-bottom:15px; text-transform:uppercase;">${type === 'pano' ? 'Pano Malzeme ve Ekipman Listesi' : 'Fiyat Teklifi ve Hizmet Dökümü'}</h3>
-        <table style="width: 100%; border-collapse: collapse; margin-bottom: 30px; font-size: 13px;">
-            <thead>
-                <tr style="background-color: #198b1d; color: white;">
-                    <th style="padding: 10px; border: 1px solid #147217; text-align: left;">İSİM</th>
-                    <th style="padding: 10px; border: 1px solid #147217; text-align: left;">TANIM</th>
-                    <th style="padding: 10px; border: 1px solid #147217; text-align: center;">MİKTAR</th>
-                    <th style="padding: 10px; border: 1px solid #147217; text-align: right;">BİRİM FİYAT</th>
-                    <th style="padding: 10px; border: 1px solid #147217; text-align: right;">TOPLAM</th>
-                </tr>
-            </thead>
-            <tbody>${tbodyHTML}</tbody>
-        </table>
-        <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 40px; font-size: 14px;">
-            <div style="width: 50%; padding: 15px; background: #eef7ee; border-radius: 5px; border: 1px solid #c3e6c3;">
-                <p style="margin:0 0 5px 0;"><strong>Özet Bilgi:</strong></p>
-                <p style="margin:0; color:#555;">Listede toplam <strong>${totalItemsCount} adet</strong> kalem/malzeme bulunmaktadır.</p>
-            </div>
-            <div style="width: 40%;">
-                <table style="width: 100%; border-collapse: collapse;">
-                    <tr><td style="padding: 8px; font-weight: bold; border-bottom: 1px solid #eee;">ARA TOPLAM:</td><td style="padding: 8px; text-align: right; border-bottom: 1px solid #eee;">${subTotal.toFixed(2)} ₺</td></tr>
-                    <tr><td style="padding: 8px; font-weight: bold; border-bottom: 1px solid #333;">KDV (%20):</td><td style="padding: 8px; text-align: right; border-bottom: 1px solid #333;">${kdv.toFixed(2)} ₺</td></tr>
-                    <tr><td style="padding: 10px 8px; font-weight: bold; font-size:16px;">GENEL TOPLAM:</td><td style="padding: 10px 8px; text-align: right; font-size:16px; font-weight:bold; color:#198b1d;">${grandTotal.toFixed(2)} ₺</td></tr>
-                </table>
-            </div>
+        <div style="margin-bottom: 25px;">
+            <h4 style="color:var(--goldnova); font-size:12px; margin-bottom:5px;">YAĞ ORANI (%)</h4>
+            <div style="height: 150px; background:#151515; padding:5px; border-radius:10px;"><canvas id="chart-fat"></canvas></div>
         </div>
-        <div style="margin-top: 50px; text-align: center; padding-top: 20px;">
-            <img src="Emirhan ÇULCU email imza.png" style="max-width: 80%; height: auto;">
+        <div style="margin-bottom: 25px;">
+            <h4 style="color:var(--goldnova); font-size:12px; margin-bottom:5px;">İDMAN HACMİ (1RM)</h4>
+            <div style="height: 150px; background:#151515; padding:5px; border-radius:10px;"><canvas id="chart-volume"></canvas></div>
         </div>
     `;
 
-    showToast("PDF Cihazınıza İndiriliyor...");
-    const opt = {
-        margin: 0,
-        filename: 'CULbase_' + (type === 'pano' ? 'Malzeme_' : 'Teklif_') + offerNumber + '.pdf',
-        image: { type: 'jpeg', quality: 1.0 },
-        html2canvas: { scale: 2, useCORS: true, letterRendering: true, backgroundColor: '#ffffff', scrollY: 0 },
-        jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' }
+    drawSpecificChart('chart-weight', JSON.parse(localStorage.getItem('olympus_history'))?.map(h => ({ date: h.date.split('.')[0], val: h.weight })), '#f6c000');
+    drawSpecificChart('chart-cal', JSON.parse(localStorage.getItem('olympus_cal_history')), '#44ff44');
+    drawSpecificChart('chart-fat', JSON.parse(localStorage.getItem('olympus_fat_history')), '#00d2ff');
+    drawVolumeChart('chart-volume');
+};
+
+window.closeAnatomy = function () {
+    const modal = document.getElementById('anatomy-modal');
+    modal.classList.remove('open');
+    setTimeout(() => { modal.style.display = 'none'; }, 400);
+};
+
+function updateAnatomyView() {
+    document.querySelectorAll('.muscle-group').forEach(m => m.classList.remove('worked'));
+    const workedMuscles = JSON.parse(localStorage.getItem('olympus_worked_muscles')) || [];
+    workedMuscles.forEach(m => { const el = document.getElementById('muscle-' + m); if (el) el.classList.add('worked'); });
+}
+
+function drawSpecificChart(canvasId, data, color) {
+    const ctx = document.getElementById(canvasId)?.getContext('2d');
+    if (!ctx || !data || data.length === 0) return;
+    new Chart(ctx, { type: 'line', data: { labels: data.map(h => h.date), datasets: [{ label: 'Veri', data: data.map(h => h.val), borderColor: color, backgroundColor: 'transparent', tension: 0.2 }] }, options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } }, scales: { x: { ticks: { color: '#888' } }, y: { ticks: { color: '#888' } } } } });
+}
+
+function drawVolumeChart(canvasId) {
+    const ctx = document.getElementById(canvasId)?.getContext('2d');
+    const volHistory = JSON.parse(localStorage.getItem('olympus_vol_history')) || [];
+    if (!ctx || volHistory.length === 0) return;
+    new Chart(ctx, {
+        type: 'line',
+        data: {
+            labels: volHistory.map(h => h.date.split('.')[0]),
+            datasets: [
+                { label: 'Bench', data: volHistory.map(h => h.bench), borderColor: '#00d2ff', backgroundColor: 'transparent', tension: 0.2 },
+                { label: 'Squat', data: volHistory.map(h => h.squat), borderColor: '#f6c000', backgroundColor: 'transparent', tension: 0.2 }
+            ]
+        },
+        options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: true, labels: { color: '#fff', font: { size: 10 } } } }, scales: { x: { ticks: { color: '#888' } }, y: { ticks: { color: '#888' } } } }
+    });
+}
+// KASLARA BASILI TUTMA (İNTERAKTİF) ÖZELLİĞİ
+function initMuscleInteractions() {
+    const display = document.getElementById('muscle-name-display');
+    const groups = document.querySelectorAll('.muscle-group');
+
+    groups.forEach(group => {
+        const name = group.getAttribute('data-name');
+
+        const showLabel = (e) => {
+            display.innerText = name;
+            display.style.opacity = '1';
+            group.classList.add('active-touch');
+            // Telefonda küçük bir titreşim (Destekleyen cihazlarda)
+            if (navigator.vibrate) navigator.vibrate(15);
+        };
+
+        const hideLabel = () => {
+            display.style.opacity = '0';
+            group.classList.remove('active-touch');
+        };
+
+        // Mobil Cihazlar İçin (Dokunma)
+        group.addEventListener('touchstart', showLabel, { passive: true });
+        group.addEventListener('touchend', hideLabel);
+        group.addEventListener('touchcancel', hideLabel);
+
+        // Bilgisayarlar İçin (Mouse)
+        group.addEventListener('mousedown', showLabel);
+        group.addEventListener('mouseup', hideLabel);
+        group.addEventListener('mouseleave', hideLabel);
+    });
+}
+// ==========================================
+// OLY CHAT & AI MOTORU FONKSİYONLARI
+// ==========================================
+
+window.openOlyChat = function () {
+    const chatWin = document.getElementById('oly-chat-window');
+    const avatar = document.getElementById('oly-avatar');
+    chatWin.classList.add('open');
+    avatar.style.right = '-50px'; // Chat açılınca avatarı gizle
+    if (navigator.vibrate) navigator.vibrate(30);
+    scrollToBottomOly();
+};
+
+window.closeOlyChat = function () {
+    document.getElementById('oly-chat-window').classList.remove('open');
+    document.getElementById('oly-avatar').style.right = '0'; // Avatarı geri getir
+};
+
+window.handleOlyKey = function (event) {
+    if (event.key === 'Enter') {
+        sendOlyMessage();
+    }
+};
+
+window.sendOlyMessage = async function () {
+    const input = document.getElementById('oly-input');
+    const text = input.value.trim();
+    if (!text) return;
+
+    // Kullanıcı mesajını ekrana yaz
+    appendOlyMessage(text, 'oly-user');
+    input.value = '';
+
+    // "Oly yazıyor..." animasyonu ekle
+    const typingIndicator = appendOlyMessage('Oly düşünüyor...', 'oly-typing');
+
+    try {
+        // GERÇEK GEMINI API ENTEGRASYONU
+        const responseText = await askGeminiAI(text);
+        typingIndicator.remove(); // Göstergeyi sil
+        appendOlyMessage(responseText, 'oly-ai');
+    } catch (error) {
+        typingIndicator.remove();
+        appendOlyMessage('Ufak bir bağlantı sorunu yaşadım. Tekrar dener misin?', 'oly-ai');
+        console.error(error);
+    }
+};
+
+function appendOlyMessage(text, className) {
+    const container = document.getElementById('oly-messages-container');
+    const msg = document.createElement('div');
+    msg.className = `oly-message ${className}`;
+    msg.innerHTML = text;
+    container.appendChild(msg);
+    scrollToBottomOly();
+    return msg;
+}
+
+function scrollToBottomOly() {
+    const container = document.getElementById('oly-messages-container');
+    container.scrollTop = container.scrollHeight;
+}
+
+// OLY AYARLARINI GÜNCELLEME
+window.updateOlyKey = function () {
+    const newKey = prompt("Lütfen Gemini API anahtarınızı girin:", localStorage.getItem('OLY_API_KEY') || "");
+    if (newKey) {
+        localStorage.setItem('OLY_API_KEY', newKey);
+        alert("Anahtar güncellendi! Oly artık hazır.");
+    }
+};
+
+// OLY AI MOTORU (GEMINI 3.5 FLASH - En Güncel Sürüm)
+async function askGeminiAI(userPrompt) {
+    let apiKey = localStorage.getItem('OLY_API_KEY');
+
+    if (!apiKey || apiKey === "null") {
+        updateOlyKey();
+        apiKey = localStorage.getItem('OLY_API_KEY');
+    }
+
+    if (!apiKey) throw new Error("Anahtar girilmedi.");
+
+    apiKey = apiKey.trim();
+
+    const systemInstruction = "Sen Project Olympus uygulamasının resmi yapay zeka asistanı Oly'sin. Görevin kullanıcılara sadece fitness, beslenme, anatomi, idman programları ve motivasyon konularında destek olmaktır. Türkçe, samimi ve net cevaplar ver.";
+
+    // DİKKAT: Modeli listedeki en güncel sürüm olan 'gemini-3.5-flash' olarak değiştirdik!
+    const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-3.5-flash:generateContent?key=${apiKey}`;
+
+    try {
+        const response = await fetch(url, {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json"
+            },
+            body: JSON.stringify({
+                contents: [
+                    {
+                        role: "user",
+                        parts: [{ text: `${systemInstruction}\n\nSoru: ${userPrompt}` }]
+                    }
+                ]
+            })
+        });
+
+        if (!response.ok) {
+            const errorData = await response.json();
+            console.error("Google API Detaylı Hata:", errorData);
+            throw new Error(`Bağlantı hatası: ${response.status} - Hata detayı için F12 konsoluna bak.`);
+        }
+
+        const data = await response.json();
+        return data.candidates[0].content.parts[0].text;
+
+    } catch (error) {
+        console.error("Oly Motor Hatası:", error);
+        throw error;
+    }
+}
+
+// ==========================================
+// OLY AVATAR SÜRÜKLEME VE SIVI MIKNATIS MOTORU
+// ==========================================
+function initDraggableOly() {
+    const avatar = document.getElementById('oly-avatar');
+    let isDragging = false;
+    let moved = false;
+    let initialX, initialY, startLeft, startTop;
+
+    const dragStart = (e) => {
+        if (e.type === 'touchstart') {
+            initialX = e.touches[0].clientX;
+            initialY = e.touches[0].clientY;
+        } else {
+            initialX = e.clientX;
+            initialY = e.clientY;
+        }
+        isDragging = true;
+        moved = false;
+
+        const rect = avatar.getBoundingClientRect();
+        startLeft = rect.left;
+        startTop = rect.top;
+
+        // Oly'yi sıvı tam daire formuna sok!
+        avatar.classList.add('dragging');
+        avatar.style.transition = 'none';
     };
 
-    // Doğrudan Tarayıcı İndirmesi
-    setTimeout(() => {
-        html2pdf().set(opt).from(template).save().then(() => {
-            overlay.remove();
-            showToast("PDF Başarıyla İndirildi!");
-        });
-    }, 1500);
-};
-
-function deleteOffer(id) {
-    if (confirm("Bu teklifi silmek istediğinize emin misiniz?")) {
-        let offers = JSON.parse(localStorage.getItem("culbase_offers")) || [];
-        offers = offers.filter(o => o.id !== id);
-        localStorage.setItem("culbase_offers", JSON.stringify(offers));
-        window.location.reload();
-    }
-}
-
-function logout() { sessionStorage.removeItem("loggedInUser"); window.location.href = "index.html"; }
-
-// CAD MOTORU MANTIĞI VE 3D GÖRÜNÜM
-let activeCanvasId = "panoCanvas_sac";
-let isDoorOpen = false;
-
-window.switchView = function (viewType) {
-    const sac = document.getElementById("panoCanvas_sac");
-    const kapak = document.getElementById("panoCanvas_kapak");
-    const view3d = document.getElementById("panoCanvas_3d");
-
-    document.querySelectorAll(".cad-view-switch .cad-tool-btn").forEach(btn => btn.classList.remove("active-view"));
-
-    if (viewType === 'sac') {
-        sac.style.display = "block"; kapak.style.display = "none"; view3d.style.display = "none";
-        document.getElementById("viewSacBtn").classList.add("active-view");
-        activeCanvasId = "panoCanvas_sac";
-    } else if (viewType === 'kapak') {
-        sac.style.display = "none"; kapak.style.display = "block"; view3d.style.display = "none";
-        document.getElementById("viewKapakBtn").classList.add("active-view");
-        activeCanvasId = "panoCanvas_kapak";
-    } else if (viewType === '3d') {
-        sac.style.display = "none"; kapak.style.display = "none"; view3d.style.display = "block";
-        document.getElementById("view3DBtn").classList.add("active-view");
-        activeCanvasId = null;
-
-        const sac3D = document.getElementById("pano3D_sac");
-        const kapak3D = document.getElementById("pano3D_kapak");
-        sac3D.innerHTML = ''; kapak3D.innerHTML = '<div class="door-handle"></div>';
-
-        Array.from(sac.children).forEach(child => {
-            if (child.classList.contains('canvas-item')) {
-                let clone = child.cloneNode(true); clone.style.cursor = "default"; clone.classList.remove("selected"); sac3D.appendChild(clone);
-            }
-        });
-        Array.from(kapak.children).forEach(child => {
-            if (child.classList.contains('canvas-item')) {
-                let clone = child.cloneNode(true); clone.style.cursor = "default"; clone.classList.remove("selected"); kapak3D.appendChild(clone);
-            }
-        });
-    }
-};
-
-window.toggle3DDoor = function () {
-    isDoorOpen = !isDoorOpen;
-    const kapak = document.getElementById("pano3D_kapak");
-    if (isDoorOpen) kapak.style.transform = "rotateY(-120deg)";
-    else kapak.style.transform = "rotateY(0deg)";
-};
-
-function initCanvasDrag() {
-    if (!document.getElementById("panoCanvas_sac")) return;
-
-    var acc = document.getElementsByClassName("accordion");
-    for (let i = 0; i < acc.length; i++) {
-        acc[i].addEventListener("click", function () {
-            this.classList.toggle("active-acc");
-            var panel = this.nextElementSibling;
-            if (panel.style.display === "block") { panel.style.display = "none"; } else { panel.style.display = "block"; }
-        });
-    }
-
-    const wInput = document.getElementById("panoWInput");
-    const hInput = document.getElementById("panoHInput");
-    const sac = document.getElementById("panoCanvas_sac");
-    const kapak = document.getElementById("panoCanvas_kapak");
-    const box3D = document.getElementById("pano3DBox");
-
-    function updatePanoSize() {
-        const w = wInput.value + "px"; const h = hInput.value + "px";
-        sac.style.width = w; sac.style.height = h; kapak.style.width = w; kapak.style.height = h;
-        if (box3D) { box3D.style.width = w; box3D.style.height = h; }
-    }
-    if (wInput && hInput) { wInput.addEventListener("input", updatePanoSize); hInput.addEventListener("input", updatePanoSize); }
-
-    // DOKUNMATİK DESTEĞİ İÇİN DRAG EVENTS
-    let activeEl = null; let offsetX = 0, offsetY = 0;
-
-    document.querySelectorAll(".lib-item").forEach(item => {
-        item.addEventListener("dragstart", e => {
-            e.dataTransfer.setData("type", item.dataset.type); e.dataTransfer.setData("name", item.textContent);
-            e.dataTransfer.setData("w", item.dataset.w); e.dataTransfer.setData("h", item.dataset.h);
-        });
-
-        // Mobil Dokunmatik Seçim (Basılı tutunca ekrana at)
-        item.addEventListener("touchstart", e => {
-            if (activeCanvasId) {
-                const canvas = document.getElementById(activeCanvasId);
-                const type = item.dataset.type; const name = item.textContent;
-                const w = item.dataset.w; const h = item.dataset.h;
-
-                const el = document.createElement("div"); el.className = `canvas-item ${type}`; el.textContent = name;
-                el.style.left = "50px"; el.style.top = "50px"; el.style.width = w + "px"; el.style.height = h + "px";
-                canvas.appendChild(el); selectElement(el); bindElementEvents(el);
-            }
-        });
-    });
-
-    const dropZones = [document.getElementById("panoCanvas_sac"), document.getElementById("panoCanvas_kapak")];
-    dropZones.forEach(canvas => {
-        canvas.addEventListener("dragover", e => e.preventDefault());
-        canvas.addEventListener("drop", e => {
-            e.preventDefault();
-            if (canvas.id !== activeCanvasId) return;
-
-            const type = e.dataTransfer.getData("type"); const name = e.dataTransfer.getData("name");
-            const w = e.dataTransfer.getData("w"); const h = e.dataTransfer.getData("h");
-            if (!type) return;
-
-            const rect = canvas.getBoundingClientRect();
-            let x = Math.round((e.clientX - rect.left - 10) / 10) * 10; let y = Math.round((e.clientY - rect.top - 10) / 10) * 10;
-
-            const el = document.createElement("div"); el.className = `canvas-item ${type}`; el.textContent = name;
-            el.style.left = x + "px"; el.style.top = y + "px"; el.style.width = w + "px"; el.style.height = h + "px";
-
-            canvas.appendChild(el); selectElement(el); bindElementEvents(el);
-        });
-    });
-
-    function bindElementEvents(el) {
-        el.addEventListener("mousedown", dragStart);
-        el.addEventListener("touchstart", dragStartMobile, { passive: false });
-        el.addEventListener("dblclick", () => { if (confirm("Bu elemanı silmek istiyor musunuz?")) { el.remove(); clearProps(); } });
-    }
-
-    function dragStart(e) {
-        activeEl = e.target; selectElement(activeEl);
-        const rect = activeEl.getBoundingClientRect(); offsetX = e.clientX - rect.left; offsetY = e.clientY - rect.top;
-        document.addEventListener("mousemove", dragMove); document.addEventListener("mouseup", dragEnd);
-    }
-
-    function dragStartMobile(e) {
-        activeEl = e.target; selectElement(activeEl);
-        const touch = e.touches[0];
-        const rect = activeEl.getBoundingClientRect(); offsetX = touch.clientX - rect.left; offsetY = touch.clientY - rect.top;
-        document.addEventListener("touchmove", dragMoveMobile, { passive: false }); document.addEventListener("touchend", dragEnd);
-    }
-
-    function dragMove(e) {
-        if (!activeEl) return;
-        const activeCanvas = document.getElementById(activeCanvasId);
-        const rect = activeCanvas.getBoundingClientRect();
-        let rawX = e.clientX - rect.left - offsetX; let rawY = e.clientY - rect.top - offsetY;
-
-        let x = Math.round(rawX / 10) * 10; let y = Math.round(rawY / 10) * 10;
-        if (x < 0) x = 0; if (y < 0) y = 0;
-
-        activeEl.style.left = x + "px"; activeEl.style.top = y + "px"; updateProps(activeEl);
-    }
-
-    function dragMoveMobile(e) {
-        if (!activeEl) return;
+    const drag = (e) => {
+        if (!isDragging) return;
         e.preventDefault();
-        const activeCanvas = document.getElementById(activeCanvasId);
-        const touch = e.touches[0];
-        const rect = activeCanvas.getBoundingClientRect();
-        let rawX = touch.clientX - rect.left - offsetX; let rawY = touch.clientY - rect.top - offsetY;
 
-        let x = Math.round(rawX / 10) * 10; let y = Math.round(rawY / 10) * 10;
-        if (x < 0) x = 0; if (y < 0) y = 0;
+        let currentX, currentY;
+        if (e.type === 'touchmove') {
+            currentX = e.touches[0].clientX;
+            currentY = e.touches[0].clientY;
+        } else {
+            currentX = e.clientX;
+            currentY = e.clientY;
+        }
 
-        activeEl.style.left = x + "px"; activeEl.style.top = y + "px"; updateProps(activeEl);
-    }
+        const dx = currentX - initialX;
+        const dy = currentY - initialY;
 
-    function dragEnd() {
-        activeEl = null;
-        document.removeEventListener("mousemove", dragMove); document.removeEventListener("mouseup", dragEnd);
-        document.removeEventListener("touchmove", dragMoveMobile); document.removeEventListener("touchend", dragEnd);
-    }
+        if (Math.abs(dx) > 5 || Math.abs(dy) > 5) {
+            moved = true;
+        }
 
-    function selectElement(el) { document.querySelectorAll(".canvas-item").forEach(i => i.classList.remove("selected")); el.classList.add("selected"); updateProps(el); }
-    function updateProps(el) {
-        document.getElementById("propNameInput").value = el.textContent; // İsim inputa geçer
-        document.getElementById("propRotate").value = el.dataset.rotate || "0"; // Döndürme bilgisi alınır
-        document.getElementById("propX").value = parseInt(el.style.left, 10) || 0;
-        document.getElementById("propY").value = parseInt(el.style.top, 10) || 0;
-        document.getElementById("propW").value = parseInt(el.style.width, 10) || 0;
-        document.getElementById("propH").value = parseInt(el.style.height, 10) || 0;
-        window.activeElement = el;
-    }
+        let newLeft = startLeft + dx;
+        let newTop = startTop + dy;
 
-    function clearProps() {
-        document.getElementById("propNameInput").value = "";
-        document.getElementById("propRotate").value = "0";
-        document.getElementById("propX").value = 0;
-        document.getElementById("propY").value = 0;
-        document.getElementById("propW").value = 0;
-        document.getElementById("propH").value = 0;
-        window.activeElement = null;
-    }
+        const maxX = window.innerWidth - avatar.offsetWidth;
+        const maxY = window.innerHeight - avatar.offsetHeight;
+        newLeft = Math.max(0, Math.min(newLeft, maxX));
+        newTop = Math.max(0, Math.min(newTop, maxY));
 
-    // YENİ NESİL ÖZELLİKLER DİNLEYİCİSİ (İSİM, DÖNDÜRME VE BOYUT)
-    document.querySelectorAll(".prop-input").forEach(inp => {
-        inp.addEventListener("input", e => {
-            if (window.activeElement) {
-                const el = window.activeElement;
-                const id = e.target.id;
-                const val = e.target.value;
+        avatar.style.left = newLeft + 'px';
+        avatar.style.top = newTop + 'px';
+        avatar.style.right = 'auto';
+    };
 
-                // İsim (Etiket) Değiştirme
-                if (id === "propNameInput") { el.textContent = val; }
+    const dragEnd = () => {
+        if (!isDragging) return;
+        isDragging = false;
 
-                // Elemanı Döndürme (Rotate)
-                if (id === "propRotate") {
-                    el.dataset.rotate = val;
-                    el.style.transform = `rotate(${val}deg)`;
-                }
+        // Sıvı formunu kapat ve yumuşak geçişi aç
+        avatar.classList.remove('dragging');
+        avatar.style.transition = 'all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1)';
 
-                // Konum ve Boyut Değiştirme
-                const pxVal = val + "px";
-                if (id === "propX") el.style.left = pxVal;
-                if (id === "propY") el.style.top = pxVal;
-                if (id === "propW") el.style.width = pxVal;
-                if (id === "propH") el.style.height = pxVal;
-            }
-        });
-    });
+        const rect = avatar.getBoundingClientRect();
+        const centerX = window.innerWidth / 2;
 
-    document.querySelectorAll(".canvas-plate").forEach(canvas => {
-        canvas.addEventListener("mousedown", e => { if (e.target === canvas) { document.querySelectorAll(".canvas-item").forEach(i => i.classList.remove("selected")); clearProps(); } });
-        canvas.addEventListener("touchstart", e => { if (e.target === canvas) { document.querySelectorAll(".canvas-item").forEach(i => i.classList.remove("selected")); clearProps(); } });
-    });
+        // Kenarlara yapışırken eski ölçülerini (45x80) geri veriyoruz
+        avatar.style.width = '45px';
+        avatar.style.height = '80px';
+
+        if (rect.left + (rect.width / 2) > centerX) {
+            // Sağa yapıştır
+            avatar.style.left = 'auto';
+            avatar.style.right = '0px';
+            avatar.style.borderRadius = '80px 0 0 80px';
+            avatar.style.justifyContent = 'flex-end';
+            avatar.style.paddingRight = '8px';
+            avatar.style.paddingLeft = '0';
+        } else {
+            // Sola yapıştır
+            avatar.style.left = '0px';
+            avatar.style.right = 'auto';
+            avatar.style.borderRadius = '0 80px 80px 0';
+            avatar.style.justifyContent = 'flex-start';
+            avatar.style.paddingLeft = '8px';
+            avatar.style.paddingRight = '0';
+        }
+    };
+
+    avatar.onclick = (e) => {
+        if (moved) {
+            e.preventDefault();
+            moved = false;
+            return;
+        }
+        openOlyChat();
+    };
+
+    avatar.addEventListener('mousedown', dragStart);
+    document.addEventListener('mousemove', drag);
+    document.addEventListener('mouseup', dragEnd);
+
+    avatar.addEventListener('touchstart', dragStart, { passive: false });
+    document.addEventListener('touchmove', drag, { passive: false });
+    document.addEventListener('touchend', dragEnd);
 }
-// ==========================================
-// YENİ NESİL CAD ARAYÜZÜ FONKSİYONLARI
-// ==========================================
 
-// Çekmece (Drawer) Kontrolleri
-window.toggleLibrary = function () {
-    const lib = document.getElementById('libraryDrawer');
-    const prop = document.getElementById('propDrawer');
-    if (prop && prop.classList.contains('open')) prop.classList.remove('open');
-    if (lib) lib.classList.toggle('open');
+// Oly Chat Açılış/Kapanış (Güncellendi)
+window.openOlyChat = function () {
+    const chatWin = document.getElementById('oly-chat-window');
+    const avatar = document.getElementById('oly-avatar');
+    chatWin.classList.add('open');
+    // Avatarı küçülterek gizle (Sağda da solda da olsa sorun olmaz)
+    avatar.style.transform = 'scale(0)';
+    if (navigator.vibrate) navigator.vibrate(30);
+    scrollToBottomOly();
 };
 
-window.toggleProps = function () {
-    const lib = document.getElementById('libraryDrawer');
-    const prop = document.getElementById('propDrawer');
-    if (lib && lib.classList.contains('open')) lib.classList.remove('open');
-    if (prop) prop.classList.toggle('open');
+window.closeOlyChat = function () {
+    document.getElementById('oly-chat-window').classList.remove('open');
+    document.getElementById('oly-avatar').style.transform = 'scale(1)'; // Avatarı geri getir
 };
+// ==========================================
+// YÜKLEME (SPLASH) EKRANI ANİMASYONU
+// ==========================================
+function playSplashAnimation(onCompleteCallback) {
+    const textElement = document.getElementById('loading-text');
+    const loadingScreen = document.getElementById('loading-screen');
 
-// TEKNİK ÇİZİMİ FOTOĞRAFLAYIP PDF'E BASMA MOTORU (GÜNCELLENDİ)
-window.exportTechnicalDrawingPDF = function () {
-    if (typeof showToast === "function") showToast("Teknik Çizim Hazırlanıyor... Lütfen bekleyin.");
-
-    let activeCanvas = document.getElementById(activeCanvasId || 'panoCanvas_sac');
-
-    if (!activeCanvas || activeCanvasId === 'panoCanvas_3d') {
-        if (typeof showToast === "function") showToast("Uyarı: 3D Görünüm PDF yapılamaz. Lütfen İç Sac veya Kapak seçin.");
-        else alert("Uyarı: 3D Görünüm PDF yapılamaz.");
+    // Eğer HTML'de yükleme ekranı yoksa direkt uygulamaya geç
+    if (!textElement || !loadingScreen) {
+        if (onCompleteCallback) onCompleteCallback();
         return;
     }
 
-    // Seçim çerçevesini PDF'te çıkmaması için temizle
-    document.querySelectorAll(".canvas-item").forEach(i => i.classList.remove("selected"));
+    const targetText = "PROJECT OLYMPUS";
+    let charIndex = 0;
+    textElement.textContent = "";
 
-    // 1. Çizim alanının fotoğrafını çek
-    html2canvas(activeCanvas, {
-        scale: 2,
-        useCORS: true,
-        backgroundColor: null
-    }).then(canvas => {
-        const imgData = canvas.toDataURL('image/png');
-        let currentScren = activeCanvasId === 'panoCanvas_sac' ? "Iç Montaj Saci" : "Pano Kapagi";
-        let dateStr = new Date().toLocaleDateString('tr-TR');
+    // Daktilo efekti: Harfleri sırayla yazdır
+    const typingInterval = setInterval(() => {
+        if (charIndex < targetText.length) {
+            textElement.textContent += targetText.charAt(charIndex);
+            charIndex++;
+        } else {
+            clearInterval(typingInterval); // Yazım bitti
 
-        // 2. Sanal bir A4 (Yatay) kağıdı oluştur ve resmi içine yerleştir
-        let template = document.createElement("div");
-        template.style.width = "297mm";
-        template.style.minHeight = "210mm";
-        template.style.padding = "10mm";
-        template.style.boxSizing = "border-box";
-        template.style.backgroundColor = "#fff";
-        template.style.textAlign = "center";
-        template.style.fontFamily = "Arial, sans-serif";
+            // Yazı tam olarak ekranda belirdikten sonra yarım saniye bekle
+            setTimeout(() => {
+                // Ekranı CSS ile yukarı kaydır
+                loadingScreen.classList.add('slide-up-animation');
 
-        template.innerHTML = `
-            <h2 style="color: #198b1d; margin-top: 10px; margin-bottom: 5px; font-size: 24px;">CULBASE AUTOMATION - TEKNIK CIZIM RAPORU</h2>
-            <p style="color: #666; margin-top: 0; margin-bottom: 20px; font-size: 14px;">Görünüm: <strong>${currentScren}</strong> &nbsp;|&nbsp; Tarih: <strong>${dateStr}</strong></p>
-            
-            <div style="display: flex; justify-content: center; align-items: center; min-height: 140mm;">
-                <img src="${imgData}" style="max-width: 100%; max-height: 145mm; object-fit: contain; border: 2px solid #2c3e50; box-shadow: 0 5px 15px rgba(0,0,0,0.1);">
-            </div>
-            
-            <div style="margin-top: 20px; border-top: 1px solid #ddd; padding-top: 10px; font-size: 11px; color: #888;">
-                Bu teknik resim CULbase CAD Engine tarafindan otomatik olarak üretilmistir.
-            </div>
-        `;
+                // CSS animasyon süresi (0.8s) dolunca arkaplandan sil ve ana sayfayı göster
+                setTimeout(() => {
+                    loadingScreen.style.display = 'none';
+                    if (onCompleteCallback) onCompleteCallback(); // Ana sayfayı açan tetikleyici
+                }, 800);
 
-        // 3. html2pdf Motorunu Çalıştır (Teklif sistemindeki gibi)
-        let opt = {
-            margin: 0,
-            filename: 'CULbase_Cizim_' + currentScren.replace(/\s+/g, '') + '_' + Math.floor(Math.random() * 1000) + '.pdf',
-            image: { type: 'jpeg', quality: 0.98 },
-            html2canvas: { scale: 2, useCORS: true },
-            jsPDF: { unit: 'mm', format: 'a4', orientation: 'landscape' } // Yatay A4 formatı
-        };
+            }, 600);
+        }
+    }, 120); // Harf çıkış hızı
+}
+// ==========================================
+// ARENA EKRANI GEÇİŞ KONTROLLERİ
+// ==========================================
+window.openArenaScreen = function () {
+    // Tüm ekranları gizle
+    document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+    // Sadece Arena'yı göster
+    document.getElementById('arena-sec').classList.add('active');
 
-        html2pdf().set(opt).from(template).save().then(() => {
-            if (typeof showToast === "function") showToast("Teknik Çizim Başarıyla İndirildi!");
+    // Üstteki takvim/gün barını gizle (Arena'da görünmemesi için)
+    const dayTracker = document.getElementById('day-tracker');
+    if (dayTracker) dayTracker.style.display = 'none';
+
+    loadGlobalFeed();
+    loadLeaderboard();
+
+
+    if (navigator.vibrate) navigator.vibrate(50);
+}
+
+window.closeArenaScreen = function () {
+    // Arena'yı kapatıp Profil'e geri dön
+    document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+    document.getElementById('profile-sec').classList.add('active');
+
+    if (navigator.vibrate) navigator.vibrate(30);
+}
+// ==========================================
+// CANLI AKIŞ (GLOBAL FEED) YÜKLEME MOTORU
+// ==========================================
+async function loadGlobalFeed() {
+    const feedDiv = document.getElementById('arena-feed');
+    if (!feedDiv) return;
+
+    feedDiv.innerHTML = '<p style="color:var(--goldnova); text-align:center;">Akış yükleniyor...</p>';
+
+    try {
+        // 1. ÖNCE KENDİ VERİMİZİ VE TAKİP LİSTEMİZİ ÇEKİYORUZ
+        const myDoc = await db.collection("users").doc(auth.currentUser.uid).get();
+        const myData = myDoc.exists ? myDoc.data() : null;
+        const myFollowing = myData ? (myData.following || []) : []; // HATA BURADAYDI, EKLENDİ
+
+        // 2. SONRA DİĞER KULLANICILARI ÇEKİYORUZ
+        const snapshot = await db.collection("users").limit(15).get();
+        let users = [];
+
+        snapshot.forEach(doc => {
+            const data = doc.data();
+            if (data.uid !== auth.currentUser.uid && data.name) {
+                users.push(data);
+            }
         });
 
-    }).catch(err => {
-        console.error("PDF Hatası:", err);
-        alert("PDF oluşturulurken bir hata oluştu.");
-    });
-};
-// ==========================================
-// PANO KAYDETME VE YÜKLEME (SAVE/LOAD) MOTORU
-// ==========================================
+        // Diğerlerini rastgele karıştır
+        users = users.sort(() => 0.5 - Math.random()).slice(0, 10);
+        feedDiv.innerHTML = '';
 
-window.savePanel = function () {
-    let projectName = prompt("Kaydedilecek projenin adını giriniz:", "Yeni Otomasyon Panosu");
-    if (!projectName) return;
+        const actions = [
+            "bugün idmanını tamamladı! 🔥", "arenaya katıldı! ⚔️",
+            "su hedefine ulaştı! 💧", "yeni bir rekor peşinde! 🎯",
+            "diyetine tam uyum sağladı! 🥗"
+        ];
 
-    let projectData = {
-        id: Date.now(),
-        name: projectName,
-        date: new Date().toLocaleString('tr-TR'),
-        width: document.getElementById("panoWInput").value,
-        height: document.getElementById("panoHInput").value,
-        sacItems: [], kapakItems: []
-    };
-
-    const extractItems = (canvasId, targetArray) => {
-        document.querySelectorAll(`#${canvasId} .canvas-item`).forEach(el => {
-            targetArray.push({
-                type: Array.from(el.classList).find(c => c !== 'canvas-item' && c !== 'selected'),
-                name: el.textContent,
-                left: el.style.left, top: el.style.top,
-                width: el.style.width, height: el.style.height,
-                rotate: el.dataset.rotate || "0"
-            });
-        });
-    };
-
-    extractItems("panoCanvas_sac", projectData.sacItems);
-    extractItems("panoCanvas_kapak", projectData.kapakItems);
-
-    let saved = JSON.parse(localStorage.getItem("culbase_panels")) || [];
-    saved.push(projectData);
-    localStorage.setItem("culbase_panels", JSON.stringify(saved));
-    if (typeof showToast === "function") showToast("Pano Başarıyla Kaydedildi!");
-};
-
-window.openPanelModal = function () {
-    const modal = document.getElementById("panelModal");
-    const list = document.getElementById("savedPanelsList");
-    let saved = JSON.parse(localStorage.getItem("culbase_panels")) || [];
-
-    list.innerHTML = "";
-    if (saved.length === 0) {
-        list.innerHTML = "<p style='color:#555;'>Henüz kaydedilmiş bir pano projesi bulunmuyor.</p>";
-    } else {
-        saved.forEach(p => {
-            list.innerHTML += `
-                <div style="display:flex; justify-content:space-between; align-items:center; padding:15px; border:1px solid #ccc; margin-bottom:10px; border-radius:8px; background:#fff;">
-                    <div>
-                        <strong style="color:#2c3e50; font-size:16px;">${p.name}</strong><br>
-                        <small style="color:#7f8c8d;">${p.date}</small>
-                    </div>
-                    <div style="display:flex; gap:10px;">
-                        <button onclick="loadPanel(${p.id})" style="background:#2f81f7; color:white; border:none; padding:8px 15px; border-radius:5px; cursor:pointer; font-weight:bold;">Aç</button>
-                        <button onclick="deletePanel(${p.id})" style="background:#e74c3c; color:white; border:none; padding:8px 15px; border-radius:5px; cursor:pointer; font-weight:bold;">Sil</button>
+        // 3. VİTRİN: KENDİ PROFİLİMİZ
+        if (myData && myData.name) {
+            const myAction = actions[Math.floor(Math.random() * actions.length)];
+            feedDiv.innerHTML += `
+                <div class="arena-user-card" style="border-left: 3px solid #00d2ff; background: rgba(0, 210, 255, 0.05);">
+                    <img src="${myData.photo || 'icon.png'}" alt="profile" class="arena-user-img">
+                    <div class="arena-user-info">
+                        <h4>${myData.name} <span style="font-size:10px; color:#00d2ff;">(Önizleme)</span></h4>
+                        <p style="font-size: 13px; color: #aaa; margin: 0;">${myAction}</p>
                     </div>
                 </div>
             `;
+        }
+
+        // 4. DİĞER KULLANICILAR VE TAKİP BUTONLARI (DÜZELTİLDİ)
+        users.forEach(user => {
+            const randomAction = actions[Math.floor(Math.random() * actions.length)];
+
+            // TAKİP DURUMU KONTROLÜ BURAYA ALINDI
+            const isFollowed = myFollowing.includes(user.uid);
+            const btnClass = isFollowed ? "follow-btn following" : "follow-btn";
+            const btnText = isFollowed ? "Takip Ediliyor" : "Takip Et";
+            const btnStyle = isFollowed ? "border-color: var(--goldnova); color: var(--goldnova);" : "border-color: #00d2ff; color: #00d2ff;";
+
+            feedDiv.innerHTML += `
+                <div class="arena-user-card" style="border-left: 3px solid var(--goldnova);">
+                    <img src="${user.photo || 'icon.png'}" alt="profile" class="arena-user-img">
+                    <div class="arena-user-info">
+                        <h4>${user.name}</h4>
+                        <p style="font-size: 13px; color: #aaa; margin: 0;">${randomAction}</p>
+                    </div>
+                    <button class="${btnClass}" id="btn-${user.uid}" onclick="followUser('${user.uid}')" style="${btnStyle}">${btnText}</button>
+                </div>
+            `;
+        });
+
+        if (users.length === 0 && !myData) {
+            feedDiv.innerHTML = '<p style="color:gray; text-align:center;">Arenada şu an kimse yok.</p>';
+        }
+
+    } catch (error) {
+        console.error("Akış yükleme hatası:", error);
+        feedDiv.innerHTML = '<p style="color:#ff4444; text-align:center;">Akış çekilemedi.</p>';
+    }
+}
+window.followUser = async function (targetUid) {
+    const btn = document.getElementById(`btn-${targetUid}`);
+    if (!btn || !auth.currentUser) return;
+
+    const isFollowing = btn.classList.contains('following');
+    const myRef = db.collection("users").doc(auth.currentUser.uid);
+    const targetRef = db.collection("users").doc(targetUid);
+
+    try {
+        if (isFollowing) {
+            await myRef.update({ following: firebase.firestore.FieldValue.arrayRemove(targetUid) });
+            await targetRef.update({ followers: firebase.firestore.FieldValue.arrayRemove(auth.currentUser.uid) });
+            btn.classList.remove('following');
+            btn.innerText = "Takip Et";
+        } else {
+            await myRef.update({ following: firebase.firestore.FieldValue.arrayUnion(targetUid) });
+            await targetRef.update({ followers: firebase.firestore.FieldValue.arrayUnion(auth.currentUser.uid) });
+            btn.classList.add('following');
+            btn.innerText = "Takip Ediliyor";
+
+            await targetRef.update({
+                notifications: firebase.firestore.FieldValue.arrayUnion({
+                    message: `👤 ${auth.currentUser.displayName || 'Bir sporcu'} seni takip etmeye başladı!`,
+                    timestamp: Date.now(),
+                    read: false
+                })
+            });
+        }
+        updateProfileFollowStats();
+        if (navigator.vibrate) navigator.vibrate(30);
+    } catch (error) { console.error("Takip hatası:", error); }
+};
+
+window.updateProfileFollowStats = function () {
+    if (!auth.currentUser) return;
+
+    // YENİ: get() yerine onSnapshot kullanarak profili "canlı" dinliyoruz!
+    db.collection("users").doc(auth.currentUser.uid).onSnapshot((doc) => {
+        if (doc.exists) {
+            const data = doc.data();
+            const followingCount = data.following ? data.following.length : 0;
+            const followersCount = data.followers ? data.followers.length : 0;
+
+            const elFollowing = document.getElementById('profile-following');
+            const elFollowers = document.getElementById('profile-followers');
+
+            if (elFollowing) elFollowing.innerText = followingCount;
+            if (elFollowers) elFollowers.innerText = followersCount;
+        }
+    });
+};
+// ==========================================
+// ARENA: KULLANICI ARAMA VE TAKİP HAFIZASI
+// ==========================================
+window.searchUsers = async function () {
+    const searchInput = document.getElementById('user-search-input').value.trim().toLowerCase();
+    const resultsContainer = document.getElementById('search-results');
+
+    if (!searchInput) {
+        resultsContainer.innerHTML = '<p style="color:gray; font-size:12px; text-align:center;">Lütfen aramak için bir isim gir.</p>';
+        return;
+    }
+
+    resultsContainer.innerHTML = '<p style="color:var(--goldnova); font-size:12px; text-align:center;">Sporcular aranıyor...</p>';
+
+    try {
+        let myFollowing = [];
+        if (auth.currentUser) {
+            const myDoc = await db.collection("users").doc(auth.currentUser.uid).get();
+            myFollowing = myDoc.exists ? (myDoc.data().following || []) : [];
+        }
+
+        const snapshot = await db.collection("users").get();
+        resultsContainer.innerHTML = '';
+        let found = false;
+
+        snapshot.forEach(doc => {
+            const data = doc.data();
+
+            // KENDİMİZ DAHİL HERKESİ ARAMADA GÖSTER
+            if (data.name && data.name.toLowerCase().includes(searchInput)) {
+                found = true;
+
+                let buttonHTML = '';
+
+                // Eğer aranan kişi bizsek "Sen" yaz ve butonu pasif yap
+                if (auth.currentUser && data.uid === auth.currentUser.uid) {
+                    buttonHTML = `<button class="edit-btn" style="border-color: var(--goldnova); color: var(--goldnova); cursor:default; padding:6px 12px; font-size:12px; font-weight:bold;" disabled>Sen</button>`;
+                } else {
+                    // Başkasıysa takip etme durumuna bak
+                    const isFollowed = myFollowing.includes(data.uid);
+                    const btnClass = isFollowed ? "edit-btn following" : "edit-btn";
+                    const btnText = isFollowed ? "Takip Ediliyor" : "Takip Et";
+                    const btnStyle = isFollowed ? "border-color: var(--goldnova); color: var(--goldnova);" : "border-color: #00d2ff; color: #00d2ff;";
+                    buttonHTML = `<button class="${btnClass}" id="btn-${data.uid}" onclick="followUser('${data.uid}')" style="padding:6px 12px; font-size:12px; font-weight:bold; ${btnStyle}">${btnText}</button>`;
+                }
+
+                resultsContainer.innerHTML += `
+                    <div style="display:flex; justify-content:space-between; align-items:center; background:#151515; padding:12px; border-radius:12px; margin-bottom:10px; border:1px solid #333;">
+                        <div style="display:flex; align-items:center; gap:12px;">
+                            <img src="${data.photo || 'icon.png'}" style="width:45px; height:45px; border-radius:50%; border:2px solid var(--goldnova); object-fit:cover;">
+                            <div>
+                                <h4 style="color:#fff; margin:0; font-size:15px; font-weight:bold;">${data.name}</h4>
+                                <span style="color:gray; font-size:11px;">Skor: ${data.weeklyScore || 0}</span>
+                            </div>
+                        </div>
+                        ${buttonHTML}
+                    </div>
+                `;
+            }
+        });
+
+        if (!found) {
+            resultsContainer.innerHTML = '<p style="color:gray; font-size:12px; text-align:center;">Bu isimde bir sporcu bulunamadı.</p>';
+        }
+
+    } catch (e) {
+        console.error("Arama sırasında hata:", e);
+        resultsContainer.innerHTML = '<p style="color:#ff4444; font-size:12px; text-align:center;">Bağlantı hatası oluştu.</p>';
+    }
+};
+// ==========================================
+// OLYMPUS PUAN VE MİNİ OYUN MOTORU
+// ==========================================
+
+// Puan Ekleme Fonksiyonu (İdman veya Oyun bitince çağrılır)
+window.addOlympusPoints = async function (amount, reason) {
+    let currentPoints = parseInt(localStorage.getItem('olympus_total_points')) || 0;
+    currentPoints += amount;
+    localStorage.setItem('olympus_total_points', currentPoints);
+
+    // Firebase'e kaydet
+    try {
+        await db.collection("users").doc(auth.currentUser.uid).set({
+            olympusPoints: currentPoints
+        }, { merge: true });
+        console.log(`${amount} Puan eklendi. Sebep: ${reason}`);
+    } catch (e) {
+        console.error("Puan kaydedilemedi", e);
+    }
+};
+
+// Oyun Değişkenleri
+let gameTimerInterval;
+let gameSpawnInterval;
+let gameScore = 0;
+let gameTime = 60;
+let isGameRunning = false;
+
+window.openMiniGame = function () {
+    document.getElementById('minigame-screen').classList.remove('hidden');
+
+    const olyAvatar = document.getElementById('oly-avatar');
+    if (olyAvatar) olyAvatar.style.display = 'none';
+}
+
+window.closeMiniGame = function () {
+    document.getElementById('minigame-screen').classList.add('hidden');
+    endMiniGame(true); // Zorla kapatılırsa bitir
+
+    // Oly'yi geri getir (Oyun bitti, asistan dönebilir)
+    const olyAvatar = document.getElementById('oly-avatar');
+    // Avatarın normal CSS flex yapısını bozmamak için 'flex' yapıyoruz
+    if (olyAvatar) olyAvatar.style.display = 'flex';
+}
+
+window.startMiniGame = function () {
+    // Bugün oynadı mı kontrolü
+    const today = new Date().toLocaleDateString('tr-TR');
+    const lastPlayed = localStorage.getItem('olympus_game_last_played');
+    if (lastPlayed === today) {
+        alert("Bugünlük hakkını doldurdun şampiyon! Yarın tekrar gel.");
+        return;
+    }
+
+    document.getElementById('start-game-btn').style.display = 'none';
+    document.getElementById('game-info').style.display = 'none';
+
+    gameScore = 0;
+    gameTime = 60;
+    isGameRunning = true;
+    document.getElementById('game-score').innerText = gameScore;
+    document.getElementById('game-time').innerText = gameTime;
+
+    // Süre sayacı
+    gameTimerInterval = setInterval(() => {
+        gameTime--;
+        document.getElementById('game-time').innerText = gameTime;
+        if (gameTime <= 0) endMiniGame(false);
+    }, 1000);
+
+    // Eşya Düşürme Sayacı (Her 600ms'de bir eşya atar)
+    gameSpawnInterval = setInterval(spawnItem, 600);
+}
+
+function spawnItem() {
+    if (!isGameRunning) return;
+
+    const goodItems = ['🍎', '🥦', '🥩', '🏋️‍♂️', '💧', '🍗', '🥚', '🍌'];
+    const badItems = ['🍔', '🍕', '🍩', '🍺', '🍟', '🍫', '🍦'];
+
+    // %70 İhtimalle iyi, %30 ihtimalle kötü eşya gelir
+    const isGood = Math.random() > 0.3;
+    const itemArray = isGood ? goodItems : badItems;
+    const itemEmoji = itemArray[Math.floor(Math.random() * itemArray.length)];
+
+    const itemEl = document.createElement('div');
+    itemEl.className = 'falling-item';
+    itemEl.innerText = itemEmoji;
+
+    // Rastgele yatay konum (ekrandan taşmasın diye %5 ile %85 arası)
+    const randomX = Math.floor(Math.random() * 80) + 5;
+    itemEl.style.left = randomX + '%';
+
+    // Rastgele düşme hızı (2.5 saniye ile 4 saniye arası)
+    const duration = Math.random() * 1.5 + 2.5;
+    itemEl.style.animationDuration = duration + 's';
+
+    // Tıklama Olayı (Mobil için touchstart, PC için mousedown)
+    itemEl.addEventListener('pointerdown', (e) => {
+        if (!isGameRunning) return;
+
+        // Puan hesapla
+        const pointChange = isGood ? 15 : -15;
+        gameScore += pointChange;
+        document.getElementById('game-score').innerText = gameScore;
+
+        // Ekrana anlık +15 / -15 yazısı çıkar
+        showPopupText(e.clientX, e.clientY, isGood ? '+15' : '-15', isGood ? '#00ff00' : '#ff4444');
+
+        // Eşyayı yok et ve titreşim ver
+        itemEl.remove();
+        if (navigator.vibrate) navigator.vibrate(isGood ? 15 : 40);
+    });
+
+    document.getElementById('game-area').appendChild(itemEl);
+
+    // Düşen eşyayı animasyon bitince DOM'dan sil (bellek şişmesin)
+    setTimeout(() => { if (itemEl.parentElement) itemEl.remove(); }, duration * 1000);
+}
+
+function showPopupText(x, y, text, color) {
+    const popup = document.createElement('div');
+    popup.className = 'game-popup';
+    popup.style.left = (x - 10) + 'px';
+    popup.style.top = (y - 20) + 'px';
+    popup.style.color = color;
+    popup.innerText = text;
+    document.body.appendChild(popup);
+    setTimeout(() => popup.remove(), 800);
+}
+
+function endMiniGame(forceClose) {
+    isGameRunning = false;
+    clearInterval(gameTimerInterval);
+    clearInterval(gameSpawnInterval);
+    document.getElementById('game-area').innerHTML = `
+        <button id="start-game-btn" class="save-btn" style="position:absolute; top:40%; left:50%; transform:translate(-50%, -50%); width:250px; background:#00d2ff; color:#000;" onclick="startMiniGame()">
+            ▶ OYUNU BAŞLAT (1 DK)
+        </button>
+    `; // Temizle
+
+    if (forceClose) return;
+
+    const today = new Date().toLocaleDateString('tr-TR');
+
+    if (gameScore >= 200) {
+        addOlympusPoints(30, "Günün Oyunu Kazanıldı");
+        localStorage.setItem('olympus_game_last_played', today); // Oynadı işaretle
+
+        confetti({ particleCount: 200, spread: 90, colors: ['#00d2ff', '#fff'] });
+        alert(`Tebrikler! ${gameScore} puan topladın.\n\n🏆 HESABINA 30 OLYMPUS EKLENDİ!`);
+        closeMiniGame();
+    } else {
+        localStorage.setItem('olympus_game_last_played', today); // Kaybetse de hakkı yanar
+        alert(`Süre bitti! Sadece ${gameScore} puan toplayabildin. 200 puana ulaşamadığın için ödül alamadın.\n\nYarın tekrar dene!`);
+        closeMiniGame();
+    }
+}
+// ==========================================
+// PODYUM VE LİDERLİK TABLOSU YÜKLEME MOTORU
+// ==========================================
+async function loadLeaderboard() {
+    const boardDiv = document.getElementById('arena-leaderboard');
+    if (!boardDiv) return;
+
+    try {
+        // En yüksek Olympus puanına sahip 3 sporcuyu çek
+        const snapshot = await db.collection("users").orderBy("olympusPoints", "desc").limit(3).get();
+        let topUsers = [];
+        snapshot.forEach(doc => topUsers.push(doc.data()));
+
+        if (topUsers.length === 0) {
+            boardDiv.innerHTML = '<p style="color:gray; font-size:12px; text-align:center;">Henüz kimse puan kazanmadı. Oynayan ilk sen ol!</p>';
+            return;
+        }
+
+        // Podyum sıralaması (0. indeks = 1. olan vb.)
+        const rank1 = topUsers[0] || null;
+        const rank2 = topUsers[1] || null;
+        const rank3 = topUsers[2] || null;
+
+        boardDiv.innerHTML = '';
+
+        // --- 2. SIRA (SOLDA) ---
+        if (rank2) {
+            boardDiv.innerHTML += `
+                <div class="podium-item rank-2">
+                    <span class="podium-crown">🥈</span>
+                    <img src="${rank2.photo || 'icon.png'}" class="podium-avatar">
+                    <div class="podium-name">${rank2.name}</div>
+                    <div class="podium-score">${rank2.olympusPoints} P</div>
+                </div>
+            `;
+        } else {
+            boardDiv.innerHTML += `<div class="podium-item rank-2" style="visibility:hidden;"></div>`;
+        }
+
+        // --- 1. SIRA (ORTADA - EN YÜKSEKTE) ---
+        if (rank1) {
+            boardDiv.innerHTML += `
+                <div class="podium-item rank-1">
+                    <span class="podium-crown">👑</span>
+                    <img src="${rank1.photo || 'icon.png'}" class="podium-avatar">
+                    <div class="podium-name">${rank1.name}</div>
+                    <div class="podium-score">${rank1.olympusPoints} P</div>
+                </div>
+            `;
+        }
+
+        // --- 3. SIRA (SAĞDA) ---
+        if (rank3) {
+            boardDiv.innerHTML += `
+                <div class="podium-item rank-3">
+                    <span class="podium-crown">🥉</span>
+                    <img src="${rank3.photo || 'icon.png'}" class="podium-avatar">
+                    <div class="podium-name">${rank3.name}</div>
+                    <div class="podium-score">${rank3.olympusPoints} P</div>
+                </div>
+            `;
+        } else {
+            boardDiv.innerHTML += `<div class="podium-item rank-3" style="visibility:hidden;"></div>`;
+        }
+
+    } catch (e) {
+        console.error("Liderlik tablosu yüklenemedi:", e);
+        boardDiv.innerHTML = '<p style="color:#ff4444; font-size:12px; text-align:center;">Sıralama alınamadı.</p>';
+    }
+}
+// ==========================================
+// BAŞARI ROZETLERİ (ACHIEVEMENTS) MOTORU
+// ==========================================
+
+const badgesData = [
+    { id: 'b1', icon: '🔥', title: 'İlk Kan', desc: 'İlk idmanını başarıyla tamamla.', req: () => (JSON.parse(localStorage.getItem('olympus_worked_muscles')) || []).length > 0 },
+    { id: 'b2', icon: '💧', title: 'Poseidon', desc: 'Su içme hedefine ulaş.', req: () => { const w = JSON.parse(localStorage.getItem('olympus_water_obj')); return w && w.yesterday >= (localStorage.getItem('olympus_water_goal') || 3000); } },
+    { id: 'b3', icon: '🎮', title: 'Oyunbaz', desc: 'Olympus Catch oyununu oyna.', req: () => localStorage.getItem('olympus_game_last_played') !== null },
+    { id: 'b4', icon: '🥉', title: 'Bronz Hırs', desc: '100 Olympus Puanı topla.', req: () => (parseInt(localStorage.getItem('olympus_total_points')) || 0) >= 100 },
+    { id: 'b5', icon: '🥈', title: 'Gümüş Disiplin', desc: '500 Olympus Puanı topla.', req: () => (parseInt(localStorage.getItem('olympus_total_points')) || 0) >= 500 },
+    { id: 'b6', icon: '🥇', title: 'Altın İrade', desc: '1000 Olympus Puanı topla.', req: () => (parseInt(localStorage.getItem('olympus_total_points')) || 0) >= 1000 },
+    { id: 'b7', icon: '⚖️', title: 'Mimar', desc: 'Vücut ölçülerini sisteme kaydet.', req: () => { const p = JSON.parse(localStorage.getItem('olympus_profile')); return p && p.w; } },
+    { id: 'b8', icon: '📈', title: 'Güç Tutkunu', desc: 'İdman hacmi (1RM) değerini kaydet.', req: () => { const p = JSON.parse(localStorage.getItem('olympus_profile')); return p && p.bench; } },
+    { id: 'b9', icon: '🍱', title: 'Makro Ustası', desc: 'Kalori takibini grafiğe yansıt.', req: () => (JSON.parse(localStorage.getItem('olympus_cal_history')) || []).length > 0 },
+    { id: 'b10', icon: '👑', title: 'Kusursuz Gün', desc: 'Tüm günlük görevleri işaretle.', req: () => { const acts = JSON.parse(localStorage.getItem('olympus_acts')) || []; return acts.length > 0 && acts.every(a => a.done); } }
+];
+
+window.openBadgesModal = function () {
+    const container = document.getElementById('badge-grid-container');
+    container.innerHTML = '';
+
+    // Kazanılan rozet sayısını bul
+    let earnedCount = 0;
+
+    badgesData.forEach(badge => {
+        // Fonksiyon çalışıp şart sağlanıyor mu kontrol ediliyor
+        const isEarned = badge.req();
+        if (isEarned) earnedCount++;
+
+        container.innerHTML += `
+            <div class="badge-card ${isEarned ? 'earned' : ''}">
+                <div class="badge-icon">${badge.icon}</div>
+                <div class="badge-title">${badge.title}</div>
+                <div class="badge-desc">${badge.desc}</div>
+            </div>
+        `;
+    });
+
+    // Rozet başarı oranını konsola yazdır (geliştirici için)
+    console.log(`Toplam ${earnedCount}/${badgesData.length} rozet kazanıldı.`);
+
+    // Modalı aç
+    document.getElementById('badges-modal').style.display = 'flex';
+    if (navigator.vibrate) navigator.vibrate(50);
+};
+// ==========================================
+// TEMA (LIGHT / DARK MODE) YÖNETİM MOTORU
+// ==========================================
+window.toggleTheme = function () {
+    const checkbox = document.getElementById('theme-toggle-checkbox');
+    const isLight = checkbox.checked;
+
+    if (isLight) {
+        document.body.classList.add('light-mode');
+    } else {
+        document.body.classList.remove('light-mode');
+    }
+
+    // Tercihi tarayıcıya kaydet
+    localStorage.setItem('olympus_theme', isLight ? 'light' : 'dark');
+
+    if (navigator.vibrate) navigator.vibrate(20);
+};
+
+// Sayfa ilk yüklendiğinde kullanıcının eski tema tercihini kontrol et
+// DİKKAT: Bu kısmı "document.addEventListener('DOMContentLoaded', () => {" bloğunun İÇİNE de ekleyebilirsin veya en altta ayrı durabilir.
+document.addEventListener('DOMContentLoaded', () => {
+    const savedTheme = localStorage.getItem('olympus_theme');
+    const checkbox = document.getElementById('theme-toggle-checkbox');
+
+    if (savedTheme === 'light') {
+        document.body.classList.add('light-mode');
+        if (checkbox) checkbox.checked = true;
+    }
+});
+// ==========================================
+// HALI SAHA (FUTBOL) YÖNETİM MOTORU (GELİŞMİŞ & GOLANOVA)
+// ==========================================
+const formations7v7 = {
+    '2-3-1': [{ t: 90, l: 50 }, { t: 70, l: 30 }, { t: 70, l: 70 }, { t: 45, l: 20 }, { t: 45, l: 50 }, { t: 45, l: 80 }, { t: 15, l: 50 }],
+    '3-2-1': [{ t: 90, l: 50 }, { t: 70, l: 20 }, { t: 70, l: 50 }, { t: 70, l: 80 }, { t: 45, l: 35 }, { t: 45, l: 65 }, { t: 15, l: 50 }],
+    '2-2-2': [{ t: 90, l: 50 }, { t: 70, l: 30 }, { t: 70, l: 70 }, { t: 45, l: 30 }, { t: 45, l: 70 }, { t: 15, l: 30 }, { t: 15, l: 70 }],
+    '1-3-2': [{ t: 90, l: 50 }, { t: 70, l: 50 }, { t: 45, l: 20 }, { t: 45, l: 50 }, { t: 45, l: 80 }, { t: 15, l: 35 }, { t: 15, l: 65 }]
+};
+
+let currentSquad = Array(7).fill("Seçilmedi");
+
+window.openFootballManager = function () {
+    document.getElementById('sports-home').classList.add('hidden');
+    document.getElementById('football-manager').classList.remove('hidden');
+
+    const oly = document.getElementById('oly-avatar');
+    if (oly) oly.style.display = 'none';
+
+    const savedLineup = JSON.parse(localStorage.getItem('goldnova_squad_names'));
+    const savedFormation = localStorage.getItem('goldnova_squad_formation');
+    if (savedLineup) currentSquad = savedLineup;
+    if (savedFormation) document.getElementById('formation-select').value = savedFormation;
+
+    renderPitch();
+    renderMatchHistory();
+    renderFutCard();
+};
+
+window.closeFootballManager = function () {
+    document.getElementById('football-manager').classList.add('hidden');
+    document.getElementById('sports-home').classList.remove('hidden');
+
+    const oly = document.getElementById('oly-avatar');
+    if (oly) oly.style.display = 'flex';
+};
+
+window.switchFootballTab = function (tab) {
+    document.getElementById('btn-tab-lineup').classList.toggle('active', tab === 'lineup');
+    document.getElementById('btn-tab-history').classList.toggle('active', tab === 'history');
+    document.getElementById('fb-tab-lineup').style.display = tab === 'lineup' ? 'block' : 'none';
+    document.getElementById('fb-tab-history').style.display = tab === 'history' ? 'block' : 'none';
+};
+
+window.changeFormation = function () { renderPitch(); };
+
+function renderPitch() {
+    const pitch = document.getElementById('pitch-container');
+    const formationKey = document.getElementById('formation-select').value;
+    const coords = formations7v7[formationKey];
+
+    pitch.querySelectorAll('.player-spot').forEach(p => p.remove());
+
+    coords.forEach((pos, index) => {
+        const spot = document.createElement('div');
+        spot.className = 'player-spot';
+        spot.style.top = pos.t + '%';
+        spot.style.left = pos.l + '%';
+
+        const jerseyHTML = index === 0 ? '<div class="jersey">🦺</div>' : '<div class="jersey">👕</div>';
+        const playerName = currentSquad[index] || "Tıkla";
+        spot.innerHTML = `${jerseyHTML}<div class="player-name-plate">${playerName}</div>`;
+        spot.onclick = () => editPlayer(index);
+        pitch.appendChild(spot);
+    });
+}
+
+window.editPlayer = function (index) {
+    const oldName = currentSquad[index] !== "Seçilmedi" ? currentSquad[index] : "";
+    const newName = prompt("Mevkideki oyuncunun Adı Soyadı:", oldName);
+    if (newName !== null && newName.trim() !== "") {
+        currentSquad[index] = newName.substring(0, 15);
+        renderPitch();
+    }
+};
+
+window.saveLineup = function () {
+    const formation = document.getElementById('formation-select').value;
+    localStorage.setItem('goldnova_squad_names', JSON.stringify(currentSquad));
+    localStorage.setItem('goldnova_squad_formation', formation);
+    if (navigator.vibrate) navigator.vibrate(50);
+    alert("Kadro ve diziliş kaydedildi! Goldnova sahaya hazır.");
+};
+
+window.addNewMatch = function () {
+    document.getElementById('new-match-modal').style.display = 'flex';
+};
+
+window.saveNewMatchAdvanced = function () {
+    const opp = document.getElementById('match-opp').value;
+    const date = document.getElementById('match-date').value;
+    const time = document.getElementById('match-time').value;
+    const loc = document.getElementById('match-loc').value;
+    const scoreMy = document.getElementById('match-score-my').value;
+    const scoreOpp = document.getElementById('match-score-opp').value;
+
+    if (!opp || !date || !time) {
+        alert("Lütfen Rakip, Tarih ve Saat girin.");
+        return;
+    }
+
+    const savedFormation = document.getElementById('formation-select').value;
+    const savedSquad = [...currentSquad];
+
+    const matchDatetime = new Date(`${date}T${time}`);
+    const isFuture = matchDatetime.getTime() > new Date().getTime();
+
+    const matchObj = {
+        id: Date.now(),
+        opponent: opp,
+        datetime: matchDatetime.toISOString(),
+        location: loc || "Belirtilmedi",
+        scoreGoldnova: isFuture ? null : parseInt(scoreMy || 0),
+        scoreOpponent: isFuture ? null : parseInt(scoreOpp || 0),
+        formation: savedFormation,
+        squad: savedSquad,
+        isFuture: isFuture
+    };
+
+    let history = JSON.parse(localStorage.getItem('goldnova_match_history')) || [];
+    history.push(matchObj);
+    history.sort((a, b) => new Date(b.datetime) - new Date(a.datetime));
+    localStorage.setItem('goldnova_match_history', JSON.stringify(history));
+
+    document.getElementById('new-match-modal').style.display = 'none';
+    renderMatchHistory();
+
+    // YENİ EKLENEN: Maçı kaydettikten sonra kadrodaki arkadaşlarına dağıt
+    distributeMatchToSquad(matchObj);
+};
+async function syncSharedMatches() {
+    if (!auth.currentUser) return;
+
+    // Hem kendi oluşturduğun maçlar (localStorage), hem de davet edildiğin maçları (Firebase) birleştir
+    const localHistory = JSON.parse(localStorage.getItem('goldnova_match_history')) || [];
+
+    try {
+        const myDoc = await db.collection("users").doc(auth.currentUser.uid).get();
+        const sharedMatches = myDoc.exists ? (myDoc.data().shared_matches || []) : [];
+
+        // ID'ye göre benzersizleştir (Çift kayıt olmasın)
+        const allMatchesMap = new Map();
+        localHistory.forEach(m => allMatchesMap.set(m.id, m));
+        sharedMatches.forEach(m => allMatchesMap.set(m.id, m));
+
+        const combinedHistory = Array.from(allMatchesMap.values());
+        combinedHistory.sort((a, b) => new Date(b.datetime) - new Date(a.datetime));
+
+        // Ekrana bas
+        localStorage.setItem('goldnova_match_history', JSON.stringify(combinedHistory));
+        renderMatchHistory();
+    } catch (e) {
+        console.error("Maç senkronizasyonu başarısız:", e);
+        renderMatchHistory();
+    }
+}
+
+// Eski saveNewMatchAdvanced içindeki kayıt kısmını güncelleyelim:
+// window.saveNewMatchAdvanced = function() { ... 
+//    ...
+//    let history = JSON.parse(localStorage.getItem('goldnova_match_history')) || [];
+//    history.push(matchObj);
+//    localStorage.setItem('goldnova_match_history', JSON.stringify(history));
+//
+//    // YENİ: Firebase üzerinden kadrodaki oyunculara (uid bulabildiklerine) maçı yolla
+//    distributeMatchToSquad(matchObj);
+//    renderMatchHistory();
+// };
+
+async function distributeMatchToSquad(matchObj) {
+    if (!auth.currentUser) return;
+    // Takım kadrosundaki isimleri al
+    const squadNames = matchObj.squad.filter(name => name !== "Seçilmedi" && name !== "Boş");
+    if (squadNames.length === 0) return;
+
+    try {
+        // İsimlerden kullanıcıları bul (Gerçek bir uygulamada UID dizisi tutmak daha sağlıklıdır)
+        const snapshot = await db.collection("users").get();
+        snapshot.forEach(doc => {
+            const data = doc.data();
+            if (squadNames.includes(data.name) && data.uid !== auth.currentUser.uid) {
+                // Maçı arkadaşının hesabına kaydet
+                db.collection("users").doc(data.uid).update({
+                    shared_matches: firebase.firestore.FieldValue.arrayUnion(matchObj),
+                    notifications: firebase.firestore.FieldValue.arrayUnion({
+                        message: `⚽ Yeni Maç: ${auth.currentUser.displayName} seni ${matchObj.opponent} maçına ekledi!`,
+                        timestamp: Date.now(),
+                        read: false
+                    })
+                });
+            }
+        });
+    } catch (e) {
+        console.log("Maç dağıtımı yapılamadı:", e);
+    }
+}
+
+// ==========================================
+// MAÇ GEÇMİŞİ VE ANLIK GERİ SAYIM MOTORu (DÜZELTİLMİŞ)
+// ==========================================
+function renderMatchHistory() {
+    const container = document.getElementById('match-history-container');
+    const history = JSON.parse(localStorage.getItem('goldnova_match_history')) || [];
+
+    container.innerHTML = '';
+    if (history.length === 0) {
+        container.innerHTML = '<p style="color:#888; text-align:center; margin-top:20px;">Henüz kaydedilmiş bir maç veya fikstür bulunmuyor.</p>';
+        return;
+    }
+
+    history.forEach(match => {
+        const targetTime = new Date(match.datetime).getTime();
+        const now = new Date().getTime();
+        const isFuture = targetTime > now;
+
+        const dateStr = new Date(match.datetime).toLocaleString('tr-TR', { day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit' });
+
+        let innerCardHTML = '';
+        if (isFuture) {
+            innerCardHTML = `
+            <div class="scoreboard-card future-match" onclick="openMatchLineup(${match.id})">
+                <div class="match-countdown" data-target="${match.datetime}">Hesaplanıyor...</div>
+                <div class="scoreboard-date">${dateStr}</div>
+                <div class="scoreboard-teams">
+                    <div class="team-name" style="color:var(--goldnova);">GOLDNOVA</div>
+                    <div class="team-score" style="border-color:var(--goldnova); color:var(--goldnova); font-size:16px;">VS</div>
+                    <div class="team-name">${match.opponent}</div>
+                </div>
+                <div class="match-location">📍 ${match.location} <span style="margin-left:auto; color:var(--goldnova); font-size:10px;">Kadro 👁️</span></div>
+            </div>`;
+        } else {
+            let resultColor = match.scoreGoldnova > match.scoreOpponent ? '#27ae60' : (match.scoreGoldnova < match.scoreOpponent ? '#ff4444' : '#888');
+            innerCardHTML = `
+            <div class="scoreboard-card" style="border-left-color: ${resultColor};">
+                <div class="scoreboard-date">${dateStr}</div>
+                <!-- Sadece takımlara tıklayınca kadro açılır -->
+                <div class="scoreboard-teams" onclick="openMatchLineup(${match.id})" style="cursor:pointer;">
+                    <div class="team-name" style="color: var(--goldnova);">GOLDNOVA</div>
+                    <div class="team-score">${match.scoreGoldnova} - ${match.scoreOpponent}</div>
+                    <div class="team-name">${match.opponent}</div>
+                </div>
+                <!-- YENİ EKLENEN: Alt kısımdaki İstatistik ve Oylama butonu -->
+                <div style="display:flex; justify-content:space-between; align-items:center; margin-top:8px; border-top:1px solid rgba(255,255,255,0.1); padding-top:10px;">
+                    <span style="color:#888; font-size:10px;" onclick="openMatchLineup(${match.id})">📍 ${match.location} <span style="color:var(--goldnova); margin-left:5px;">👁️ Kadro</span></span>
+                    <button onclick="openMatchStatsModal(${match.id})" class="edit-btn" style="padding:6px 12px; font-size:11px; border-color:var(--goldnova); color:var(--goldnova); font-weight:bold;">📊 İstatistik Gir</button>
+                </div>
+            </div>`;
+        }
+
+        const wrapper = document.createElement('div');
+        wrapper.className = 'scoreboard-wrapper';
+        wrapper.innerHTML = `<div class="scoreboard-delete-bg">SİL 🗑️</div>`;
+
+        const tempContainer = document.createElement('div');
+        tempContainer.innerHTML = innerCardHTML;
+        const cardEl = tempContainer.firstElementChild;
+        wrapper.appendChild(cardEl);
+        container.appendChild(wrapper);
+
+        // Kaydırma (Swipe to delete) olayları
+        let startX = 0;
+        cardEl.addEventListener('touchstart', (e) => {
+            startX = e.touches[0].clientX;
+            cardEl.style.transition = 'none';
+        }, { passive: true });
+
+        cardEl.addEventListener('touchmove', (e) => {
+            let moveX = e.touches[0].clientX - startX;
+            if (moveX < 0 && moveX > -110) {
+                cardEl.style.transform = `translateX(${moveX}px)`;
+            }
+        }, { passive: true });
+
+        cardEl.addEventListener('touchend', (e) => {
+            let endX = e.changedTouches[0].clientX;
+            cardEl.style.transition = 'transform 0.3s ease';
+            if (startX - endX > 70) {
+                if (confirm("Bu maçı silmek istiyor musun?")) {
+                    deleteMatch(match.id);
+                    return;
+                }
+            }
+            cardEl.style.transform = 'translateX(0px)';
+        });
+    });
+}
+
+// ANLIK GERİ SAYIM MOTORU (HER SANİYE GÜNCELLENİR)
+setInterval(() => {
+    document.querySelectorAll('.match-countdown').forEach(el => {
+        const targetStr = el.getAttribute('data-target');
+        if (!targetStr) return;
+
+        const target = new Date(targetStr).getTime();
+        const now = new Date().getTime();
+        const diff = target - now;
+
+        if (diff > 0) {
+            const d = Math.floor(diff / (1000 * 60 * 60 * 24));
+            const h = Math.floor((diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+            const m = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
+            const s = Math.floor((diff % (1000 * 60)) / 1000);
+
+            el.innerText = `Maça: ${d}g ${h}s ${m}d ${s}sn`;
+        } else {
+            el.innerText = "⚽ MAÇ SAATİ GELDİ!";
+        }
+    });
+}, 1000);
+
+
+window.deleteMatch = function (matchId) {
+    let history = JSON.parse(localStorage.getItem('goldnova_match_history')) || [];
+    history = history.filter(m => m.id !== matchId);
+    localStorage.setItem('goldnova_match_history', JSON.stringify(history));
+    renderMatchHistory();
+    if (navigator.vibrate) navigator.vibrate(50);
+};
+
+// MAÇ KADROSU İZLEME
+window.openMatchLineup = function (matchId) {
+    const history = JSON.parse(localStorage.getItem('goldnova_match_history')) || [];
+    const match = history.find(m => m.id === matchId);
+    if (!match) return;
+
+    document.getElementById('view-match-title').innerText = `Goldnova vs ${match.opponent}`;
+    document.getElementById('view-match-subtitle').innerText = `${new Date(match.datetime).toLocaleDateString('tr-TR')} | Sistem: ${match.formation}`;
+
+    const pitch = document.getElementById('view-pitch-container');
+    pitch.querySelectorAll('.player-spot').forEach(p => p.remove());
+
+    const coords = formations7v7[match.formation];
+
+    coords.forEach((pos, index) => {
+        const spot = document.createElement('div');
+        spot.className = 'player-spot';
+        spot.style.top = pos.t + '%';
+        spot.style.left = pos.l + '%';
+        spot.style.cursor = 'default';
+
+        const jerseyHTML = index === 0 ? '<div class="jersey">🦺</div>' : '<div class="jersey">👕</div>';
+        const playerName = match.squad[index] || "Boş";
+
+        spot.innerHTML = `${jerseyHTML}<div class="player-name-plate">${playerName}</div>`;
+        pitch.appendChild(spot);
+    });
+
+    document.getElementById('view-match-modal').style.display = 'flex';
+};
+// ==========================================
+// SPORLAR ANA EKRANI GEÇİŞ MOTORU
+// ==========================================
+window.openSportsScreen = function () {
+    document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+    document.getElementById('sports-sec').classList.add('active');
+
+    // İŞTE ÇÖZÜM: Direkt ana menüyü göster, futbolu gizle!
+    document.getElementById('sports-home').classList.remove('hidden');
+    document.getElementById('football-manager').classList.add('hidden');
+
+    const oly = document.getElementById('oly-avatar');
+    if (oly) oly.style.display = 'none';
+
+    const dayTracker = document.getElementById('day-tracker');
+    if (dayTracker) dayTracker.style.display = 'none';
+};
+
+window.closeSportsScreen = function () {
+    document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+    document.getElementById('profile-sec').classList.add('active');
+
+    // Oly'yi geri getir
+    const oly = document.getElementById('oly-avatar');
+    if (oly) oly.style.display = 'flex';
+
+    if (navigator.vibrate) navigator.vibrate(30);
+};
+
+// Sekme Değiştirme (Kadro vs Geçmiş Maçlar)
+window.switchFootballTab = function (tab) {
+    const lineupBtn = document.getElementById('btn-tab-lineup');
+    const historyBtn = document.getElementById('btn-tab-history');
+    const lineupDiv = document.getElementById('fb-tab-lineup');
+    const historyDiv = document.getElementById('fb-tab-history');
+
+    if (tab === 'lineup') {
+        lineupBtn.classList.add('active');
+        historyBtn.classList.remove('active');
+        lineupDiv.classList.remove('hidden');
+        lineupDiv.style.display = 'block';
+        historyDiv.classList.add('hidden');
+        historyDiv.style.display = 'none';
+    } else {
+        historyBtn.classList.add('active');
+        lineupBtn.classList.remove('active');
+        historyDiv.classList.remove('hidden');
+        historyDiv.style.display = 'block';
+        lineupDiv.classList.add('hidden');
+        lineupDiv.style.display = 'none';
+
+        // Geçmiş maçlar sekmesine geçildiğinde listeyi tazele
+        if (typeof renderMatchHistory === 'function') renderMatchHistory();
+    }
+};
+// ==========================================
+// FUT KARTI YÖNETİM MOTORU (FOTOĞRAF DESTEKLİ & EKSİZSİZ)
+// ==========================================
+let tempCustomCardImg = null;
+let futRadarInstance = null; // YENİ: Radar grafiği hafızası
+
+window.renderFutCard = function () {
+    const savedCard = JSON.parse(localStorage.getItem('goldnova_fut_card')) || {
+        ovr: 88, pos: 'ST', jersey: 10, pace: 90, shoot: 85, pass: 82, dribble: 88, def: 70, phys: 86, img: null
+    };
+
+    // Ön Yüz Verileri
+    document.getElementById('fut-rating').innerText = savedCard.ovr;
+    document.getElementById('fut-position').innerText = savedCard.pos;
+    document.getElementById('fut-jersey-num').innerText = savedCard.jersey || 10;
+    document.getElementById('stat-pace').innerText = savedCard.pace;
+    document.getElementById('stat-shoot').innerText = savedCard.shoot;
+    document.getElementById('stat-pass').innerText = savedCard.pass;
+    document.getElementById('stat-dribble').innerText = savedCard.dribble;
+    document.getElementById('stat-def').innerText = savedCard.def;
+    document.getElementById('stat-phys').innerText = savedCard.phys;
+
+    const avatarImg = document.getElementById('fut-avatar-img');
+    avatarImg.src = savedCard.img ? savedCard.img : (auth.currentUser && auth.currentUser.photoURL ? auth.currentUser.photoURL : 'icon.png');
+
+    const profileName = document.getElementById('profile-name-display').innerText;
+    document.getElementById('fut-name').innerText = profileName !== "Yükleniyor..." ? profileName.toUpperCase() : "GOLDNOVA OYUNCU";
+
+    // Arka Yüz Kariyer Verileri
+    const careerStats = JSON.parse(localStorage.getItem('goldnova_career_stats')) || { goals: 0, assists: 0, motm: 0 };
+    const elGoals = document.getElementById('career-goals');
+    const elAssists = document.getElementById('career-assists');
+    const elMotm = document.getElementById('career-motm');
+
+    if (elGoals) elGoals.innerText = careerStats.goals;
+    if (elAssists) elAssists.innerText = careerStats.assists;
+    if (elMotm) elMotm.innerText = careerStats.motm;
+
+    // RADAR GRAFİĞİNİ ÇİZ
+    drawFutRadar(savedCard);
+};
+
+function drawFutRadar(cardData) {
+    const ctx = document.getElementById('fut-radar-chart');
+    if (!ctx) return;
+
+    if (futRadarInstance) futRadarInstance.destroy();
+
+    futRadarInstance = new Chart(ctx.getContext('2d'), {
+        type: 'radar',
+        data: {
+            labels: ['HIZ', 'ŞUT', 'PAS', 'DRİB', 'DEF', 'FİZ'],
+            datasets: [{
+                label: 'Yetenekler',
+                data: [cardData.pace, cardData.shoot, cardData.pass, cardData.dribble, cardData.def, cardData.phys],
+                backgroundColor: 'rgba(0, 0, 0, 0.4)',
+                borderColor: '#f6c000',
+                borderWidth: 2,
+                pointBackgroundColor: '#fff',
+                pointBorderColor: '#000'
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            scales: {
+                r: {
+                    angleLines: { color: 'rgba(255,255,255,0.2)' },
+                    grid: { color: 'rgba(255,255,255,0.2)' },
+                    pointLabels: { color: '#fff', font: { size: 10, weight: 'bold' } },
+                    ticks: { display: false, max: 99, min: 0 }
+                }
+            },
+            plugins: { legend: { display: false } }
+        }
+    });
+}
+window.openFutEditModal = function () {
+    const savedCard = JSON.parse(localStorage.getItem('goldnova_fut_card')) || {
+        ovr: 88, pos: 'ST', jersey: 10, pace: 90, shoot: 85, pass: 82, dribble: 88, def: 70, phys: 86, img: null
+    };
+
+    document.getElementById('edit-ovr').value = savedCard.ovr;
+    document.getElementById('edit-pos').value = savedCard.pos;
+    document.getElementById('edit-jersey').value = savedCard.jersey || 10;
+    document.getElementById('edit-pace').value = savedCard.pace;
+    document.getElementById('edit-shoot').value = savedCard.shoot;
+    document.getElementById('edit-pass').value = savedCard.pass;
+    document.getElementById('edit-dribble').value = savedCard.dribble;
+    document.getElementById('edit-def').value = savedCard.def;
+    document.getElementById('edit-phys').value = savedCard.phys;
+
+    tempCustomCardImg = savedCard.img;
+    document.getElementById('fut-edit-modal').style.display = 'flex';
+};
+
+window.saveFutCardData = function () {
+    const existingCard = JSON.parse(localStorage.getItem('goldnova_fut_card')) || {};
+    const cardData = {
+        ovr: document.getElementById('edit-ovr').value,
+        pos: document.getElementById('edit-pos').value.toUpperCase(),
+        jersey: document.getElementById('edit-jersey').value || 10,
+        pace: document.getElementById('edit-pace').value,
+        shoot: document.getElementById('edit-shoot').value,
+        pass: document.getElementById('edit-pass').value,
+        dribble: document.getElementById('edit-dribble').value,
+        def: document.getElementById('edit-def').value,
+        phys: document.getElementById('edit-phys').value,
+        img: tempCustomCardImg !== undefined ? tempCustomCardImg : existingCard.img
+    };
+
+    localStorage.setItem('goldnova_fut_card', JSON.stringify(cardData));
+    document.getElementById('fut-edit-modal').style.display = 'none';
+    renderFutCard();
+    if (navigator.vibrate) navigator.vibrate(50);
+    alert("FIFA kartın başarıyla güncellendi şampiyon! 🎴🔥");
+};
+window.previewCardImage = function (event) {
+    const file = event.target.files[0];
+    if (file) {
+        const reader = new FileReader();
+        reader.onload = function (e) {
+            tempCustomCardImg = e.target.result;
+        };
+        reader.readAsDataURL(file);
+    }
+};
+
+
+// DÜZELTİLMİŞ: Sadece konfeti atar ve titreşim verir. Dönme işini (Flipped) CSS ve HTML yönetir.
+window.triggerCardCelebration = function () {
+    if (typeof confetti === 'function') {
+        confetti({
+            particleCount: 120,
+            spread: 80,
+            origin: { y: 0.6 },
+            colors: ['#f6c000', '#ffffff', '#ffd700', '#ffaa00']
         });
     }
-    modal.style.display = "flex";
+
+    if (navigator.vibrate) navigator.vibrate([50, 50, 100]);
+};
+// ==========================================
+// OYUNCU SEÇİM VE ARKADAŞ LİSTESİ MOTORU (DÜZELTİLMİŞ KESİN ÇÖZÜM)
+// ==========================================
+var activeEditingIndex = null; // Global ve her yerden erişilebilir
+
+window.editPlayer = function (index) {
+    activeEditingIndex = index;
+
+    // Eğer currentSquad bir şekilde kaybolduysa güvenli şekilde geri çağır
+    if (typeof currentSquad === 'undefined' || !currentSquad) {
+        window.currentSquad = JSON.parse(localStorage.getItem('goldnova_squad_names')) || Array(7).fill("Seçilmedi");
+    }
+
+    const oldName = currentSquad[index] !== "Seçilmedi" ? currentSquad[index] : "";
+
+    const inputEl = document.getElementById('manual-player-input');
+    if (inputEl) inputEl.value = oldName;
+
+    const modal = document.getElementById('player-select-modal');
+    if (modal) modal.style.display = 'flex';
+
+    loadArenaFriendsForSelection();
 };
 
-window.closePanelModal = function () { document.getElementById("panelModal").style.display = "none"; };
+async function loadArenaFriendsForSelection() {
+    const listContainer = document.getElementById('arena-friends-list');
+    listContainer.innerHTML = '<p style="color:gray; font-size:11px; text-align:center; padding:10px;">Yükleniyor...</p>';
 
-window.deletePanel = function (id) {
-    if (!confirm("Bu projeyi tamamen silmek istediğinize emin misiniz?")) return;
-    let saved = JSON.parse(localStorage.getItem("culbase_panels")) || [];
-    saved = saved.filter(p => p.id !== id);
-    localStorage.setItem("culbase_panels", JSON.stringify(saved));
-    openPanelModal();
+    try {
+        const currentUser = auth.currentUser;
+        if (!currentUser) return;
+
+        const myDoc = await db.collection("users").doc(currentUser.uid).get();
+        const myData = myDoc.exists ? myDoc.data() : { name: currentUser.displayName || "Ben", photo: currentUser.photoURL, uid: currentUser.uid };
+
+        let friends = [];
+        try {
+            const snapshot = await db.collection("users").limit(15).get();
+            snapshot.forEach(doc => {
+                const data = doc.data();
+                if (data.name && data.uid !== currentUser.uid) friends.push(data);
+            });
+        } catch (err) { }
+
+        listContainer.innerHTML = '';
+
+        // KENDİMİZİ EKLEYELİM
+        const selfItem = document.createElement('div');
+        selfItem.className = 'friend-select-item';
+        selfItem.style.border = '1px solid var(--goldnova)';
+        selfItem.innerHTML = `<img src="${myData.photo || 'icon.png'}" class="friend-select-avatar"><span style="color:var(--goldnova); font-size:13px; font-weight:bold;">${myData.name} (Sen)</span>`;
+        selfItem.onclick = () => {
+            const inputEl = document.getElementById('manual-player-input');
+            inputEl.value = myData.name;
+            inputEl.removeAttribute('data-target-uid'); // Kendimize bildirim atmaya gerek yok
+            confirmPlayerSelection();
+        };
+        listContainer.appendChild(selfItem);
+
+        // ARKADAŞLARI EKLEYELİM
+        if (friends.length > 0) {
+            friends.forEach(friend => {
+                const item = document.createElement('div');
+                item.className = 'friend-select-item';
+                item.innerHTML = `<img src="${friend.photo || 'icon.png'}" class="friend-select-avatar"><span style="color:#fff; font-size:13px; font-weight:bold;">${friend.name}</span>`;
+                item.onclick = () => {
+                    const inputEl = document.getElementById('manual-player-input');
+                    inputEl.value = friend.name;
+                    // YENİ: Seçtiğimiz kişinin ID'sini gizlice inputa gömüyoruz ki bildirim atabilelim!
+                    inputEl.setAttribute('data-target-uid', friend.uid);
+                    confirmPlayerSelection();
+                };
+                listContainer.appendChild(item);
+            });
+        }
+    } catch (e) {
+        listContainer.innerHTML = '<p style="color:#ff4444; font-size:11px; text-align:center;">Hata oluştu.</p>';
+    }
+}
+
+window.confirmPlayerSelection = async function () {
+    const inputEl = document.getElementById('manual-player-input');
+    if (!inputEl) return;
+
+    const inputVal = inputEl.value.trim();
+    const targetUid = inputEl.getAttribute('data-target-uid'); // Gizli ID'yi al
+
+    if (activeEditingIndex !== null) {
+        currentSquad[activeEditingIndex] = inputVal !== "" ? inputVal.substring(0, 15) : "Seçilmedi";
+        if (typeof renderPitch === 'function') renderPitch();
+
+        // EĞER LİSTEDEN BİR ARKADAŞ SEÇİLDİYSE ONA BİLDİRİM GÖNDER!
+        if (targetUid && inputVal !== "") {
+            const myName = document.getElementById('profile-name-display').innerText;
+            const notifMsg = `⚽ ${myName}, seni Goldnova halı saha kadrosuna ekledi! Maça hazır ol.`;
+
+            try {
+                await db.collection("users").doc(targetUid).update({
+                    notifications: firebase.firestore.FieldValue.arrayUnion({
+                        message: notifMsg,
+                        timestamp: Date.now(),
+                        read: false
+                    })
+                });
+                console.log("Bildirim başarıyla gönderildi!");
+            } catch (e) {
+                console.log("Bildirim gönderilemedi:", e);
+            }
+        }
+    }
+
+    // İşlem bitince inputun içindeki gizli UID'yi temizle (sonraki seçimler karışmasın)
+    inputEl.removeAttribute('data-target-uid');
+
+    const modal = document.getElementById('player-select-modal');
+    if (modal) modal.style.display = 'none';
+    if (navigator.vibrate) navigator.vibrate(30);
 };
 
-window.loadPanel = function (id) {
-    let saved = JSON.parse(localStorage.getItem("culbase_panels")) || [];
-    let project = saved.find(p => p.id === id);
-    if (!project) return;
-
-    // Ölçüleri ayarla
-    document.getElementById("panoWInput").value = project.width;
-    document.getElementById("panoHInput").value = project.height;
-    document.getElementById("panoWInput").dispatchEvent(new Event('input')); // Tuvali boyutlandır
-
-    // Ekranı temizle
-    document.querySelectorAll("#panoCanvas_sac .canvas-item, #panoCanvas_kapak .canvas-item").forEach(e => e.remove());
-
-    // Öğeleri yeniden oluşturma ve Canlandırma
-    const recreateItem = (itemData, canvasId) => {
-        const canvas = document.getElementById(canvasId);
-        const el = document.createElement("div");
-        el.className = `canvas-item ${itemData.type}`;
-        el.textContent = itemData.name;
-        el.style.left = itemData.left; el.style.top = itemData.top;
-        el.style.width = itemData.width; el.style.height = itemData.height;
-        el.dataset.rotate = itemData.rotate;
-        if (itemData.rotate !== "0") el.style.transform = `rotate(${itemData.rotate}deg)`;
-
-        canvas.appendChild(el);
-        bindLoadedItem(el); // Sürükleme özelliklerini yeniden ver
-    };
-
-    project.sacItems.forEach(i => recreateItem(i, "panoCanvas_sac"));
-    project.kapakItems.forEach(i => recreateItem(i, "panoCanvas_kapak"));
-
-    closePanelModal();
-    if (typeof showToast === "function") showToast("Proje Yüklendi!");
+// ==========================================
+// BİLDİRİM (NOTIFICATION) MOTORU
+// ==========================================
+window.openNotifications = function () {
+    document.getElementById('notifications-modal').style.display = 'flex';
+    // Modalı açtığımızda bekleyen bildirim sayısını gizleyelim (okundu varsayalım)
+    const badge = document.getElementById('notif-badge');
+    if (badge) badge.style.display = 'none';
 };
 
-// Yüklenen öğelere sürükleme ve özellik (Ayarlar) panelini bağlama motoru
-window.bindLoadedItem = function (el) {
-    let offsetX = 0, offsetY = 0;
+// Bu fonksiyon Firebase'den anlık bildirimleri dinler
+function listenForNotifications() {
+    if (!auth.currentUser) return;
 
-    const selectThis = () => {
-        document.querySelectorAll(".canvas-item").forEach(i => i.classList.remove("selected"));
-        el.classList.add("selected");
-        document.getElementById("propNameInput").value = el.textContent;
-        document.getElementById("propRotate").value = el.dataset.rotate || "0";
-        document.getElementById("propX").value = parseInt(el.style.left, 10) || 0;
-        document.getElementById("propY").value = parseInt(el.style.top, 10) || 0;
-        document.getElementById("propW").value = parseInt(el.style.width, 10) || 0;
-        document.getElementById("propH").value = parseInt(el.style.height, 10) || 0;
-        window.activeElement = el;
-    };
+    db.collection("users").doc(auth.currentUser.uid)
+        .onSnapshot((doc) => {
+            if (doc.exists) {
+                const data = doc.data();
+                const notifs = data.notifications || [];
+                renderNotifications(notifs);
+            }
+        });
+}
 
-    const onMove = (e) => {
-        const canvas = document.getElementById(activeCanvasId || 'panoCanvas_sac');
-        const rect = canvas.getBoundingClientRect();
-        let clientX = e.touches ? e.touches[0].clientX : e.clientX;
-        let clientY = e.touches ? e.touches[0].clientY : e.clientY;
-        let rawX = clientX - rect.left - offsetX; let rawY = clientY - rect.top - offsetY;
+function renderNotifications(notifs) {
+    const list = document.getElementById('notifications-list');
+    const badge = document.getElementById('notif-badge');
 
-        let x = Math.round(rawX / 10) * 10; let y = Math.round(rawY / 10) * 10;
-        if (x < 0) x = 0; if (y < 0) y = 0;
-        el.style.left = x + "px"; el.style.top = y + "px";
-        selectThis();
-        if (e.touches) e.preventDefault();
-    };
+    list.innerHTML = '';
+    if (notifs.length === 0) {
+        list.innerHTML = '<p style="color:gray; font-size:12px; text-align:center;">Henüz yeni bildirim yok.</p>';
+        if (badge) badge.style.display = 'none';
+        return;
+    }
 
-    const onEnd = () => {
-        document.removeEventListener("mousemove", onMove); document.removeEventListener("mouseup", onEnd);
-        document.removeEventListener("touchmove", onMove); document.removeEventListener("touchend", onEnd);
-    };
+    // En yeni bildirim en üstte görünsün diye tersine çeviriyoruz
+    notifs.slice().reverse().forEach(n => {
+        list.innerHTML += `
+            <div style="padding:12px; background:#1a1a1a; border-left:3px solid var(--goldnova); margin-bottom:8px; border-radius:8px;">
+                <p style="margin:0; font-size:13px; color:#fff; line-height:1.4;">${n.message}</p>
+                <span style="font-size:10px; color:#888; display:block; margin-top:5px;">${new Date(n.timestamp).toLocaleString('tr-TR')}</span>
+            </div>
+        `;
+    });
 
-    const onStart = (e) => {
-        selectThis();
-        const rect = el.getBoundingClientRect();
-        let clientX = e.touches ? e.touches[0].clientX : e.clientX;
-        let clientY = e.touches ? e.touches[0].clientY : e.clientY;
-        offsetX = clientX - rect.left; offsetY = clientY - rect.top;
+    // Eğer bildirim varsa zildeki kırmızı rozeti (badge) göster
+    if (notifs.length > 0 && document.getElementById('notifications-modal').style.display !== 'flex') {
+        if (badge) {
+            badge.innerText = notifs.length;
+            badge.style.display = 'block';
+        }
+    }
+}
 
-        if (e.touches) { document.addEventListener("touchmove", onMove, { passive: false }); document.addEventListener("touchend", onEnd); }
-        else { document.addEventListener("mousemove", onMove); document.addEventListener("mouseup", onEnd); }
-    };
-
-    el.addEventListener("mousedown", onStart);
-    el.addEventListener("touchstart", onStart, { passive: false });
-    el.addEventListener("dblclick", () => { if (confirm("Silmek istiyor musunuz?")) { el.remove(); window.activeElement = null; } });
+window.clearNotifications = function () {
+    if (!auth.currentUser) return;
+    // Firebase'deki notifications dizisini tamamen temizle
+    db.collection("users").doc(auth.currentUser.uid).update({
+        notifications: []
+    }).then(() => {
+        if (navigator.vibrate) navigator.vibrate(30);
+    });
 };
-// ÖĞE SİLME MOTORU (ÖZELLİKLER MENÜSÜNDEN)
-window.deleteActiveItem = function () {
-    if (window.activeElement) {
-        window.activeElement.remove(); // Ekrandan sil
-        window.activeElement = null; // Hafızadan sil
 
-        // Sağ menüdeki yazıları sıfırla
-        document.getElementById("propNameInput").value = "";
-        document.getElementById("propRotate").value = "0";
-        document.getElementById("propX").value = 0;
-        document.getElementById("propY").value = 0;
-        document.getElementById("propW").value = 0;
-        document.getElementById("propH").value = 0;
+// ==========================================
+// GÜNLÜK ANTRENMAN BİLDİRİM MOTORU
+// ==========================================
+window.sendDailyWorkoutNotification = function () {
+    // Sadece giriş yapılmışsa ve takvim "Bugün" modundaysa çalışsın
+    if (!auth.currentUser || viewMode !== 'today') return;
 
-        if (typeof showToast === "function") showToast("Öğe silindi!");
+    const todayStr = new Date().toLocaleDateString('tr-TR');
+    const lastNotifDate = localStorage.getItem('olympus_daily_notif_date');
+
+    // Eğer bugün zaten bildirim gönderildiyse tekrar gönderme (Spam koruması)
+    if (lastNotifDate !== todayStr) {
+        // Bugünün idmanını programdan bul
+        const todayWorkout = programData[currentPhase].find(x => x.day == calculatedDay);
+
+        if (todayWorkout) {
+            let msg = "";
+            if (todayWorkout.rest) {
+                msg = `🧘 Bugün dinlenme günün: ${todayWorkout.title}. Kaslarını toparla şampiyon!`;
+            } else {
+                msg = `🏋️‍♂️ Oly hatırlatıyor: Bugün ${todayWorkout.title}. Limitleri zorlama vakti geldi!`;
+            }
+
+            // Firebase'deki bildirimler dizisine otomatik mesajı ateşle
+            db.collection("users").doc(auth.currentUser.uid).update({
+                notifications: firebase.firestore.FieldValue.arrayUnion({
+                    message: msg,
+                    timestamp: Date.now(),
+                    read: false
+                })
+            }).then(() => {
+                // Bugünü hafızaya yaz ki aynı gün içinde sayfayı yeniledikçe tekrar bildirim atmasın
+                localStorage.setItem('olympus_daily_notif_date', todayStr);
+            }).catch(e => console.log("Günlük bildirim atılamadı:", e));
+        }
+    }
+};
+window.openDirectFootball = function () {
+    document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+    document.getElementById('sports-sec').classList.add('active');
+    document.getElementById('sports-home').classList.add('hidden');
+    document.getElementById('football-manager').classList.remove('hidden');
+
+    const oly = document.getElementById('oly-avatar');
+    if (oly) oly.style.display = 'none';
+
+    const dayTracker = document.getElementById('day-tracker');
+    if (dayTracker) dayTracker.style.display = 'none';
+
+    // Verileri yükle ve arayüzü çiz
+    const savedLineup = JSON.parse(localStorage.getItem('goldnova_squad_names'));
+    const savedFormation = localStorage.getItem('goldnova_squad_formation');
+    if (savedLineup) currentSquad = savedLineup;
+    if (savedFormation) document.getElementById('formation-select').value = savedFormation;
+
+    if (typeof renderFutCard === 'function') renderFutCard();
+    renderPitch();
+    syncSharedMatches(); // Maçları buluttan eşitle
+};
+let canvas, ctx, isDrawing = false, tacticInitialized = false, isDrawMode = false;
+
+window.openTacticBoard = function () {
+    document.getElementById('tactic-board-screen').classList.remove('hidden');
+    if (!tacticInitialized) { initTacticBoard(); tacticInitialized = true; }
+};
+
+window.closeTacticBoard = function () { document.getElementById('tactic-board-screen').classList.add('hidden'); };
+
+window.toggleTacticPen = function () {
+    isDrawMode = !isDrawMode;
+    const btn = document.getElementById('tactic-pen-btn');
+    const cvs = document.getElementById('tactic-canvas');
+    if (isDrawMode) {
+        btn.innerText = "✏️ Kalem: AÇIK";
+        btn.style.borderColor = "var(--goldnova)";
+        btn.style.color = "var(--goldnova)";
+        cvs.style.pointerEvents = "auto"; // Çizim serbest
     } else {
-        alert("Lütfen silmek istediğiniz öğeyi panodan seçin (Üzerine tıklayın).");
+        btn.innerText = "✏️ Kalem: KAPALI";
+        btn.style.borderColor = "white";
+        btn.style.color = "white";
+        cvs.style.pointerEvents = "none"; // Adam taşıma serbest
+    }
+};
+
+window.resetTacticPlayers = function () { spawnTacticPlayers(); clearTacticCanvas(); };
+
+function initTacticBoard() {
+    canvas = document.getElementById('tactic-canvas');
+    ctx = canvas.getContext('2d');
+    canvas.width = window.innerWidth;
+    canvas.height = window.innerHeight;
+
+    canvas.addEventListener('touchstart', startDraw, { passive: false });
+    canvas.addEventListener('touchmove', draw, { passive: false });
+    canvas.addEventListener('touchend', endDraw);
+    canvas.addEventListener('mousedown', startDraw);
+    canvas.addEventListener('mousemove', draw);
+    canvas.addEventListener('mouseup', endDraw);
+    spawnTacticPlayers();
+}
+
+function startDraw(e) {
+    if (!isDrawMode || e.target !== canvas) return;
+    e.preventDefault();
+    isDrawing = true;
+    ctx.beginPath();
+    const { x, y } = getPointers(e);
+    ctx.moveTo(x, y);
+}
+
+function draw(e) {
+    if (!isDrawing || !isDrawMode) return;
+    e.preventDefault();
+    const { x, y } = getPointers(e);
+    ctx.lineTo(x, y);
+    ctx.strokeStyle = '#f6c000';
+    ctx.lineWidth = 3;
+    ctx.stroke();
+}
+function endDraw() { isDrawing = false; ctx.closePath(); }
+window.clearTacticCanvas = function () { if (ctx) ctx.clearRect(0, 0, canvas.width, canvas.height); };
+
+function getPointers(e) {
+    const rect = canvas.getBoundingClientRect();
+    if (e.touches && e.touches.length > 0) return { x: e.touches[0].clientX - rect.left, y: e.touches[0].clientY - rect.top };
+    return { x: e.clientX - rect.left, y: e.clientY - rect.top };
+}
+
+window.toggleTacticMenu = function () {
+    document.getElementById('tactic-tools-menu').classList.toggle('open');
+};
+
+function spawnTacticPlayers() {
+    const container = document.getElementById('tactic-draggables');
+    container.innerHTML = '';
+
+    const formationKey = document.getElementById('formation-select').value || '2-3-1';
+    const coords = formations7v7[formationKey];
+
+    const futCard = JSON.parse(localStorage.getItem('goldnova_fut_card')) || {};
+    const myJerseyNum = futCard.jersey || 10;
+    const myName = document.getElementById('profile-name-display').innerText.trim().toLowerCase();
+
+    // 1. Kendi Takımımız (Goldnova - Alt Yarı Saha - Altın Forma)
+    coords.forEach((pos, index) => {
+        let pName = (currentSquad[index] || "").toLowerCase();
+        let jerseyNum = (pName === myName && myName !== "yükleniyor..." && myName !== "") ? myJerseyNum : (index === 0 ? 1 : index + 2);
+
+        // isHome = true (Kendi takımımız altın/sarı olacak)
+        createDraggableJersey(container, 'tactic-home', jerseyNum, pos.t, pos.l, true);
+    });
+
+    // 2. Rakip Takım (Üst Yarı Saha - Kırmızı Forma)
+    coords.forEach((pos, index) => {
+        let jerseyNum = index === 0 ? 1 : index + 2;
+        // isHome = false (Rakip takım kırmızı olacak)
+        createDraggableJersey(container, 'tactic-away', jerseyNum, 100 - pos.t, 100 - pos.l, false);
+    });
+
+    // 3. Futbol Topu
+    createDraggableEmoji(container, '⚽', 50, 50);
+}
+
+// VEKTÖREL FORMA ÇİZEN VE NUMARAYI YAZAN MOTOR
+function createDraggableJersey(container, teamClass, num, topPercent, leftPercent, isHome) {
+    const el = document.createElement('div');
+    el.className = `tactic-player ${teamClass}`;
+
+    // Forma Renkleri: Ev sahibi Goldnova (Sarı-Siyah), Rakip (Kırmızı-Beyaz)
+    const fillColor = isHome ? '#f6c000' : '#ff4444';
+    const strokeColor = isHome ? '#000000' : '#ffffff';
+    const textColor = isHome ? '#000000' : '#ffffff';
+
+    // Kaliteli Vektörel Forma Çizimi (SVG)
+    const svgIcon = `
+        <svg viewBox="0 0 24 24" width="36" height="36" style="position:absolute; z-index:1; filter:drop-shadow(0 3px 3px rgba(0,0,0,0.5));">
+            <path d="M15.3,2.3c-0.3,0-0.5,0.1-0.7,0.2c-0.8,0.6-1.7,0.9-2.6,0.9s-1.8-0.3-2.6-0.9C9.2,2.4,9,2.3,8.7,2.3H5.9 C5.2,2.3,4.6,2.7,4.3,3.3l-2,5.2c-0.2,0.4,0,0.8,0.3,1l2.5,1.7c0.2,0.1,0.5,0.1,0.8,0l0.7-0.5v10.5C6.7,22.3,7.6,23,8.5,23h7 c1,0,1.8-0.8,1.8-1.8V10.7l0.7,0.5c0.2,0.1,0.5,0.2,0.8,0l2.5-1.7c0.3-0.2,0.5-0.6,0.3-1l-2-5.2C19.4,2.7,18.8,2.3,18.1,2.3H15.3z" 
+            fill="${fillColor}" stroke="${strokeColor}" stroke-width="1.5"/>
+        </svg>
+    `;
+
+    el.innerHTML = `
+        ${svgIcon}
+        <span class="tactic-num-text" style="color:${textColor}; margin-top:2px; font-size:12px; z-index:2;">${num}</span>
+    `;
+    el.style.top = topPercent + '%';
+    el.style.left = leftPercent + '%';
+
+    bindDragEvents(el);
+    container.appendChild(el);
+}
+
+// EKSİK OLAN VE EKLENEN FONKSİYONLAR:
+function createDraggableEmoji(container, emoji, topPercent, leftPercent) {
+    const el = document.createElement('div');
+    el.className = 'tactic-player';
+    el.innerHTML = `<span style="font-size:24px; filter:drop-shadow(0 2px 2px rgba(0,0,0,0.5));">${emoji}</span>`;
+    el.style.top = topPercent + '%';
+    el.style.left = leftPercent + '%';
+
+    bindDragEvents(el);
+    container.appendChild(el);
+}
+
+function bindDragEvents(el) {
+    let isDragging = false;
+    const dragStart = (e) => { if (!isDrawMode) isDragging = true; };
+    const dragEnd = (e) => { isDragging = false; };
+    const drag = (e) => {
+        if (!isDragging || isDrawMode) return;
+        e.preventDefault();
+        const clientX = e.touches ? e.touches[0].clientX : e.clientX;
+        const clientY = e.touches ? e.touches[0].clientY : e.clientY;
+        el.style.left = clientX + 'px';
+        el.style.top = clientY + 'px';
+    };
+
+    el.addEventListener('mousedown', dragStart);
+    document.addEventListener('mousemove', drag);
+    document.addEventListener('mouseup', dragEnd);
+    el.addEventListener('touchstart', dragStart, { passive: false });
+    document.addEventListener('touchmove', drag, { passive: false });
+    document.addEventListener('touchend', dragEnd);
+}
+// ==========================================
+// TAKİP LİSTESİ (FOLLOWERS / FOLLOWING) MODALI
+// ==========================================
+window.openFollowList = async function (type) {
+    const modal = document.getElementById('follow-list-modal');
+    const container = document.getElementById('follow-list-container');
+    const title = document.getElementById('follow-modal-title');
+
+    if (!modal || !container || !title) return;
+
+    modal.style.display = 'flex';
+    container.innerHTML = '<p style="color:gray; font-size:12px; text-align:center;">Yükleniyor...</p>';
+    title.innerText = type === 'following' ? 'Takip Edilenler' : 'Takipçiler';
+
+    if (!auth.currentUser) return;
+
+    try {
+        const myDoc = await db.collection("users").doc(auth.currentUser.uid).get();
+        if (!myDoc.exists) {
+            container.innerHTML = '<p style="color:gray; font-size:12px; text-align:center;">Liste boş.</p>';
+            return;
+        }
+
+        const data = myDoc.data();
+        const listIds = data[type] || [];
+
+        if (listIds.length === 0) {
+            container.innerHTML = '<p style="color:gray; font-size:12px; text-align:center;">Kimse bulunamadı.</p>';
+            return;
+        }
+
+        container.innerHTML = '';
+        // UID'leri kullanarak kullanıcıları tek tek Firestore'dan çekip listeye basıyoruz
+        for (let uid of listIds) {
+            const userDoc = await db.collection("users").doc(uid).get();
+            if (userDoc.exists) {
+                const uData = userDoc.data();
+                container.innerHTML += `
+                    <div style="display:flex; justify-content:space-between; align-items:center; background:#151515; padding:10px; border-radius:8px; margin-bottom:8px; border:1px solid #333;">
+                        <div style="display:flex; align-items:center; gap:10px;">
+                            <img src="${uData.photo || 'icon.png'}" style="width:35px; height:35px; border-radius:50%; border:2px solid var(--goldnova); object-fit:cover;">
+                            <h4 style="color:#fff; margin:0; font-size:13px;">${uData.name}</h4>
+                        </div>
+                    </div>
+                `;
+            }
+        }
+    } catch (e) {
+        console.error("Liste çekilemedi:", e);
+        container.innerHTML = '<p style="color:#ff4444; font-size:12px; text-align:center;">Bir hata oluştu.</p>';
+    }
+};
+// ==========================================
+// MAÇ SONU İSTATİSTİK VE OYLAMA MOTORU
+// ==========================================
+let activeMatchIdForStats = null;
+
+window.openMatchStatsModal = function (matchId) {
+    const history = JSON.parse(localStorage.getItem('goldnova_match_history')) || [];
+    const match = history.find(m => m.id === matchId);
+    if (!match) return;
+
+    activeMatchIdForStats = matchId;
+    document.getElementById('match-report-subtitle').innerText = `Goldnova vs ${match.opponent} (${new Date(match.datetime).toLocaleDateString('tr-TR')})`;
+
+    // YENİ: Varsa eski skoru doldur, yoksa (null ise) 0 yap
+    document.getElementById('input-team-score-goldnova').value = (match.scoreGoldnova !== null && match.scoreGoldnova !== undefined) ? match.scoreGoldnova : 0;
+    document.getElementById('input-team-score-opponent').value = (match.scoreOpponent !== null && match.scoreOpponent !== undefined) ? match.scoreOpponent : 0;
+
+    // Bireysel alanları sıfırla
+    document.getElementById('input-match-goals').value = 0;
+    document.getElementById('input-match-assists').value = 0;
+
+    // Kadrodaki oyuncuları MOTM (Maçın Adamı) seçim kutusuna doldur
+    const motmSelect = document.getElementById('select-match-motm');
+    motmSelect.innerHTML = '<option value="">Seçim Yap...</option>';
+    if (match.squad) {
+        match.squad.forEach(player => {
+            if (player && player !== "Seçilmedi" && player !== "Boş") {
+                motmSelect.innerHTML += `<option value="${player}">${player}</option>`;
+            }
+        });
+    }
+
+    document.getElementById('match-stats-modal').style.display = 'flex';
+};
+
+window.saveMatchStatsAndClose = function () {
+    // 1. TAKIM SKORLARINI AL
+    const scoreGoldnova = parseInt(document.getElementById('input-team-score-goldnova').value) || 0;
+    const scoreOpponent = parseInt(document.getElementById('input-team-score-opponent').value) || 0;
+
+    // 2. BİREYSEL İSTATİSTİKLERİ AL
+    const goalsToAdd = parseInt(document.getElementById('input-match-goals').value) || 0;
+    const assistsToAdd = parseInt(document.getElementById('input-match-assists').value) || 0;
+    const selectedMotm = document.getElementById('select-match-motm').value;
+
+    // 3. MAÇ LİSTESİNDE SKORU GÜNCELLE
+    let history = JSON.parse(localStorage.getItem('goldnova_match_history')) || [];
+    const matchIndex = history.findIndex(m => m.id === activeMatchIdForStats);
+    if (matchIndex !== -1) {
+        history[matchIndex].scoreGoldnova = scoreGoldnova;
+        history[matchIndex].scoreOpponent = scoreOpponent;
+        localStorage.setItem('goldnova_match_history', JSON.stringify(history));
+    }
+
+    // 4. KİŞİSEL KARİYERE (FUT KARTI) EKLE
+    const myName = document.getElementById('profile-name-display').innerText.trim().toLowerCase();
+    let careerStats = JSON.parse(localStorage.getItem('goldnova_career_stats')) || { goals: 0, assists: 0, motm: 0 };
+
+    careerStats.goals += goalsToAdd;
+    careerStats.assists += assistsToAdd;
+
+    if (selectedMotm && selectedMotm.toLowerCase() === myName) {
+        careerStats.motm += 1;
+    }
+
+    localStorage.setItem('goldnova_career_stats', JSON.stringify(careerStats));
+    document.getElementById('match-stats-modal').style.display = 'none';
+
+    // EKRANLARI YENİLE
+    if (typeof renderFutCard === 'function') renderFutCard();
+    if (typeof renderMatchHistory === 'function') renderMatchHistory(); // 'null' yazısını anında silip skoru yazdırır!
+
+    if (navigator.vibrate) navigator.vibrate(50);
+    alert("Maç skoru ve istatistikler başarıyla işlendi! 🎴🔥");
+};
+// ==========================================
+// KARİYER İSTATİSTİKLERİNİ SIFIRLAMA MOTORU
+// ==========================================
+window.resetCareerStats = function () {
+    // Yanlışlıkla basılmalara karşı onay isteyelim
+    if (confirm("Tüm gol, asist ve MOTM istatistiklerin sıfırlanacak. Yeni bir sezona başlamaya emin misin?")) {
+        // İstatistikleri sıfırla
+        localStorage.setItem('goldnova_career_stats', JSON.stringify({ goals: 0, assists: 0, motm: 0 }));
+
+        // Modalı kapat ve kartı yeniden çiz
+        document.getElementById('fut-edit-modal').style.display = 'none';
+        if (typeof renderFutCard === 'function') renderFutCard();
+
+        if (navigator.vibrate) navigator.vibrate([50, 50, 50]);
+        alert("Kariyer istatistiklerin başarıyla sıfırlandı şampiyon!");
+    }
+};
+// ==========================================
+// DOĞA GÜNLÜĞÜ (KAMP) SAYFA ÇEVİRME MOTORU
+// ==========================================
+let currentCampPage = 0; // Artık kapaktan (0. sayfa) başlıyor
+const totalCampPages = 5;
+
+window.openCampBook = function () {
+    document.getElementById('camp-book-screen').classList.remove('hidden');
+
+    // Tüm sayfaları kapağa geri sar
+    for (let i = 0; i <= totalCampPages; i++) {
+        let p = document.getElementById('page-' + i);
+        if (p) p.classList.remove('turned');
+    }
+    currentCampPage = 0;
+
+    // Defterin zıplayarak ekrana gelme animasyonunu tetikle
+    const book = document.getElementById('camp-book');
+    book.classList.remove('camp-book-anim');
+    void book.offsetWidth; // Animasyonu sıfırlamak için ufak bir trick
+    book.classList.add('camp-book-anim');
+
+    loadCampData();
+    initCampSwipe();
+    // YENİ: Hava durumunu çek ve Geçmiş rotaları yükle
+    fetchCampWeatherData();
+    renderSavedRoutes();
+    renderCampPlans();
+    renderCampDiary();
+    setTimeout(() => {
+        const cover = document.getElementById('page-0');
+        if (cover) {
+            cover.classList.add('turned');
+            currentCampPage = 1;
+            if (navigator.vibrate) navigator.vibrate([40, 60]);
+        }
+    }, 1200);
+
+    // 1 saniye sonra deri kapağı otomatik aç!
+    setTimeout(() => {
+        const cover = document.getElementById('page-0');
+        if (cover) {
+            cover.classList.add('turned');
+            currentCampPage = 1;
+            if (navigator.vibrate) navigator.vibrate([40, 60]);
+        }
+    }, 1200); // 1.2 saniye kapağı gösterip açar
+};
+
+window.closeCampBook = function () {
+    document.getElementById('camp-book-screen').classList.add('hidden');
+};
+
+function initCampSwipe() {
+    const book = document.getElementById('camp-book');
+    let startX = 0;
+
+    // Önceki event listener'ları temizlemek için (üst üste binmeyi önler)
+    book.ontouchstart = (e) => { startX = e.touches[0].clientX; };
+
+    book.ontouchend = (e) => {
+        let endX = e.changedTouches[0].clientX;
+        let diff = startX - endX;
+
+        // Sola kaydırma (İleri git, sayfayı çevir)
+        if (diff > 50) {
+            if (currentCampPage < totalCampPages) {
+                document.getElementById('page-' + currentCampPage).classList.add('turned');
+                currentCampPage++;
+                if (navigator.vibrate) navigator.vibrate(30);
+            }
+        }
+        // Sağa kaydırma (Geri dön, sayfayı kapat)
+        else if (diff < -50) {
+            if (currentCampPage > 1) {
+                currentCampPage--;
+                document.getElementById('page-' + currentCampPage).classList.remove('turned');
+                if (navigator.vibrate) navigator.vibrate(30);
+            }
+        }
+    };
+}
+
+// ==========================================
+// KAMP VERİ VE CHECKLIST YÖNETİMİ
+// ==========================================
+let campItems = JSON.parse(localStorage.getItem('olympus_camp_items')) || [
+    { id: 1, text: "Çadır & Uyku Tulumu", done: false },
+    { id: 2, text: "Kafa Lambası & Pil", done: false },
+    { id: 3, text: "Kamp Ocağı & Gaz", done: false },
+    { id: 4, text: "Bıçak & Çakmak", done: false }
+];
+
+function loadCampData() {
+    const notes = localStorage.getItem('olympus_camp_notes');
+    if (notes) document.getElementById('camp-notes').value = notes;
+    renderCampChecklist();
+}
+
+window.saveCampNotes = function () {
+    const noteText = document.getElementById('camp-notes').value.trim();
+    if (noteText !== '') {
+        let entries = JSON.parse(localStorage.getItem('olympus_camp_diary_entries')) || [];
+        // 1. Sayfadaki anlık hava durumu ve tarih metnini çekiyoruz
+        const metaText = document.getElementById('camp-meta-info').innerText;
+
+        entries.push({
+            id: Date.now(),
+            date: new Date().toLocaleDateString('tr-TR'),
+            meta: metaText,
+            text: noteText
+        });
+
+        localStorage.setItem('olympus_camp_diary_entries', JSON.stringify(entries));
+        document.getElementById('camp-notes').value = ''; // Yazıyı temizle
+
+        renderCampDiary(); // 5. Sayfayı güncelle
+
+        if (navigator.vibrate) navigator.vibrate([50, 50, 50]);
+        alert("Günlük doğaya kazındı! 🌲🔥 (5. Sayfaya eklendi)");
+    } else {
+        alert("Sayfaya işlemek için önce kalemi eline alıp bir şeyler yazmalısın!");
+    }
+};
+window.renderCampDiary = function () {
+    const container = document.getElementById('saved-diary-list');
+    const entries = JSON.parse(localStorage.getItem('olympus_camp_diary_entries')) || [];
+
+    container.innerHTML = '';
+    if (entries.length === 0) {
+        container.innerHTML = '<p style="text-align:center; color:#a1887f; font-family:\'Caveat\', cursive; font-size:24px;">Henüz anı yazılmadı.</p>';
+        return;
+    }
+
+    // En yeni anı en üstte
+    entries.reverse().forEach(entry => {
+        container.innerHTML += `
+            <div class="camp-log-item" style="flex-direction:column; align-items:flex-start; margin-bottom: 20px; border-bottom: 2px dashed rgba(139, 90, 43, 0.4); padding-bottom:15px;">
+                <div style="display:flex; justify-content:space-between; width:100%; margin-bottom: 5px;">
+                    <strong style="font-size:22px; color:#5d4037;">📅 ${entry.date}</strong>
+                    <button class="eraser-btn" onclick="deleteCampDiary(${entry.id})">🧽</button>
+                </div>
+                <div style="font-size:14px; color:#8b5a2b; margin-bottom: 10px; font-style: italic; font-family:sans-serif;">${entry.meta}</div>
+                <div style="font-size:24px; color:#2c1a0e; white-space: pre-wrap; line-height: 1.2;">${entry.text}</div>
+            </div>
+        `;
+    });
+};
+window.deleteCampDiary = function (id) {
+    if (confirm("Bu anıyı defterin yapraklarından silmek istediğine emin misin?")) {
+        let entries = JSON.parse(localStorage.getItem('olympus_camp_diary_entries')) || [];
+        entries = entries.filter(e => e.id !== id);
+        localStorage.setItem('olympus_camp_diary_entries', JSON.stringify(entries));
+        renderCampDiary();
+        if (navigator.vibrate) navigator.vibrate([30, 30]);
+    }
+};
+
+window.renderCampChecklist = function () {
+    const container = document.getElementById('camp-checklist');
+    container.innerHTML = '';
+    campItems.forEach(item => {
+        container.innerHTML += `
+            <div class="camp-item ${item.done ? 'checked' : ''}" onclick="toggleCampItem(${item.id})">
+                <div class="camp-check"></div>
+                <span>${item.text}</span>
+            </div>
+        `;
+    });
+    localStorage.setItem('olympus_camp_items', JSON.stringify(campItems));
+};
+
+window.toggleCampItem = function (id) {
+    const item = campItems.find(i => i.id === id);
+    if (item) {
+        item.done = !item.done;
+        if (item.done && navigator.vibrate) navigator.vibrate(20);
+        renderCampChecklist();
+    }
+};
+
+window.addCampItem = function () {
+    const input = document.getElementById('new-camp-item');
+    if (input.value.trim() !== "") {
+        campItems.push({ id: Date.now(), text: input.value, done: false });
+        input.value = "";
+        renderCampChecklist();
+        if (navigator.vibrate) navigator.vibrate(20);
+    }
+};
+
+window.startGPS = function () {
+    alert("Harita motoru kalibre ediliyor... (Strava tarzı GPS ve rota çizimi eklentisini bir sonraki adımda inşa edeceğiz!) 🗺️🚀");
+};
+// ==========================================
+// KAMP GPS & HARİTA MOTORU (NİHAİ SÜRÜM)
+// ==========================================
+let map = null;
+let routeLine = null;
+let userMarker = null; // Haritadaki mavi nokta
+let routeCoords = [];
+let gpsWatchId = null;
+let totalDistance = 0;
+let gpsStartTime = null;
+let gpsTimerInterval = null;
+let lastTimeStr = "00:00"; // Kaydetmek için süreyi tutuyoruz
+
+window.startGPS = function () {
+    if (!navigator.geolocation) { alert("Cihazınız GPS desteklemiyor."); return; }
+
+    document.getElementById('btn-start-gps').classList.add('hidden');
+    document.getElementById('btn-stop-gps').classList.remove('hidden');
+    document.getElementById('btn-reset-gps').classList.remove('hidden');
+
+    if (!map) {
+        map = L.map('gps-map-area').setView([39.92077, 32.85411], 15);
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', { attribution: '© OpenStreetMap' }).addTo(map);
+        routeLine = L.polyline([], { color: '#d35400', weight: 5, opacity: 0.8 }).addTo(map);
+
+        // Mavi konum yuvarlağını (Marker) oluştur
+        userMarker = L.circleMarker([0, 0], { color: '#2980b9', fillColor: '#3498db', fillOpacity: 1, radius: 8 }).addTo(map);
+    }
+
+    gpsStartTime = Date.now();
+    clearInterval(gpsTimerInterval);
+    gpsTimerInterval = setInterval(() => {
+        const diff = Math.floor((Date.now() - gpsStartTime) / 1000);
+        const m = String(Math.floor(diff / 60)).padStart(2, '0');
+        const s = String(diff % 60).padStart(2, '0');
+        lastTimeStr = `${m}:${s}`;
+        document.getElementById('gps-time').innerText = lastTimeStr;
+    }, 1000);
+
+    setTimeout(() => { map.invalidateSize(); }, 300);
+
+    gpsWatchId = navigator.geolocation.watchPosition(
+        (position) => {
+            const lat = position.coords.latitude;
+            const lng = position.coords.longitude;
+            const newLatLng = new L.LatLng(lat, lng);
+
+            // Mavi noktayı ve haritayı güncelle
+            userMarker.setLatLng(newLatLng);
+            map.setView(newLatLng, 17);
+
+            if (routeCoords.length > 0) {
+                totalDistance += routeCoords[routeCoords.length - 1].distanceTo(newLatLng);
+                document.getElementById('gps-distance').innerText = (totalDistance / 1000).toFixed(2);
+            }
+            routeCoords.push(newLatLng);
+            routeLine.setLatLngs(routeCoords);
+        },
+        (error) => { console.log("GPS hatası:", error); },
+        { enableHighAccuracy: true, maximumAge: 5000, timeout: 5000 }
+    );
+    if (navigator.vibrate) navigator.vibrate([50, 50]);
+};
+
+// YENİ: Konumuma Geri Dön Butonu
+window.centerMapToUser = function () {
+    if (map && routeCoords.length > 0) {
+        map.setView(routeCoords[routeCoords.length - 1], 17);
+        if (navigator.vibrate) navigator.vibrate(20);
+    } else {
+        alert("Henüz konum verisi alınamadı. Rotayı başlatmalısın.");
+    }
+};
+
+// YENİ: Rotayı Sıfırlama Butonu
+window.resetGPS = function () {
+    if (confirm("Mevcut rota çizimini sıfırlamak istediğine emin misin?")) {
+        routeCoords = [];
+        totalDistance = 0;
+        if (routeLine) routeLine.setLatLngs([]);
+        document.getElementById('gps-distance').innerText = "0.00";
+        gpsStartTime = Date.now(); // Süreyi başa sar
+        if (navigator.vibrate) navigator.vibrate(30);
+    }
+};
+
+window.stopGPS = function () {
+    if (gpsWatchId) navigator.geolocation.clearWatch(gpsWatchId);
+    clearInterval(gpsTimerInterval);
+
+    document.getElementById('btn-stop-gps').classList.add('hidden');
+    document.getElementById('btn-reset-gps').classList.add('hidden');
+    document.getElementById('btn-start-gps').classList.remove('hidden');
+    document.getElementById('btn-start-gps').innerText = "📍 Yeni Rota";
+
+    // Rotayı Hafızaya (Geçmiş Keşiflere) Kaydet
+    if (totalDistance > 0 || lastTimeStr !== "00:00") {
+        let routes = JSON.parse(localStorage.getItem('olympus_camp_routes')) || [];
+        routes.push({
+            id: Date.now(),
+            date: new Date().toLocaleDateString('tr-TR'),
+            distance: (totalDistance / 1000).toFixed(2),
+            duration: lastTimeStr
+        });
+        localStorage.setItem('olympus_camp_routes', JSON.stringify(routes));
+        renderSavedRoutes(); // 4. Sayfayı anında güncelle
+    }
+
+    if (navigator.vibrate) navigator.vibrate(50);
+    setTimeout(() => { alert(`Keşif tamamlandı!\n\n🌲 Mesafe: ${(totalDistance / 1000).toFixed(2)} km\n⏱️ Süre: ${lastTimeStr}\n\nRota 4. Sayfaya (Geçmiş Keşifler) işlendi!`); }, 500);
+};
+// ==========================================
+// KAMP HAVA DURUMU VE GEÇMİŞ ROTA MOTORU
+// ==========================================
+window.fetchCampWeatherData = function () {
+    const metaInfo = document.getElementById('camp-meta-info');
+    if (!navigator.geolocation) {
+        metaInfo.innerHTML = "Doğa ruhu (GPS) kapalı. 🌲";
+        return;
+    }
+
+    // Telefonun anlık konumunu alıyoruz
+    navigator.geolocation.getCurrentPosition(async (pos) => {
+        const lat = pos.coords.latitude;
+        const lon = pos.coords.longitude;
+        try {
+            // Şifresiz ve ücretsiz Open-Meteo uydusuna bağlanıyoruz
+            const weatherRes = await fetch(`https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}&current_weather=true`);
+            const weatherData = await weatherRes.json();
+            const temp = weatherData.current_weather.temperature;
+            const wind = weatherData.current_weather.windspeed;
+
+            const now = new Date();
+            const dateStr = now.toLocaleDateString('tr-TR');
+            const timeStr = now.toLocaleTimeString('tr-TR', { hour: '2-digit', minute: '2-digit' });
+
+            metaInfo.innerHTML = `📅 ${dateStr} - ${timeStr} <br> ⛅ Sıcaklık: ${temp}°C | 💨 Rüzgar: ${wind} km/h`;
+        } catch (err) {
+            metaInfo.innerHTML = `📍 Koordinatlar: ${lat.toFixed(2)}, ${lon.toFixed(2)} (Hava durumu alınamadı)`;
+        }
+    }, () => {
+        metaInfo.innerHTML = "Doğa ruhu (GPS) izni reddedildi. 🌲";
+    });
+};
+
+// ==========================================
+// KAMP PLANLARI VE GEÇMİŞ ROTA YÖNETİMİ
+// ==========================================
+
+// 1. Gelecek Planları Yükle
+window.renderCampPlans = function () {
+    const container = document.getElementById('camp-plans-list');
+    const plans = JSON.parse(localStorage.getItem('olympus_camp_plans')) || [];
+
+    container.innerHTML = '';
+    if (plans.length === 0) {
+        container.innerHTML = '<p style="text-align:center; color:#a1887f; font-family:\'Caveat\', cursive; font-size:24px;">Henüz kamp planı yok.</p>';
+        return;
+    }
+
+    plans.forEach(plan => {
+        container.innerHTML += `
+            <div class="camp-log-item" style="flex-direction:column; align-items:flex-start;">
+                <div style="display:flex; justify-content:space-between; width:100%;">
+                    <strong style="font-size:26px;">🏕️ ${plan.text}</strong>
+                    <button class="eraser-btn" onclick="deleteCampPlan(${plan.id})">🧽</button>
+                </div>
+                <div class="camp-countdown" data-target="${plan.datetime}">Hesaplanıyor...</div>
+            </div>
+        `;
+    });
+};
+
+// 2. Yeni Plan Ekle
+window.addCampPlan = function () {
+    const inputStr = document.getElementById('new-plan-item').value.trim();
+    const inputDate = document.getElementById('new-plan-date').value;
+
+    if (inputStr !== '' && inputDate !== '') {
+        let plans = JSON.parse(localStorage.getItem('olympus_camp_plans')) || [];
+
+        plans.push({
+            id: Date.now(),
+            text: inputStr,
+            datetime: new Date(inputDate).toISOString()
+        });
+
+        // Planları tarihe göre sırala (En yakın tarih en üstte)
+        plans.sort((a, b) => new Date(a.datetime) - new Date(b.datetime));
+
+        localStorage.setItem('olympus_camp_plans', JSON.stringify(plans));
+
+        document.getElementById('new-plan-item').value = '';
+        document.getElementById('new-plan-date').value = '';
+
+        renderCampPlans();
+        if (navigator.vibrate) navigator.vibrate(20);
+    } else {
+        alert("Hedefi kurabilmem için lütfen hem bir rota adı yaz hem de tarih seç!");
+    }
+};
+// ==========================================
+// KAMP GERİ SAYIM ANLIK GÜNCELLEME MOTORU
+// ==========================================
+setInterval(() => {
+    document.querySelectorAll('.camp-countdown').forEach(el => {
+        const targetStr = el.getAttribute('data-target');
+        if (!targetStr) return;
+
+        const target = new Date(targetStr).getTime();
+        const now = new Date().getTime();
+        const diff = target - now;
+
+        if (diff > 0) {
+            const d = Math.floor(diff / (1000 * 60 * 60 * 24));
+            const h = Math.floor((diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+            const m = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
+            const s = Math.floor((diff % (1000 * 60)) / 1000);
+
+            el.innerText = `⏳ Kalkışa: ${d}g ${h}s ${m}d ${s}sn`;
+        } else {
+            el.innerText = "🔥 KAMP VAKTİ GELDİ!";
+            el.style.color = "#27ae60";
+            el.style.borderColor = "#27ae60";
+        }
+    });
+}, 1000);
+
+// 3. Plan Sil (Silgi)
+window.deleteCampPlan = function (id) {
+    let plans = JSON.parse(localStorage.getItem('olympus_camp_plans')) || [];
+    plans = plans.filter(p => p.id !== id);
+    localStorage.setItem('olympus_camp_plans', JSON.stringify(plans));
+    renderCampPlans();
+    if (navigator.vibrate) navigator.vibrate(20);
+};
+
+// 4. Geçmiş Keşifleri Yükle (Değiştirildi)
+window.renderSavedRoutes = function () {
+    const container = document.getElementById('saved-routes-list');
+    const routes = JSON.parse(localStorage.getItem('olympus_camp_routes')) || [];
+
+    container.innerHTML = '';
+    if (routes.length === 0) {
+        container.innerHTML = '<p style="text-align:center; color:#a1887f; font-family:\'Caveat\', cursive; font-size:22px;">Henüz rota kaydedilmedi.</p>';
+        return;
+    }
+
+    routes.reverse().forEach(r => {
+        container.innerHTML += `
+            <div class="camp-log-item" style="flex-direction:column; align-items:flex-start;">
+                <div style="display:flex; justify-content:space-between; width:100%;">
+                    <strong>📍 ${r.date}</strong>
+                    <button class="eraser-btn" onclick="deleteSavedRoute(${r.id})">🧽</button>
+                </div>
+                <div style="font-size: 20px; color:#5d4037; font-family:'Caveat', cursive;">Mesafe: ${r.distance} km | Süre: ${r.duration}</div>
+            </div>
+        `;
+    });
+};
+
+// 5. Geçmiş Keşfi Sil (Silgi)
+window.deleteSavedRoute = function (id) {
+    if (confirm("Bu keşif kaydını defterden silmek istediğine emin misin?")) {
+        let routes = JSON.parse(localStorage.getItem('olympus_camp_routes')) || [];
+        routes = routes.filter(r => r.id !== id);
+        localStorage.setItem('olympus_camp_routes', JSON.stringify(routes));
+        renderSavedRoutes();
+        if (navigator.vibrate) navigator.vibrate([30, 30]);
+    }
+};
+// ==========================================
+// CULBASE GİZLİ GEÇİT (MATRIX PROTOKOLÜ)
+// ==========================================
+let secretClickCount = 0;
+let secretClickTimer;
+
+const secretTrigger = document.getElementById('secret-trigger');
+const matrixTerminal = document.getElementById('matrix-terminal');
+const matrixPassword = document.getElementById('matrix-password');
+const matrixText = document.getElementById('matrix-text');
+
+if (secretTrigger) {
+    secretTrigger.addEventListener('click', () => {
+        secretClickCount++;
+
+        clearTimeout(secretClickTimer);
+
+        // 1.5 saniye içinde 3 kere tıklanırsa terminali aç
+        secretClickTimer = setTimeout(() => {
+            secretClickCount = 0;
+        }, 1500);
+
+        if (secretClickCount === 3) {
+            openSecretTerminal();
+            secretClickCount = 0;
+        }
+    });
+}
+
+function openSecretTerminal() {
+    matrixTerminal.classList.remove('hidden');
+    // Kısa bir gecikmeyle opacity transition'ı tetikle
+    setTimeout(() => {
+        matrixTerminal.classList.add('active');
+        matrixPassword.value = '';
+        matrixPassword.focus();
+        if (navigator.vibrate) navigator.vibrate([100, 50, 100]);
+    }, 50);
+}
+
+// Şifre Giriş Dinleyicisi
+if (matrixPassword) {
+    matrixPassword.addEventListener('keyup', (e) => {
+        if (e.key === 'Enter') {
+            const pass = matrixPassword.value;
+            // CULbase admin şifren veya belirlediğin başka bir şifre
+            if (pass === "183654" || pass === "admin") {
+                matrixText.innerText = "YETKİ ONAYLANDI. CULBASE YÜKLENİYOR...";
+                matrixText.style.color = "#fff";
+                matrixPassword.style.display = "none";
+                if (navigator.vibrate) navigator.vibrate([50, 50, 200]);
+
+                // 1 Saniye sonra CULbase klasörüne ışınla
+                setTimeout(() => {
+                    window.location.href = "culbase_system/index.html";
+                }, 1200);
+            } else {
+                // Şifre yanlışsa glitch efekti ver ve kapat
+                matrixText.innerText = "ERİŞİM REDDEDİLDİ!";
+                matrixText.classList.add('matrix-glitch');
+                matrixPassword.value = '';
+                if (navigator.vibrate) navigator.vibrate([200, 200, 200]);
+
+                setTimeout(() => {
+                    matrixText.classList.remove('matrix-glitch');
+                    matrixText.innerText = "GİZLİ PROTOKOL BAŞLATILDI.";
+                    matrixTerminal.classList.remove('active');
+                    setTimeout(() => matrixTerminal.classList.add('hidden'), 500);
+                }, 1000);
+            }
+        }
+    });
+}
+// Geri Dönüş / İptal Butonu
+const matrixCancelBtn = document.getElementById('matrix-cancel-btn');
+if (matrixCancelBtn) {
+    matrixCancelBtn.addEventListener('click', () => {
+        matrixTerminal.classList.remove('active');
+        setTimeout(() => matrixTerminal.classList.add('hidden'), 500);
+        matrixPassword.value = '';
+        matrixText.innerText = "GİZLİ PROTOKOL BAŞLATILDI.";
+        matrixText.classList.remove('matrix-glitch');
+        if (navigator.vibrate) navigator.vibrate(50);
+    });
+}
+// GÜNÜ KURTAR MOTORU (FİLTRELEME)
+window.activateSaveTheDay = function (dayData, startBtn, panicBtn) {
+    if (!confirm("Günü Kurtar moduna geçilsin mi? İzolasyon hareketleri silinecek ve dinlenme süreleri 45 saniyeye düşecek!")) return;
+
+    isExpressMode = true;
+    panicBtn.style.display = 'none';
+    startBtn.innerText = "⚡ EXPRESS İDMANI BAŞLAT";
+    startBtn.style.background = "linear-gradient(135deg, #ea580c, #dc2626)";
+    startBtn.style.color = "white";
+
+    // Vücudu inşaa eden ANA hareketler (Compound)
+    const compounds = ['bench', 'squat', 'deadlift', 'pull-up', 'row', 'press', 'pulldown', 'lunge', 'dips'];
+
+    // Hareketleri filtrele (Deep Copy yapıyoruz ki asıl program bozulmasın)
+    let expressEx = JSON.parse(JSON.stringify(dayData.ex));
+    expressEx = expressEx.filter(ex => {
+        const nameLow = ex.name.toLowerCase();
+        return compounds.some(comp => nameLow.includes(comp));
+    });
+
+    // Eğer filtre sonucu boş çıkarsa (örneğin tamamen kol günüyse) en baştaki 3 hareketi al
+    if (expressEx.length === 0) expressEx = dayData.ex.slice(0, 3);
+
+    // Maksimum 4 harekete düşür
+    expressEx = expressEx.slice(0, 4);
+
+    // Set ve tekrarları vahşileştir
+    expressEx.forEach(ex => {
+        ex.scheme = "3 x 8-12 (Tükeniş)";
+        ex.tempo = "Dinamik (Patlayıcı)";
+        ex.rpe = "9.5";
+    });
+
+    let expressDayData = { ...dayData, ex: expressEx };
+
+    const newStartBtn = startBtn.cloneNode(true);
+    startBtn.parentNode.replaceChild(newStartBtn, startBtn);
+    newStartBtn.addEventListener('click', () => { startActiveWorkout(expressDayData); });
+
+    renderModalExercises(expressDayData.ex);
+
+    // Uyarı mesajı ekle
+    const holder = document.getElementById('modal-exercises');
+    holder.insertAdjacentHTML('afterbegin', `<div style="background:rgba(234, 88, 12, 0.1); border:1px dashed #ea580c; padding:10px; border-radius:8px; margin-bottom:15px; color:#ffedd5; font-size:12px; text-align:center;">İzolasyon hareketleri iptal edildi. Set araları 45 saniyeye kilitlendi. Sadece temel kasları yıkıp çıkıyoruz!</div>`);
+
+    if (navigator.vibrate) navigator.vibrate([100, 50, 100]);
+};
+// ==========================================
+// 🕹️ ARCADE TERMINAL MOTORU
+// ==========================================
+window.openArcadeTerminal = function () {
+    document.getElementById('arcade-screen').classList.remove('hidden');
+
+    // Oly'yi oyundayken gizle
+    const oly = document.getElementById('oly-avatar');
+    if (oly) oly.style.display = 'none';
+
+    if (navigator.vibrate) navigator.vibrate([50, 100]); // Cihazı sars
+};
+
+window.closeArcadeTerminal = function () {
+    document.getElementById('arcade-screen').classList.add('hidden');
+
+    // 1. ÖLÜM EMRİ: Arkada çalışan JS-DOS emülatörünü tamamen durdur (Sesi ve işlemi kes)
+    if (window.dosCommandInterface) {
+        try { window.dosCommandInterface.exit(); } catch (e) { }
+        window.dosCommandInterface = null;
+    }
+
+    // 2. Ekranı temizle
+    document.getElementById('game-container').innerHTML = '';
+    document.getElementById('arcade-game-select').value = '';
+    document.getElementById('arcade-placeholder-text').style.display = 'block';
+    document.getElementById('game-container').style.display = 'none';
+
+    // Oly'yi geri getir
+    const oly = document.getElementById('oly-avatar');
+    if (oly) oly.style.display = 'flex';
+
+    // 3. YENİ: İşlemler bitince Merkez Üsse (Hub) geri dön!
+    if (typeof returnToHub === 'function') {
+        returnToHub();
+    }
+};
+
+// ==========================================
+// 🕹️ YEREL (NATIVE) ARCADE TERMINAL MOTORU
+// ==========================================
+window.loadArcadeGame = function () {
+    const game = document.getElementById('arcade-game-select').value;
+    const container = document.getElementById('game-container');
+    const placeholder = document.getElementById('arcade-placeholder-text');
+
+    // YENİ GÜVENLİK: Kaset değiştirmeden önce, eğer arkada çalışan bir oyun varsa FİŞİNİ ÇEK!
+    if (window.dosCommandInterface) {
+        try { window.dosCommandInterface.exit(); } catch (e) { }
+        window.dosCommandInterface = null;
+    }
+
+    if (!game) {
+        container.style.display = 'none';
+        placeholder.style.display = 'block';
+        container.innerHTML = '';
+        return;
+    }
+
+    placeholder.style.display = 'none';
+    container.style.display = 'block';
+    container.innerHTML = '<div style="display:flex; justify-content:center; align-items:center; height:100%; color:#0f0; font-family:\'Courier New\', monospace; font-weight:bold; font-size:14px; text-align:center;">[SİSTEM HAZIRLANIYOR...]</div>';
+
+    const runGame = (zipName, exeName) => {
+        // EKRANA TAM SIĞDIRMA DÜZELTMESİ: 'object-fit: contain;' ve 'display: block;' eklendi. 
+        // Bu sayede oyun taşmaz, kutuya mükemmel oranda oturur.
+        container.innerHTML = '<canvas id="jsdos-canvas" style="width: 100%; height: 100%; display: block; object-fit: contain; border-radius: 8px; image-rendering: pixelated;"></canvas>';
+
+        Dos(document.getElementById("jsdos-canvas"), { wdosboxUrl: "https://js-dos.com/6.22/current/wdosbox.js" }).ready(function (fs, main) {
+            fs.extract(`./games/${zipName}`).then(function () {
+                main(["-c", exeName]).then(function (ci) {
+                    window.dosCommandInterface = ci;
+                });
+            }).catch(err => alert(`Hata: ${zipName} dosyası 'games' klasöründe bulunamadı! Lütfen dosyanın yüklü olduğundan emin ol.`));
+        });
+    };
+
+    // OYUN BİLGİLERİ (GitHub'daki uzantılara göre .ZIP veya .zip olarak hassas ayarlandı)
+    if (game === 'pop') runGame('pop.ZIP', 'PRINCE.EXE');
+    else if (game === 'doom') runGame('doom.ZIP', 'DOOM.EXE');
+    else if (game === 'ssf2t') runGame('ssf2t.ZIP', 'SSF2T.BAT');
+    else if (game === 'mspac') runGame('mspac.zip', 'MSPAC.EXE'); // mspac küçük .zip kalmış
+    else if (game === 'wolf3d') runGame('wolf3d.ZIP', 'WOLF3D.EXE');
+    else if (game === 'tr') runGame('tr.ZIP', 'TOMB.EXE');
+    else if (game === 'mk2') runGame('mk2.ZIP', 'MK2.EXE');
+    else if (game === 'pop2') runGame('pop2.zip', 'PRINCE.EXE'); // pop2 küçük .zip kalmış
+};
+// ==========================================
+// 🕹️ ÇİFT KATMANLI GAMEPAD & EFEKT MOTORU
+// ==========================================
+let activeGamepadKeys = {};
+
+function triggerEmulatorKey(keyCode, isPressed) {
+    // 1. Birinci Katman: JS-DOS Donanım Sinyali
+    if (window.dosCommandInterface) {
+        window.dosCommandInterface.simulateKeyEvent(keyCode, isPressed);
+    }
+
+    // 2. İkinci Katman: Modern Emscripten Canvas Sinyali (Yedek Güvenlik)
+    const canvas = document.getElementById('jsdos-canvas');
+    if (canvas) {
+        const e = new KeyboardEvent(isPressed ? 'keydown' : 'keyup', {
+            bubbles: true, cancelable: true, keyCode: keyCode, which: keyCode
+        });
+        Object.defineProperty(e, 'keyCode', { get: () => keyCode });
+        Object.defineProperty(e, 'which', { get: () => keyCode });
+        canvas.dispatchEvent(e);
+    }
+}
+
+window.pressKey = function (e, keyCode) {
+    if (e) {
+        e.preventDefault();
+        e.currentTarget.classList.add('btn-pressed'); // Tuşa basılma efekti ekle
+    }
+
+    // Tuş zaten basılıysa tekrar sinyal gönderip sistemi boğma
+    if (activeGamepadKeys[keyCode]) return;
+    activeGamepadKeys[keyCode] = true;
+
+    triggerEmulatorKey(keyCode, true);
+    if (navigator.vibrate) navigator.vibrate(20); // Titreşim hissi
+};
+
+window.releaseKey = function (e, keyCode) {
+    if (e) {
+        e.preventDefault();
+        e.currentTarget.classList.remove('btn-pressed'); // Tuş bırakılınca efekti kaldır
+    }
+
+    // Tuş zaten bırakılmışsa işlem yapma
+    if (!activeGamepadKeys[keyCode]) return;
+    activeGamepadKeys[keyCode] = false;
+
+    triggerEmulatorKey(keyCode, false);
+};
+// ==========================================
+// 🕹️ OYUNLARA ÖZEL TUŞ REHBERİ (KEY CONFIG)
+// ==========================================
+window.showKeyConfig = function () {
+    const game = document.getElementById('arcade-game-select').value;
+    const configText = document.getElementById('key-config-text');
+
+    // Oyunların kısaltmalarına göre tuş haritaları
+    const configs = {
+        'pop': "<b style='color:var(--goldnova); font-size:16px;'>Prince of Persia</b><br><br><b>X (Ctrl) :</b> Kılıç Vurma / Eşya Alma<br><b>A (Shift):</b> Dikkatli Adım / Çıkıntıya Tutunma<br><b>B (Space):</b> Zıplama<br><b>Yön Tuşları:</b> Hareket, Zıplama, Eğilme ve Kılıçla Korunma",
+
+        'pop2': "<b style='color:var(--goldnova); font-size:16px;'>Prince of Persia 2</b><br><br><b>X (Ctrl) :</b> Kılıç Vurma / Eşya Alma<br><b>A (Shift):</b> Dikkatli Adım / Çıkıntıya Tutunma<br><b>B (Space):</b> Zıplama<br><b>Yön Tuşları:</b> Hareket ve Zıplama",
+
+        'doom': "<b style='color:var(--goldnova); font-size:16px;'>DOOM</b><br><br><b>X (Ctrl) :</b> Ateş Etme (Tetik)<br><b>B (Space):</b> Kapı Açma / Düğmeye Basma<br><b>A (Shift):</b> Hızlı Koşma (Run)<br><b>Y (N)    :</b> Menülerde 'Hayır' (No) demek içindir<br><b>Yön Tuşları:</b> İleri/Geri ve Sağa/Sola Dönüş",
+
+        'mspac': "<b style='color:var(--goldnova); font-size:16px;'>Pac-Man</b><br><br><b>Y (N)    :</b> Oyun başında 'Use Joystick?' sorusuna Hayır (N) demek için basılır.<br><b>Yön Tuşları:</b> Pac-Man'i yönlendirir.",
+
+        'ssf2t': "<b style='color:var(--goldnova); font-size:16px;'>Street Fighter 2</b><br><br><b>X, A, B  :</b> Standart Yumruk ve Tekme saldırıları<br><b>Yön Tuşları:</b> Zıplama, Eğilme, Hareket ve Kombolar (Örn: Aşağı, İleri + Yumruk = Hadouken)",
+
+        'wolf3d': "<b style='color:var(--goldnova); font-size:16px;'>Wolfenstein 3D</b><br><br><b>X (Ctrl) :</b> Ateş Etme<br><b>B (Space):</b> Kapı Açma<br><b>A (Shift):</b> Hızlı Koşma<br><b>Yön Tuşları:</b> Hareket ve Dönüş",
+
+        'tr': "<b style='color:var(--goldnova); font-size:16px;'>Tomb Raider</b><br><br><b>X (Ctrl) :</b> Aksiyon / Silahla Ateş Etme<br><b>B (Space):</b> Silah Çekme / Kaldırma<br><b>A (Shift):</b> Yürüme (Uçurumdan düşmemek için kilitlenir)<br><b>Yön Tuşları:</b> Hareket, Geri Zıplama",
+
+        'mk2': "<b style='color:var(--goldnova); font-size:16px;'>Mortal Kombat 2</b><br><br><b>X, A, B, Y:</b> Yüksek/Alçak Yumruk ve Tekmeler ile Blok<br><b>Yön Tuşları:</b> Hareket ve Zıplama"
+    };
+
+    if (!game) {
+        configText.innerHTML = "Lütfen önce yukarıdaki menüden bir kaset (oyun) seçin.";
+    } else {
+        configText.innerHTML = configs[game] || "Bu oyun için sistemde kayıtlı bir tuş rehberi bulunmuyor.";
+    }
+
+    document.getElementById('key-config-modal').style.display = 'flex';
+    if (navigator.vibrate) navigator.vibrate(30);
+};
+
+// ==========================================
+// 🌟 MERKEZ ÜS (HUB) MOTORU
+// ==========================================
+let hubSlideIndex = 0;
+let hubCarouselInterval;
+
+function initHubCarousel() {
+    updateHubGreeting();
+    loadHubPhotos();
+    clearInterval(hubCarouselInterval);
+
+    // 3 Saniye logoda bekledikten sonra fotoğrafları döndürmeye başla
+    setTimeout(() => {
+        hubCarouselInterval = setInterval(nextHubSlide, 4000); // Her 4 saniyede bir değişir
+    }, 3000);
+}
+
+function nextHubSlide() {
+    const track = document.getElementById('hub-carousel-track');
+    const slides = track.children;
+    if (slides.length <= 1) return; // Sadece logo varsa dönme
+
+    hubSlideIndex = (hubSlideIndex + 1) % slides.length;
+    track.style.transform = `translateX(-${hubSlideIndex * 100}%)`;
+}
+
+window.addHubPhoto = function (event) {
+    const file = event.target.files[0];
+    if (file) {
+        const reader = new FileReader();
+        reader.onload = function (e) {
+            let photos = JSON.parse(localStorage.getItem('olympus_hub_photos')) || [];
+            photos.push(e.target.result); // Fotoğrafı tarayıcı hafızasına (Base64) kaydet
+            localStorage.setItem('olympus_hub_photos', JSON.stringify(photos));
+            loadHubPhotos();
+            alert("Fotoğraf başarıyla eklendi! Döngüye alındı.");
+        };
+        reader.readAsDataURL(file);
+    }
+};
+
+function loadHubPhotos() {
+    const track = document.getElementById('hub-carousel-track');
+    // 1. Sabit Logo Slaytı
+    track.innerHTML = `
+        <div class="hub-slide" style="min-width: 100%; height: 100%; display: flex; justify-content: center; align-items: center; background: #000;">
+            <img src="icon.png" style="width: 120px; height: 120px; object-fit: contain; filter: drop-shadow(0 0 30px var(--goldnova));">
+        </div>
+    `;
+
+    // 2. Kullanıcının Yüklediği Özel Fotoğraflar
+    const photos = JSON.parse(localStorage.getItem('olympus_hub_photos')) || [];
+    photos.forEach(p => {
+        track.innerHTML += `
+            <div class="hub-slide" style="min-width: 100%; height: 100%;">
+                <img src="${p}">
+            </div>
+        `;
+    });
+}
+
+// 🚀 SİNEMATİK GEÇİŞ MOTORU
+window.enterAppFromHub = function (targetId, textString) {
+    const overlay = document.getElementById('hub-zoom-overlay');
+    const zoomText = document.getElementById('hub-zoom-text');
+    const hubScreen = document.getElementById('hub-screen');
+
+    // Rengine göre metin ve parlama ayarla
+    let textColor = "var(--goldnova)";
+    if (targetId === 'arcade-screen') textColor = "#d1a3ff";
+    if (targetId === 'business-screen') textColor = "#00d2ff";
+
+    zoomText.style.color = textColor;
+    zoomText.style.textShadow = `0 0 30px ${textColor}`;
+    zoomText.innerText = textString;
+
+    // Animasyonu sıfırla
+    zoomText.style.transform = 'scale(1)';
+    zoomText.style.opacity = '1';
+    zoomText.classList.remove('zoom-fly-animation');
+
+    overlay.classList.remove('hidden'); // Siyah ekranı ve metni göster
+
+    if (navigator.vibrate) navigator.vibrate([40, 60, 40]);
+
+    // 50ms sonra CSS Animasyonunu (Büyüme) tetikle
+    setTimeout(() => {
+        zoomText.classList.add('zoom-fly-animation');
+    }, 50);
+
+    // Animasyon (1.2 saniye) bittiğinde asıl ekrana geç
+    setTimeout(() => {
+        hubScreen.classList.add('hidden'); // Hub'ı kapat
+        overlay.classList.add('hidden'); // Siyah geçişi kapat
+
+        // Hedef uygulamayı aç
+        const target = document.getElementById(targetId);
+        if (target) {
+            target.classList.remove('hidden');
+            if (targetId === 'app-content') {
+                target.style.display = 'flex';
+
+                // YENİ: Olympus'a giriş yapıldığı an Spotify'ı sahneye al!
+                const player = document.getElementById('spotify-floating-player');
+                if (player) player.classList.remove('hidden');
+            }
+        }
+    }, 1200);
+};
+// ==========================================
+// 🚀 HUB'A (MERKEZ ÜSSE) GERİ DÖNÜŞ MOTORU
+// ==========================================
+window.returnToHub = function () {
+    updateHubGreeting();
+    // 1. Müzik çaları gizle
+    const player = document.getElementById('spotify-floating-player');
+    if (player) player.classList.add('hidden');
+
+    // 2. Tüm açık olabilecek modülleri (Odaları) gizle
+    const appContent = document.getElementById('app-content');
+    if (appContent) appContent.classList.add('hidden');
+
+    const arcadeScreen = document.getElementById('arcade-screen');
+    if (arcadeScreen) arcadeScreen.classList.add('hidden');
+
+    const businessScreen = document.getElementById('business-screen');
+    if (businessScreen) businessScreen.classList.add('hidden');
+
+    // 3. Hub ekranını tekrar göster
+    const hubScreen = document.getElementById('hub-screen');
+    if (hubScreen) {
+        hubScreen.classList.remove('hidden');
+        hubScreen.style.display = 'flex';
+    }
+
+    if (navigator.vibrate) navigator.vibrate(30);
+};
+// ==========================================
+// 🌟 HUB KARŞILAMA MOTORU (DİNAMİK SAAT VE İSİM)
+// ==========================================
+window.updateHubGreeting = function () {
+    // 1. Saate Göre Selamlama
+    const hour = new Date().getHours();
+    let greeting = "İyi Geceler";
+
+    if (hour >= 5 && hour < 12) {
+        greeting = "Günaydın";
+    } else if (hour >= 12 && hour < 18) {
+        greeting = "İyi Günler";
+    } else if (hour >= 18 && hour < 22) {
+        greeting = "İyi Akşamlar";
+    }
+
+    const greetingEl = document.getElementById('hub-greeting-text');
+    if (greetingEl) greetingEl.innerText = greeting + ",";
+
+    // 2. Kullanıcı Profil Verisini Çek
+    const user = firebase.auth().currentUser;
+    let name = "Şampiyon";
+    let photo = "icon.png";
+
+    if (user && user.displayName) {
+        name = user.displayName;
+        photo = user.photoURL || "icon.png";
+    } else {
+        // Yedek: Eğer henüz yüklenmediyse localStorage'dan al
+        const localName = document.getElementById('profile-name-display');
+        if (localName && localName.innerText !== "Yükleniyor...") {
+            name = localName.innerText;
+        }
+        const localImg = document.getElementById('header-profile-img');
+        if (localImg && localImg.src) {
+            photo = localImg.src;
+        }
+    }
+
+    const nameEl = document.getElementById('hub-greeting-name');
+    if (nameEl) nameEl.innerText = name;
+
+    const imgEl = document.getElementById('hub-header-img');
+    if (imgEl) imgEl.src = photo;
+};
+// ==========================================
+// 💼 BUSINESS CENTER MOTORU (CULBASE)
+// ==========================================
+let pomodoroInterval;
+let pomodoroTime = 25 * 60; // 25 dakika
+let isPomodoroRunning = false;
+
+window.startPomodoro = function () {
+    if (isPomodoroRunning) return;
+    isPomodoroRunning = true;
+
+    if (navigator.vibrate) navigator.vibrate(30);
+
+    pomodoroInterval = setInterval(() => {
+        pomodoroTime--;
+        let m = Math.floor(pomodoroTime / 60);
+        let s = pomodoroTime % 60;
+        document.getElementById('pomodoro-time').innerText = `${m.toString().padStart(2, '0')}:${s.toString().padStart(2, '0')}`;
+
+        // Saniye her ilerlediğinde ince bir görsel geribildirim eklenebilir
+
+        if (pomodoroTime <= 0) {
+            clearInterval(pomodoroInterval);
+            isPomodoroRunning = false;
+            if (navigator.vibrate) navigator.vibrate([500, 200, 500]);
+            alert("🔥 Derin çalışma seansı tamamlandı! Şampiyon şimdi kısa bir mola hak etti.");
+            resetPomodoro();
+        }
+    }, 1000);
+};
+
+window.resetPomodoro = function () {
+    clearInterval(pomodoroInterval);
+    isPomodoroRunning = false;
+    pomodoroTime = 25 * 60;
+    document.getElementById('pomodoro-time').innerText = "25:00";
+    if (navigator.vibrate) navigator.vibrate(30);
+};
+
+// Varsayılan Projeler (Sistem ilk açıldığında gösterilir, sonra localStorage'dan silip eklenebilir)
+let bProjects = JSON.parse(localStorage.getItem('culbase_projects')) || [
+    { id: 1, name: "SolidWorks Makine Çizimi (Fiverr)", status: "Aktif", color: "#f39c12" },
+    { id: 2, name: "Kaynak Makinesi PLC Kodlama", status: "Beklemede", color: "#3498db" }
+];
+
+// ==========================================
+// 💼 HUB'DAN CULBASE'E KÖPRÜ (Olympus script.js)
+// ==========================================
+window.addBusinessProject = function () {
+    const name = prompt("Yeni Projenin Adı veya Görevi:");
+    if (name && name.trim() !== "") {
+        // Artık culbase_projects değil, doğrudan culbase_offers veritabanına yazıyoruz!
+        let offers = JSON.parse(localStorage.getItem('culbase_offers')) || [];
+
+        const newOffer = {
+            id: Date.now(),
+            companyName: name + " (Hızlı Kayıt)",
+            offerDate: new Date().toLocaleDateString('tr-TR'),
+            offerNumber: "PRJ-" + Math.floor(Math.random() * 10000),
+            items: [{ name: "Proje / Görev Tanımı", desc: "Hub üzerinden eklendi. Detaylandırılmalı.", qty: 1, price: 0, total: "0 ₺" }],
+            grandTotal: "0 ₺",
+            status: "Aktif",
+            files: [] // Kaynak dosyalar için boş dizi
+        };
+
+        offers.push(newOffer);
+        localStorage.setItem('culbase_offers', JSON.stringify(offers));
+        renderBusinessProjects();
+
+        if (navigator.vibrate) navigator.vibrate([30, 30]);
+        alert("Görev gizli CULBASE Kasası'na başarıyla iletildi!");
+    }
+};
+
+window.renderBusinessProjects = function () {
+    const list = document.getElementById('business-projects-list');
+    if (!list) return;
+    list.innerHTML = '';
+
+    // Hub listesi de artık culbase_offers'tan okunuyor
+    let offers = JSON.parse(localStorage.getItem('culbase_offers')) || [];
+
+    if (offers.length === 0) {
+        list.innerHTML = '<p style="color:#888; font-size:12px; text-align:center;">Şu an aktif bir proje yok.</p>';
+        return;
+    }
+
+    // En yeni en üstte görünsün
+    offers.reverse().forEach(p => {
+        let statusStr = p.status || "Beklemede";
+        let colorStr = statusStr === "Aktif" ? "#00d2ff" : "#f6c000";
+
+        list.innerHTML += `
+            <div class="business-project-card" style="background: #1a1a1a; border-left: 4px solid ${colorStr}; padding: 12px 15px; border-radius: 6px; display: flex; justify-content: space-between; align-items: center; transition: 0.2s; margin-bottom: 10px;">
+                <div onclick="openProjectDetails(${p.id})" style="flex: 1; cursor: pointer;">
+                    <h4 style="color: #fff; margin: 0 0 4px 0; font-size: 14px;">${p.companyName}</h4>
+                    <span style="color: ${colorStr}; font-size: 11px; font-weight: bold; padding: 2px 6px; background: rgba(255,255,255,0.05); border-radius: 4px;">${statusStr}</span>
+                </div>
+                <button onclick="deleteOfferFromHub(${p.id})" style="background: transparent; border: none; color: #ff4444; font-size: 18px; cursor: pointer; padding: 5px; margin-left: 10px;">🗑️</button>
+            </div>
+        `;
+    });
+};
+
+window.deleteOfferFromHub = function (id) {
+    if (confirm("Bu projeyi tamamen silmek istediğinize emin misiniz?")) {
+        let offers = JSON.parse(localStorage.getItem('culbase_offers')) || [];
+        offers = offers.filter(o => o.id !== id);
+        localStorage.setItem('culbase_offers', JSON.stringify(offers));
+        renderBusinessProjects();
+    }
+};
+
+window.openProjectDetails = function (id) {
+    let offers = JSON.parse(localStorage.getItem('culbase_offers')) || [];
+    const p = offers.find(x => x.id === id);
+    if (!p) return;
+
+    document.getElementById('pd-title').innerText = p.companyName;
+    document.getElementById('pd-status').innerText = p.status || "Beklemede";
+
+    document.getElementById('pd-progress').style.width = '0%';
+    document.getElementById('project-detail-modal').style.display = 'flex';
+
+    setTimeout(() => {
+        document.getElementById('pd-progress').style.width = (Math.floor(Math.random() * 50) + 30) + '%';
+    }, 100);
+    if (navigator.vibrate) navigator.vibrate(20);
+};
+
+// Sayfa yüklendiğinde projeleri listele
+setTimeout(() => {
+    if (typeof renderBusinessProjects === 'function') renderBusinessProjects();
+}, 1000);
+// ==========================================
+// 🚀 GITHUB ACTIONS (DEPLOY LOGLARI) API MOTORU
+// ==========================================
+window.openDeployLogs = async function () {
+    // 1. Modalı Aç ve Yükleniyor Yazısı Göster
+    document.getElementById('deploy-logs-modal').style.display = 'flex';
+    const terminal = document.getElementById('deploy-terminal');
+    terminal.innerHTML = "<span style='color:#fff;'>> API'ye Bağlanılıyor:</span> github.com/emirhanculcu86354/project-olympus...<br>";
+
+    try {
+        // 2. GitHub REST API'sine İstek At (Son 5 İşlemi Çek)
+        const response = await fetch("https://api.github.com/repos/emirhanculcu86354/project-olympus/actions/runs?per_page=5");
+
+        if (!response.ok) throw new Error(`HTTP Hata Kodu: ${response.status}`);
+
+        const data = await response.json();
+
+        // 3. Terminal Ekranını Temizle ve Verileri Bas
+        terminal.innerHTML += `<span style="color:#00d2ff;">> Bağlantı Başarılı. Son ${data.workflow_runs.length} işlem paketi çözümleniyor:</span><br><br>`;
+
+        data.workflow_runs.forEach(run => {
+            // Tarihi okunabilir formata çevir
+            const date = new Date(run.created_at).toLocaleString('tr-TR');
+
+            // Başarı durumuna göre renk ve metin belirle
+            let statusColor = "#f6c000"; // Beklemede (Sarı)
+            let statusText = "IN_PROGRESS";
+
+            if (run.conclusion === "success") {
+                statusColor = "#27ae60"; // Başarılı (Yeşil)
+                statusText = "SUCCESS";
+            } else if (run.conclusion === "failure") {
+                statusColor = "#ff4444"; // Hatalı (Kırmızı)
+                statusText = "FAILED";
+            }
+
+            // Commit başlığını çok uzunsa kırp
+            let commitMsg = run.head_commit.message.split('\n')[0];
+            if (commitMsg.length > 40) commitMsg = commitMsg.substring(0, 40) + "...";
+
+            // HTML olarak terminale satır satır yazdır
+            terminal.innerHTML += `
+                <div style="border-left: 2px solid ${statusColor}; padding-left: 10px; margin-bottom: 12px; background: rgba(255,255,255,0.02); padding-top: 5px; padding-bottom: 5px;">
+                    <span style="color:#aaa;">[${date}]</span><br>
+                    <span style="color:#fff;">Olay:</span> ${run.name}<br>
+                    <span style="color:#fff;">Kayıt (Commit):</span> <span style="color:#ccc;">${commitMsg}</span><br>
+                    <span style="color:#fff;">Durum:</span> <strong style="color:${statusColor}; text-shadow: 0 0 5px ${statusColor};">${statusText}</strong>
+                </div>
+            `;
+        });
+
+        // Titreşim geribildirimi
+        if (navigator.vibrate) navigator.vibrate([30, 30]);
+
+    } catch (error) {
+        terminal.innerHTML += `<br><br><span style="color:#ff4444;">[FATAL ERROR] Loglar çekilemedi! İnternet bağlantını veya GitHub kısıtlamalarını kontrol et.</span><br><span style="color:#888;">${error.message}</span>`;
+        console.error("Deploy Log Hatası:", error);
     }
 };

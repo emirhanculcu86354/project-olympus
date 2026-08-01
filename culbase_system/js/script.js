@@ -1,11 +1,11 @@
 
 // PWA Service Worker Registration
 if ('serviceWorker' in navigator) {
-  navigator.serviceWorker.register('sw.js').then(function(registration) {
-    console.log('ServiceWorker registration successful');
-  }).catch(function(err) {
-    console.log('ServiceWorker registration failed: ', err);
-  });
+    navigator.serviceWorker.register('sw.js').then(function (registration) {
+        console.log('ServiceWorker registration successful');
+    }).catch(function (err) {
+        console.log('ServiceWorker registration failed: ', err);
+    });
 }
 
 document.addEventListener("DOMContentLoaded", function () {
@@ -22,9 +22,9 @@ document.addEventListener("DOMContentLoaded", function () {
     }
 
     const globalWelcome = document.getElementById("globalWelcome");
-    if(globalWelcome) {
+    if (globalWelcome) {
         const user = sessionStorage.getItem("loggedInUser");
-        if(user) { globalWelcome.textContent = "Hoşgeldin, " + user; }
+        if (user) { globalWelcome.textContent = "Hoşgeldin, " + user; }
     }
 
     const loginForm = document.getElementById("staticLoginForm");
@@ -32,16 +32,16 @@ document.addEventListener("DOMContentLoaded", function () {
         loginForm.addEventListener("submit", function (e) {
             e.preventDefault();
             const user = document.getElementById("username").value;
-            if(user) { sessionStorage.setItem("loggedInUser", user); window.location.href = "ana_sayfa.html"; }
+            if (user) { sessionStorage.setItem("loggedInUser", user); window.location.href = "ana_sayfa.html"; }
         });
     }
 
     const adminForm = document.getElementById("staticAdminForm");
-    if(adminForm) {
-        adminForm.addEventListener("submit", function(e) {
+    if (adminForm) {
+        adminForm.addEventListener("submit", function (e) {
             e.preventDefault();
             const pass = document.getElementById("admin_password").value;
-            if(pass === "183654" || pass === "admin123") {
+            if (pass === "183654" || pass === "admin123") {
                 sessionStorage.setItem("loggedInUser", "Yönetici"); window.location.href = "ana_sayfa.html";
             } else { alert("Hatalı yönetici şifresi!"); }
         });
@@ -82,31 +82,31 @@ document.addEventListener("DOMContentLoaded", function () {
             }
         });
         let kdv = total * 0.20; let grand = total + kdv;
-        let tAmt = document.getElementById("totalAmount"); if(tAmt) tAmt.textContent = total.toFixed(2) + " ₺";
-        let kAmt = document.getElementById("kdvAmount"); if(kAmt) kAmt.textContent = kdv.toFixed(2) + " ₺";
-        let gAmt = document.getElementById("grandTotal"); if(gAmt) gAmt.textContent = grand.toFixed(2) + " ₺";
+        let tAmt = document.getElementById("totalAmount"); if (tAmt) tAmt.textContent = total.toFixed(2) + " ₺";
+        let kAmt = document.getElementById("kdvAmount"); if (kAmt) kAmt.textContent = kdv.toFixed(2) + " ₺";
+        let gAmt = document.getElementById("grandTotal"); if (gAmt) gAmt.textContent = grand.toFixed(2) + " ₺";
     }
 
-    if(saveBtn) {
-        saveBtn.addEventListener("click", function(e) {
+    if (saveBtn) {
+        saveBtn.addEventListener("click", function (e) {
             e.preventDefault();
             const cName = document.getElementById("companyName").value;
             const oDate = document.getElementById("offerDate").value;
             const oNum = document.getElementById("offerNumber").value;
 
-            if(!cName || !oDate || !oNum) { showToast("Lütfen firma adı, tarih ve teklif numarasını doldurun."); return; }
+            if (!cName || !oDate || !oNum) { showToast("Lütfen firma adı, tarih ve teklif numarasını doldurun."); return; }
 
             let items = [];
             document.querySelectorAll("#offerTableBody tr").forEach(row => {
                 const nameInp = row.querySelector(".item-name");
-                if(!nameInp) return;
+                if (!nameInp) return;
                 items.push({
                     name: nameInp.value, desc: row.querySelector(".item-desc").value,
                     qty: row.querySelector(".quantity").value, price: row.querySelector(".price").value, total: row.querySelector(".total-price").textContent
                 });
             });
 
-            if(items.length === 0 || !items[0].name) { showToast("Lütfen teklife en az bir geçerli kalem ekleyin."); return; }
+            if (items.length === 0 || !items[0].name) { showToast("Lütfen teklife en az bir geçerli kalem ekleyin."); return; }
 
             let grandTotal = document.getElementById("grandTotal").textContent;
             let newOffer = { id: Date.now(), companyName: cName, offerDate: oDate, offerNumber: oNum, items: items, grandTotal: grandTotal };
@@ -120,36 +120,140 @@ document.addEventListener("DOMContentLoaded", function () {
     }
 
     const savedTable = document.getElementById("savedOffersTableBody");
-    if(savedTable) {
+    if (savedTable) {
+        window.loadSavedOffers = function () {
+            let offers = JSON.parse(localStorage.getItem("culbase_offers")) || [];
+            savedTable.innerHTML = "";
+            if (offers.length === 0) {
+                savedTable.innerHTML = "<tr><td colspan='5' style='text-align:center;'>Henüz kayıtlı iş veya teklif bulunmamaktadır.</td></tr>";
+            } else {
+                // En yeni projeler en üstte listelensin
+                offers.reverse().forEach(off => {
+                    let fileCount = off.files ? off.files.length : 0;
+                    let tr = document.createElement("tr");
+                    tr.innerHTML = `
+                        <td>${off.offerNumber}</td>
+                        <td>${off.companyName}</td>
+                        <td>${off.offerDate}</td>
+                        <td>
+                            <strong style="color:#198b1d;">${off.grandTotal}</strong><br>
+                            <span style="font-size:10px; color:#2f81f7;">📎 ${fileCount} Dosya</span>
+                        </td>
+                        <td style="display:flex; gap:5px; flex-wrap:wrap;">
+                            <button class="delete-btn" style="background:#f39c12; border:none; border-radius:4px;" onclick="openEditOfferModal(${off.id})">Düzenle</button>
+                            <button class="delete-btn" style="background:#2980b9; border:none; border-radius:4px;" onclick="generateProfessionalPDF('kayitli', ${off.id})">PDF İndir</button>
+                            <button class="delete-btn" style="background:#e74c3c; border:none; border-radius:4px;" onclick="deleteOffer(${off.id})">Sil</button>
+                        </td>
+                    `;
+                    savedTable.appendChild(tr);
+                });
+            }
+        };
+        loadSavedOffers();
+    }
+
+    // --- DOSYA YÜKLEME VE DÜZENLEME MOTORU ---
+    let activeOfferEditId = null;
+    let tempOfferFiles = [];
+
+    window.openEditOfferModal = function (id) {
         let offers = JSON.parse(localStorage.getItem("culbase_offers")) || [];
-        if(offers.length === 0) {
-            savedTable.innerHTML = "<tr><td colspan='5'>Henüz kayıtlı teklif bulunmamaktadır.</td></tr>";
+        const off = offers.find(o => o.id === id);
+        if (!off) return;
+
+        activeOfferEditId = id;
+        tempOfferFiles = off.files || [];
+
+        document.getElementById('edit-company').value = off.companyName;
+        document.getElementById('edit-total').value = off.grandTotal;
+
+        updateOfferFileList();
+        document.getElementById('edit-offer-modal').style.display = 'flex';
+    };
+
+    window.attachOfferFile = function (event) {
+        const file = event.target.files[0];
+        if (file) {
+            const reader = new FileReader();
+            reader.onload = function (e) {
+                tempOfferFiles.push({
+                    name: file.name,
+                    data: e.target.result // Dosyayı CULbase hafızasına alır
+                });
+                updateOfferFileList();
+                showToast("Dosya eklendi!");
+            };
+            reader.readAsDataURL(file);
+        }
+    };
+
+    window.updateOfferFileList = function () {
+        const list = document.getElementById('attached-files-list');
+        list.innerHTML = '';
+        if (tempOfferFiles.length === 0) {
+            list.innerHTML = 'Henüz dosya eklenmedi.';
+            return;
+        }
+        tempOfferFiles.forEach((f, index) => {
+            // İndirme linki ile birlikte listele
+            list.innerHTML += `
+                <div style="display:flex; justify-content:space-between; align-items:center; border-bottom:1px solid #333; padding-bottom:5px; margin-bottom:5px;">
+                    <a href="${f.data}" download="${f.name}" style="color:#00d2ff; text-decoration:none; font-size:11px;">📄 ${f.name} (İndir)</a>
+                    <span style="color:#ff4444; cursor:pointer; font-weight:bold;" onclick="tempOfferFiles.splice(${index}, 1); updateOfferFileList();">[SİL]</span>
+                </div>
+            `;
+        });
+    };
+
+    window.saveOfferDetails = function () {
+        let offers = JSON.parse(localStorage.getItem("culbase_offers")) || [];
+        const index = offers.findIndex(o => o.id === activeOfferEditId);
+        if (index !== -1) {
+            offers[index].companyName = document.getElementById('edit-company').value;
+            offers[index].grandTotal = document.getElementById('edit-total').value;
+            // Eksik bilgileri tamamladıysak status'u güncelleyelim
+            offers[index].status = "Aktif";
+            offers[index].files = tempOfferFiles;
+
+            localStorage.setItem("culbase_offers", JSON.stringify(offers));
+            document.getElementById('edit-offer-modal').style.display = 'none';
+            loadSavedOffers();
+            showToast("Proje güncellendi ve dosyalar kaydedildi!");
+        }
+    };
+
+    // --- PDF MOTORUNA "KAYITLI" İŞLER ENTEGRASYONU ---
+    // generateProfessionalPDF fonksiyonunun başındaki if (type === 'teklif') bloğundan hemen sonra (veya o satırların arasına) şunu ekle:
+    /*
+    else if (type === 'kayitli') {
+        let offers = JSON.parse(localStorage.getItem("culbase_offers")) || [];
+        let offer = offers.find(o => o.id === arguments[1]); // 2. parametre ID'dir
+        if(offer) {
+            companyName = offer.companyName;
+            offerDate = offer.offerDate;
+            offerNumber = offer.offerNumber;
+            items = offer.items || [];
+            subTotal = 0; kdv = 0;
+            grandTotal = parseFloat(offer.grandTotal.replace('₺', '').trim()) || 0;
         } else {
-            offers.forEach(off => {
-                let tr = document.createElement("tr");
-                tr.innerHTML = `
-                    <td>${off.offerNumber}</td><td>${off.companyName}</td><td>${off.offerDate}</td>
-                    <td><strong style="color:#198b1d;">${off.grandTotal}</strong></td>
-                    <td><button class="delete-btn" onclick="deleteOffer(${off.id})">Sil</button></td>
-                `;
-                savedTable.appendChild(tr);
-            });
+            showToast("Kayıt bulunamadı!"); return;
         }
     }
+    */
 
     const stokTable = document.getElementById("stokTableBody");
     const addStokBtn = document.getElementById("addStokBtn");
     if (stokTable) loadStok();
 
     if (addStokBtn) {
-        addStokBtn.addEventListener("click", function(e) {
+        addStokBtn.addEventListener("click", function (e) {
             e.preventDefault();
             const code = document.getElementById("stokCode").value;
             const name = document.getElementById("stokName").value;
             const cat = document.getElementById("stokCat").value;
             const qty = document.getElementById("stokQty").value;
 
-            if(!code || !name || !qty) { showToast("Lütfen stok kodu, adı ve miktarını giriniz."); return; }
+            if (!code || !name || !qty) { showToast("Lütfen stok kodu, adı ve miktarını giriniz."); return; }
 
             let stoks = JSON.parse(localStorage.getItem("culbase_stok")) || [];
             stoks.push({ id: Date.now(), code: code, name: name, category: cat, qty: qty });
@@ -163,7 +267,7 @@ document.addEventListener("DOMContentLoaded", function () {
     function loadStok() {
         let stoks = JSON.parse(localStorage.getItem("culbase_stok")) || [];
         stokTable.innerHTML = "";
-        if(stoks.length === 0) {
+        if (stoks.length === 0) {
             stokTable.innerHTML = "<tr><td colspan='5'>Sistemde kayıtlı stok bulunmuyor.</td></tr>";
         } else {
             stoks.forEach(item => {
@@ -178,8 +282,8 @@ document.addEventListener("DOMContentLoaded", function () {
         }
     }
 
-    window.deleteStok = function(id) {
-        if(confirm("Bu stoğu silmek istediğinize emin misiniz?")) {
+    window.deleteStok = function (id) {
+        if (confirm("Bu stoğu silmek istediğinize emin misiniz?")) {
             let stoks = JSON.parse(localStorage.getItem("culbase_stok")) || [];
             stoks = stoks.filter(s => s.id !== id);
             localStorage.setItem("culbase_stok", JSON.stringify(stoks));
@@ -190,9 +294,9 @@ document.addEventListener("DOMContentLoaded", function () {
     initCanvasDrag();
 });
 
-window.showToast = function(message) {
+window.showToast = function (message) {
     let toast = document.getElementById("toastMsg");
-    if(!toast) {
+    if (!toast) {
         toast = document.createElement("div");
         toast.id = "toastMsg";
         toast.className = "toast-msg";
@@ -200,11 +304,11 @@ window.showToast = function(message) {
     }
     toast.textContent = message;
     toast.className = "toast-msg show";
-    setTimeout(function(){ toast.className = toast.className.replace("show", ""); }, 3000);
+    setTimeout(function () { toast.className = toast.className.replace("show", ""); }, 3000);
 }
 
 // ==== PWA / WEB TARAYICI İÇİN NATIVE İNDİRME ====
-window.exportMaterialExcel = function(type) {
+window.exportMaterialExcel = function (type) {
     showToast("Excel Cihazınıza İndiriliyor...");
     let excelData = [
         ["", "", "", "", "", "", ""],
@@ -215,19 +319,19 @@ window.exportMaterialExcel = function(type) {
         ["", "", "", "", "", "", ""],
         ["", "İSİM", "TANIM", "MİKTAR", "BİRİM FİYAT", "TOTAL", ""]
     ];
-    
+
     let subTotal = 0, kdv = 0, grandTotal = 0;
-    let offerNumber = "TKLF-" + Math.floor(Math.random()*10000);
-    
+    let offerNumber = "TKLF-" + Math.floor(Math.random() * 10000);
+
     if (type === 'pano') {
         excelData[2][1] = "Pano Tasarım Projesi";
         const allItems = document.querySelectorAll(".canvas-item");
-        if(allItems.length === 0) { showToast("Panoda malzeme yok!"); return;}
-        
+        if (allItems.length === 0) { showToast("Panoda malzeme yok!"); return; }
+
         let materialCounts = {};
         allItems.forEach(item => {
             let name = item.textContent;
-            if(materialCounts[name]) { materialCounts[name]++; } else { materialCounts[name] = 1; }
+            if (materialCounts[name]) { materialCounts[name]++; } else { materialCounts[name] = 1; }
         });
         for (const [name, count] of Object.entries(materialCounts)) {
             excelData.push(["", name, "Pano Çiziminden Aktarıldı", count, 0, 0, ""]);
@@ -236,30 +340,30 @@ window.exportMaterialExcel = function(type) {
         const companyName = document.getElementById("companyName").value || "Belirtilmedi";
         const offerDate = document.getElementById("offerDate").value || "";
         offerNumber = document.getElementById("offerNumber").value || offerNumber;
-        
+
         excelData[2][1] = companyName;
         excelData[3][2] = offerDate;
         excelData[4][2] = offerNumber;
 
         const rows = document.querySelectorAll("#offerTableBody tr");
-        if(rows.length === 0) { showToast("Tabloda kalem yok!"); return;}
-        
+        if (rows.length === 0) { showToast("Tabloda kalem yok!"); return; }
+
         let hasItem = false;
         rows.forEach(row => {
             const nameInput = row.querySelector(".item-name");
-            if(!nameInput) return;
+            if (!nameInput) return;
             const name = nameInput.value;
             const desc = row.querySelector(".item-desc").value;
             const qty = parseFloat(row.querySelector(".quantity").value) || 0;
             const price = parseFloat(row.querySelector(".price").value) || 0;
             const rowTotal = qty * price;
-            if(name) { 
-                excelData.push(["", name, desc, qty, price, rowTotal, ""]); 
+            if (name) {
+                excelData.push(["", name, desc, qty, price, rowTotal, ""]);
                 hasItem = true;
             }
         });
-        
-        if(!hasItem) { showToast("Listede geçerli veri yok!"); return; }
+
+        if (!hasItem) { showToast("Listede geçerli veri yok!"); return; }
 
         subTotal = parseFloat(document.getElementById("totalAmount")?.textContent) || 0;
         kdv = parseFloat(document.getElementById("kdvAmount")?.textContent) || 0;
@@ -272,18 +376,18 @@ window.exportMaterialExcel = function(type) {
     excelData.push(["", "", "", "", "GENEL TOPLAM", grandTotal, ""]);
 
     const ws = XLSX.utils.aoa_to_sheet(excelData);
-    ws['!cols'] = [{wch: 2}, {wch: 25}, {wch: 45}, {wch: 10}, {wch: 15}, {wch: 15}];
+    ws['!cols'] = [{ wch: 2 }, { wch: 25 }, { wch: 45 }, { wch: 10 }, { wch: 15 }, { wch: 15 }];
     const wb = XLSX.utils.book_new();
     XLSX.utils.book_append_sheet(wb, ws, "Hesaptablosu.Net");
-    
+
     // Doğrudan Tarayıcı İndirmesi
     XLSX.writeFile(wb, `CULbase_${offerNumber}.xlsx`);
     showToast("Excel İndirildi!");
 };
 
 // PDF MOTORU - Tarayıcı Desteği İçin Perdeyi Görünür Yaparak Beyaz Sayfayı Çözer
-window.generateProfessionalPDF = function(type) {
-    let companyName = "Belirtilmedi", offerDate = new Date().toISOString().split('T')[0], offerNumber = "TKLF-" + Math.floor(Math.random()*10000);
+window.generateProfessionalPDF = function (type) {
+    let companyName = "Belirtilmedi", offerDate = new Date().toISOString().split('T')[0], offerNumber = "TKLF-" + Math.floor(Math.random() * 10000);
     let items = [];
     let subTotal = 0, kdv = 0, grandTotal = 0;
 
@@ -294,13 +398,13 @@ window.generateProfessionalPDF = function(type) {
 
         document.querySelectorAll("#offerTableBody tr").forEach(row => {
             const nameInput = row.querySelector(".item-name");
-            if(!nameInput) return;
+            if (!nameInput) return;
             const name = nameInput.value;
             const desc = row.querySelector(".item-desc").value;
             const qty = parseFloat(row.querySelector(".quantity").value) || 0;
             const price = parseFloat(row.querySelector(".price").value) || 0;
             const rowTotal = qty * price;
-            if(name) { items.push({name, desc, qty, price, total: rowTotal}); }
+            if (name) { items.push({ name, desc, qty, price, total: rowTotal }); }
         });
         subTotal = parseFloat(document.getElementById("totalAmount")?.textContent) || 0;
         kdv = parseFloat(document.getElementById("kdvAmount")?.textContent) || 0;
@@ -308,19 +412,33 @@ window.generateProfessionalPDF = function(type) {
 
     } else if (type === 'pano') {
         companyName = "Pano Tasarım Projesi";
-        offerNumber = "PANO-" + Math.floor(Math.random()*10000);
+        offerNumber = "PANO-" + Math.floor(Math.random() * 10000);
         const allItems = document.querySelectorAll(".canvas-item");
         let materialCounts = {};
         allItems.forEach(item => {
             let name = item.textContent;
-            if(materialCounts[name]) { materialCounts[name]++; } else { materialCounts[name] = 1; }
+            if (materialCounts[name]) { materialCounts[name]++; } else { materialCounts[name] = 1; }
         });
         for (const [name, count] of Object.entries(materialCounts)) {
-            items.push({name: name, desc: "Pano Montaj Ekipmanı", qty: count, price: 0, total: 0});
+            items.push({ name: name, desc: "Pano Montaj Ekipmanı", qty: count, price: 0, total: 0 });
+        }
+    }
+    else if (type === 'kayitli') {
+        let offers = JSON.parse(localStorage.getItem("culbase_offers")) || [];
+        let offer = offers.find(o => o.id === arguments[1]); // 2. parametre ID'dir
+        if(offer) {
+            companyName = offer.companyName;
+            offerDate = offer.offerDate;
+            offerNumber = offer.offerNumber;
+            items = offer.items || [];
+            subTotal = 0; kdv = 0;
+            grandTotal = parseFloat(offer.grandTotal.replace('₺', '').trim()) || 0;
+        } else {
+            showToast("Kayıt bulunamadı!"); return;
         }
     }
 
-    if(items.length === 0) { showToast("Uyarı: Listede hiç malzeme/kalem bulunmuyor!"); return; }
+    if (items.length === 0) { showToast("Uyarı: Listede hiç malzeme/kalem bulunmuyor!"); return; }
 
     // 1. TAM EKRAN VE GÖRÜNÜR PERDE - iOS Safari dahi görsün diye
     let overlay = document.createElement("div");
@@ -334,26 +452,39 @@ window.generateProfessionalPDF = function(type) {
 
     let template = document.createElement("div");
     template.id = "pdfExportArea";
-    template.style.width = "210mm"; 
+    template.style.width = "210mm";
     template.style.minHeight = "297mm";
-    template.style.padding = "15mm"; 
+    template.style.padding = "15mm";
     template.style.margin = "0 auto";
     template.style.backgroundColor = "#ffffff";
-    template.style.color = "#000000"; 
-    template.style.fontFamily = "Arial, sans-serif"; 
+    template.style.color = "#000000";
+    template.style.fontFamily = "Arial, sans-serif";
     template.style.boxSizing = "border-box";
     overlay.appendChild(template);
 
     let tbodyHTML = ""; let totalItemsCount = 0;
     items.forEach(item => {
-        totalItemsCount += item.qty;
+        // Miktarı güvenli sayıya çevir
+        let qtyNum = parseFloat(item.qty) || 0;
+        totalItemsCount += qtyNum;
+        
+        // Fiyatı güvenli sayıya çevir (İçinde '₺' veya harf varsa temizler)
+        let priceNum = 0;
+        if (typeof item.price === 'number') priceNum = item.price;
+        else if (item.price) priceNum = parseFloat(String(item.price).replace(/[^0-9,-]+/g,"").replace(',','.')) || 0;
+        
+        // Toplamı güvenli sayıya çevir
+        let totalNum = 0;
+        if (typeof item.total === 'number') totalNum = item.total;
+        else if (item.total) totalNum = parseFloat(String(item.total).replace(/[^0-9,-]+/g,"").replace(',','.')) || 0;
+
         tbodyHTML += `
             <tr style="border-bottom: 1px solid #eee;">
-                <td style="padding: 10px; border-left: 1px solid #eee; border-right: 1px solid #eee;">${item.name}</td>
-                <td style="padding: 10px; border-right: 1px solid #eee;">${item.desc}</td>
-                <td style="padding: 10px; border-right: 1px solid #eee; text-align: center; font-weight:bold;">${item.qty}</td>
-                <td style="padding: 10px; border-right: 1px solid #eee; text-align: right;">${item.price.toFixed(2)} ₺</td>
-                <td style="padding: 10px; border-right: 1px solid #eee; text-align: right; font-weight:bold;">${item.total.toFixed(2)} ₺</td>
+                <td style="padding: 10px; border-left: 1px solid #eee; border-right: 1px solid #eee;">${item.name || '-'}</td>
+                <td style="padding: 10px; border-right: 1px solid #eee;">${item.desc || '-'}</td>
+                <td style="padding: 10px; border-right: 1px solid #eee; text-align: center; font-weight:bold;">${qtyNum}</td>
+                <td style="padding: 10px; border-right: 1px solid #eee; text-align: right;">${priceNum.toFixed(2)} ₺</td>
+                <td style="padding: 10px; border-right: 1px solid #eee; text-align: right; font-weight:bold;">${totalNum.toFixed(2)} ₺</td>
             </tr>
         `;
     });
@@ -411,13 +542,13 @@ window.generateProfessionalPDF = function(type) {
 
     showToast("PDF Cihazınıza İndiriliyor...");
     const opt = {
-        margin:       0, 
-        filename:     'CULbase_' + (type === 'pano' ? 'Malzeme_' : 'Teklif_') + offerNumber + '.pdf',
-        image:        { type: 'jpeg', quality: 1.0 }, 
-        html2canvas:  { scale: 2, useCORS: true, letterRendering: true, backgroundColor: '#ffffff', scrollY: 0 },
-        jsPDF:        { unit: 'mm', format: 'a4', orientation: 'portrait' }
+        margin: 0,
+        filename: 'CULbase_' + (type === 'pano' ? 'Malzeme_' : 'Teklif_') + offerNumber + '.pdf',
+        image: { type: 'jpeg', quality: 1.0 },
+        html2canvas: { scale: 2, useCORS: true, letterRendering: true, backgroundColor: '#ffffff', scrollY: 0 },
+        jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' }
     };
-    
+
     // Doğrudan Tarayıcı İndirmesi
     setTimeout(() => {
         html2pdf().set(opt).from(template).save().then(() => {
@@ -428,7 +559,7 @@ window.generateProfessionalPDF = function(type) {
 };
 
 function deleteOffer(id) {
-    if(confirm("Bu teklifi silmek istediğinize emin misiniz?")) {
+    if (confirm("Bu teklifi silmek istediğinize emin misiniz?")) {
         let offers = JSON.parse(localStorage.getItem("culbase_offers")) || [];
         offers = offers.filter(o => o.id !== id);
         localStorage.setItem("culbase_offers", JSON.stringify(offers));
@@ -442,47 +573,47 @@ function logout() { sessionStorage.removeItem("loggedInUser"); window.location.h
 let activeCanvasId = "panoCanvas_sac";
 let isDoorOpen = false;
 
-window.switchView = function(viewType) {
+window.switchView = function (viewType) {
     const sac = document.getElementById("panoCanvas_sac");
     const kapak = document.getElementById("panoCanvas_kapak");
     const view3d = document.getElementById("panoCanvas_3d");
-    
+
     document.querySelectorAll(".cad-view-switch .cad-tool-btn").forEach(btn => btn.classList.remove("active-view"));
 
-    if(viewType === 'sac') {
+    if (viewType === 'sac') {
         sac.style.display = "block"; kapak.style.display = "none"; view3d.style.display = "none";
         document.getElementById("viewSacBtn").classList.add("active-view");
         activeCanvasId = "panoCanvas_sac";
-    } else if(viewType === 'kapak') {
+    } else if (viewType === 'kapak') {
         sac.style.display = "none"; kapak.style.display = "block"; view3d.style.display = "none";
         document.getElementById("viewKapakBtn").classList.add("active-view");
         activeCanvasId = "panoCanvas_kapak";
-    } else if(viewType === '3d') {
+    } else if (viewType === '3d') {
         sac.style.display = "none"; kapak.style.display = "none"; view3d.style.display = "block";
         document.getElementById("view3DBtn").classList.add("active-view");
-        activeCanvasId = null; 
-        
+        activeCanvasId = null;
+
         const sac3D = document.getElementById("pano3D_sac");
         const kapak3D = document.getElementById("pano3D_kapak");
         sac3D.innerHTML = ''; kapak3D.innerHTML = '<div class="door-handle"></div>';
-        
+
         Array.from(sac.children).forEach(child => {
-            if(child.classList.contains('canvas-item')) {
+            if (child.classList.contains('canvas-item')) {
                 let clone = child.cloneNode(true); clone.style.cursor = "default"; clone.classList.remove("selected"); sac3D.appendChild(clone);
             }
         });
         Array.from(kapak.children).forEach(child => {
-            if(child.classList.contains('canvas-item')) {
+            if (child.classList.contains('canvas-item')) {
                 let clone = child.cloneNode(true); clone.style.cursor = "default"; clone.classList.remove("selected"); kapak3D.appendChild(clone);
             }
         });
     }
 };
 
-window.toggle3DDoor = function() {
+window.toggle3DDoor = function () {
     isDoorOpen = !isDoorOpen;
     const kapak = document.getElementById("pano3D_kapak");
-    if(isDoorOpen) kapak.style.transform = "rotateY(-120deg)";
+    if (isDoorOpen) kapak.style.transform = "rotateY(-120deg)";
     else kapak.style.transform = "rotateY(0deg)";
 };
 
@@ -491,7 +622,7 @@ function initCanvasDrag() {
 
     var acc = document.getElementsByClassName("accordion");
     for (let i = 0; i < acc.length; i++) {
-        acc[i].addEventListener("click", function() {
+        acc[i].addEventListener("click", function () {
             this.classList.toggle("active-acc");
             var panel = this.nextElementSibling;
             if (panel.style.display === "block") { panel.style.display = "none"; } else { panel.style.display = "block"; }
@@ -507,9 +638,9 @@ function initCanvasDrag() {
     function updatePanoSize() {
         const w = wInput.value + "px"; const h = hInput.value + "px";
         sac.style.width = w; sac.style.height = h; kapak.style.width = w; kapak.style.height = h;
-        if(box3D) { box3D.style.width = w; box3D.style.height = h; }
+        if (box3D) { box3D.style.width = w; box3D.style.height = h; }
     }
-    if(wInput && hInput) { wInput.addEventListener("input", updatePanoSize); hInput.addEventListener("input", updatePanoSize); }
+    if (wInput && hInput) { wInput.addEventListener("input", updatePanoSize); hInput.addEventListener("input", updatePanoSize); }
 
     // DOKUNMATİK DESTEĞİ İÇİN DRAG EVENTS
     let activeEl = null; let offsetX = 0, offsetY = 0;
@@ -519,14 +650,14 @@ function initCanvasDrag() {
             e.dataTransfer.setData("type", item.dataset.type); e.dataTransfer.setData("name", item.textContent);
             e.dataTransfer.setData("w", item.dataset.w); e.dataTransfer.setData("h", item.dataset.h);
         });
-        
+
         // Mobil Dokunmatik Seçim (Basılı tutunca ekrana at)
         item.addEventListener("touchstart", e => {
-            if(activeCanvasId) {
+            if (activeCanvasId) {
                 const canvas = document.getElementById(activeCanvasId);
                 const type = item.dataset.type; const name = item.textContent;
                 const w = item.dataset.w; const h = item.dataset.h;
-                
+
                 const el = document.createElement("div"); el.className = `canvas-item ${type}`; el.textContent = name;
                 el.style.left = "50px"; el.style.top = "50px"; el.style.width = w + "px"; el.style.height = h + "px";
                 canvas.appendChild(el); selectElement(el); bindElementEvents(el);
@@ -539,7 +670,7 @@ function initCanvasDrag() {
         canvas.addEventListener("dragover", e => e.preventDefault());
         canvas.addEventListener("drop", e => {
             e.preventDefault();
-            if(canvas.id !== activeCanvasId) return;
+            if (canvas.id !== activeCanvasId) return;
 
             const type = e.dataTransfer.getData("type"); const name = e.dataTransfer.getData("name");
             const w = e.dataTransfer.getData("w"); const h = e.dataTransfer.getData("h");
@@ -554,11 +685,11 @@ function initCanvasDrag() {
             canvas.appendChild(el); selectElement(el); bindElementEvents(el);
         });
     });
-    
+
     function bindElementEvents(el) {
         el.addEventListener("mousedown", dragStart);
-        el.addEventListener("touchstart", dragStartMobile, {passive: false});
-        el.addEventListener("dblclick", () => { if(confirm("Bu elemanı silmek istiyor musunuz?")) { el.remove(); clearProps(); } });
+        el.addEventListener("touchstart", dragStartMobile, { passive: false });
+        el.addEventListener("dblclick", () => { if (confirm("Bu elemanı silmek istiyor musunuz?")) { el.remove(); clearProps(); } });
     }
 
     function dragStart(e) {
@@ -566,14 +697,14 @@ function initCanvasDrag() {
         const rect = activeEl.getBoundingClientRect(); offsetX = e.clientX - rect.left; offsetY = e.clientY - rect.top;
         document.addEventListener("mousemove", dragMove); document.addEventListener("mouseup", dragEnd);
     }
-    
+
     function dragStartMobile(e) {
         activeEl = e.target; selectElement(activeEl);
         const touch = e.touches[0];
         const rect = activeEl.getBoundingClientRect(); offsetX = touch.clientX - rect.left; offsetY = touch.clientY - rect.top;
-        document.addEventListener("touchmove", dragMoveMobile, {passive: false}); document.addEventListener("touchend", dragEnd);
+        document.addEventListener("touchmove", dragMoveMobile, { passive: false }); document.addEventListener("touchend", dragEnd);
     }
-    
+
     function dragMove(e) {
         if (!activeEl) return;
         const activeCanvas = document.getElementById(activeCanvasId);
@@ -581,11 +712,11 @@ function initCanvasDrag() {
         let rawX = e.clientX - rect.left - offsetX; let rawY = e.clientY - rect.top - offsetY;
 
         let x = Math.round(rawX / 10) * 10; let y = Math.round(rawY / 10) * 10;
-        if(x < 0) x = 0; if(y < 0) y = 0;
+        if (x < 0) x = 0; if (y < 0) y = 0;
 
         activeEl.style.left = x + "px"; activeEl.style.top = y + "px"; updateProps(activeEl);
     }
-    
+
     function dragMoveMobile(e) {
         if (!activeEl) return;
         e.preventDefault();
@@ -595,13 +726,13 @@ function initCanvasDrag() {
         let rawX = touch.clientX - rect.left - offsetX; let rawY = touch.clientY - rect.top - offsetY;
 
         let x = Math.round(rawX / 10) * 10; let y = Math.round(rawY / 10) * 10;
-        if(x < 0) x = 0; if(y < 0) y = 0;
+        if (x < 0) x = 0; if (y < 0) y = 0;
 
         activeEl.style.left = x + "px"; activeEl.style.top = y + "px"; updateProps(activeEl);
     }
-    
-    function dragEnd() { 
-        activeEl = null; 
+
+    function dragEnd() {
+        activeEl = null;
         document.removeEventListener("mousemove", dragMove); document.removeEventListener("mouseup", dragEnd);
         document.removeEventListener("touchmove", dragMoveMobile); document.removeEventListener("touchend", dragEnd);
     }
@@ -610,9 +741,9 @@ function initCanvasDrag() {
     function updateProps(el) {
         document.getElementById("propNameInput").value = el.textContent; // İsim inputa geçer
         document.getElementById("propRotate").value = el.dataset.rotate || "0"; // Döndürme bilgisi alınır
-        document.getElementById("propX").value = parseInt(el.style.left, 10) || 0; 
+        document.getElementById("propX").value = parseInt(el.style.left, 10) || 0;
         document.getElementById("propY").value = parseInt(el.style.top, 10) || 0;
-        document.getElementById("propW").value = parseInt(el.style.width, 10) || 0; 
+        document.getElementById("propW").value = parseInt(el.style.width, 10) || 0;
         document.getElementById("propH").value = parseInt(el.style.height, 10) || 0;
         window.activeElement = el;
     }
@@ -620,43 +751,43 @@ function initCanvasDrag() {
     function clearProps() {
         document.getElementById("propNameInput").value = "";
         document.getElementById("propRotate").value = "0";
-        document.getElementById("propX").value = 0; 
+        document.getElementById("propX").value = 0;
         document.getElementById("propY").value = 0;
-        document.getElementById("propW").value = 0; 
-        document.getElementById("propH").value = 0; 
+        document.getElementById("propW").value = 0;
+        document.getElementById("propH").value = 0;
         window.activeElement = null;
     }
 
     // YENİ NESİL ÖZELLİKLER DİNLEYİCİSİ (İSİM, DÖNDÜRME VE BOYUT)
     document.querySelectorAll(".prop-input").forEach(inp => {
         inp.addEventListener("input", e => {
-            if(window.activeElement) {
+            if (window.activeElement) {
                 const el = window.activeElement;
                 const id = e.target.id;
                 const val = e.target.value;
-                
+
                 // İsim (Etiket) Değiştirme
-                if(id === "propNameInput") { el.textContent = val; }
-                
+                if (id === "propNameInput") { el.textContent = val; }
+
                 // Elemanı Döndürme (Rotate)
-                if(id === "propRotate") {
+                if (id === "propRotate") {
                     el.dataset.rotate = val;
                     el.style.transform = `rotate(${val}deg)`;
                 }
-                
+
                 // Konum ve Boyut Değiştirme
                 const pxVal = val + "px";
-                if(id === "propX") el.style.left = pxVal; 
-                if(id === "propY") el.style.top = pxVal;
-                if(id === "propW") el.style.width = pxVal; 
-                if(id === "propH") el.style.height = pxVal;
+                if (id === "propX") el.style.left = pxVal;
+                if (id === "propY") el.style.top = pxVal;
+                if (id === "propW") el.style.width = pxVal;
+                if (id === "propH") el.style.height = pxVal;
             }
         });
     });
 
     document.querySelectorAll(".canvas-plate").forEach(canvas => {
-        canvas.addEventListener("mousedown", e => { if(e.target === canvas) { document.querySelectorAll(".canvas-item").forEach(i => i.classList.remove("selected")); clearProps(); } });
-        canvas.addEventListener("touchstart", e => { if(e.target === canvas) { document.querySelectorAll(".canvas-item").forEach(i => i.classList.remove("selected")); clearProps(); } });
+        canvas.addEventListener("mousedown", e => { if (e.target === canvas) { document.querySelectorAll(".canvas-item").forEach(i => i.classList.remove("selected")); clearProps(); } });
+        canvas.addEventListener("touchstart", e => { if (e.target === canvas) { document.querySelectorAll(".canvas-item").forEach(i => i.classList.remove("selected")); clearProps(); } });
     });
 }
 // ==========================================
@@ -664,14 +795,14 @@ function initCanvasDrag() {
 // ==========================================
 
 // Çekmece (Drawer) Kontrolleri
-window.toggleLibrary = function() {
+window.toggleLibrary = function () {
     const lib = document.getElementById('libraryDrawer');
     const prop = document.getElementById('propDrawer');
     if (prop && prop.classList.contains('open')) prop.classList.remove('open');
     if (lib) lib.classList.toggle('open');
 };
 
-window.toggleProps = function() {
+window.toggleProps = function () {
     const lib = document.getElementById('libraryDrawer');
     const prop = document.getElementById('propDrawer');
     if (lib && lib.classList.contains('open')) lib.classList.remove('open');
@@ -679,12 +810,12 @@ window.toggleProps = function() {
 };
 
 // TEKNİK ÇİZİMİ FOTOĞRAFLAYIP PDF'E BASMA MOTORU (GÜNCELLENDİ)
-window.exportTechnicalDrawingPDF = function() {
+window.exportTechnicalDrawingPDF = function () {
     if (typeof showToast === "function") showToast("Teknik Çizim Hazırlanıyor... Lütfen bekleyin.");
-    
+
     let activeCanvas = document.getElementById(activeCanvasId || 'panoCanvas_sac');
-    
-    if(!activeCanvas || activeCanvasId === 'panoCanvas_3d') {
+
+    if (!activeCanvas || activeCanvasId === 'panoCanvas_3d') {
         if (typeof showToast === "function") showToast("Uyarı: 3D Görünüm PDF yapılamaz. Lütfen İç Sac veya Kapak seçin.");
         else alert("Uyarı: 3D Görünüm PDF yapılamaz.");
         return;
@@ -702,17 +833,17 @@ window.exportTechnicalDrawingPDF = function() {
         const imgData = canvas.toDataURL('image/png');
         let currentScren = activeCanvasId === 'panoCanvas_sac' ? "Iç Montaj Saci" : "Pano Kapagi";
         let dateStr = new Date().toLocaleDateString('tr-TR');
-        
+
         // 2. Sanal bir A4 (Yatay) kağıdı oluştur ve resmi içine yerleştir
         let template = document.createElement("div");
-        template.style.width = "297mm"; 
+        template.style.width = "297mm";
         template.style.minHeight = "210mm";
         template.style.padding = "10mm";
         template.style.boxSizing = "border-box";
         template.style.backgroundColor = "#fff";
         template.style.textAlign = "center";
         template.style.fontFamily = "Arial, sans-serif";
-        
+
         template.innerHTML = `
             <h2 style="color: #198b1d; margin-top: 10px; margin-bottom: 5px; font-size: 24px;">CULBASE AUTOMATION - TEKNIK CIZIM RAPORU</h2>
             <p style="color: #666; margin-top: 0; margin-bottom: 20px; font-size: 14px;">Görünüm: <strong>${currentScren}</strong> &nbsp;|&nbsp; Tarih: <strong>${dateStr}</strong></p>
@@ -725,20 +856,20 @@ window.exportTechnicalDrawingPDF = function() {
                 Bu teknik resim CULbase CAD Engine tarafindan otomatik olarak üretilmistir.
             </div>
         `;
-        
+
         // 3. html2pdf Motorunu Çalıştır (Teklif sistemindeki gibi)
         let opt = {
-            margin:       0,
-            filename:     'CULbase_Cizim_' + currentScren.replace(/\s+/g, '') + '_' + Math.floor(Math.random()*1000) + '.pdf',
-            image:        { type: 'jpeg', quality: 0.98 },
-            html2canvas:  { scale: 2, useCORS: true },
-            jsPDF:        { unit: 'mm', format: 'a4', orientation: 'landscape' } // Yatay A4 formatı
+            margin: 0,
+            filename: 'CULbase_Cizim_' + currentScren.replace(/\s+/g, '') + '_' + Math.floor(Math.random() * 1000) + '.pdf',
+            image: { type: 'jpeg', quality: 0.98 },
+            html2canvas: { scale: 2, useCORS: true },
+            jsPDF: { unit: 'mm', format: 'a4', orientation: 'landscape' } // Yatay A4 formatı
         };
-        
+
         html2pdf().set(opt).from(template).save().then(() => {
             if (typeof showToast === "function") showToast("Teknik Çizim Başarıyla İndirildi!");
         });
-        
+
     }).catch(err => {
         console.error("PDF Hatası:", err);
         alert("PDF oluşturulurken bir hata oluştu.");
@@ -748,7 +879,7 @@ window.exportTechnicalDrawingPDF = function() {
 // PANO KAYDETME VE YÜKLEME (SAVE/LOAD) MOTORU
 // ==========================================
 
-window.savePanel = function() {
+window.savePanel = function () {
     let projectName = prompt("Kaydedilecek projenin adını giriniz:", "Yeni Otomasyon Panosu");
     if (!projectName) return;
 
@@ -782,13 +913,13 @@ window.savePanel = function() {
     if (typeof showToast === "function") showToast("Pano Başarıyla Kaydedildi!");
 };
 
-window.openPanelModal = function() {
+window.openPanelModal = function () {
     const modal = document.getElementById("panelModal");
     const list = document.getElementById("savedPanelsList");
     let saved = JSON.parse(localStorage.getItem("culbase_panels")) || [];
-    
+
     list.innerHTML = "";
-    if(saved.length === 0) {
+    if (saved.length === 0) {
         list.innerHTML = "<p style='color:#555;'>Henüz kaydedilmiş bir pano projesi bulunmuyor.</p>";
     } else {
         saved.forEach(p => {
@@ -809,20 +940,20 @@ window.openPanelModal = function() {
     modal.style.display = "flex";
 };
 
-window.closePanelModal = function() { document.getElementById("panelModal").style.display = "none"; };
+window.closePanelModal = function () { document.getElementById("panelModal").style.display = "none"; };
 
-window.deletePanel = function(id) {
-    if(!confirm("Bu projeyi tamamen silmek istediğinize emin misiniz?")) return;
+window.deletePanel = function (id) {
+    if (!confirm("Bu projeyi tamamen silmek istediğinize emin misiniz?")) return;
     let saved = JSON.parse(localStorage.getItem("culbase_panels")) || [];
     saved = saved.filter(p => p.id !== id);
     localStorage.setItem("culbase_panels", JSON.stringify(saved));
-    openPanelModal(); 
+    openPanelModal();
 };
 
-window.loadPanel = function(id) {
+window.loadPanel = function (id) {
     let saved = JSON.parse(localStorage.getItem("culbase_panels")) || [];
     let project = saved.find(p => p.id === id);
-    if(!project) return;
+    if (!project) return;
 
     // Ölçüleri ayarla
     document.getElementById("panoWInput").value = project.width;
@@ -842,7 +973,7 @@ window.loadPanel = function(id) {
         el.style.width = itemData.width; el.style.height = itemData.height;
         el.dataset.rotate = itemData.rotate;
         if (itemData.rotate !== "0") el.style.transform = `rotate(${itemData.rotate}deg)`;
-        
+
         canvas.appendChild(el);
         bindLoadedItem(el); // Sürükleme özelliklerini yeniden ver
     };
@@ -855,9 +986,9 @@ window.loadPanel = function(id) {
 };
 
 // Yüklenen öğelere sürükleme ve özellik (Ayarlar) panelini bağlama motoru
-window.bindLoadedItem = function(el) {
+window.bindLoadedItem = function (el) {
     let offsetX = 0, offsetY = 0;
-    
+
     const selectThis = () => {
         document.querySelectorAll(".canvas-item").forEach(i => i.classList.remove("selected"));
         el.classList.add("selected");
@@ -876,12 +1007,12 @@ window.bindLoadedItem = function(el) {
         let clientX = e.touches ? e.touches[0].clientX : e.clientX;
         let clientY = e.touches ? e.touches[0].clientY : e.clientY;
         let rawX = clientX - rect.left - offsetX; let rawY = clientY - rect.top - offsetY;
-        
+
         let x = Math.round(rawX / 10) * 10; let y = Math.round(rawY / 10) * 10;
-        if(x < 0) x = 0; if(y < 0) y = 0;
+        if (x < 0) x = 0; if (y < 0) y = 0;
         el.style.left = x + "px"; el.style.top = y + "px";
         selectThis();
-        if(e.touches) e.preventDefault();
+        if (e.touches) e.preventDefault();
     };
 
     const onEnd = () => {
@@ -895,30 +1026,30 @@ window.bindLoadedItem = function(el) {
         let clientX = e.touches ? e.touches[0].clientX : e.clientX;
         let clientY = e.touches ? e.touches[0].clientY : e.clientY;
         offsetX = clientX - rect.left; offsetY = clientY - rect.top;
-        
-        if(e.touches) { document.addEventListener("touchmove", onMove, {passive: false}); document.addEventListener("touchend", onEnd); } 
+
+        if (e.touches) { document.addEventListener("touchmove", onMove, { passive: false }); document.addEventListener("touchend", onEnd); }
         else { document.addEventListener("mousemove", onMove); document.addEventListener("mouseup", onEnd); }
     };
 
     el.addEventListener("mousedown", onStart);
-    el.addEventListener("touchstart", onStart, {passive: false});
-    el.addEventListener("dblclick", () => { if(confirm("Silmek istiyor musunuz?")) { el.remove(); window.activeElement = null; } });
+    el.addEventListener("touchstart", onStart, { passive: false });
+    el.addEventListener("dblclick", () => { if (confirm("Silmek istiyor musunuz?")) { el.remove(); window.activeElement = null; } });
 };
 // ÖĞE SİLME MOTORU (ÖZELLİKLER MENÜSÜNDEN)
-window.deleteActiveItem = function() {
-    if(window.activeElement) {
+window.deleteActiveItem = function () {
+    if (window.activeElement) {
         window.activeElement.remove(); // Ekrandan sil
         window.activeElement = null; // Hafızadan sil
-        
+
         // Sağ menüdeki yazıları sıfırla
         document.getElementById("propNameInput").value = "";
         document.getElementById("propRotate").value = "0";
-        document.getElementById("propX").value = 0; 
+        document.getElementById("propX").value = 0;
         document.getElementById("propY").value = 0;
-        document.getElementById("propW").value = 0; 
+        document.getElementById("propW").value = 0;
         document.getElementById("propH").value = 0;
-        
-        if(typeof showToast === "function") showToast("Öğe silindi!");
+
+        if (typeof showToast === "function") showToast("Öğe silindi!");
     } else {
         alert("Lütfen silmek istediğiniz öğeyi panodan seçin (Üzerine tıklayın).");
     }
