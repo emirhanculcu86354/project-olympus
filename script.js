@@ -4085,3 +4085,199 @@ window.openDeployLogs = async function () {
         console.error("Deploy Log Hatası:", error);
     }
 };
+// ==========================================
+// ⚙️ PLC KASASINA OTOMATİK ŞABLON ENJEKSİYONU
+// ==========================================
+(function initPlcSnippets() {
+    let existingSnippets = localStorage.getItem('culbase_plc_archive');
+    if (!existingSnippets || JSON.parse(existingSnippets).length === 0) {
+        const defaultPlcCodes = [
+            {
+                id: 101,
+                title: "Delta PLC: Tek Buton Start/Stop (Mühürleme)",
+                code: "LD X0       // X0 Butonuna basıldığında\nALT Y0      // Y0 çıkışının konumunu değiştir (Toggle)",
+                date: new Date().toLocaleDateString('tr-TR')
+            },
+            {
+                id: 102,
+                title: "Delta HMI: Sayfa Geçiş Makrosu",
+                code: "$2000 = 5    // 5 numaralı sayfaya geçişi tetikle\nBITON $200.0 // Sayfa geçiş bitini aktif et",
+                date: new Date().toLocaleDateString('tr-TR')
+            },
+            {
+                id: 103,
+                title: "PT100 Analog Sıcaklık Skalalama",
+                code: "FROM K0 K0 D100 K1  // 0. modülden analog değeri D100'e oku\nSCLP D100 D200 D300 // Okunan değeri D200'deki skalaya göre D300'e çevir (Sensör Verisi)",
+                date: new Date().toLocaleDateString('tr-TR')
+            }
+        ];
+        localStorage.setItem('culbase_plc_archive', JSON.stringify(defaultPlcCodes));
+    }
+})();
+// ==========================================
+// ⚙️ PLC & OTOMASYON ARŞİVİ MOTORU
+// ==========================================
+window.openPlcArchive = function() {
+    document.getElementById('plc-archive-modal').style.display = 'flex';
+    renderPlcSnippets();
+    if (navigator.vibrate) navigator.vibrate(20);
+};
+
+window.savePlcSnippet = function() {
+    const title = document.getElementById('new-plc-title').value.trim();
+    const code = document.getElementById('new-plc-code').value.trim();
+
+    if (!title || !code) {
+        alert("Başlık ve kod alanı boş bırakılamaz!");
+        return;
+    }
+
+    let snippets = JSON.parse(localStorage.getItem('culbase_plc_archive')) || [];
+    snippets.push({
+        id: Date.now(),
+        title: title,
+        code: code,
+        date: new Date().toLocaleDateString('tr-TR')
+    });
+
+    localStorage.setItem('culbase_plc_archive', JSON.stringify(snippets));
+
+    // Ekledikten sonra inputları temizle
+    document.getElementById('new-plc-title').value = '';
+    document.getElementById('new-plc-code').value = '';
+
+    renderPlcSnippets();
+    if (navigator.vibrate) navigator.vibrate([30, 30]);
+};
+
+window.renderPlcSnippets = function() {
+    const list = document.getElementById('plc-snippets-list');
+    let snippets = JSON.parse(localStorage.getItem('culbase_plc_archive')) || [];
+
+    list.innerHTML = '';
+    if (snippets.length === 0) {
+        list.innerHTML = '<p style="color:#888; font-size:12px; text-align:center;">Kasa şu an boş. İlk makronu ekle.</p>';
+        return;
+    }
+
+    // En son eklenen en üstte görünsün
+    snippets.reverse().forEach(s => {
+        // Kod içindeki HTML karakterlerini güvenli hale getiriyoruz (< ve > bozulmasın diye)
+        let safeCode = s.code.replace(/</g, "&lt;").replace(/>/g, "&gt;");
+
+        list.innerHTML += `
+            <div style="background: #1a1a1a; border: 1px solid #333; border-radius: 6px; overflow: hidden;">
+                <div style="background: #222; padding: 10px 15px; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #333;">
+                    <span style="color: #fff; font-size: 13px; font-weight: bold;">${s.title}</span>
+                    <div>
+                        <!-- YENİ: Tek Tıkla Pano'ya Kopyalama -->
+                        <button onclick="copyPlcCode('${s.id}')" style="background: #00d2ff; color: #000; border: none; padding: 4px 8px; border-radius: 4px; font-size: 10px; font-weight: bold; cursor: pointer; margin-right: 5px;">KOPYALA</button>
+                        <button onclick="deletePlcSnippet('${s.id}')" style="background: transparent; color: #ff4444; border: none; font-size: 12px; cursor: pointer;">🗑️</button>
+                    </div>
+                </div>
+                <!-- SİBERPUNK KOD GÖRÜNÜMÜ -->
+                <div style="background: #000; padding: 15px; overflow-x: auto;">
+                    <pre id="code-${s.id}" style="margin: 0; color: #27ae60; font-family: 'Courier New', monospace; font-size: 11px;">${safeCode}</pre>
+                </div>
+                <div style="background: #111; padding: 5px 15px; text-align: right; font-size: 9px; color: #666;">
+                    Eklenme: ${s.date}
+                </div>
+            </div>
+        `;
+    });
+};
+
+window.copyPlcCode = function(id) {
+    const codeText = document.getElementById('code-' + id).innerText;
+    
+    // Modern Pano (Clipboard) API'si
+    navigator.clipboard.writeText(codeText).then(() => {
+        if (navigator.vibrate) navigator.vibrate(20);
+        alert("Kod başarıyla panoya kopyalandı! Sahada kullanıma hazır.");
+    }).catch(err => {
+        console.error("Kopyalama başarısız", err);
+        alert("Kopyalama işlemi başarısız oldu.");
+    });
+};
+
+window.deletePlcSnippet = function(id) {
+    if(confirm("Bu kodu arşivden silmek istediğine emin misin?")) {
+        let snippets = JSON.parse(localStorage.getItem('culbase_plc_archive')) || [];
+        snippets = snippets.filter(s => s.id.toString() !== id.toString());
+        localStorage.setItem('culbase_plc_archive', JSON.stringify(snippets));
+        renderPlcSnippets();
+    }
+};
+// ==========================================
+// 📡 CANLI TELEMETRİ (SCADA) SİMÜLASYONU
+// ==========================================
+let liveMachineInterval = null;
+
+window.openLiveMachine = function() {
+    document.getElementById('live-machine-modal').style.display = 'flex';
+    if (navigator.vibrate) navigator.vibrate([50, 50]);
+    
+    const logBox = document.getElementById('sim-log');
+    logBox.innerHTML += "<br>> Ağ üzerinden canlı veri akışı başladı.";
+    logBox.scrollTop = logBox.scrollHeight;
+
+    let isMotorRunning = false;
+    let currentTemp = 24.0;
+    let currentRpm = 0;
+
+    // Saniyede 1 kez sensörleri güncelleyen motor
+    liveMachineInterval = setInterval(() => {
+        // Rastgele Motor Durumu Değişimi (%15 ihtimalle tetiklenir)
+        if (Math.random() < 0.15) {
+            isMotorRunning = !isMotorRunning;
+            logBox.innerHTML += `<br>> [ALARM] Sensör durumu değişti: Ana Motor ${isMotorRunning ? 'ÇALIŞTI' : 'DURDU'}`;
+            logBox.scrollTop = logBox.scrollHeight;
+        }
+
+        // RPM ve Sıcaklık Dinamikleri
+        if (isMotorRunning) {
+            document.getElementById('sim-motor-light').style.background = '#27ae60';
+            document.getElementById('sim-motor-light').style.boxShadow = '0 0 15px #27ae60';
+            document.getElementById('sim-motor-status').innerText = 'ÇALIŞIYOR';
+            document.getElementById('sim-motor-status').style.color = '#27ae60';
+
+            currentRpm = Math.floor(Math.random() * 50) + 1450; // 1450-1500 RPM arası dalgalanma
+            currentTemp += (Math.random() * 2.5); // Motor çalıştıkça ısınır
+            if (currentTemp > 98.0) currentTemp = 98.0 - (Math.random() * 3); // Kritik sınır koruması
+        } else {
+            document.getElementById('sim-motor-light').style.background = '#ff4444';
+            document.getElementById('sim-motor-light').style.boxShadow = '0 0 15px #ff4444';
+            document.getElementById('sim-motor-status').innerText = 'DURDU';
+            document.getElementById('sim-motor-status').style.color = '#ff4444';
+
+            currentRpm = 0; // Motor durdu
+            currentTemp -= (Math.random() * 1.5); // Soğuma evresi
+            if (currentTemp < 24.0) currentTemp = 24.0; // Oda sıcaklığına sabitler
+        }
+
+        // Arayüz (SCADA) Ekranını Canlı Güncelle
+        document.getElementById('sim-rpm').innerText = currentRpm;
+        
+        let tempStr = currentTemp.toFixed(1);
+        document.getElementById('sim-temp').innerText = tempStr;
+        
+        let tempBar = document.getElementById('sim-temp-bar');
+        tempBar.style.width = Math.min(currentTemp, 100) + '%';
+        
+        // Akıllı Sıcaklık Uyarı Renkleri
+        let tempColor = '#27ae60'; // Normal (Yeşil)
+        if (currentTemp > 85.0) tempColor = '#ff4444'; // Kritik (Kırmızı)
+        else if (currentTemp > 60.0) tempColor = '#f6c000'; // Uyarı (Sarı)
+        
+        tempBar.style.background = tempColor;
+        document.getElementById('sim-temp').style.color = tempColor;
+
+    }, 1000); // 1 saniyelik ping
+};
+
+window.closeLiveMachine = function() {
+    clearInterval(liveMachineInterval);
+    document.getElementById('live-machine-modal').style.display = 'none';
+    document.getElementById('sim-log').innerHTML = "> Sistem başlatılıyor...<br>> MQTT Sunucusuna bağlanıldı.<br>> Veri akışı bekleniyor...";
+    if (navigator.vibrate) navigator.vibrate(20);
+};
