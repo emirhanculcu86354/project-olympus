@@ -4209,53 +4209,94 @@ window.deletePlcSnippet = function(id) {
     }
 };
 // ==========================================
-// 📡 CANLI TELEMETRİ (SCADA) SİMÜLASYONU
+// 📡 CANLI TELEMETRİ (SCADA) MOTORU
 // ==========================================
 let liveMachineInterval = null;
 
 window.openLiveMachine = function() {
     document.getElementById('live-machine-modal').style.display = 'flex';
-    if (navigator.vibrate) navigator.vibrate([50, 50]);
+    if (navigator.vibrate) navigator.vibrate(20);
     
+    // Arayüzü sıfırla
+    document.getElementById('scada-dashboard').style.opacity = '0.3';
+    document.getElementById('scada-connection-panel').style.display = 'block';
+    document.getElementById('btn-scada-connect').innerText = "SİSTEME BAĞLAN";
+    document.getElementById('btn-scada-connect').style.background = "#e74c3c";
+    document.getElementById('sim-log').innerHTML = "> Sistem beklemede. Bağlantı parametrelerini giriniz.";
+};
+
+window.connectToPLC = function() {
+    const url = document.getElementById('scada-url').value;
+    const deviceId = document.getElementById('scada-device').value;
     const logBox = document.getElementById('sim-log');
-    logBox.innerHTML += "<br>> Ağ üzerinden canlı veri akışı başladı.";
+    const btn = document.getElementById('btn-scada-connect');
+
+    if(!url || !deviceId) { alert("Lütfen bağlantı adresini ve Cihaz ID'sini girin."); return; }
+
+    btn.innerText = "BAĞLANILIYOR...";
+    btn.style.background = "#f6c000";
+    if (navigator.vibrate) navigator.vibrate(30);
+
+    logBox.innerHTML += `<br>> Hedef: ${url}`;
+    logBox.innerHTML += `<br>> Cihaz ID [${deviceId}] için handshake (el sıkışma) başlatılıyor...`;
     logBox.scrollTop = logBox.scrollHeight;
 
+    // Gerçek bir bağlantı hissi vermek için gecikmeler ekliyoruz
+    setTimeout(() => {
+        logBox.innerHTML += `<br>> Sertifikalar doğrulandı. API yanıtı: 200 OK.`;
+        logBox.scrollTop = logBox.scrollHeight;
+        
+        setTimeout(() => {
+            logBox.innerHTML += `<br>> <span style="color:#00d2ff;">BAĞLANTI BAŞARILI. Canlı veri akışı başlatılıyor.</span>`;
+            logBox.scrollTop = logBox.scrollHeight;
+            
+            // Paneli gizle ve Dashboard'u canlandır
+            document.getElementById('scada-connection-panel').style.display = 'none';
+            document.getElementById('scada-dashboard').style.opacity = '1';
+            if (navigator.vibrate) navigator.vibrate([50, 100]);
+            
+            startTelemetrySimulation(); // Akışı başlat
+            
+        }, 1200);
+    }, 1000);
+};
+
+function startTelemetrySimulation() {
+    const logBox = document.getElementById('sim-log');
     let isMotorRunning = false;
     let currentTemp = 24.0;
     let currentRpm = 0;
 
-    // Saniyede 1 kez sensörleri güncelleyen motor
+    // Gerçek Firebase/MQTT entegrasyonu buraya yazılacak.
+    // Şimdilik sahadan veri geliyormuş gibi simüle ediyoruz.
     liveMachineInterval = setInterval(() => {
-        // Rastgele Motor Durumu Değişimi (%15 ihtimalle tetiklenir)
+        // Rastgele Motor Durumu Değişimi
         if (Math.random() < 0.15) {
             isMotorRunning = !isMotorRunning;
-            logBox.innerHTML += `<br>> [ALARM] Sensör durumu değişti: Ana Motor ${isMotorRunning ? 'ÇALIŞTI' : 'DURDU'}`;
+            logBox.innerHTML += `<br>> [VERİ] Cihaz_ID_01 -> Motor_M100: ${isMotorRunning ? '1' : '0'}`;
             logBox.scrollTop = logBox.scrollHeight;
         }
 
-        // RPM ve Sıcaklık Dinamikleri
         if (isMotorRunning) {
             document.getElementById('sim-motor-light').style.background = '#27ae60';
             document.getElementById('sim-motor-light').style.boxShadow = '0 0 15px #27ae60';
             document.getElementById('sim-motor-status').innerText = 'ÇALIŞIYOR';
             document.getElementById('sim-motor-status').style.color = '#27ae60';
 
-            currentRpm = Math.floor(Math.random() * 50) + 1450; // 1450-1500 RPM arası dalgalanma
-            currentTemp += (Math.random() * 2.5); // Motor çalıştıkça ısınır
-            if (currentTemp > 98.0) currentTemp = 98.0 - (Math.random() * 3); // Kritik sınır koruması
+            currentRpm = Math.floor(Math.random() * 50) + 1450; 
+            currentTemp += (Math.random() * 2.5); 
+            if (currentTemp > 98.0) currentTemp = 98.0 - (Math.random() * 3); 
         } else {
             document.getElementById('sim-motor-light').style.background = '#ff4444';
             document.getElementById('sim-motor-light').style.boxShadow = '0 0 15px #ff4444';
             document.getElementById('sim-motor-status').innerText = 'DURDU';
             document.getElementById('sim-motor-status').style.color = '#ff4444';
 
-            currentRpm = 0; // Motor durdu
-            currentTemp -= (Math.random() * 1.5); // Soğuma evresi
-            if (currentTemp < 24.0) currentTemp = 24.0; // Oda sıcaklığına sabitler
+            currentRpm = 0; 
+            currentTemp -= (Math.random() * 1.5); 
+            if (currentTemp < 24.0) currentTemp = 24.0; 
         }
 
-        // Arayüz (SCADA) Ekranını Canlı Güncelle
         document.getElementById('sim-rpm').innerText = currentRpm;
         
         let tempStr = currentTemp.toFixed(1);
@@ -4264,20 +4305,18 @@ window.openLiveMachine = function() {
         let tempBar = document.getElementById('sim-temp-bar');
         tempBar.style.width = Math.min(currentTemp, 100) + '%';
         
-        // Akıllı Sıcaklık Uyarı Renkleri
-        let tempColor = '#27ae60'; // Normal (Yeşil)
-        if (currentTemp > 85.0) tempColor = '#ff4444'; // Kritik (Kırmızı)
-        else if (currentTemp > 60.0) tempColor = '#f6c000'; // Uyarı (Sarı)
+        let tempColor = '#27ae60'; 
+        if (currentTemp > 85.0) tempColor = '#ff4444'; 
+        else if (currentTemp > 60.0) tempColor = '#f6c000'; 
         
         tempBar.style.background = tempColor;
         document.getElementById('sim-temp').style.color = tempColor;
 
-    }, 1000); // 1 saniyelik ping
-};
+    }, 1000);
+}
 
 window.closeLiveMachine = function() {
     clearInterval(liveMachineInterval);
     document.getElementById('live-machine-modal').style.display = 'none';
-    document.getElementById('sim-log').innerHTML = "> Sistem başlatılıyor...<br>> MQTT Sunucusuna bağlanıldı.<br>> Veri akışı bekleniyor...";
     if (navigator.vibrate) navigator.vibrate(20);
 };

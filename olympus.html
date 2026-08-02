@@ -1347,21 +1347,24 @@
             <!-- 3. OTOMASYON & YAZILIM ARAÇLARI -->
             <h3 style="color: #fff; font-size: 16px; margin: 0;">Sistem Entegrasyonları</h3>
             <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px;">
-                
-                <div style="background: linear-gradient(145deg, #1a1a1a, #0a0a0a); border: 1px solid #333; border-radius: 12px; padding: 15px; text-align: center; cursor: pointer;" onclick="openPlcArchive()">
+
+                <div style="background: linear-gradient(145deg, #1a1a1a, #0a0a0a); border: 1px solid #333; border-radius: 12px; padding: 15px; text-align: center; cursor: pointer;"
+                    onclick="openPlcArchive()">
                     <span style="font-size: 32px; filter: drop-shadow(0 0 5px #fff);">⚙️</span>
                     <h4 style="color: #fff; margin: 10px 0 5px 0; font-size: 14px;">PLC Kütüphanesi</h4>
                     <p style="color: #00d2ff; font-size: 10px; margin: 0; font-weight: bold;">Kasa Açık</p>
                 </div>
-                
+
                 <!-- YENİ: CANLI TELEMETRİ KARTI -->
-                <div style="background: linear-gradient(145deg, #1a1a1a, #0a0a0a); border: 1px solid #333; border-radius: 12px; padding: 15px; text-align: center; cursor: pointer;" onclick="openLiveMachine()">
+                <div style="background: linear-gradient(145deg, #1a1a1a, #0a0a0a); border: 1px solid #333; border-radius: 12px; padding: 15px; text-align: center; cursor: pointer;"
+                    onclick="openLiveMachine()">
                     <span style="font-size: 32px; filter: drop-shadow(0 0 5px #e74c3c);">📡</span>
                     <h4 style="color: #fff; margin: 10px 0 5px 0; font-size: 14px;">Canlı Telemetri</h4>
                     <p style="color: #e74c3c; font-size: 10px; margin: 0; font-weight: bold;">Simülasyon Aktif</p>
                 </div>
-                
-                <div style="background: linear-gradient(145deg, #1a1a1a, #0a0a0a); border: 1px solid #333; border-radius: 12px; padding: 15px; text-align: center; cursor: pointer; grid-column: span 2;" onclick="openDeployLogs()">
+
+                <div style="background: linear-gradient(145deg, #1a1a1a, #0a0a0a); border: 1px solid #333; border-radius: 12px; padding: 15px; text-align: center; cursor: pointer; grid-column: span 2;"
+                    onclick="openDeployLogs()">
                     <span style="font-size: 32px; filter: drop-shadow(0 0 5px #00d2ff);">🚀</span>
                     <h4 style="color: #fff; margin: 10px 0 5px 0; font-size: 14px;">Deploy Logları</h4>
                     <p style="color: #27ae60; font-size: 10px; margin: 0; font-weight: bold;">Canlı API Bağlantısı</p>
@@ -1525,22 +1528,32 @@
          💼 BUSINESS: PLC & OTOMASYON ARŞİVİ MODALI
          ========================================== -->
     <div id="plc-archive-modal" class="modal" style="z-index: 10015;">
-        <div class="modal-content" style="max-width: 500px; width: 90%; background: #0a0a0a; border: 1px solid #fff; text-align: left; padding: 25px;">
-            <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #333; padding-bottom: 15px; margin-bottom: 15px;">
-                <h3 style="color: #fff; margin: 0; font-family:'Courier New', monospace; letter-spacing: 1px;">>_ PLC_KÜTÜPHANESİ</h3>
-                <button onclick="document.getElementById('plc-archive-modal').style.display='none'" style="background: transparent; border: none; color: #ff4444; font-size: 16px; cursor: pointer; font-weight: bold;">[X]</button>
+        <div class="modal-content"
+            style="max-width: 500px; width: 90%; background: #0a0a0a; border: 1px solid #fff; text-align: left; padding: 25px;">
+            <div
+                style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #333; padding-bottom: 15px; margin-bottom: 15px;">
+                <h3 style="color: #fff; margin: 0; font-family:'Courier New', monospace; letter-spacing: 1px;">>_
+                    PLC_KÜTÜPHANESİ</h3>
+                <button onclick="document.getElementById('plc-archive-modal').style.display='none'"
+                    style="background: transparent; border: none; color: #ff4444; font-size: 16px; cursor: pointer; font-weight: bold;">[X]</button>
             </div>
 
             <!-- Yeni Kod Ekleme Alanı -->
-            <div style="background: #111; padding: 15px; border-radius: 8px; border: 1px dashed #444; margin-bottom: 20px;">
+            <div
+                style="background: #111; padding: 15px; border-radius: 8px; border: 1px dashed #444; margin-bottom: 20px;">
                 <h4 style="color: #00d2ff; margin-top: 0; font-size: 13px;">+ Yeni Kod / Makro Ekle</h4>
-                <input type="text" id="new-plc-title" placeholder="Başlık (Örn: Delta HMI Şifre Makrosu)" style="width: 100%; padding: 8px; background: #000; color: #fff; border: 1px solid #333; margin-bottom: 10px; border-radius: 4px; box-sizing: border-box; font-size: 12px;">
-                <textarea id="new-plc-code" rows="4" placeholder="Kodu, Ladder notlarını veya SolidWorks ölçülerini buraya yapıştır..." style="width: 100%; padding: 8px; background: #000; color: #27ae60; border: 1px solid #333; margin-bottom: 10px; border-radius: 4px; box-sizing: border-box; font-family: 'Courier New', monospace; font-size: 12px;"></textarea>
-                <button onclick="savePlcSnippet()" class="save-btn" style="width: 100%; background: #fff; color: #000; font-weight: bold;">KASAYA KAYDET</button>
+                <input type="text" id="new-plc-title" placeholder="Başlık (Örn: Delta HMI Şifre Makrosu)"
+                    style="width: 100%; padding: 8px; background: #000; color: #fff; border: 1px solid #333; margin-bottom: 10px; border-radius: 4px; box-sizing: border-box; font-size: 12px;">
+                <textarea id="new-plc-code" rows="4"
+                    placeholder="Kodu, Ladder notlarını veya SolidWorks ölçülerini buraya yapıştır..."
+                    style="width: 100%; padding: 8px; background: #000; color: #27ae60; border: 1px solid #333; margin-bottom: 10px; border-radius: 4px; box-sizing: border-box; font-family: 'Courier New', monospace; font-size: 12px;"></textarea>
+                <button onclick="savePlcSnippet()" class="save-btn"
+                    style="width: 100%; background: #fff; color: #000; font-weight: bold;">KASAYA KAYDET</button>
             </div>
 
             <!-- Kayıtlı Kodlar Listesi -->
-            <div id="plc-snippets-list" style="max-height: 40vh; overflow-y: auto; display: flex; flex-direction: column; gap: 15px; padding-right: 5px;">
+            <div id="plc-snippets-list"
+                style="max-height: 40vh; overflow-y: auto; display: flex; flex-direction: column; gap: 15px; padding-right: 5px;">
                 <!-- JS Motoru Burayı Dolduracak -->
             </div>
         </div>
@@ -1549,42 +1562,82 @@
          💼 BUSINESS: CANLI MAKİNE (TELEMETRİ) MODALI
          ========================================== -->
     <div id="live-machine-modal" class="modal" style="z-index: 10020;">
-        <div class="modal-content" style="max-width: 450px; background: #050505; border: 1px solid #e74c3c; text-align: left; padding: 25px;">
-            <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #333; padding-bottom: 15px; margin-bottom: 20px;">
-                <h3 style="color: #e74c3c; margin: 0; font-family:'Courier New', monospace; letter-spacing: 1px; text-shadow: 0 0 10px #e74c3c;">>_ SCADA_MONITOR</h3>
-                <button onclick="closeLiveMachine()" style="background: transparent; border: none; color: #ff4444; font-size: 16px; cursor: pointer; font-weight: bold;">[X]</button>
+        <div class="modal-content"
+            style="max-width: 450px; background: #050505; border: 1px solid #e74c3c; text-align: left; padding: 25px;">
+            <div
+                style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #333; padding-bottom: 15px; margin-bottom: 20px;">
+                <h3
+                    style="color: #e74c3c; margin: 0; font-family:'Courier New', monospace; letter-spacing: 1px; text-shadow: 0 0 10px #e74c3c;">
+                    >_ SCADA_MONITOR</h3>
+                <button onclick="closeLiveMachine()"
+                    style="background: transparent; border: none; color: #ff4444; font-size: 16px; cursor: pointer; font-weight: bold;">[X]</button>
             </div>
 
-            <!-- Durum Göstergeleri -->
-            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-bottom: 20px;">
-                <div style="background: #111; border: 1px solid #333; padding: 15px; border-radius: 8px; text-align: center;">
-                    <span style="font-size: 11px; color: #888; display: block; margin-bottom: 5px;">ANA MOTOR (M100)</span>
-                    <div id="sim-motor-light" style="width: 25px; height: 25px; border-radius: 50%; background: #ff4444; margin: 0 auto 10px auto; box-shadow: 0 0 15px #ff4444;"></div>
-                    <strong id="sim-motor-status" style="color: #ff4444; font-size: 14px;">DURDU</strong>
+            <!-- YENİ: BAĞLANTI AYARLARI PANELİ -->
+            <div id="scada-connection-panel"
+                style="background: #111; padding: 15px; border-radius: 8px; border: 1px dashed #e74c3c; margin-bottom: 20px;">
+                <h4 style="color: #00d2ff; margin-top: 0; font-size: 13px;">Ağ Bağlantı Konfigürasyonu</h4>
+
+                <div style="display: flex; gap: 10px; margin-bottom: 10px;">
+                    <div style="flex: 2;">
+                        <label style="color:#aaa; font-size:10px;">Broker / API URL (Firebase / MQTT):</label>
+                        <input type="text" id="scada-url" value="wss://project-olympusss..."
+                            style="width: 100%; padding: 6px; background: #000; color: #fff; border: 1px solid #333; border-radius: 4px; box-sizing: border-box; font-size: 11px;">
+                    </div>
+                    <div style="flex: 1;">
+                        <label style="color:#aaa; font-size:10px;">Cihaz ID:</label>
+                        <input type="text" id="scada-device" value="DELTA-PLC-01"
+                            style="width: 100%; padding: 6px; background: #000; color: #fff; border: 1px solid #333; border-radius: 4px; box-sizing: border-box; font-size: 11px;">
+                    </div>
                 </div>
-                <div style="background: #111; border: 1px solid #333; padding: 15px; border-radius: 8px; text-align: center;">
-                    <span style="font-size: 11px; color: #888; display: block; margin-bottom: 5px;">ROTOR HIZI (D200)</span>
-                    <span style="font-size: 24px;">⚙️</span>
-                    <br>
-                    <strong style="color: #00d2ff; font-size: 20px;"><span id="sim-rpm">0</span> <small style="font-size: 10px;">RPM</small></strong>
+
+                <button onclick="connectToPLC()" id="btn-scada-connect" class="save-btn"
+                    style="width: 100%; background: #e74c3c; color: #fff; font-weight: bold;">SİSTEME BAĞLAN</button>
+            </div>
+
+            <!-- Durum Göstergeleri (Başlangıçta Yarı Şeffaf ve Pasif Görünecek) -->
+            <div id="scada-dashboard" style="opacity: 0.3; pointer-events: none; transition: opacity 0.5s;">
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-bottom: 20px;">
+                    <div
+                        style="background: #111; border: 1px solid #333; padding: 15px; border-radius: 8px; text-align: center;">
+                        <span style="font-size: 11px; color: #888; display: block; margin-bottom: 5px;">ANA MOTOR
+                            (M100)</span>
+                        <div id="sim-motor-light"
+                            style="width: 25px; height: 25px; border-radius: 50%; background: #333; margin: 0 auto 10px auto;">
+                        </div>
+                        <strong id="sim-motor-status" style="color: #666; font-size: 14px;">BAĞLANTI YOK</strong>
+                    </div>
+                    <div
+                        style="background: #111; border: 1px solid #333; padding: 15px; border-radius: 8px; text-align: center;">
+                        <span style="font-size: 11px; color: #888; display: block; margin-bottom: 5px;">ROTOR HIZI
+                            (D200)</span>
+                        <span style="font-size: 24px;">⚙️</span>
+                        <br>
+                        <strong style="color: #00d2ff; font-size: 20px;"><span id="sim-rpm">0</span> <small
+                                style="font-size: 10px;">RPM</small></strong>
+                    </div>
+                </div>
+
+                <!-- Sıcaklık Barı -->
+                <div
+                    style="background: #111; border: 1px solid #333; padding: 15px; border-radius: 8px; margin-bottom: 20px;">
+                    <div style="display: flex; justify-content: space-between; margin-bottom: 5px;">
+                        <span style="font-size: 11px; color: #888;">EKSTRUDER SICAKLIĞI (D202)</span>
+                        <strong style="color: #888; font-size: 12px;"><span id="sim-temp">0.0</span> °C</strong>
+                    </div>
+                    <div
+                        style="width: 100%; background: #222; height: 14px; border-radius: 7px; overflow: hidden; box-shadow: inset 0 0 5px #000;">
+                        <div id="sim-temp-bar"
+                            style="width: 0%; background: #27ae60; height: 100%; border-radius: 7px; transition: width 0.5s ease, background 0.5s ease;">
+                        </div>
+                    </div>
                 </div>
             </div>
 
-            <!-- Sıcaklık Barı -->
-            <div style="background: #111; border: 1px solid #333; padding: 15px; border-radius: 8px; margin-bottom: 20px;">
-                <div style="display: flex; justify-content: space-between; margin-bottom: 5px;">
-                    <span style="font-size: 11px; color: #888;">EKSTRUDER SICAKLIĞI (D202)</span>
-                    <strong style="color: #27ae60; font-size: 12px;"><span id="sim-temp">24.0</span> °C</strong>
-                </div>
-                <div style="width: 100%; background: #222; height: 14px; border-radius: 7px; overflow: hidden; box-shadow: inset 0 0 5px #000;">
-                    <div id="sim-temp-bar" style="width: 24%; background: #27ae60; height: 100%; border-radius: 7px; transition: width 0.5s ease, background 0.5s ease;"></div>
-                </div>
-            </div>
-            
-            <div id="sim-log" style="font-family:'Courier New', monospace; font-size:10px; color:#27ae60; background:#000; padding:10px; border-radius:4px; height: 70px; overflow-y:auto; border:1px dashed #333;">
-                > Sistem başlatılıyor...<br>
-                > MQTT Sunucusuna bağlanıldı.<br>
-                > Veri akışı bekleniyor...
+            <!-- Terminal Log Ekranı -->
+            <div id="sim-log"
+                style="font-family:'Courier New', monospace; font-size:10px; color:#27ae60; background:#000; padding:10px; border-radius:4px; height: 80px; overflow-y:auto; border:1px dashed #333;">
+                > Sistem beklemede. Bağlantı parametrelerini giriniz.
             </div>
         </div>
     </div>
