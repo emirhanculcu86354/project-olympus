@@ -1299,24 +1299,35 @@
     <!-- ==========================================
          💼 BUSINESS / CULBASE KOMUTA MERKEZİ
          ========================================== -->
-    <div id="business-screen" class="full-screen-overlay hidden" style="z-index: 10000; background: #000a12; flex-direction: column; justify-content: flex-start; overflow-y: auto;">
-        
+    <div id="business-screen" class="full-screen-overlay hidden"
+        style="z-index: 10000; background: #000a12; flex-direction: column; justify-content: flex-start; overflow-y: auto;">
+
         <!-- ÜST BAR -->
-        <div class="header-top" style="width:100%; padding: calc(env(safe-area-inset-top) + 15px) 20px 15px 20px; background:#000; border-bottom: 2px solid #00d2ff; display: flex; justify-content: space-between; align-items: center; position: sticky; top: 0; z-index: 10;">
-            <h2 style="color:#00d2ff; font-family:'Courier New', monospace; font-weight:900; margin:0; text-shadow: 0 0 10px #00d2ff; letter-spacing: 1px;">CULBASE_COMMAND_</h2>
-            <button onclick="returnToHub(); document.getElementById('business-screen').classList.add('hidden');" class="edit-btn" style="border-color:#ff4444; color:#ff4444;">[X] ÇIKIŞ</button>
+        <div class="header-top"
+            style="width:100%; padding: calc(env(safe-area-inset-top) + 15px) 20px 15px 20px; background:#000; border-bottom: 2px solid #00d2ff; display: flex; justify-content: space-between; align-items: center; position: sticky; top: 0; z-index: 10;">
+            <h2
+                style="color:#00d2ff; font-family:'Courier New', monospace; font-weight:900; margin:0; text-shadow: 0 0 10px #00d2ff; letter-spacing: 1px;">
+                CULBASE_COMMAND_</h2>
+            <button onclick="returnToHub(); document.getElementById('business-screen').classList.add('hidden');"
+                class="edit-btn" style="border-color:#ff4444; color:#ff4444;">[X] ÇIKIŞ</button>
         </div>
-        
+
         <div style="padding: 20px; display: flex; flex-direction: column; gap: 20px; padding-bottom: 50px;">
-            
+
             <!-- 1. POMODORO (DERİN ÇALIŞMA) MOTORU -->
-            <div style="background: #111; border: 1px solid #00d2ff; border-radius: 12px; padding: 20px; text-align: center; box-shadow: 0 4px 15px rgba(0, 210, 255, 0.1);">
+            <div
+                style="background: #111; border: 1px solid #00d2ff; border-radius: 12px; padding: 20px; text-align: center; box-shadow: 0 4px 15px rgba(0, 210, 255, 0.1);">
                 <h3 style="color: #00d2ff; margin-bottom: 5px; font-size: 16px;">Derin Çalışma (Deep Work)</h3>
                 <p style="color: #888; font-size: 11px; margin-bottom: 10px;">Odaklan ve dünyayı dışarıda bırak.</p>
-                <h1 id="pomodoro-time" style="font-size: 56px; color: #fff; font-family: 'Courier New', monospace; margin: 10px 0; font-weight: 900;">25:00</h1>
+                <h1 id="pomodoro-time"
+                    style="font-size: 56px; color: #fff; font-family: 'Courier New', monospace; margin: 10px 0; font-weight: 900;">
+                    25:00</h1>
                 <div style="display: flex; justify-content: center; gap: 10px;">
-                    <button class="save-btn" onclick="startPomodoro()" style="background: #00d2ff; color: #000; padding: 10px 25px; margin: 0; width: auto; font-weight: bold;">▶ Başlat</button>
-                    <button class="edit-btn" onclick="resetPomodoro()" style="border-color: #ff4444; color: #ff4444; padding: 10px 25px; margin: 0; font-weight: bold;">Sıfırla</button>
+                    <button class="save-btn" onclick="startPomodoro()"
+                        style="background: #00d2ff; color: #000; padding: 10px 25px; margin: 0; width: auto; font-weight: bold;">▶
+                        Başlat</button>
+                    <button class="edit-btn" onclick="resetPomodoro()"
+                        style="border-color: #ff4444; color: #ff4444; padding: 10px 25px; margin: 0; font-weight: bold;">Sıfırla</button>
                 </div>
             </div>
 
@@ -1324,7 +1335,9 @@
             <div style="background: #111; border: 1px solid #333; border-radius: 12px; padding: 15px;">
                 <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
                     <h3 style="color: #fff; font-size: 16px; margin: 0;">Aktif Projeler / Fiverr</h3>
-                    <button class="edit-btn" onclick="addBusinessProject()" style="padding: 4px 10px; font-size: 11px; border-color: #27ae60; color: #27ae60; font-weight: bold;">+ Yeni Ekle</button>
+                    <button class="edit-btn" onclick="addBusinessProject()"
+                        style="padding: 4px 10px; font-size: 11px; border-color: #27ae60; color: #27ae60; font-weight: bold;">+
+                        Yeni Ekle</button>
                 </div>
                 <div id="business-projects-list" style="display: flex; flex-direction: column; gap: 10px;">
                     <!-- Projeler JS ile buraya yüklenecek -->
@@ -1334,67 +1347,171 @@
             <!-- 3. OTOMASYON & YAZILIM ARAÇLARI (Gelecek Entegrasyonlar) -->
             <h3 style="color: #fff; font-size: 16px; margin: 0;">Sistem Entegrasyonları</h3>
             <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px;">
-                <div style="background: linear-gradient(145deg, #1a1a1a, #0a0a0a); border: 1px solid #333; border-radius: 12px; padding: 15px; text-align: center; cursor: pointer;" onclick="alert('Yakında: Delta PLC ve HMI register verilerini buradan canlı okuyacağız!')">
+                <div style="background: linear-gradient(145deg, #1a1a1a, #0a0a0a); border: 1px solid #333; border-radius: 12px; padding: 15px; text-align: center; cursor: pointer;"
+                    onclick="alert('Yakında: Delta PLC ve HMI register verilerini buradan canlı okuyacağız!')">
                     <span style="font-size: 32px; filter: drop-shadow(0 0 5px #fff);">⚙️</span>
                     <h4 style="color: #fff; margin: 10px 0 5px 0; font-size: 14px;">PLC & HMI Paneli</h4>
                     <p style="color: #888; font-size: 10px; margin: 0;">Bağlantı Bekleniyor</p>
                 </div>
-                <div style="background: linear-gradient(145deg, #1a1a1a, #0a0a0a); border: 1px solid #333; border-radius: 12px; padding: 15px; text-align: center; cursor: pointer;" onclick="openDeployLogs()">
+                <div style="background: linear-gradient(145deg, #1a1a1a, #0a0a0a); border: 1px solid #333; border-radius: 12px; padding: 15px; text-align: center; cursor: pointer;"
+                    onclick="openDeployLogs()">
                     <span style="font-size: 32px; filter: drop-shadow(0 0 5px #00d2ff);">🚀</span>
                     <h4 style="color: #fff; margin: 10px 0 5px 0; font-size: 14px;">Deploy Logları</h4>
                     <p style="color: #27ae60; font-size: 10px; margin: 0; font-weight: bold;">Canlı API Bağlantısı</p>
                 </div>
             </div>
-            
+
         </div>
     </div>
     <!-- YENİ: GITHUB DEPLOY LOGLARI TERMINALİ -->
     <div id="deploy-logs-modal" class="modal" style="z-index: 10005;">
         <div class="modal-content" style="max-width: 500px; background: #050505; border: 1px solid #00d2ff;">
-            <h2 style="color:#00d2ff; font-family:'Courier New', monospace; text-shadow: 0 0 5px #00d2ff; margin-bottom:15px; font-size: 18px;">> GITHUB_ACTIONS_LOGS</h2>
-            
-            <div id="deploy-terminal" style="background: #000; padding: 15px; border-radius: 8px; border: 1px solid #333; font-family: 'Courier New', monospace; font-size: 12px; color: #27ae60; height: 300px; overflow-y: auto; text-align: left; line-height: 1.5;">
+            <h2
+                style="color:#00d2ff; font-family:'Courier New', monospace; text-shadow: 0 0 5px #00d2ff; margin-bottom:15px; font-size: 18px;">
+                > GITHUB_ACTIONS_LOGS</h2>
+
+            <div id="deploy-terminal"
+                style="background: #000; padding: 15px; border-radius: 8px; border: 1px solid #333; font-family: 'Courier New', monospace; font-size: 12px; color: #27ae60; height: 300px; overflow-y: auto; text-align: left; line-height: 1.5;">
                 Sistem başlatılıyor...
             </div>
-            
-            <button class="save-btn" onclick="document.getElementById('deploy-logs-modal').style.display='none'" style="margin-top:15px; background: #222; color: #fff; border: 1px solid #444;">Bağlantıyı Kes</button>
+
+            <button class="save-btn" onclick="document.getElementById('deploy-logs-modal').style.display='none'"
+                style="margin-top:15px; background: #222; color: #fff; border: 1px solid #444;">Bağlantıyı Kes</button>
         </div>
     </div>
     <!-- ==========================================
-         💼 BUSINESS: PROJE DETAY MODALI VE GİZLİ GEÇİT
+         💼 BUSINESS: YENİ PROJE EKLEME MODALI
+         ========================================== -->
+    <div id="business-add-modal" class="modal" style="z-index: 10010;">
+        <div class="modal-content"
+            style="max-width: 400px; background: #0a0a0a; border: 1px solid #00d2ff; text-align: left; padding: 25px;">
+            <h3 style="color: #00d2ff; margin-top: 0;">> YENİ GÖREV OLUŞTUR</h3>
+
+            <label style="color:#aaa; font-size:12px;">Proje Adı (Zorunlu):</label>
+            <input type="text" id="add-proj-name"
+                style="width:100%; padding:10px; background:#000; color:#fff; border:1px solid #333; margin-bottom:15px; border-radius:4px; box-sizing:border-box;"
+                placeholder="Örn: SolidWorks Makine Tasarımı">
+
+            <label style="color:#aaa; font-size:12px;">Müşteri / Platform (Hızlı Kayıt için boş bırak):</label>
+            <input type="text" id="add-proj-client"
+                style="width:100%; padding:10px; background:#000; color:#fff; border:1px solid #333; margin-bottom:15px; border-radius:4px; box-sizing:border-box;"
+                placeholder="Örn: Fiverr">
+
+            <label style="color:#aaa; font-size:12px;">Başlangıç Durumu:</label>
+            <select id="add-proj-status"
+                style="width:100%; padding:10px; background:#000; color:#fff; border:1px solid #333; margin-bottom:20px; border-radius:4px; box-sizing:border-box;">
+                <option value="Aktif">Aktif</option>
+                <option value="Beklemede">Beklemede</option>
+                <option value="Tamamlandı">Tamamlandı</option>
+            </select>
+
+            <div style="display:flex; gap:10px;">
+                <button onclick="saveNewBusinessProject()" class="save-btn"
+                    style="flex:1; background:#00d2ff; color:#000; font-weight:bold;">KAYDET</button>
+                <button onclick="document.getElementById('business-add-modal').style.display='none'" class="edit-btn"
+                    style="flex:1; border-color:#ff4444; color:#ff4444;">İPTAL</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- ==========================================
+         💼 BUSINESS: PROJE DETAY VE DÜZENLEME MODALI
          ========================================== -->
     <div id="project-detail-modal" class="modal" style="z-index: 10010;">
-        <div class="modal-content" style="max-width: 400px; background: #0a0a0a; border: 1px solid #333; text-align: left; padding: 25px;">
-            
-            <!-- Başlık ve Durum -->
-            <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #222; padding-bottom: 12px; margin-bottom: 15px;">
-                <h3 id="pd-title" style="color: #fff; margin: 0; font-size: 18px; font-family:'Courier New', monospace;">Proje Adı</h3>
-                <span id="pd-status" style="font-size: 11px; font-weight: bold; padding: 4px 8px; border-radius: 4px; letter-spacing: 1px;">Aktif</span>
-            </div>
+        <div class="modal-content"
+            style="max-width: 400px; background: #0a0a0a; border: 1px solid #333; text-align: left; padding: 25px;">
 
-            <!-- Müşteri Bilgisi -->
-            <div style="margin-bottom: 15px;">
-                <label style="color: #888; font-size: 11px; text-transform: uppercase;">Müşteri / Platform:</label>
-                <div style="color: #00d2ff; font-size: 14px; margin-top: 3px; font-weight: bold;">Fiverr / Uluslararası</div>
-            </div>
+            <!-- GÖRÜNTÜLEME MODU (Varsayılan) -->
+            <div id="pd-view-mode">
+                <div
+                    style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #222; padding-bottom: 12px; margin-bottom: 15px;">
+                    <h3 id="pd-title"
+                        style="color: #fff; margin: 0; font-size: 18px; font-family:'Courier New', monospace;">Proje Adı
+                    </h3>
+                    <span id="pd-status"
+                        style="font-size: 11px; font-weight: bold; padding: 4px 8px; border-radius: 4px; letter-spacing: 1px;">Aktif</span>
+                </div>
 
-            <!-- İlerleme Çubuğu -->
-            <div style="margin-bottom: 25px;">
-                <label style="color: #888; font-size: 11px; text-transform: uppercase;">Geliştirme İlerlemesi:</label>
-                <div style="width: 100%; background: #222; height: 10px; border-radius: 5px; margin-top: 8px; overflow: hidden; box-shadow: inset 0 0 5px #000;">
-                    <div id="pd-progress" style="width: 65%; background: var(--goldnova); height: 100%; border-radius: 5px; transition: width 1s ease-in-out;"></div>
+                <div style="margin-bottom: 15px; display:flex; justify-content:space-between;">
+                    <div>
+                        <label style="color: #888; font-size: 11px; text-transform: uppercase;">Müşteri /
+                            Platform:</label>
+                        <div id="pd-client"
+                            style="color: #00d2ff; font-size: 14px; margin-top: 3px; font-weight: bold;">Belirtilmedi
+                        </div>
+                    </div>
+                    <!-- YENİ: Düzenle Butonu -->
+                    <button onclick="toggleEditProjectDetails(true)"
+                        style="background:transparent; border:1px solid #f6c000; color:#f6c000; border-radius:4px; padding:4px 10px; font-size:11px; cursor:pointer; height:30px;">✏️
+                        Düzenle</button>
+                </div>
+
+                <div style="margin-bottom: 25px;">
+                    <div style="display:flex; justify-content:space-between;">
+                        <label style="color: #888; font-size: 11px; text-transform: uppercase;">Geliştirme
+                            İlerlemesi:</label>
+                        <span id="pd-progress-text" style="color:#fff; font-size:11px; font-weight:bold;">%0</span>
+                    </div>
+                    <div
+                        style="width: 100%; background: #222; height: 10px; border-radius: 5px; margin-top: 8px; overflow: hidden; box-shadow: inset 0 0 5px #000;">
+                        <div id="pd-progress"
+                            style="width: 0%; background: var(--goldnova); height: 100%; border-radius: 5px; transition: width 1s ease-in-out;">
+                        </div>
+                    </div>
                 </div>
             </div>
 
-            <!-- KÖPRÜ: GİZLİ MATRIX PROTOKOLÜNÜ TETİKLER -->
-            <div style="margin-top: 20px; padding: 15px; background: rgba(255, 68, 68, 0.05); border: 1px dashed #ff4444; border-radius: 8px; text-align: center;">
-                <span style="font-size: 24px; margin-bottom: 5px; display: block;">🔒</span>
-                <p style="color: #ff4444; font-size: 11px; margin: 0 0 12px 0;">Gizli Kaynak Kodları ve Müşteri Şifreleri CULBASE'de korunmaktadır.</p>
-                <!-- DİKKAT: Bu buton önce detay modalını kapatır, sonra gizli terminali açar! -->
-                <button onclick="document.getElementById('project-detail-modal').style.display='none'; openSecretTerminal();" class="edit-btn" style="border-color: #ff4444; color: #ff4444; width: 100%; font-weight: bold; letter-spacing: 1px; font-size: 12px;">CULBASE'E GEÇİŞ YAP</button>
+            <!-- DÜZENLEME MODU (Gizli) -->
+            <div id="pd-edit-mode" class="hidden">
+                <h4 style="color:#f6c000; margin-top:0;">✏️ Projeyi Düzenle</h4>
+                <label style="color:#aaa; font-size:11px;">Proje Adı:</label>
+                <input type="text" id="edit-pd-title-input"
+                    style="width:100%; padding:8px; background:#000; color:#fff; border:1px solid #333; margin-bottom:10px; border-radius:4px; box-sizing:border-box;">
+
+                <label style="color:#aaa; font-size:11px;">Müşteri:</label>
+                <input type="text" id="edit-pd-client-input"
+                    style="width:100%; padding:8px; background:#000; color:#fff; border:1px solid #333; margin-bottom:10px; border-radius:4px; box-sizing:border-box;">
+
+                <label style="color:#aaa; font-size:11px;">Durum:</label>
+                <select id="edit-pd-status-input"
+                    style="width:100%; padding:8px; background:#000; color:#fff; border:1px solid #333; margin-bottom:10px; border-radius:4px; box-sizing:border-box;">
+                    <option value="Aktif">Aktif</option>
+                    <option value="Beklemede">Beklemede</option>
+                    <option value="Tamamlandı">Tamamlandı</option>
+                    <option value="İptal">İptal</option>
+                </select>
+
+                <label style="color: #00d2ff; font-size: 11px;">İlerleme Durumu: % <span
+                        id="edit-pd-progress-val">0</span></label>
+                <!-- YENİ: İlerleme Slider'ı -->
+                <input type="range" id="edit-pd-progress-input" min="0" max="100" value="0"
+                    style="width:100%; margin-bottom:15px;"
+                    oninput="document.getElementById('edit-pd-progress-val').innerText = this.value">
+
+                <div style="display:flex; gap:10px; margin-bottom:20px;">
+                    <button onclick="saveProjectDetailsEdit()" class="save-btn"
+                        style="flex:1; background:#27ae60; color:#fff; font-weight:bold;">KAYDET</button>
+                    <button onclick="toggleEditProjectDetails(false)" class="edit-btn"
+                        style="flex:1; border-color:#ff4444; color:#ff4444;">İPTAL</button>
+                </div>
             </div>
 
-            <button class="save-btn" onclick="document.getElementById('project-detail-modal').style.display='none'" style="margin-top:15px; width:100%; background: #222; color: #fff; border: 1px solid #444;">Paneli Kapat</button>
+            <!-- GİZLİ GEÇİT (CULBASE) -->
+            <div
+                style="margin-top: 10px; padding: 15px; background: rgba(255, 68, 68, 0.05); border: 1px dashed #ff4444; border-radius: 8px; text-align: center;">
+                <span style="font-size: 24px; margin-bottom: 5px; display: block;">🔒</span>
+                <p style="color: #ff4444; font-size: 11px; margin: 0 0 12px 0;">Gizli Kaynak Kodları ve Dosyalar
+                    CULBASE'de korunmaktadır.</p>
+                <button
+                    onclick="document.getElementById('project-detail-modal').style.display='none'; openSecretTerminal();"
+                    class="edit-btn"
+                    style="border-color: #ff4444; color: #ff4444; width: 100%; font-weight: bold; letter-spacing: 1px; font-size: 12px;">CULBASE'E
+                    GEÇİŞ YAP</button>
+            </div>
+
+            <button class="save-btn" onclick="document.getElementById('project-detail-modal').style.display='none'"
+                style="margin-top:15px; width:100%; background: #222; color: #fff; border: 1px solid #444;">Paneli
+                Kapat</button>
         </div>
     </div>
 

@@ -3857,57 +3857,87 @@ let bProjects = JSON.parse(localStorage.getItem('culbase_projects')) || [
 ];
 
 // ==========================================
-// 💼 HUB'DAN CULBASE'E KÖPRÜ (Olympus script.js)
+// 💼 HUB'DAN CULBASE'E KÖPRÜ (YENİ NESİL)
 // ==========================================
+
+// 1. Yeni Proje Modalını Açar
 window.addBusinessProject = function () {
-    const name = prompt("Yeni Projenin Adı veya Görevi:");
-    if (name && name.trim() !== "") {
-        // Artık culbase_projects değil, doğrudan culbase_offers veritabanına yazıyoruz!
-        let offers = JSON.parse(localStorage.getItem('culbase_offers')) || [];
-
-        const newOffer = {
-            id: Date.now(),
-            companyName: name + " (Hızlı Kayıt)",
-            offerDate: new Date().toLocaleDateString('tr-TR'),
-            offerNumber: "PRJ-" + Math.floor(Math.random() * 10000),
-            items: [{ name: "Proje / Görev Tanımı", desc: "Hub üzerinden eklendi. Detaylandırılmalı.", qty: 1, price: 0, total: "0 ₺" }],
-            grandTotal: "0 ₺",
-            status: "Aktif",
-            files: [] // Kaynak dosyalar için boş dizi
-        };
-
-        offers.push(newOffer);
-        localStorage.setItem('culbase_offers', JSON.stringify(offers));
-        renderBusinessProjects();
-
-        if (navigator.vibrate) navigator.vibrate([30, 30]);
-        alert("Görev gizli CULBASE Kasası'na başarıyla iletildi!");
-    }
+    document.getElementById('add-proj-name').value = '';
+    document.getElementById('add-proj-client').value = '';
+    document.getElementById('add-proj-status').value = 'Aktif';
+    document.getElementById('business-add-modal').style.display = 'flex';
 };
 
+// 2. Projeyi İster Hızlı İster Detaylı Kaydeder
+window.saveNewBusinessProject = function () {
+    const name = document.getElementById('add-proj-name').value.trim();
+    const client = document.getElementById('add-proj-client').value.trim();
+    const status = document.getElementById('add-proj-status').value;
+
+    if (!name) { alert("Lütfen bir proje adı girin!"); return; }
+
+    // Hızlı kayıt zekası: Müşteri girilmezse otomatik Hızlı Kayıt der.
+    let isQuick = (client === "");
+    let finalName = isQuick ? name + " (Hızlı Kayıt)" : name;
+    let finalClient = isQuick ? "Belirtilmedi" : client;
+    // YENİ: Akıllı Teklif Numarası Üretici (CLC19 + Yıl + 4 Rakam)
+    // 1. O anki yılın son 2 hanesini alır (Örn: 2026 -> "26")
+    let yearSuffix = new Date().getFullYear().toString().slice(-2);
+    // 2. 0000 ile 9999 arasında tam 4 basamaklı rastgele rakam üretir (Örn: 0482, 5921)
+    let random4Digits = Math.floor(Math.random() * 10000).toString().padStart(4, '0');
+    // 3. Kodu birleştirir (Örn: CLC19260482)
+    let specialOfferNumber = "CLC19" + yearSuffix + random4Digits;
+
+    let offers = JSON.parse(localStorage.getItem('culbase_offers')) || [];
+
+    const newOffer = {
+        id: Date.now(),
+        companyName: finalName,
+        client: finalClient,
+        progress: 0, // Varsayılan ilerleme 0
+        offerDate: new Date().toLocaleDateString('tr-TR'),
+        offerNumber: specialOfferNumber,
+        items: [{ name: "Proje / Görev Tanımı", desc: "Sistem üzerinden eklendi.", qty: 1, price: 0, total: "0 ₺" }],
+        grandTotal: "0 ₺",
+        status: status,
+        files: []
+    };
+
+    offers.push(newOffer);
+    localStorage.setItem('culbase_offers', JSON.stringify(offers));
+    renderBusinessProjects();
+
+    document.getElementById('business-add-modal').style.display = 'none';
+    if (navigator.vibrate) navigator.vibrate([30, 30]);
+};
+
+// 3. Projeleri Ön Yüze Basar (Renk Zekası Eklendi)
 window.renderBusinessProjects = function () {
     const list = document.getElementById('business-projects-list');
     if (!list) return;
     list.innerHTML = '';
 
-    // Hub listesi de artık culbase_offers'tan okunuyor
     let offers = JSON.parse(localStorage.getItem('culbase_offers')) || [];
 
     if (offers.length === 0) {
-        list.innerHTML = '<p style="color:#888; font-size:12px; text-align:center;">Şu an aktif bir proje yok.</p>';
+        list.innerHTML = '<p style="color:#888; font-size:12px; text-align:center;">Şu an kayıtlı bir proje yok.</p>';
         return;
     }
 
-    // En yeni en üstte görünsün
     offers.reverse().forEach(p => {
         let statusStr = p.status || "Beklemede";
-        let colorStr = statusStr === "Aktif" ? "#00d2ff" : "#f6c000";
+        let colorStr = "#00d2ff"; // Aktif
+        if (statusStr === "Beklemede") colorStr = "#f6c000";
+        else if (statusStr === "Tamamlandı") colorStr = "#27ae60";
+        else if (statusStr === "İptal") colorStr = "#ff4444";
+
+        let prog = p.progress || 0;
 
         list.innerHTML += `
             <div class="business-project-card" style="background: #1a1a1a; border-left: 4px solid ${colorStr}; padding: 12px 15px; border-radius: 6px; display: flex; justify-content: space-between; align-items: center; transition: 0.2s; margin-bottom: 10px;">
                 <div onclick="openProjectDetails(${p.id})" style="flex: 1; cursor: pointer;">
                     <h4 style="color: #fff; margin: 0 0 4px 0; font-size: 14px;">${p.companyName}</h4>
-                    <span style="color: ${colorStr}; font-size: 11px; font-weight: bold; padding: 2px 6px; background: rgba(255,255,255,0.05); border-radius: 4px;">${statusStr}</span>
+                    <span style="color: ${colorStr}; font-size: 11px; font-weight: bold; padding: 2px 6px; background: rgba(255,255,255,0.05); border-radius: 4px;">${statusStr} (%${prog})</span>
                 </div>
                 <button onclick="deleteOfferFromHub(${p.id})" style="background: transparent; border: none; color: #ff4444; font-size: 18px; cursor: pointer; padding: 5px; margin-left: 10px;">🗑️</button>
             </div>
@@ -3924,21 +3954,72 @@ window.deleteOfferFromHub = function (id) {
     }
 };
 
+// 4. Detayları Görüntüleme ve Düzenleme Motoru
+let activeHubEditId = null;
+
 window.openProjectDetails = function (id) {
     let offers = JSON.parse(localStorage.getItem('culbase_offers')) || [];
     const p = offers.find(x => x.id === id);
     if (!p) return;
 
+    activeHubEditId = id;
+    toggleEditProjectDetails(false); // Önce görüntüleme modunda aç
+
+    let colorStr = "#00d2ff";
+    if (p.status === "Beklemede") colorStr = "#f6c000";
+    else if (p.status === "Tamamlandı") colorStr = "#27ae60";
+    else if (p.status === "İptal") colorStr = "#ff4444";
+
     document.getElementById('pd-title').innerText = p.companyName;
+    document.getElementById('pd-client').innerText = p.client || "Belirtilmedi";
     document.getElementById('pd-status').innerText = p.status || "Beklemede";
+    document.getElementById('pd-status').style.color = colorStr;
+    document.getElementById('pd-status').style.border = `1px solid ${colorStr}`;
+    document.getElementById('pd-status').style.background = 'rgba(255,255,255,0.05)';
+
+    let prog = p.progress || 0;
+    document.getElementById('pd-progress-text').innerText = `%${prog}`;
 
     document.getElementById('pd-progress').style.width = '0%';
+    document.getElementById('pd-progress').style.background = colorStr;
     document.getElementById('project-detail-modal').style.display = 'flex';
 
-    setTimeout(() => {
-        document.getElementById('pd-progress').style.width = (Math.floor(Math.random() * 50) + 30) + '%';
-    }, 100);
+    setTimeout(() => { document.getElementById('pd-progress').style.width = prog + '%'; }, 100);
+
+    // Düzenleme inputlarını hazırla
+    document.getElementById('edit-pd-title-input').value = p.companyName;
+    document.getElementById('edit-pd-client-input').value = p.client || "";
+    document.getElementById('edit-pd-status-input').value = p.status || "Aktif";
+    document.getElementById('edit-pd-progress-input').value = prog;
+    document.getElementById('edit-pd-progress-val').innerText = prog;
+
     if (navigator.vibrate) navigator.vibrate(20);
+};
+
+window.toggleEditProjectDetails = function (showEdit) {
+    if (showEdit) {
+        document.getElementById('pd-view-mode').classList.add('hidden');
+        document.getElementById('pd-edit-mode').classList.remove('hidden');
+    } else {
+        document.getElementById('pd-edit-mode').classList.add('hidden');
+        document.getElementById('pd-view-mode').classList.remove('hidden');
+    }
+};
+
+window.saveProjectDetailsEdit = function () {
+    let offers = JSON.parse(localStorage.getItem('culbase_offers')) || [];
+    const index = offers.findIndex(x => x.id === activeHubEditId);
+    if (index !== -1) {
+        offers[index].companyName = document.getElementById('edit-pd-title-input').value.trim();
+        offers[index].client = document.getElementById('edit-pd-client-input').value.trim() || "Belirtilmedi";
+        offers[index].status = document.getElementById('edit-pd-status-input').value;
+        offers[index].progress = parseInt(document.getElementById('edit-pd-progress-input').value) || 0;
+
+        // İsim "(Hızlı Kayıt)" ibaresi içeriyorsa ve müşteri de güncellendiyse (veya isim elle değiştirildiyse) text temiz kalsın.
+        localStorage.setItem('culbase_offers', JSON.stringify(offers));
+        renderBusinessProjects();
+        openProjectDetails(activeHubEditId); // Yeni verilerle tekrar yükle
+    }
 };
 
 // Sayfa yüklendiğinde projeleri listele

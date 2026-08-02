@@ -121,13 +121,14 @@ document.addEventListener("DOMContentLoaded", function () {
 
     const savedTable = document.getElementById("savedOffersTableBody");
     if (savedTable) {
-        window.loadSavedOffers = function () {
-            let offers = JSON.parse(localStorage.getItem("culbase_offers")) || [];
+        window.loadSavedOffers = function() {
+        let offers = JSON.parse(localStorage.getItem("culbase_offers")) || [];
+        let savedTable = document.getElementById("savedOffersTableBody");
+        if(savedTable) {
             savedTable.innerHTML = "";
-            if (offers.length === 0) {
+            if(offers.length === 0) {
                 savedTable.innerHTML = "<tr><td colspan='5' style='text-align:center;'>Henüz kayıtlı iş veya teklif bulunmamaktadır.</td></tr>";
             } else {
-                // En yeni projeler en üstte listelensin
                 offers.reverse().forEach(off => {
                     let fileCount = off.files ? off.files.length : 0;
                     let tr = document.createElement("tr");
@@ -141,14 +142,16 @@ document.addEventListener("DOMContentLoaded", function () {
                         </td>
                         <td style="display:flex; gap:5px; flex-wrap:wrap;">
                             <button class="delete-btn" style="background:#f39c12; border:none; border-radius:4px;" onclick="openEditOfferModal(${off.id})">Düzenle</button>
-                            <button class="delete-btn" style="background:#2980b9; border:none; border-radius:4px;" onclick="generateProfessionalPDF('kayitli', ${off.id})">PDF İndir</button>
+                            <!-- DÜZELTİLDİ: Artık direkt indirmez, önce görüntüleyiciyi açar -->
+                            <button class="delete-btn" style="background:#2980b9; border:none; border-radius:4px;" onclick="openPDFPreview('kayitli', ${off.id})">PDF Görüntüle 👁️</button>
                             <button class="delete-btn" style="background:#e74c3c; border:none; border-radius:4px;" onclick="deleteOffer(${off.id})">Sil</button>
                         </td>
                     `;
                     savedTable.appendChild(tr);
                 });
             }
-        };
+        }
+    };
         loadSavedOffers();
     }
 
@@ -1053,4 +1056,160 @@ window.deleteActiveItem = function () {
     } else {
         alert("Lütfen silmek istediğiniz öğeyi panodan seçin (Üzerine tıklayın).");
     }
+};
+// ==========================================
+// YENİ NESİL PDF ÖNİZLEME VE İNDİRME MOTORU
+// ==========================================
+window.openPDFPreview = function(type, id) {
+    let companyName = "Belirtilmedi", offerDate = new Date().toLocaleDateString('tr-TR'), offerNumber = "TKLF-" + Math.floor(Math.random()*10000);
+    let items = [];
+    let subTotal = 0, kdv = 0, grandTotal = 0;
+
+    // Veritabanından projeyi bul
+    let offers = JSON.parse(localStorage.getItem("culbase_offers")) || [];
+    let offer = offers.find(o => o.id === id);
+    if(!offer) { showToast("Kayıt bulunamadı!"); return; }
+    
+    companyName = offer.companyName;
+    offerDate = offer.offerDate || offerDate;
+    offerNumber = offer.offerNumber || offerNumber;
+    items = offer.items || [];
+    
+    // Eğer Hub'dan hızlı eklenmiş boş bir proje ise, listeyi çökertmemek için boş bir kalem ekle
+    if(items.length === 0) {
+        items.push({name: "Proje Görevi / Otomasyon İşlemi", desc: "Hızlı kayıt verisi", qty: 1, price: 0, total: 0});
+    }
+    
+    // Genel Toplamı (0 ₺ yazsa bile) temiz sayıya çevir
+    grandTotal = parseFloat(String(offer.grandTotal).replace(/[^0-9,-]+/g,"").replace(',','.')) || 0;
+
+    // HTML Tablosunu Hatasız Şekilde İnşa Et
+    let tbodyHTML = ""; let totalItemsCount = 0;
+    items.forEach(item => {
+        let qtyNum = parseFloat(item.qty) || 0;
+        totalItemsCount += qtyNum;
+        
+        // Fiyat ve Toplam verilerini (harf, boşluk, ₺ işareti içerse bile) tertemiz sayıya çevir
+        let priceNum = 0, totalNum = 0;
+        if (typeof item.price === 'number') priceNum = item.price;
+        else if (item.price) priceNum = parseFloat(String(item.price).replace(/[^0-9,-]+/g,"").replace(',','.')) || 0;
+        
+        if (typeof item.total === 'number') totalNum = item.total;
+        else if (item.total) totalNum = parseFloat(String(item.total).replace(/[^0-9,-]+/g,"").replace(',','.')) || 0;
+
+        tbodyHTML += `
+            <tr style="border-bottom: 1px solid #eee;">
+                <td style="padding: 10px; border-left: 1px solid #eee; border-right: 1px solid #eee; color:#000;">${item.name || '-'}</td>
+                <td style="padding: 10px; border-right: 1px solid #eee; color:#000;">${item.desc || '-'}</td>
+                <td style="padding: 10px; border-right: 1px solid #eee; text-align: center; font-weight:bold; color:#000;">${qtyNum}</td>
+                <td style="padding: 10px; border-right: 1px solid #eee; text-align: right; color:#000;">${priceNum.toFixed(2)} ₺</td>
+                <td style="padding: 10px; border-right: 1px solid #eee; text-align: right; font-weight:bold; color:#000;">${totalNum.toFixed(2)} ₺</td>
+            </tr>
+        `;
+    });
+
+    // A4 Kağıdının İç Tasarımı (HTML Formatında)
+    let templateHTML = `
+        <div style="padding:15mm; box-sizing:border-box; background:#fff; color:#000; font-family:Arial, sans-serif; min-height:297mm; width:210mm;">
+            <div style="display: flex; justify-content: space-between; align-items: flex-end; border-bottom: 3px solid #198b1d; padding-bottom: 15px; margin-bottom: 30px;">
+                <img src="CULBASEpng.png" style="height: 70px; object-fit: contain;">
+                <div style="text-align: right; font-size: 14px; line-height: 1.5; color:#000;">
+                    <p style="margin:0;"><strong>Tarih:</strong> ${offerDate}</p>
+                    <p style="margin:0;"><strong>Teklif No:</strong> ${offerNumber}</p>
+                </div>
+            </div>
+            <div style="display: flex; justify-content: space-between; margin-bottom: 30px; font-size: 14px; line-height: 1.5;">
+                <div style="width: 48%; background: #f9f9f9; padding: 15px; border-radius: 5px;">
+                    <h4 style="margin:0 0 10px 0; color: #555; border-bottom: 1px solid #ccc; padding-bottom: 5px;">TEKLİF (KİME):</h4>
+                    <strong style="font-size:16px; color:#198b1d;">${companyName}</strong>
+                </div>
+                <div style="width: 48%; background: #f9f9f9; padding: 15px; border-radius: 5px; text-align: right;">
+                    <h4 style="margin:0 0 10px 0; color: #555; border-bottom: 1px solid #ccc; padding-bottom: 5px;">TEKLİF (KİMDEN):</h4>
+                    <strong style="font-size:16px; color:#198b1d;">CULBASE AUTOMATION</strong><br>
+                    <span style="color:#000;">Tel: +905362503300</span><br>
+                    <span style="color:#000;">Hazırlayan: Emirhan ÇULCU</span>
+                </div>
+            </div>
+            <h3 style="text-align:center; color:#333; margin-bottom:15px; text-transform:uppercase;">Fiyat Teklifi ve Hizmet Dökümü</h3>
+            <table style="width: 100%; border-collapse: collapse; margin-bottom: 30px; font-size: 13px;">
+                <thead>
+                    <tr style="background-color: #198b1d; color: white;">
+                        <th style="padding: 10px; border: 1px solid #147217; text-align: left;">İSİM</th>
+                        <th style="padding: 10px; border: 1px solid #147217; text-align: left;">TANIM</th>
+                        <th style="padding: 10px; border: 1px solid #147217; text-align: center;">MİKTAR</th>
+                        <th style="padding: 10px; border: 1px solid #147217; text-align: right;">BİRİM FİYAT</th>
+                        <th style="padding: 10px; border: 1px solid #147217; text-align: right;">TOPLAM</th>
+                    </tr>
+                </thead>
+                <tbody>${tbodyHTML}</tbody>
+            </table>
+            <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 40px; font-size: 14px;">
+                <div style="width: 50%; padding: 15px; background: #eef7ee; border-radius: 5px; border: 1px solid #c3e6c3;">
+                    <p style="margin:0 0 5px 0; color:#000;"><strong>Özet Bilgi:</strong></p>
+                    <p style="margin:0; color:#555;">Listede toplam <strong>${totalItemsCount} adet</strong> kalem/hizmet bulunmaktadır.</p>
+                </div>
+                <div style="width: 40%;">
+                    <table style="width: 100%; border-collapse: collapse; color:#000;">
+                        <tr><td style="padding: 8px; font-weight: bold; border-bottom: 1px solid #eee;">ARA TOPLAM:</td><td style="padding: 8px; text-align: right; border-bottom: 1px solid #eee;">${subTotal.toFixed(2)} ₺</td></tr>
+                        <tr><td style="padding: 8px; font-weight: bold; border-bottom: 1px solid #333;">KDV (%20):</td><td style="padding: 8px; text-align: right; border-bottom: 1px solid #333;">${kdv.toFixed(2)} ₺</td></tr>
+                        <tr><td style="padding: 10px 8px; font-weight: bold; font-size:16px;">GENEL TOPLAM:</td><td style="padding: 10px 8px; text-align: right; font-size:16px; font-weight:bold; color:#198b1d;">${grandTotal.toFixed(2)} ₺</td></tr>
+                    </table>
+                </div>
+            </div>
+        </div>
+    `;
+
+    // 1. Tasarımı Önizleme Ekranına Bas ve Modalı Aç
+    document.getElementById('pdf-preview-content').innerHTML = templateHTML;
+    document.getElementById('pdf-preview-modal').style.display = 'flex';
+
+    // Ekran genişliği 850px'den küçükse (telefon/tablet) kağıdı otomatik küçült
+    let screenWidth = window.innerWidth;
+    if (screenWidth < 850) {
+        // Ekranın genişliğine göre A4 kağıdını (yaklaşık 800px) oranla
+        currentPdfZoom = (screenWidth - 40) / 800; // 40px sağ-sol boşluk payı
+        if(currentPdfZoom > 1) currentPdfZoom = 1;
+    } else {
+        currentPdfZoom = 1.0;
+    }
+    document.getElementById('pdf-zoom-wrapper').style.transform = `scale(${currentPdfZoom})`;
+    document.getElementById('pdf-zoom-level').innerText = Math.round(currentPdfZoom * 100) + '%';
+
+    // 2. Sağ Üstteki "İNDİR" butonuna basılınca PDF Motorunu (html2pdf) çalıştır
+    document.getElementById('pdf-download-btn').onclick = function() {
+        showToast("PDF Hazırlanıyor, lütfen bekleyin...");
+        
+        // Butonu geçici olarak pasif yap (Çift tıklamayı önlemek için)
+        const btn = document.getElementById('pdf-download-btn');
+        btn.innerText = "⏳ İndiriliyor...";
+        btn.disabled = true;
+
+        const opt = {
+            margin:       0, 
+            filename:     'CULbase_Proje_' + offerNumber + '.pdf',
+            image:        { type: 'jpeg', quality: 1.0 }, 
+            html2canvas:  { scale: 2, useCORS: true, letterRendering: true, backgroundColor: '#ffffff', scrollY: 0 },
+            jsPDF:        { unit: 'mm', format: 'a4', orientation: 'portrait' }
+        };
+        
+        // Sadece ekranda gördüğümüz "beyaz kağıt" alanını PDF'e dönüştürür
+        html2pdf().set(opt).from(document.getElementById('pdf-preview-content')).save().then(() => {
+            showToast("PDF Başarıyla İndirildi!");
+            btn.innerText = "📥 İNDİR";
+            btn.disabled = false;
+        });
+    };
+};
+// --- PDF ZOOM (YAKINLAŞTIRMA) MOTORU ---
+let currentPdfZoom = 1.0;
+
+window.zoomPDF = function(step) {
+    currentPdfZoom += step;
+    
+    // Sınırlar: En fazla %30'a kadar küçülebilir, %250'ye kadar büyüyebilir
+    if(currentPdfZoom < 0.3) currentPdfZoom = 0.3;
+    if(currentPdfZoom > 2.5) currentPdfZoom = 2.5;
+    
+    document.getElementById('pdf-zoom-wrapper').style.transform = `scale(${currentPdfZoom})`;
+    document.getElementById('pdf-zoom-level').innerText = Math.round(currentPdfZoom * 100) + '%';
 };
