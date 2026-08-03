@@ -1679,11 +1679,20 @@
                             <option value="MICRO850">AB Micro850</option>
                         </optgroup>
                     </select>
+                    <button onclick="saveFactoryLayout()"
+                        style="background: #2980b9; color: #fff; border: 1px solid #1c5980; padding: 5px 10px; border-radius: 4px; cursor: pointer; font-size:11px;">💾
+                        Kaydet</button>
+                    <button onclick="loadFactoryLayout()"
+                        style="background: #2c3e50; color: #fff; border: 1px solid #1a252f; padding: 5px 10px; border-radius: 4px; cursor: pointer; font-size:11px;">📂
+                        Yükle</button>
                     <button id="btn-vplc-run" onclick="togglePlcRun()"
                         style="background: #27ae60; color: #fff; border: 2px solid #145c32; padding: 5px 15px; font-weight: bold; border-radius: 4px; cursor: pointer;">RUN</button>
                     <button onclick="generateEPlanPDF()"
                         style="background: #f39c12; color: #fff; border: 2px solid #b9770e; padding: 5px 15px; font-weight: bold; border-radius: 4px; cursor: pointer;">📄
                         E-Plan Çıkar</button>
+                    <button onclick="startTroubleshootingGame()"
+                        style="background: #8e44ad; color: #fff; border: 2px solid #5e3370; padding: 5px 15px; font-weight: bold; border-radius: 4px; cursor: pointer; box-shadow: 0 0 10px #8e44ad;">🎮
+                        Arıza Avı</button>
                     <button onclick="closeVirtualPLC()"
                         style="background: transparent; border: none; color: #ff4444; font-size: 16px; cursor: pointer; font-weight: bold;">[X]</button>
                 </div>
@@ -1814,6 +1823,14 @@
                         style="color: #555; font-family: monospace; position: absolute; top: 10px; right: 10px; font-size: 12px;">
                         FACTORY ENGINE v2.0</div>
                 </div>
+                <div
+                    style="position: absolute; right: 10px; bottom: 10px; background: rgba(0,0,0,0.8); border: 1px solid #333; border-radius: 8px; padding: 5px; z-index: 100; pointer-events: none;">
+                    <div
+                        style="color: #00d2ff; font-size: 9px; font-family: monospace; text-align: center; margin-bottom: 2px;">
+                        VFD (Hz) <span style="color:#27ae60;">■</span> | SENSÖR (V) <span
+                            style="color:#f39c12;">■</span></div>
+                    <canvas id="oscilloscope-canvas" width="300" height="80"></canvas>
+                </div>
             </div>
 
             <!-- YENİ SEKME 3: ELEKTRİK KABLAJ ŞEMASI -->
@@ -1831,36 +1848,38 @@
 
         </div>
     </div>
-    <!-- PDF ÖNİZLEME VE İNDİRME EKRANI (E-PLAN İÇİN) -->
-    <div id="pdf-preview-modal"
-        style="display:none; position:fixed; top:0; left:0; width:100vw; height:100vh; background:#333639; z-index:999999; flex-direction:column;">
-        <div
-            style="height:60px; background:#202124; display:flex; justify-content:space-between; align-items:center; padding:0 15px; border-bottom:1px solid #444; flex-wrap:wrap;">
-            <button onclick="document.getElementById('pdf-preview-modal').style.display='none'"
-                style="background:transparent; color:#fff; border:none; cursor:pointer; font-size:13px; font-weight:bold;">←
-                Kapat</button>
-            <div
-                style="display:flex; align-items:center; gap:8px; background:#111; border:1px solid #444; border-radius:4px; padding:2px 5px;">
-                <button onclick="zoomPDF(-0.1)"
-                    style="background:transparent; color:#fff; border:none; cursor:pointer; font-size:18px; width:30px; height:30px;">-</button>
-                <span id="pdf-zoom-level"
-                    style="color:#00d2ff; font-size:12px; font-weight:bold; min-width:40px; text-align:center;">100%</span>
-                <button onclick="zoomPDF(0.1)"
-                    style="background:transparent; color:#fff; border:none; cursor:pointer; font-size:18px; width:30px; height:30px;">+</button>
+    <!-- ==========================================
+         📄 PDF ÖNİZLEME VE İNDİRME EKRANI (GÜNCELLENDİ)
+         ========================================== -->
+    <div id="pdf-preview-modal" style="display:none; position:fixed; top:0; left:0; width:100vw; height:100vh; background:#525659; z-index:999999; flex-direction:column; overflow:hidden;">
+        
+        <!-- YAPIŞKAN ÜST BAR (Asla Yukarı Kaçmaz) -->
+        <div style="width:100%; min-height:60px; background:#202124; display:flex; justify-content:space-between; align-items:center; padding:10px 15px; border-bottom:2px solid #00d2ff; flex-wrap:wrap; z-index:100; box-sizing:border-box; flex-shrink:0;">
+            
+            <button onclick="document.getElementById('pdf-preview-modal').style.display='none'" style="background:#e74c3c; color:#fff; border:2px solid #c0392b; padding:8px 15px; border-radius:4px; cursor:pointer; font-size:13px; font-weight:bold; box-shadow:0 4px 6px rgba(0,0,0,0.3);">
+                🔙 GERİ DÖN
+            </button>
+            
+            <div style="display:flex; align-items:center; gap:8px; background:#111; border:1px solid #444; border-radius:4px; padding:2px 5px;">
+                <button onclick="zoomPDF(-0.1)" style="background:transparent; color:#fff; border:none; cursor:pointer; font-size:18px; width:30px; height:30px; font-weight:bold;">-</button>
+                <span id="pdf-zoom-level" style="color:#00d2ff; font-size:12px; font-weight:bold; min-width:40px; text-align:center;">100%</span>
+                <button onclick="zoomPDF(0.1)" style="background:transparent; color:#fff; border:none; cursor:pointer; font-size:18px; width:30px; height:30px; font-weight:bold;">+</button>
             </div>
-            <button id="pdf-download-btn"
-                style="background:#27ae60; color:#fff; border:none; padding:8px 15px; border-radius:4px; cursor:pointer; font-weight:bold; font-size:12px;">📥
-                İNDİR</button>
+            
+            <button id="pdf-download-btn" style="background:#27ae60; color:#fff; border:2px solid #198b1d; padding:8px 20px; border-radius:4px; cursor:pointer; font-weight:bold; font-size:12px; box-shadow:0 4px 6px rgba(0,0,0,0.3);">
+                📥 İNDİR
+            </button>
         </div>
-        <div
-            style="flex:1; overflow:auto; padding:20px; display:flex; justify-content:flex-start; align-items:flex-start; background:#525659; flex-direction:column;">
-            <div id="pdf-zoom-wrapper"
-                style="transform-origin: top left; transition: transform 0.2s ease-out; margin: 0 auto;">
-                <div id="pdf-preview-content"
-                    style="background:#fff; width:210mm; min-height:297mm; box-shadow:0 10px 30px rgba(0,0,0,0.7); box-sizing:border-box;">
+
+        <!-- SADECE BURASI KAYDIRILABİLİR (PDF KAĞIDI ALANI) -->
+        <div style="flex:1; overflow-y:auto; padding:20px; display:flex; justify-content:center; align-items:flex-start; width:100%; box-sizing:border-box;">
+            <div id="pdf-zoom-wrapper" style="transform-origin: top center; transition: transform 0.2s ease-out; padding-bottom: 50px;">
+                <div id="pdf-preview-content" style="background:#fff; width:210mm; min-height:297mm; box-shadow:0 10px 30px rgba(0,0,0,0.8); box-sizing:border-box;">
+                    <!-- JS Tarafından E-Plan Buraya Basılacak -->
                 </div>
             </div>
         </div>
+        
     </div>
 
     <script src="script.js"></script>
