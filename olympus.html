@@ -511,8 +511,9 @@
                         style="position: absolute; right: 0; top: 0; background: transparent; border: none; color: var(--goldnova); font-size: 28px; cursor: pointer; padding: 5px;">☰</button>
                     <div class="profile-img-container">
                         <input type="file" id="profile-img-upload" accept="image/*" style="display:none;">
-                        <img id="profile-image-large" src="icon.png" alt="Profil"
-                            style="width: 90px; height: 90px; border-radius: 50%; border: 3px solid var(--goldnova);">
+                        <img id="profile-image-large" src="icon.png" alt="Profile"
+                            style="width: 100px; height: 100px; border-radius: 50%; border: 3px solid var(--goldnova); object-fit: cover; margin-bottom: 10px; cursor: pointer; transition: transform 0.2s;"
+                            onclick="openProfileSwitcher()" title="Program Değiştir">
                         <button onclick="document.getElementById('profile-img-upload').click();" class="edit-btn"
                             style="margin-top:10px;">Fotoğrafı Değiştir</button>
                     </div>
@@ -1851,35 +1852,180 @@
     <!-- ==========================================
          📄 PDF ÖNİZLEME VE İNDİRME EKRANI (GÜNCELLENDİ)
          ========================================== -->
-    <div id="pdf-preview-modal" style="display:none; position:fixed; top:0; left:0; width:100vw; height:100vh; background:#525659; z-index:999999; flex-direction:column; overflow:hidden;">
-        
+    <div id="pdf-preview-modal"
+        style="display:none; position:fixed; top:0; left:0; width:100vw; height:100vh; background:#525659; z-index:999999; flex-direction:column; overflow:hidden;">
+
         <!-- YAPIŞKAN ÜST BAR (Asla Yukarı Kaçmaz) -->
-        <div style="width:100%; min-height:60px; background:#202124; display:flex; justify-content:space-between; align-items:center; padding:10px 15px; border-bottom:2px solid #00d2ff; flex-wrap:wrap; z-index:100; box-sizing:border-box; flex-shrink:0;">
-            
-            <button onclick="document.getElementById('pdf-preview-modal').style.display='none'" style="background:#e74c3c; color:#fff; border:2px solid #c0392b; padding:8px 15px; border-radius:4px; cursor:pointer; font-size:13px; font-weight:bold; box-shadow:0 4px 6px rgba(0,0,0,0.3);">
+        <div
+            style="width:100%; min-height:60px; background:#202124; display:flex; justify-content:space-between; align-items:center; padding:10px 15px; border-bottom:2px solid #00d2ff; flex-wrap:wrap; z-index:100; box-sizing:border-box; flex-shrink:0;">
+
+            <button onclick="document.getElementById('pdf-preview-modal').style.display='none'"
+                style="background:#e74c3c; color:#fff; border:2px solid #c0392b; padding:8px 15px; border-radius:4px; cursor:pointer; font-size:13px; font-weight:bold; box-shadow:0 4px 6px rgba(0,0,0,0.3);">
                 🔙 GERİ DÖN
             </button>
-            
-            <div style="display:flex; align-items:center; gap:8px; background:#111; border:1px solid #444; border-radius:4px; padding:2px 5px;">
-                <button onclick="zoomPDF(-0.1)" style="background:transparent; color:#fff; border:none; cursor:pointer; font-size:18px; width:30px; height:30px; font-weight:bold;">-</button>
-                <span id="pdf-zoom-level" style="color:#00d2ff; font-size:12px; font-weight:bold; min-width:40px; text-align:center;">100%</span>
-                <button onclick="zoomPDF(0.1)" style="background:transparent; color:#fff; border:none; cursor:pointer; font-size:18px; width:30px; height:30px; font-weight:bold;">+</button>
+
+            <div
+                style="display:flex; align-items:center; gap:8px; background:#111; border:1px solid #444; border-radius:4px; padding:2px 5px;">
+                <button onclick="zoomPDF(-0.1)"
+                    style="background:transparent; color:#fff; border:none; cursor:pointer; font-size:18px; width:30px; height:30px; font-weight:bold;">-</button>
+                <span id="pdf-zoom-level"
+                    style="color:#00d2ff; font-size:12px; font-weight:bold; min-width:40px; text-align:center;">100%</span>
+                <button onclick="zoomPDF(0.1)"
+                    style="background:transparent; color:#fff; border:none; cursor:pointer; font-size:18px; width:30px; height:30px; font-weight:bold;">+</button>
             </div>
-            
-            <button id="pdf-download-btn" style="background:#27ae60; color:#fff; border:2px solid #198b1d; padding:8px 20px; border-radius:4px; cursor:pointer; font-weight:bold; font-size:12px; box-shadow:0 4px 6px rgba(0,0,0,0.3);">
+
+            <button id="pdf-download-btn"
+                style="background:#27ae60; color:#fff; border:2px solid #198b1d; padding:8px 20px; border-radius:4px; cursor:pointer; font-weight:bold; font-size:12px; box-shadow:0 4px 6px rgba(0,0,0,0.3);">
                 📥 İNDİR
             </button>
         </div>
 
         <!-- SADECE BURASI KAYDIRILABİLİR (PDF KAĞIDI ALANI) -->
-        <div style="flex:1; overflow-y:auto; padding:20px; display:flex; justify-content:center; align-items:flex-start; width:100%; box-sizing:border-box;">
-            <div id="pdf-zoom-wrapper" style="transform-origin: top center; transition: transform 0.2s ease-out; padding-bottom: 50px;">
-                <div id="pdf-preview-content" style="background:#fff; width:210mm; min-height:297mm; box-shadow:0 10px 30px rgba(0,0,0,0.8); box-sizing:border-box;">
+        <div
+            style="flex:1; overflow-y:auto; padding:20px; display:flex; justify-content:center; align-items:flex-start; width:100%; box-sizing:border-box;">
+            <div id="pdf-zoom-wrapper"
+                style="transform-origin: top center; transition: transform 0.2s ease-out; padding-bottom: 50px;">
+                <div id="pdf-preview-content"
+                    style="background:#fff; width:210mm; min-height:297mm; box-shadow:0 10px 30px rgba(0,0,0,0.8); box-sizing:border-box;">
                     <!-- JS Tarafından E-Plan Buraya Basılacak -->
                 </div>
             </div>
         </div>
+
+    </div>
+    <!-- ==========================================
+         🎬 OLYMPUS PROFİL (KİMLİK) SEÇİCİ (NETFLIX STYLE)
+         ========================================== -->
+    <div id="profile-switcher-screen" class="hidden"
+        style="position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background-color: rgba(20, 20, 20, 0.95); z-index: 6000; display: flex; flex-direction: column; justify-content: center; align-items: center; backdrop-filter: blur(5px);">
+
+        <h1
+            style="color: #fff; font-size: 24px; font-weight: normal; margin-bottom: 40px; letter-spacing: 1px; text-align:center;">
+            Hangi programa geçiş yapıyoruz?</h1>
+
+        <div id="workout-profiles-container"
+            style="display: flex; gap: 25px; flex-wrap: wrap; justify-content: center; max-width: 90%;">
+            <!-- JS Tarafından Dinamik Doldurulacak -->
+        </div>
+
+        <button onclick="closeProfileSwitcher()"
+            style="margin-top: 50px; padding: 10px 40px; background: transparent; color: #888; border: 1px solid #555; border-radius: 4px; font-size: 14px; cursor: pointer; letter-spacing: 2px;">İPTAL</button>
+    </div>
+    <!-- ==========================================
+         🛠️ YENİ PROGRAM OLUŞTURMA SİHİRBAZI MODALI
+         ========================================== -->
+    <div id="new-profile-modal" class="hidden" style="position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background-color: rgba(10, 10, 10, 0.95); z-index: 6100; display: flex; flex-direction: column; justify-content: center; align-items: center; backdrop-filter: blur(8px);">
         
+        <h2 style="color: var(--goldnova); font-size: 22px; margin-bottom: 10px; text-transform: uppercase; letter-spacing: 2px;">Yeni Sistem İnşası</h2>
+        <p style="color: #888; font-size: 14px; margin-bottom: 40px; text-align: center; max-width: 80%;">Programını nasıl oluşturmak istersin şampiyon?</p>
+        
+        <div style="display: flex; gap: 20px; flex-wrap: wrap; justify-content: center; max-width: 90%;">
+            
+            <!-- YAPAY ZEKA BUTONU -->
+            <div onclick="startOlyAIWizard()" style="background: #151515; border: 2px solid #00d2ff; border-radius: 12px; padding: 30px 20px; width: 220px; text-align: center; cursor: pointer; transition: 0.3s; box-shadow: 0 10px 30px rgba(0, 210, 255, 0.1);" onmouseover="this.style.transform='translateY(-10px)'; this.style.boxShadow='0 15px 40px rgba(0, 210, 255, 0.3)';" onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='0 10px 30px rgba(0, 210, 255, 0.1)';">
+                <div style="font-size: 50px; margin-bottom: 15px;">🤖</div>
+                <h3 style="color: #fff; font-size: 16px; margin: 0 0 10px 0;">Oly-AI Akıllı Antrenör</h3>
+                <p style="color: #888; font-size: 11px; margin: 0; line-height: 1.4;">Bana hedeflerinden bahset, yapay zeka motorum sana özel kusursuz bir 5 günlük sistem çıkarsın.</p>
+            </div>
+
+            <!-- MANUEL KÜTÜPHANE BUTONU -->
+            <div onclick="openManualBuilder()" style="background: #151515; border: 2px solid #27ae60; border-radius: 12px; padding: 30px 20px; width: 220px; text-align: center; cursor: pointer; transition: 0.3s; box-shadow: 0 10px 30px rgba(39, 174, 96, 0.1);" onmouseover="this.style.transform='translateY(-10px)'; this.style.boxShadow='0 15px 40px rgba(39, 174, 96, 0.3)';" onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='0 10px 30px rgba(39, 174, 96, 0.1)';">
+                <div style="font-size: 50px; margin-bottom: 15px;">⚙️</div>
+                <h3 style="color: #fff; font-size: 16px; margin: 0 0 10px 0;">Manuel İnşa (Builder)</h3>
+                <p style="color: #888; font-size: 11px; margin: 0; line-height: 1.4;">Kapsamlı egzersiz kütüphanesini aç. Hareketleri sürükle, setleri yaz ve kendi sistemini tasarla.</p>
+            </div>
+
+        </div>
+
+        <button onclick="closeNewProfileModal()" style="margin-top: 50px; padding: 10px 40px; background: transparent; color: #ff4444; border: 1px solid #c0392b; border-radius: 4px; font-size: 14px; cursor: pointer; font-weight:bold;">İPTAL</button>
+    </div>
+    <!-- ==========================================
+         🤖 OLY-AI AKILLI PROGRAM SİHİRBAZI
+         ========================================== -->
+    <div id="oly-ai-wizard-modal" class="hidden" style="position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background-color: rgba(15, 15, 15, 0.98); z-index: 6200; display: flex; flex-direction: column; justify-content: flex-start; align-items: center; padding-top: 50px; overflow-y: auto;">
+        
+        <h2 style="color: #00d2ff; font-size: 24px; margin-bottom: 5px; text-transform: uppercase; letter-spacing: 2px;">🤖 Oly-AI SİHİRBAZI</h2>
+        <p style="color: #888; font-size: 13px; margin-bottom: 30px; text-align: center; max-width: 80%;">Hedeflerini belirle, senin için kusursuz bir sistem inşa edeyim.</p>
+        
+        <div style="background: #1a1a1a; border: 1px solid #333; border-radius: 12px; padding: 20px; width: 90%; max-width: 400px; margin-bottom: 20px; box-shadow: 0 10px 30px rgba(0,0,0,0.5);">
+            
+            <label style="color: var(--goldnova); font-size: 12px; font-weight: bold; margin-bottom: 8px; display: block;">1. Ana Hedefin Nedir?</label>
+            <select id="ai-goal" style="width: 100%; background: #000; color: #fff; border: 1px solid #555; padding: 10px; border-radius: 6px; font-size: 14px; margin-bottom: 20px; outline: none;">
+                <option value="Hipertrofi (Kas Büyümesi)">Kas Kütlesi (Hipertrofi)</option>
+                <option value="Maksimum Güç (Strength)">Saf Güç (Strength)</option>
+                <option value="Yağ Yakımı ve Kondisyon">Definisyon / Yağ Yakımı</option>
+            </select>
+
+            <label style="color: var(--goldnova); font-size: 12px; font-weight: bold; margin-bottom: 8px; display: block;">2. Haftada Kaç Gün İdman Yapabilirsin?</label>
+            <select id="ai-days" style="width: 100%; background: #000; color: #fff; border: 1px solid #555; padding: 10px; border-radius: 6px; font-size: 14px; margin-bottom: 20px; outline: none;">
+                <option value="3">3 Gün (Full Body / Üst-Alt)</option>
+                <option value="4">4 Gün (Upper / Lower)</option>
+                <option value="5" selected>5 Gün (Bro Split / İt-Çek-Bacak)</option>
+                <option value="6">6 Gün (Agresif İt-Çek-Bacak)</option>
+            </select>
+
+            <label style="color: var(--goldnova); font-size: 12px; font-weight: bold; margin-bottom: 8px; display: block;">3. Tecrübe Seviyen?</label>
+            <select id="ai-level" style="width: 100%; background: #000; color: #fff; border: 1px solid #555; padding: 10px; border-radius: 6px; font-size: 14px; margin-bottom: 20px; outline: none;">
+                <option value="Başlangıç">Başlangıç (0-1 Yıl)</option>
+                <option value="Orta" selected>Orta Seviye (1-3 Yıl)</option>
+                <option value="İleri">İleri Seviye (3+ Yıl)</option>
+            </select>
+            
+            <label style="color: var(--goldnova); font-size: 12px; font-weight: bold; margin-bottom: 8px; display: block;">4. Programın Adı Ne Olsun?</label>
+            <input type="text" id="ai-prog-name" placeholder="Örn: Yaz Definisyonu" style="width: 100%; background: #000; color: #fff; border: 1px solid #555; padding: 10px; border-radius: 6px; font-size: 14px; box-sizing: border-box; outline: none;">
+        </div>
+
+        <div style="display: flex; gap: 15px; margin-bottom: 50px;">
+            <button onclick="closeOlyAIWizard()" style="padding: 12px 25px; background: transparent; color: #888; border: 1px solid #555; border-radius: 6px; font-size: 14px; cursor: pointer; font-weight:bold;">İPTAL</button>
+            <button id="btn-generate-ai" onclick="generateAIProgram()" style="padding: 12px 25px; background: #00d2ff; color: #000; border: none; border-radius: 6px; font-size: 14px; cursor: pointer; font-weight:bold; box-shadow: 0 4px 15px rgba(0, 210, 255, 0.4); transition: 0.3s;">🚀 PROGRAMI YARAT</button>
+        </div>
+    </div>
+    <!-- ==========================================
+         ⚙️ MANUEL PROGRAM İNŞA (BUILDER) EKRANI
+         ========================================== -->
+    <div id="manual-builder-modal" class="hidden" style="position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background-color: #0a0a0a; z-index: 6300; display: flex; flex-direction: column; overflow: hidden;">
+        
+        <!-- ÜST BAR -->
+        <div style="width: 100%; height: 60px; background: #151515; display: flex; justify-content: space-between; align-items: center; padding: 0 15px; border-bottom: 2px solid #27ae60; box-sizing: border-box; flex-shrink: 0;">
+            <button onclick="closeManualBuilder()" style="background: transparent; color: #ff4444; border: 1px solid #c0392b; padding: 6px 12px; border-radius: 4px; font-weight: bold; cursor: pointer;">İPTAL</button>
+            <input type="text" id="builder-prog-name" placeholder="Program Adı (Örn: Güç Bloku)" style="background: #000; color: #fff; border: 1px solid #333; padding: 8px; border-radius: 4px; text-align: center; width: 200px; font-size: 13px; outline:none;">
+            <button onclick="saveManualProgram()" style="background: #27ae60; color: #fff; border: none; padding: 8px 15px; border-radius: 4px; font-weight: bold; cursor: pointer; box-shadow: 0 0 10px rgba(39, 174, 96, 0.4);">💾 KAYDET</button>
+        </div>
+
+        <!-- İÇERİK (2 SÜTUN: Günler ve Kütüphane) -->
+        <div style="display: flex; flex: 1; overflow: hidden; flex-wrap: wrap;">
+            
+            <!-- SOL: GÜNLER VE EKLENEN HAREKETLER -->
+            <div style="flex: 1; min-width: 300px; background: #111; border-right: 1px solid #333; padding: 15px; overflow-y: auto; box-sizing: border-box;">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
+                    <h3 style="color: #fff; margin: 0; font-size: 16px;">📅 İdman Günleri</h3>
+                    <button onclick="addNewBuilderDay()" style="background: transparent; color: var(--goldnova); border: 1px solid var(--goldnova); padding: 5px 10px; border-radius: 4px; font-size: 11px; cursor: pointer;">+ Yeni Gün Ekle</button>
+                </div>
+                <div id="builder-days-container" style="display: flex; flex-direction: column; gap: 15px;">
+                    <!-- JS Burayı Dolduracak -->
+                </div>
+            </div>
+
+            <!-- SAĞ: EGZERSİZ KÜTÜPHANESİ -->
+            <div style="width: 350px; flex-grow: 1; background: #0a0a0a; padding: 15px; overflow-y: auto; box-sizing: border-box;">
+                <h3 style="color: #00d2ff; margin: 0 0 15px 0; font-size: 16px;">📚 Egzersiz Kütüphanesi</h3>
+                
+                <!-- Kategori Sekmeleri -->
+                <div style="display: flex; gap: 5px; flex-wrap: wrap; margin-bottom: 15px;">
+                    <button class="lib-tab-btn active" onclick="switchLibraryTab('chest', this)" style="background: #222; color: #fff; border: 1px solid #00d2ff; padding: 5px 10px; border-radius: 4px; cursor: pointer; font-size: 11px;">Göğüs</button>
+                    <button class="lib-tab-btn" onclick="switchLibraryTab('back', this)" style="background: #222; color: #888; border: 1px solid #333; padding: 5px 10px; border-radius: 4px; cursor: pointer; font-size: 11px;">Sırt</button>
+                    <button class="lib-tab-btn" onclick="switchLibraryTab('legs', this)" style="background: #222; color: #888; border: 1px solid #333; padding: 5px 10px; border-radius: 4px; cursor: pointer; font-size: 11px;">Bacak</button>
+                    <button class="lib-tab-btn" onclick="switchLibraryTab('shoulders', this)" style="background: #222; color: #888; border: 1px solid #333; padding: 5px 10px; border-radius: 4px; cursor: pointer; font-size: 11px;">Omuz</button>
+                    <button class="lib-tab-btn" onclick="switchLibraryTab('arms', this)" style="background: #222; color: #888; border: 1px solid #333; padding: 5px 10px; border-radius: 4px; cursor: pointer; font-size: 11px;">Kol</button>
+                    <button class="lib-tab-btn" onclick="switchLibraryTab('core', this)" style="background: #222; color: #888; border: 1px solid #333; padding: 5px 10px; border-radius: 4px; cursor: pointer; font-size: 11px;">Core</button>
+                </div>
+
+                <div id="builder-library-items" style="display: flex; flex-direction: column; gap: 8px;">
+                    <!-- JS Burayı Dolduracak -->
+                </div>
+            </div>
+
+        </div>
     </div>
 
     <script src="script.js"></script>
