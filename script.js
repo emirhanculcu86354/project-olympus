@@ -3672,6 +3672,7 @@ window.addHubPhoto = function (event) {
 
 function loadHubPhotos() {
     const track = document.getElementById('hub-carousel-track');
+    
     // 1. Sabit Logo Slaytı
     track.innerHTML = `
         <div class="hub-slide" style="min-width: 100%; height: 100%; display: flex; justify-content: center; align-items: center; background: #000;">
@@ -3679,12 +3680,18 @@ function loadHubPhotos() {
         </div>
     `;
 
-    // 2. Kullanıcının Yüklediği Özel Fotoğraflar
+    // 2. Şanlı Türk Bayrağı Slaytı 🇹🇷 (Akıcı Dalgalanan GIF Modu)
+    track.innerHTML += `
+        <div class="hub-slide" style="min-width: 100%; height: 100%; display: flex; justify-content: center; align-items: center; background: #000;">
+            <img src="https://media2.giphy.com/media/v1.Y2lkPTc5MGI3NjExY3RnbDF3YmdmcDVudnM3NDA2dm1wMDM4MDZoeWFlNGw3dnM3d3JiNCZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9Zw/axUE5IV9YoJ9ObTydP/giphy.gif" style="width: 100%; height: 100%; object-fit: cover;" alt="Türk Bayrağı">
+        </div>
+    `;
+    // 3. Kullanıcının Yüklediği Özel Fotoğraflar
     const photos = JSON.parse(localStorage.getItem('olympus_hub_photos')) || [];
     photos.forEach(p => {
         track.innerHTML += `
-            <div class="hub-slide" style="min-width: 100%; height: 100%;">
-                <img src="${p}">
+            <div class="hub-slide" style="min-width: 100%; height: 100%; display: flex; justify-content: center; align-items: center; background: #000;">
+                <img src="${p}" style="width: 100%; height: 100%; object-fit: cover;">
             </div>
         `;
     });
