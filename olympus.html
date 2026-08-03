@@ -1352,22 +1352,25 @@
                     onclick="openPlcArchive()">
                     <span style="font-size: 32px; filter: drop-shadow(0 0 5px #fff);">⚙️</span>
                     <h4 style="color: #fff; margin: 10px 0 5px 0; font-size: 14px;">PLC Kütüphanesi</h4>
-                    <p style="color: #00d2ff; font-size: 10px; margin: 0; font-weight: bold;">Kasa Açık</p>
                 </div>
 
-                <!-- YENİ: CANLI TELEMETRİ KARTI -->
                 <div style="background: linear-gradient(145deg, #1a1a1a, #0a0a0a); border: 1px solid #333; border-radius: 12px; padding: 15px; text-align: center; cursor: pointer;"
                     onclick="openLiveMachine()">
                     <span style="font-size: 32px; filter: drop-shadow(0 0 5px #e74c3c);">📡</span>
                     <h4 style="color: #fff; margin: 10px 0 5px 0; font-size: 14px;">Canlı Telemetri</h4>
-                    <p style="color: #e74c3c; font-size: 10px; margin: 0; font-weight: bold;">Simülasyon Aktif</p>
                 </div>
 
-                <div style="background: linear-gradient(145deg, #1a1a1a, #0a0a0a); border: 1px solid #333; border-radius: 12px; padding: 15px; text-align: center; cursor: pointer; grid-column: span 2;"
+                <!-- YENİ: SANAL PLC SİMÜLATÖRÜ KARTI -->
+                <div style="background: linear-gradient(145deg, #1a1a1a, #0a0a0a); border: 1px solid #00d2ff; border-radius: 12px; padding: 15px; text-align: center; cursor: pointer;"
+                    onclick="openVirtualPLC()">
+                    <span style="font-size: 32px; filter: drop-shadow(0 0 5px #00d2ff);">🎛️</span>
+                    <h4 style="color: #00d2ff; margin: 10px 0 5px 0; font-size: 14px;">Sanal PLC (Sim)</h4>
+                </div>
+
+                <div style="background: linear-gradient(145deg, #1a1a1a, #0a0a0a); border: 1px solid #333; border-radius: 12px; padding: 15px; text-align: center; cursor: pointer;"
                     onclick="openDeployLogs()">
-                    <span style="font-size: 32px; filter: drop-shadow(0 0 5px #00d2ff);">🚀</span>
+                    <span style="font-size: 32px; filter: drop-shadow(0 0 5px #27ae60);">🚀</span>
                     <h4 style="color: #fff; margin: 10px 0 5px 0; font-size: 14px;">Deploy Logları</h4>
-                    <p style="color: #27ae60; font-size: 10px; margin: 0; font-weight: bold;">Canlı API Bağlantısı</p>
                 </div>
             </div>
 
@@ -1638,6 +1641,224 @@
             <div id="sim-log"
                 style="font-family:'Courier New', monospace; font-size:10px; color:#27ae60; background:#000; padding:10px; border-radius:4px; height: 80px; overflow-y:auto; border:1px dashed #333;">
                 > Sistem beklemede. Bağlantı parametrelerini giriniz.
+            </div>
+        </div>
+    </div>
+    <!-- ==========================================
+         💼 BUSINESS: SANAL PLC & FABRİKA SİMÜLATÖRÜ
+         ========================================== -->
+    <!-- ==========================================
+         💼 BUSINESS: SANAL PLC, FACTORY IO & E-PLAN SİMÜLATÖRÜ
+         ========================================== -->
+    <div id="virtual-plc-modal" class="modal" style="z-index: 10025;">
+        <div class="modal-content"
+            style="max-width: 1000px; width: 98%; background: #050505; border: 2px solid #00d2ff; text-align: left; padding: 0; border-radius: 10px; overflow: hidden; display: flex; flex-direction: column; height: 95vh;">
+
+            <!-- ÜST KONTROL BARI -->
+            <div
+                style="display: flex; justify-content: space-between; align-items: center; background: #001f3f; padding: 12px; border-bottom: 2px solid #00d2ff; flex-wrap: wrap; gap: 10px;">
+                <h3
+                    style="color: #00d2ff; margin: 0; font-family:'Courier New', monospace; text-shadow: 0 0 10px #00d2ff; font-size: 16px;">
+                    >_ CULBASE_FACTORY_SIM v2.0</h3>
+                <div style="display: flex; gap: 10px; align-items: center; flex-wrap: wrap;">
+                    <select id="vplc-model"
+                        style="background: #000; color: #fff; border: 1px solid #00d2ff; padding: 5px; font-size: 11px; font-weight: bold; border-radius: 4px;"
+                        onchange="buildPlcHardware()">
+                        <optgroup label="DELTA (X/Y)">
+                            <option value="14SS2">DVP-14SS2 (8 IN / 6 OUT)</option>
+                            <option value="14SS2_06XA">DVP-14SS2 + 06XA (Analog Voltaj)</option>
+                            <option value="14SS2_04PT">DVP-14SS2 + 04PT (Sıcaklık)</option>
+                            <option value="AS228">AS228 (16 IN / 12 OUT)</option>
+                        </optgroup>
+                        <optgroup label="SIEMENS (I/Q)">
+                            <option value="S71200">S7-1200 CPU1214C</option>
+                            <option value="S71500">S7-1500 CPU1511-1 PN</option>
+                        </optgroup>
+                        <optgroup label="OMRON / ALLEN BRADLEY">
+                            <option value="CP1E">OMRON CP1E-N20</option>
+                            <option value="MICRO850">AB Micro850</option>
+                        </optgroup>
+                    </select>
+                    <button id="btn-vplc-run" onclick="togglePlcRun()"
+                        style="background: #27ae60; color: #fff; border: 2px solid #145c32; padding: 5px 15px; font-weight: bold; border-radius: 4px; cursor: pointer;">RUN</button>
+                    <button onclick="generateEPlanPDF()"
+                        style="background: #f39c12; color: #fff; border: 2px solid #b9770e; padding: 5px 15px; font-weight: bold; border-radius: 4px; cursor: pointer;">📄
+                        E-Plan Çıkar</button>
+                    <button onclick="closeVirtualPLC()"
+                        style="background: transparent; border: none; color: #ff4444; font-size: 16px; cursor: pointer; font-weight: bold;">[X]</button>
+                </div>
+            </div>
+
+            <!-- 3'LÜ SEKME YAPISI -->
+            <div style="display: flex; background: #111; border-bottom: 1px solid #333; flex-shrink: 0;">
+                <button id="tab-btn-code" onclick="switchPlcTab('code')"
+                    style="flex: 1; padding: 10px; background: #1a1a1a; color: #00d2ff; border: none; border-bottom: 3px solid #00d2ff; font-weight: bold; cursor: pointer; font-size: 12px;">💻
+                    PLC & Kod</button>
+                <button id="tab-btn-factory" onclick="switchPlcTab('factory')"
+                    style="flex: 1; padding: 10px; background: #111; color: #888; border: none; border-bottom: 3px solid transparent; font-weight: bold; cursor: pointer; font-size: 12px;">🏭
+                    Sanal Fabrika</button>
+                <button id="tab-btn-wiring" onclick="switchPlcTab('wiring')"
+                    style="flex: 1; padding: 10px; background: #111; color: #888; border: none; border-bottom: 3px solid transparent; font-weight: bold; cursor: pointer; font-size: 12px;">⚡
+                    Kablo Bağlantı Şeması</button>
+            </div>
+
+            <!-- SEKME 1: KOD (Aynı Kalıyor, sadece ID'ler aynı) -->
+            <div id="tab-content-code" style="padding: 15px; display: block; overflow-y: auto; flex: 1;">
+                <div style="display: flex; flex-wrap: wrap; gap: 10px; margin-bottom: 10px;">
+                    <div
+                        style="flex: 2; background: #0a0a0a; padding: 15px; border-radius: 8px; border: 1px solid #333;">
+                        <h4 style="color:#aaa; font-size:11px; margin:0 0 10px 0;">[IN] DİJİTAL GİRİŞLER</h4>
+                        <div id="vplc-inputs" style="display:flex; gap:5px; flex-wrap:wrap; margin-bottom:15px;"></div>
+                        <h4 style="color:#aaa; font-size:11px; margin:0 0 10px 0;">[OUT] DİJİTAL ÇIKIŞLAR</h4>
+                        <div id="vplc-outputs" style="display:flex; gap:8px; flex-wrap:wrap;"></div>
+                    </div>
+                    <div id="vplc-analog-panel"
+                        style="flex: 1; background: #0a0a0a; padding: 15px; border-radius: 8px; border: 1px solid #333; display: none;">
+                        <h4 style="color:#f6c000; font-size:11px; margin:0 0 10px 0;">[ANALOG] SENSÖR VERİLERİ</h4>
+                        <div id="vplc-analog-inputs" style="display:flex; flex-direction:column; gap:10px;"></div>
+                    </div>
+                </div>
+                <textarea id="vplc-code"
+                    style="width:100%; height:180px; padding:12px; background:#000; color:#27ae60; border:1px solid #00d2ff; border-radius:4px; font-family:'Courier New', monospace; font-size:12px;"
+                    placeholder="LD X0\nOUT Y0"></textarea>
+            </div>
+
+            <!-- SEKME 2: SANAL FABRİKA -->
+            <div id="tab-content-factory"
+                style="display: none; background: #111; flex: 1; overflow: hidden; position: relative; flex-direction: row;">
+
+                <!-- Açılır/Kapanır Araç Kutusu -->
+                <div id="factory-toolbox"
+                    style="width: 240px; background: #0a0a0a; border-right: 1px solid #333; display: flex; flex-direction: column; overflow-y: auto; transition: width 0.3s; z-index: 10;">
+                    <div
+                        style="padding: 10px; background: #001f3f; color: #00d2ff; font-weight: bold; font-size: 11px; text-align: center; border-bottom: 1px solid #00d2ff;">
+                        KÜTÜPHANE</div>
+
+                    <div style="padding: 5px; color: #888; font-size: 10px; font-weight: bold; background: #1a1a1a;">
+                        PANO İÇİ EKİPMANLAR</div>
+                    <button class="toolbox-btn" onclick="addFactoryComponent('btn_momentary')"
+                        style="padding:8px; background:transparent; border:none; color:#fff; text-align:left; cursor:pointer; border-bottom:1px solid #222; font-size:11px;">🔘
+                        Anlık Buton (Yaylı)</button>
+                    <button class="toolbox-btn" onclick="addFactoryComponent('btn_toggle')"
+                        style="padding:8px; background:transparent; border:none; color:#fff; text-align:left; cursor:pointer; border-bottom:1px solid #222; font-size:11px;">🕹️
+                        Kalıcı Seçici Şalter</button>
+                    <button class="toolbox-btn" onclick="addFactoryComponent('panel_light')"
+                        style="padding:8px; background:transparent; border:none; color:#fff; text-align:left; cursor:pointer; border-bottom:1px solid #222; font-size:11px;">💡
+                        Panel Sinyal Lambası</button>
+
+                    <div
+                        style="padding: 5px; color: #888; font-size: 10px; font-weight: bold; background: #1a1a1a; margin-top:5px;">
+                        HAREKET & MOTORLAR</div>
+                    <button class="toolbox-btn" onclick="addFactoryComponent('vfd_drive')"
+                        style="padding:8px; background:transparent; border:none; color:#00d2ff; text-align:left; cursor:pointer; border-bottom:1px solid #222; font-size:11px; font-weight:bold;">🔌
+                        AC Sürücü (VFD)</button>
+                    <button class="toolbox-btn" onclick="addFactoryComponent('ac_motor')"
+                        style="padding:8px; background:transparent; border:none; color:#fff; text-align:left; cursor:pointer; border-bottom:1px solid #222; font-size:11px;">⚙️
+                        3 Fazlı AC Motor</button>
+                    <button class="toolbox-btn" onclick="addFactoryComponent('linear_axis')"
+                        style="padding:8px; background:transparent; border:none; color:#fff; text-align:left; cursor:pointer; border-bottom:1px solid #222; font-size:11px;">📏
+                        Lineer Eksen (Vidalı Mil)</button>
+                    <button class="toolbox-btn" onclick="addFactoryComponent('conveyor')"
+                        style="padding:8px; background:transparent; border:none; color:#fff; text-align:left; cursor:pointer; border-bottom:1px solid #222; font-size:11px;">🛤️
+                        Konveyör Bant</button>
+                    <button class="toolbox-btn" onclick="addFactoryComponent('cylinder')"
+                        style="padding:8px; background:transparent; border:none; color:#fff; text-align:left; cursor:pointer; border-bottom:1px solid #222; font-size:11px;">🗜️
+                        Pnömatik Silindir</button>
+                    <button class="toolbox-btn" onclick="addFactoryComponent('barrier')"
+                        style="padding:8px; background:transparent; border:none; color:#fff; text-align:left; cursor:pointer; border-bottom:1px solid #222; font-size:11px;">🚧
+                        Otomatik Bariyer</button>
+
+                    <div
+                        style="padding: 5px; color: #888; font-size: 10px; font-weight: bold; background: #1a1a1a; margin-top:5px;">
+                        SENSÖRLER</div>
+                    <button class="toolbox-btn" onclick="addFactoryComponent('sensor_optic')"
+                        style="padding:8px; background:transparent; border:none; color:#fff; text-align:left; cursor:pointer; border-bottom:1px solid #222; font-size:11px;">👁️
+                        Lazer / Optik Sensör</button>
+                    <button class="toolbox-btn" onclick="addFactoryComponent('sensor_analog')"
+                        style="padding:8px; background:transparent; border:none; color:#f39c12; text-align:left; cursor:pointer; border-bottom:1px solid #222; font-size:11px; font-weight:bold;">📡
+                        Analog Mesafe (0-10V)</button>
+                    <button class="toolbox-btn" onclick="addFactoryComponent('encoder')"
+                        style="padding:8px; background:transparent; border:none; color:#fff; text-align:left; cursor:pointer; border-bottom:1px solid #222; font-size:11px;">🔄
+                        Rotary Encoder (Pulse)</button>
+                    <button class="toolbox-btn" onclick="addFactoryComponent('tower_light')"
+                        style="padding:8px; background:transparent; border:none; color:#fff; text-align:left; cursor:pointer; border-bottom:1px solid #222; font-size:11px;">🚦
+                        Tepe Lambası</button>
+                    <div
+                        style="padding: 5px; color: #888; font-size: 10px; font-weight: bold; background: #1a1a1a; margin-top:5px;">
+                        ENTEGRASYON</div>
+                    <button class="toolbox-btn" onclick="importCulbasePanel()"
+                        style="padding:10px; background:#111; border:1px dashed #f39c12; color:#f39c12; text-align:left; cursor:pointer; font-size:11px; font-weight:bold; width: 90%; margin: 5px auto; display: block; border-radius: 4px;">📥
+                        CULbase Panosunu Aktar</button>
+                </div>
+
+                <!-- Araç Kutusu Gizleme Butonu -->
+                <button onclick="toggleToolbox()"
+                    style="position:absolute; left:220px; top:50%; transform:translateY(-50%); background:#00d2ff; color:#000; border:none; border-radius:0 5px 5px 0; padding:15px 5px; cursor:pointer; z-index:11; font-weight:bold;"
+                    id="btn-toggle-toolbox">◀</button>
+
+                <!-- Mini Kontrol Paneli -->
+                <div
+                    style="position: absolute; bottom: 10px; left: 240px; background: rgba(10,10,10,0.9); border: 1px solid #00d2ff; padding: 10px; border-radius: 8px; z-index: 100; max-width: 400px; box-shadow: 0 5px 15px rgba(0,0,0,0.5);">
+                    <div
+                        style="color: #00d2ff; font-size: 10px; font-weight: bold; margin-bottom: 5px; border-bottom: 1px solid #333; padding-bottom: 3px;">
+                        MİNİ PANEL</div>
+                    <div id="vplc-mini-inputs" style="display: flex; gap: 3px; flex-wrap: wrap; margin-bottom: 5px;">
+                    </div>
+                    <div id="vplc-mini-outputs" style="display: flex; gap: 5px; flex-wrap: wrap;"></div>
+                </div>
+
+                <!-- Fabrika Sahası (Canvas) -->
+                <div id="factory-canvas"
+                    style="flex: 1; background: repeating-linear-gradient(45deg, #161616, #161616 10px, #111 10px, #111 20px); position: relative; overflow: hidden; touch-action: none;">
+                    <div
+                        style="color: #555; font-family: monospace; position: absolute; top: 10px; right: 10px; font-size: 12px;">
+                        FACTORY ENGINE v2.0</div>
+                </div>
+            </div>
+
+            <!-- YENİ SEKME 3: ELEKTRİK KABLAJ ŞEMASI -->
+            <div id="tab-content-wiring"
+                style="display: none; background: #050505; flex: 1; padding: 20px; overflow-y: auto;">
+                <h4 style="color:#f39c12; border-bottom:1px solid #333; padding-bottom:10px;">⚡ Sanal Klemens ve Kablaj
+                    Panosu</h4>
+                <p style="color:#888; font-size:12px;">Sahaya eklediğiniz ürünlerin PLC ile olan pin-to-pin bağlantı
+                    şeması aşağıda otomatik oluşturulmuştur. Bu liste doğrudan E-Plan'a aktarılır.</p>
+                <div id="wiring-board"
+                    style="background:#111; border:1px solid #333; border-radius:8px; padding:15px; display:flex; flex-direction:column; gap:10px;">
+                    <!-- JS Tarafından Doldurulacak -->
+                </div>
+            </div>
+
+        </div>
+    </div>
+    <!-- PDF ÖNİZLEME VE İNDİRME EKRANI (E-PLAN İÇİN) -->
+    <div id="pdf-preview-modal"
+        style="display:none; position:fixed; top:0; left:0; width:100vw; height:100vh; background:#333639; z-index:999999; flex-direction:column;">
+        <div
+            style="height:60px; background:#202124; display:flex; justify-content:space-between; align-items:center; padding:0 15px; border-bottom:1px solid #444; flex-wrap:wrap;">
+            <button onclick="document.getElementById('pdf-preview-modal').style.display='none'"
+                style="background:transparent; color:#fff; border:none; cursor:pointer; font-size:13px; font-weight:bold;">←
+                Kapat</button>
+            <div
+                style="display:flex; align-items:center; gap:8px; background:#111; border:1px solid #444; border-radius:4px; padding:2px 5px;">
+                <button onclick="zoomPDF(-0.1)"
+                    style="background:transparent; color:#fff; border:none; cursor:pointer; font-size:18px; width:30px; height:30px;">-</button>
+                <span id="pdf-zoom-level"
+                    style="color:#00d2ff; font-size:12px; font-weight:bold; min-width:40px; text-align:center;">100%</span>
+                <button onclick="zoomPDF(0.1)"
+                    style="background:transparent; color:#fff; border:none; cursor:pointer; font-size:18px; width:30px; height:30px;">+</button>
+            </div>
+            <button id="pdf-download-btn"
+                style="background:#27ae60; color:#fff; border:none; padding:8px 15px; border-radius:4px; cursor:pointer; font-weight:bold; font-size:12px;">📥
+                İNDİR</button>
+        </div>
+        <div
+            style="flex:1; overflow:auto; padding:20px; display:flex; justify-content:flex-start; align-items:flex-start; background:#525659; flex-direction:column;">
+            <div id="pdf-zoom-wrapper"
+                style="transform-origin: top left; transition: transform 0.2s ease-out; margin: 0 auto;">
+                <div id="pdf-preview-content"
+                    style="background:#fff; width:210mm; min-height:297mm; box-shadow:0 10px 30px rgba(0,0,0,0.7); box-sizing:border-box;">
+                </div>
             </div>
         </div>
     </div>
