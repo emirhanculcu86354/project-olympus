@@ -116,9 +116,20 @@
 
         <!-- ORTA VE ALT KISIM: Modüller ve Karşılama İmzası -->
         <div style="padding: 20px; display: flex; flex-direction: column; flex: 1; overflow-y: auto;">
-            <h2 style="color: #fff; margin-bottom: 15px; font-size: 18px;">Modüller</h2>
+            <h2 style="color: #fff; margin-bottom: 15px; font-size: 18px;"></h2>
 
             <div class="hub-grid" style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px;">
+                <!-- YENİ: DİĞER KARTLARLA AYNI BOYUTTA WIDGET KARTI -->
+                <div class="hub-card" onclick="rotateHubWidget()" style="background: linear-gradient(135deg, #151515, #222); border: 1px solid var(--goldnova); display: flex; flex-direction: column; justify-content: space-between; position: relative;">
+                    <div>
+                        <div style="display: flex; justify-content: space-between; align-items: center;">
+                            <span style="color: var(--goldnova); font-size: 9px; font-weight: bold; text-transform: uppercase; letter-spacing: 1px;">Sistem Durumu</span>
+                            <span style="font-size: 14px;">⚡</span>
+                        </div>
+                        <h4 id="hub-widget-title" style="color: #fff; font-size: 14px; margin: 8px 0 0 0; line-height: 1.4;">Yükleniyor...</h4>
+                    </div>
+                    <div style="font-size: 35px; text-align: right; margin-top: 10px;">📊</div>
+                </div>
                 <!-- 1. OLYMPUS KARTI -->
                 <div class="hub-card" onclick="enterAppFromHub('app-content', 'OLYMPUS')"
                     style="background: linear-gradient(135deg, #151515, #2a2a2a); border: 1px solid var(--goldnova);">

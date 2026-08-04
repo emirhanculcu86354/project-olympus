@@ -3223,3 +3223,26 @@ input:checked+.ios-slider:before {
     background-color: #555;
     border-radius: 4px;
 }
+/* ==========================================
+   🖼️ HUB DOKUNMATİK KAYDIRMA VE WIDGET
+   ========================================== */
+#hub-carousel-track {
+    display: flex;
+    height: 100%;
+    width: 100%;
+    overflow-x: auto;
+    scroll-snap-type: x mandatory;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none; /* Firefox için scrollbar'ı gizle */
+}
+
+#hub-carousel-track::-webkit-scrollbar {
+    display: none; /* Chrome/Safari için scrollbar'ı gizle */
+}
+
+.hub-slide {
+    min-width: 100%;
+    height: 100%;
+    scroll-snap-align: start;
+    flex-shrink: 0;
+}

@@ -4020,10 +4020,13 @@ window.showKeyConfig = function () {
 // ==========================================
 let hubSlideIndex = 0;
 let hubCarouselInterval;
+let widgetMode = 0; // 0: Günün Sözü/Hedefi, 1: Su Durumu, 2: Streak
 
 function initHubCarousel() {
     updateHubGreeting();
     loadHubPhotos();
+    initHubTouchSwipe();
+    updateHubWidget();
     clearInterval(hubCarouselInterval);
 
     // 3 Saniye logoda bekledikten sonra fotoğrafları döndürmeye başla
@@ -4034,13 +4037,47 @@ function initHubCarousel() {
 
 function nextHubSlide() {
     const track = document.getElementById('hub-carousel-track');
+    if (!track) return;
     const slides = track.children;
-    if (slides.length <= 1) return; // Sadece logo varsa dönme
+    if (slides.length <= 1) return;
 
     hubSlideIndex = (hubSlideIndex + 1) % slides.length;
-    track.style.transform = `translateX(-${hubSlideIndex * 100}%)`;
+    track.scrollTo({
+        left: hubSlideIndex * track.clientWidth,
+        behavior: 'smooth'
+    });
 }
+function initHubTouchSwipe() {
+    const track = document.getElementById('hub-carousel-track');
+    if (!track) return;
 
+    track.addEventListener('scroll', () => {
+        if (!track.clientWidth) return;
+        // Kullanıcı elle kaydırdığında index'i güncelle ki otomatik geçiş şaşırmasın
+        hubSlideIndex = Math.round(track.scrollLeft / track.clientWidth);
+    }, { passive: true });
+}
+window.rotateHubWidget = function() {
+    widgetMode = (widgetMode + 1) % 3;
+    updateHubWidget();
+    if (navigator.vibrate) navigator.vibrate(20);
+};
+function updateHubWidget() {
+    const titleEl = document.getElementById('hub-widget-title');
+    if (!titleEl) return;
+
+    if (widgetMode === 0) {
+        titleEl.innerText = "🚀 Limitlerini Zorla, Asla Durma!";
+    } else if (widgetMode === 1) {
+        let wData = JSON.parse(localStorage.getItem('olympus_water_obj')) || { amount: 0 };
+        let goal = parseInt(localStorage.getItem('olympus_water_goal') || 3000);
+        titleEl.innerText = `💧 Su Durumu: ${wData.amount} / ${goal} ml`;
+    } else if (widgetMode === 2) {
+        let streak = JSON.parse(localStorage.getItem('olympus_streak_data')) || [false];
+        let activeCount = streak.filter(Boolean).length;
+        titleEl.innerText = `🔥 Bu Hafta ${activeCount} Gün Aktif`;
+    }
+}
 window.addHubPhoto = function (event) {
     const file = event.target.files[0];
     if (file) {
