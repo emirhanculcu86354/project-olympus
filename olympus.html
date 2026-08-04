@@ -93,12 +93,12 @@
             </div>
         </div>
 
-        <!-- ÜST KISIM: Fotoğraf Karuseli (Biraz Genişletildi) -->
+        <!-- ÜST KISIM: Fotoğraf Karuseli (Yükseklik Dengelendi) -->
         <div class="hub-carousel-container"
-            style="position: relative; width: 100%; height: 32vh; min-height: 220px; overflow: hidden; border-bottom: 2px solid var(--goldnova); border-top: 1px solid #222; box-shadow: 0 4px 15px rgba(246, 192, 0, 0.2);">
+            style="position: relative; width: 100%; height: 32vh; min-height: 180px; overflow: hidden; border-bottom: 2px solid var(--goldnova); border-top: 1px solid #222; box-shadow: 0 4px 15px rgba(246, 192, 0, 0.2);">
             <div id="hub-carousel-track"
                 style="display: flex; height: 100%; transition: transform 0.6s cubic-bezier(0.25, 0.8, 0.25, 1);">
-                <!-- 1. Slayt (Her Zaman Uygulama Logosu) -->
+                <!-- 1. Slayt -->
                 <div class="hub-slide"
                     style="min-width: 100%; height: 100%; display: flex; justify-content: center; align-items: center; background: #000;">
                     <img src="icon.png"
@@ -114,64 +114,76 @@
                 onchange="addHubPhoto(event)">
         </div>
 
-        <!-- ORTA VE ALT KISIM: Modüller ve Karşılama İmzası -->
-        <div style="padding: 20px; display: flex; flex-direction: column; flex: 1; overflow-y: auto;">
-            <h2 style="color: #fff; margin-bottom: 15px; font-size: 18px;"></h2>
+        <!-- ORTA VE ALT KISIM: Modüller ve Karşılama İmzası (Scroll Kapatıldı, Boşluklar Tıraşlandı) -->
+        <div style="padding: 15px 20px 10px 20px; display: flex; flex-direction: column; flex: 1; overflow: hidden;">
 
-            <div class="hub-grid" style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px;">
-                <!-- YENİ: DİĞER KARTLARLA AYNI BOYUTTA WIDGET KARTI -->
-                <div class="hub-card" onclick="rotateHubWidget()" style="background: linear-gradient(135deg, #151515, #222); border: 1px solid var(--goldnova); display: flex; flex-direction: column; justify-content: space-between; position: relative;">
-                    <div>
-                        <div style="display: flex; justify-content: space-between; align-items: center;">
-                            <span style="color: var(--goldnova); font-size: 9px; font-weight: bold; text-transform: uppercase; letter-spacing: 1px;">Sistem Durumu</span>
-                            <span style="font-size: 14px;">⚡</span>
-                        </div>
-                        <h4 id="hub-widget-title" style="color: #fff; font-size: 14px; margin: 8px 0 0 0; line-height: 1.4;">Yükleniyor...</h4>
+            <!-- KESİN ÇÖZÜM: BETON GİBİ HAYALET KUTU -->
+            <div style="height: 80px; width: 100%; margin-bottom: 15px; position: relative;">
+
+                <!-- HAVADA ASILI WIDGET (ALTLAKİ BUTONLARDAN %100 BAĞIMSIZ) -->
+                <div onclick="rotateHubWidget()"
+                    style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: linear-gradient(90deg, #151515, #0a0a0a); border: 1px solid #333; border-left: 4px solid var(--goldnova); border-radius: 12px; padding: 0 15px; display: flex; justify-content: space-between; align-items: center; cursor: pointer; box-shadow: 0 4px 12px rgba(0,0,0,0.4); box-sizing: border-box;">
+
+                    <div
+                        style="display: flex; flex-direction: column; justify-content: center; width: calc(100% - 50px);">
+                        <span
+                            style="color: var(--goldnova); font-size: 10px; font-weight: 900; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 4px;">Sistem
+                            Durumu</span>
+                        <h4 id="hub-widget-title"
+                            style="color: #fff; font-size: 14px; margin: 0; font-weight: bold; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; display: block; width: 100%;">
+                            Yükleniyor...</h4>
                     </div>
-                    <div style="font-size: 35px; text-align: right; margin-top: 10px;">📊</div>
+
+                    <div
+                        style="background: rgba(246, 192, 0, 0.1); border: 1px solid rgba(246, 192, 0, 0.3); color: var(--goldnova); width: 42px; height: 42px; border-radius: 50%; display: flex; justify-content: center; align-items: center; font-size: 18px; flex-shrink: 0;">
+                        ⚡
+                    </div>
                 </div>
+
+            </div>
+
+            <!-- KUSURSUZ 4'LÜ GRID DÜZENİ -->
+            <div class="hub-grid" style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px;">
                 <!-- 1. OLYMPUS KARTI -->
                 <div class="hub-card" onclick="enterAppFromHub('app-content', 'OLYMPUS')"
-                    style="background: linear-gradient(135deg, #151515, #2a2a2a); border: 1px solid var(--goldnova);">
-                    <h3 style="color: var(--goldnova); margin: 0; font-size: 18px;">Olympus</h3>
-                    <p style="font-size: 11px; color: #888; margin-top: 5px;">Kişisel Gelişim & Spor</p>
-                    <div style="font-size: 45px; text-align: right; margin-top: 15px;">🏋️‍♂️</div>
+                    style="background: linear-gradient(135deg, #151515, #2a2a2a); border: 1px solid var(--goldnova); padding: 12px;">
+                    <h3 style="color: var(--goldnova); margin: 0; font-size: 16px;">Olympus</h3>
+                    <p style="font-size: 10px; color: #888; margin-top: 4px;">Kişisel Gelişim & Spor</p>
+                    <div style="font-size: 35px; text-align: right; margin-top: 10px;">🏋️‍♂️</div>
                 </div>
 
                 <!-- 2. ARCADE KARTI -->
                 <div class="hub-card" onclick="enterAppFromHub('arcade-screen', 'ARCADE')"
-                    style="background: linear-gradient(135deg, #1a0033, #3a0066); border: 1px solid #8a2be2;">
-                    <h3 style="color: #d1a3ff; margin: 0; font-size: 18px;">Arcade</h3>
-                    <p style="font-size: 11px; color: #d1a3ff; opacity: 0.7; margin-top: 5px;">Retro Terminal</p>
-                    <div style="font-size: 45px; text-align: right; margin-top: 15px;">🕹️</div>
+                    style="background: linear-gradient(135deg, #1a0033, #3a0066); border: 1px solid #8a2be2; padding: 12px;">
+                    <h3 style="color: #d1a3ff; margin: 0; font-size: 16px;">Arcade</h3>
+                    <p style="font-size: 10px; color: #d1a3ff; opacity: 0.7; margin-top: 4px;">Retro Terminal</p>
+                    <div style="font-size: 35px; text-align: right; margin-top: 10px;">🕹️</div>
                 </div>
 
                 <!-- 3. BUSINESS KARTI -->
                 <div class="hub-card" onclick="enterAppFromHub('business-screen', 'BUSINESS')"
-                    style="background: linear-gradient(135deg, #001f3f, #003366); border: 1px solid #00d2ff;">
-                    <h3 style="color: #00d2ff; margin: 0; font-size: 18px;">Business</h3>
-                    <p style="font-size: 11px; color: #00d2ff; opacity: 0.7; margin-top: 5px;">Üretkenlik & İş</p>
-                    <div style="font-size: 45px; text-align: right; margin-top: 15px;">💼</div>
+                    style="background: linear-gradient(135deg, #001f3f, #003366); border: 1px solid #00d2ff; padding: 12px;">
+                    <h3 style="color: #00d2ff; margin: 0; font-size: 16px;">Business</h3>
+                    <p style="font-size: 10px; color: #00d2ff; opacity: 0.7; margin-top: 4px;">Üretkenlik & İş</p>
+                    <div style="font-size: 35px; text-align: right; margin-top: 10px;">💼</div>
                 </div>
 
                 <!-- 4. GELECEK MODÜL -->
                 <div class="hub-card"
-                    style="background: linear-gradient(135deg, #111, #222); border: 1px dashed #444; opacity: 0.6;">
-                    <h3 style="color: #666; margin: 0; font-size: 18px;">Yakında</h3>
-                    <p style="font-size: 11px; color: #555; margin-top: 5px;">Yeni Ufuklar</p>
-                    <div style="font-size: 45px; text-align: right; margin-top: 15px;">🚀</div>
+                    style="background: linear-gradient(135deg, #111, #222); border: 1px dashed #444; opacity: 0.6; padding: 12px;">
+                    <h3 style="color: #666; margin: 0; font-size: 16px;">Yakında</h3>
+                    <p style="font-size: 10px; color: #555; margin-top: 4px;">Yeni Ufuklar</p>
+                    <div style="font-size: 35px; text-align: right; margin-top: 10px;">🚀</div>
                 </div>
             </div>
 
-            <!-- ZARİF KARŞILAMA İMZASI (Sayfanın En Altında) -->
-            <div style="margin-top: auto; padding-top: 40px; padding-bottom: 20px; text-align: center;">
-                <!-- Font-weight: 300 ile çok ince ve zarif yapıldı -->
+            <!-- ZARİF KARŞILAMA İMZASI (Boşluklar azaltılarak ekranın en altına itildi) -->
+            <div style="margin-top: auto; padding-top: 15px; padding-bottom: 5px; text-align: center;">
                 <h2 id="hub-greeting-text"
-                    style="color: #888; font-size: 16px; margin: 0; font-weight: 300; letter-spacing: 1px;">İyi Günler,
+                    style="color: #888; font-size: 14px; margin: 0; font-weight: 300; letter-spacing: 1px;">İyi Günler,
                 </h2>
-                <!-- İsim kısmı biraz daha vurgulu ama yine abartısız -->
                 <p id="hub-greeting-name"
-                    style="color: #fff; font-size: 20px; margin-top: 4px; font-weight: 400; font-style: italic;">Sporcu
+                    style="color: #fff; font-size: 18px; margin-top: 4px; font-weight: 400; font-style: italic;">Sporcu
                 </p>
             </div>
         </div>
@@ -535,7 +547,6 @@
                     </div> <!-- KADRO SEKMESİNİN DOĞRU KAPANIŞI -->
 
                     <!-- 2. SEKME: GEÇMİŞ MAÇLAR -->
-                    <!-- 2. SEKME: GEÇMİŞ MAÇLAR -->
                     <div id="fb-tab-history" class="hidden">
                         <button class="save-btn" onclick="addNewMatch()"
                             style="margin-bottom: 20px; background:var(--goldnova); color:#000;">+ Yeni Maç Skoru
@@ -580,7 +591,32 @@
                         <span style="font-size:11px; color:#888;">Takipçi</span>
                     </div>
                 </div>
+                <!-- YENİ: APPLE WATCH TARZI GÜNLÜK HALKALAR -->
+                <div
+                    style="background: #151515; border: 1px solid #333; border-radius: 12px; padding: 15px; margin-bottom: 20px; display: flex; align-items: center; justify-content: space-around;">
+                    <div class="activity-rings-container">
+                        <svg width="120" height="120" viewBox="0 0 120 120">
+                            <!-- Arka Plan Halkaları -->
+                            <circle class="ring-bg" cx="60" cy="60" r="50" stroke-width="10" />
+                            <circle class="ring-bg" cx="60" cy="60" r="38" stroke-width="10" />
+                            <circle class="ring-bg" cx="60" cy="60" r="26" stroke-width="10" />
 
+                            <!-- İlerleme Halkaları (JS ile dolacak) -->
+                            <!-- Kırmızı: İdman, Yeşil: Kalori, Mavi: Su -->
+                            <circle id="ring-workout" class="ring-progress ring-red" cx="60" cy="60" r="50"
+                                stroke-width="10" stroke-dasharray="314" stroke-dashoffset="314" />
+                            <circle id="ring-calories" class="ring-progress ring-green" cx="60" cy="60" r="38"
+                                stroke-width="10" stroke-dasharray="238" stroke-dashoffset="238" />
+                            <circle id="ring-water" class="ring-progress ring-blue" cx="60" cy="60" r="26"
+                                stroke-width="10" stroke-dasharray="163" stroke-dashoffset="163" />
+                        </svg>
+                    </div>
+                    <div style="display: flex; flex-direction: column; gap: 8px;">
+                        <span style="color: #ff4444; font-size: 11px; font-weight: bold;">🔴 İdman</span>
+                        <span style="color: #27ae60; font-size: 11px; font-weight: bold;">🟢 Kalori</span>
+                        <span style="color: #00d2ff; font-size: 11px; font-weight: bold;">🔵 Su</span>
+                    </div>
+                </div>
                 <!-- YENİ: 7 GÜNLÜK STREAK TAKVİMİ -->
                 <div class="streak-container">
                     <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px;">
@@ -705,13 +741,22 @@
             <button class="nav-btn" data-target="diet-sec"><span class="icon">🍽️</span><span
                     class="text">Diyet</span></button>
             <div class="hub-nav-btn" onclick="returnToHub()">
-                <span class="hub-icon">⊞</span>
+                <span class="hub-icon"></span>
             </div>
             <button class="nav-btn" data-target="activity-sec"><span class="icon">✅</span><span
                     class="text">Görev</span></button>
             <button class="nav-btn" data-target="tracking-sec"><span class="icon">🎯</span><span
                     class="text">Takip</span></button>
         </nav>
+        <!-- GÜNCELLENMİŞ AKTİF FAB DÜĞMESİ -->
+        <div class="fab-container">
+            <div id="fab-menu" class="fab-menu">
+                <button class="fab-btn" onclick="fabAddWater()" style="color:#00d2ff;" title="Hızlı Su Ekle">💧</button>
+                <button class="fab-btn" onclick="fabOpenWorkout()" style="color:#ff4444;"
+                    title="Olympus Arenası">🏋️</button>
+            </div>
+            <button id="fab-main" class="fab-main" onclick="toggleFAB()">+</button>
+        </div>
     </div>
 
     <!-- ==========================================
@@ -1296,12 +1341,6 @@
                 </div>
             </div>
         </div>
-    </div>
-    <div id="spotify-floating-player" class="hidden">
-        <iframe style="border-radius:12px"
-            src="https://open.spotify.com/embed/playlist/4aJ0qKBiSMEI8ldn589iNr?utm_source=generator&theme=0&si=45eee92065144cb7"
-            width="100%" height="152" frameBorder="0" allowfullscreen=""
-            allow="autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture" loading="lazy"></iframe>
     </div>
     <!-- GİZLİ GEÇİT: MATRIX TERMINALI (CULBASE) -->
     <div id="matrix-terminal" class="hidden"
@@ -2300,6 +2339,36 @@
             </div>
         </div>
     </div>
+    <!-- ==========================================
+         🚀 PREMIUM ARAÇLAR (FAB, ISLAND, VIEWER)
+         ========================================== -->
+         
+    <!-- 1. HIZLI EYLEM DÜĞMESİ (SADECE OLYMPUS'TA AÇILACAK) -->
+    <div id="main-fab-container" class="fab-container" style="display: none;">
+        <div id="fab-menu" class="fab-menu">
+            <button class="fab-btn" onclick="fabAddWater()" style="color:#00d2ff;" title="Hızlı Su Ekle">💧</button>
+            <button class="fab-btn" onclick="fabOpenWorkout()" style="color:#ff4444;" title="Olympus Arenası">🏋️</button>
+        </div>
+        <button id="fab-main" class="fab-main" onclick="toggleFAB()">+</button>
+    </div>
+
+    <!-- 2. DYNAMIC ISLAND (CANLI BİLDİRİM KAPSÜLÜ) -->
+    <div id="dynamic-island" class="dynamic-island" onclick="document.getElementById('dynamic-island').classList.remove('active')">
+        <div style="display: flex; align-items: center; gap: 10px;">
+            <span class="di-icon">⚡</span>
+            <span id="di-text" class="di-text">Aktif Antrenman</span>
+        </div>
+        <div class="di-wave"><span></span><span></span><span></span></div>
+    </div>
+
+    <!-- 3. TAM EKRAN FOTOĞRAF GÖRÜNTÜLEYİCİ -->
+    <div id="fullscreen-image-viewer" onclick="closeFullscreenPhoto()" style="position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: rgba(0,0,0,0.95); z-index: 100000; display: flex; justify-content: center; align-items: center; opacity: 0; pointer-events: none; transition: opacity 0.3s ease;">
+        <img id="fullscreen-image-element" src="" style="max-width: 95%; max-height: 90%; object-fit: contain; border-radius: 12px; box-shadow: 0 0 30px rgba(246, 192, 0, 0.2); transition: transform 0.3s;">
+        <div style="position: absolute; top: 30px; right: 30px; color: white; background: rgba(255,255,255,0.2); width: 40px; height: 40px; border-radius: 50%; display: flex; justify-content: center; align-items: center; font-size: 20px; cursor: pointer;">✖</div>
+    </div>
+
+    <script src="script.js"></script>
+</body>
 
     <script src="script.js"></script>
 </body>
