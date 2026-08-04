@@ -2342,18 +2342,20 @@
     <!-- ==========================================
          🚀 PREMIUM ARAÇLAR (FAB, ISLAND, VIEWER)
          ========================================== -->
-         
+
     <!-- 1. HIZLI EYLEM DÜĞMESİ (SADECE OLYMPUS'TA AÇILACAK) -->
     <div id="main-fab-container" class="fab-container" style="display: none;">
         <div id="fab-menu" class="fab-menu">
             <button class="fab-btn" onclick="fabAddWater()" style="color:#00d2ff;" title="Hızlı Su Ekle">💧</button>
-            <button class="fab-btn" onclick="fabOpenWorkout()" style="color:#ff4444;" title="Olympus Arenası">🏋️</button>
+            <button class="fab-btn" onclick="fabOpenWorkout()" style="color:#ff4444;"
+                title="Olympus Arenası">🏋️</button>
         </div>
         <button id="fab-main" class="fab-main" onclick="toggleFAB()">+</button>
     </div>
 
     <!-- 2. DYNAMIC ISLAND (CANLI BİLDİRİM KAPSÜLÜ) -->
-    <div id="dynamic-island" class="dynamic-island" onclick="document.getElementById('dynamic-island').classList.remove('active')">
+    <div id="dynamic-island" class="dynamic-island"
+        onclick="document.getElementById('dynamic-island').classList.remove('active')">
         <div style="display: flex; align-items: center; gap: 10px;">
             <span class="di-icon">⚡</span>
             <span id="di-text" class="di-text">Aktif Antrenman</span>
@@ -2361,14 +2363,19 @@
         <div class="di-wave"><span></span><span></span><span></span></div>
     </div>
 
-    <!-- 3. TAM EKRAN FOTOĞRAF GÖRÜNTÜLEYİCİ -->
-    <div id="fullscreen-image-viewer" onclick="closeFullscreenPhoto()" style="position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: rgba(0,0,0,0.95); z-index: 100000; display: flex; justify-content: center; align-items: center; opacity: 0; pointer-events: none; transition: opacity 0.3s ease;">
-        <img id="fullscreen-image-element" src="" style="max-width: 95%; max-height: 90%; object-fit: contain; border-radius: 12px; box-shadow: 0 0 30px rgba(246, 192, 0, 0.2); transition: transform 0.3s;">
-        <div style="position: absolute; top: 30px; right: 30px; color: white; background: rgba(255,255,255,0.2); width: 40px; height: 40px; border-radius: 50%; display: flex; justify-content: center; align-items: center; font-size: 20px; cursor: pointer;">✖</div>
+    <!-- TAM EKRAN FOTOĞRAF GÖRÜNTÜLEYİCİ -->
+    <div id="fullscreen-image-viewer" class="progress-viewer" onclick="handleProgressViewerClick(event)" aria-hidden="true">
+        <button class="progress-viewer-close" type="button" onclick="closeFullscreenPhoto()" aria-label="Fotoğrafı kapat">×</button>
+        <button class="progress-viewer-nav progress-viewer-prev" type="button" onclick="changeFullscreenPhoto(-1, event)" aria-label="Önceki fotoğraf">‹</button>
+        <div class="progress-viewer-content" onclick="handleProgressViewerClick(event)">
+            <img id="fullscreen-image-element" src="" alt="Gelişim fotoğrafı" onclick="handleProgressViewerClick(event)">
+            <div class="progress-viewer-details">
+                <strong id="fullscreen-photo-date"></strong>
+                <span id="fullscreen-photo-measurements"></span>
+            </div>
+        </div>
+        <button class="progress-viewer-nav progress-viewer-next" type="button" onclick="changeFullscreenPhoto(1, event)" aria-label="Sonraki fotoğraf">›</button>
     </div>
-
-    <script src="script.js"></script>
-</body>
 
     <script src="script.js"></script>
 </body>
