@@ -22,6 +22,7 @@
     <script src="https://www.gstatic.com/firebasejs/10.8.1/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.8.1/firebase-auth-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.8.1/firebase-firestore-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.8.1/firebase-database-compat.js"></script>
     <!-- JS-DOS EMÜLATÖR MOTORU -->
     <script src="https://js-dos.com/6.22/current/js-dos.js"></script>
 
@@ -2290,54 +2291,56 @@
     <!-- ==========================================
          💬 OLYMPUS SOHBET: KİŞİ LİSTESİ
          ========================================== -->
-    <div id="chat-list-modal" class="modal" style="z-index: 7000;">
-        <div class="modal-content" style="max-height: 80vh;">
-            <div
-                style="display:flex; justify-content:space-between; align-items:center; margin-bottom:15px; border-bottom:1px solid #333; padding-bottom:10px;">
-                <h2 style="color:#00d2ff; margin:0;">Mesajlar</h2>
-                <button onclick="document.getElementById('chat-list-modal').style.display='none'"
-                    style="background:transparent; border:none; color:#ff4444; font-size:18px; cursor:pointer;">[X]</button>
+    <section id="messages-page" class="messages-page" aria-hidden="true">
+        <div id="messages-list-view" class="messages-page-view active">
+        <div class="messages-page-header">
+            <div class="chat-list-header">
+                <div>
+                    <span class="chat-list-eyebrow">OLYMPUS SOCIAL</span>
+                    <h2>Mesajlar</h2>
+                </div>
+                <button class="chat-close-button" onclick="closeMessagingPage(true)" aria-label="Mesajları kapat">×</button>
             </div>
-            <p style="color:#888; font-size:12px; margin-bottom:15px;">Sohbet etmek için takip ettiğin bir sporcuyu seç.
-            </p>
-            <div id="chat-friends-list" style="flex:1; overflow-y:auto; display:flex; flex-direction:column; gap:10px;">
+            <div class="messages-search-wrap"><span>⌕</span><input id="messages-search-input" type="search" placeholder="Sohbet ara" oninput="filterChatList(this.value)"></div>
+        </div>
+        <div class="messages-page-content">
+            <p class="chat-list-description">Takip ettiğin sporcularla bağlantıda kal.</p>
+            <div id="chat-friends-list" class="chat-friends-list">
                 <p style="color:gray; font-size:12px; text-align:center;">Kişiler yükleniyor...</p>
             </div>
         </div>
-    </div>
+        <button class="messages-page-fab" onclick="focusMessagesSearch()" aria-label="Yeni sohbet başlat">✎</button>
+        </div>
 
     <!-- ==========================================
          💬 OLYMPUS SOHBET: MESAJLAŞMA ODASI
          ========================================== -->
-    <div id="chat-room-modal" class="modal" style="z-index: 7100; padding:0; background:rgba(0,0,0,0.95);">
-        <div class="modal-content"
-            style="width:100%; height:100vh; max-width:600px; border-radius:0; border:none; display:flex; flex-direction:column; padding:0;">
+        <div id="chat-room-view" class="messages-page-view chat-room-view">
+        <div class="chat-room-panel">
 
             <!-- Üst Bar -->
-            <div
-                style="background:#111; padding:calc(env(safe-area-inset-top) + 15px) 15px 15px 15px; display:flex; align-items:center; gap:15px; border-bottom:1px solid #333;">
-                <button onclick="closeChatRoom()"
-                    style="background:transparent; border:none; color:var(--goldnova); font-size:24px; cursor:pointer;">←</button>
-                <img id="chat-room-avatar" src="icon.png"
-                    style="width:40px; height:40px; border-radius:50%; object-fit:cover; border:2px solid #00d2ff;">
-                <h3 id="chat-room-name" style="color:#fff; margin:0; font-size:16px;">Sporcu</h3>
+            <div class="chat-room-header">
+                <button class="chat-back-button" onclick="closeChatRoom()" aria-label="Mesajlara dön">←</button>
+                <img id="chat-room-avatar" class="chat-room-avatar" src="icon.png" alt="Sporcu profili">
+                <div class="chat-room-person">
+                    <h3 id="chat-room-name">Sporcu</h3>
+                    <span><i id="chat-room-presence-dot"></i><b id="chat-room-presence-text">Çevrimiçi</b></span>
+                </div>
             </div>
 
             <!-- Mesajların Aktığı Alan -->
-            <div id="chat-messages-container"
-                style="flex:1; background:#0a0a0a; padding:15px; overflow-y:auto; display:flex; flex-direction:column; gap:10px;">
+            <div id="chat-messages-container" class="chat-messages-container">
                 <!-- Mesajlar Buraya Düşecek -->
             </div>
 
             <!-- Mesaj Yazma Alanı -->
-            <div
-                style="background:#111; padding:10px 15px calc(env(safe-area-inset-bottom) + 10px) 15px; border-top:1px solid #333; display:flex; gap:10px;">
+            <div class="chat-composer">
                 <input type="text" id="chat-message-input" placeholder="Bir mesaj yaz..."
-                    style="flex:1; background:#222; border:1px solid #444; color:#fff; padding:12px 15px; border-radius:20px; outline:none; font-size:14px;">
-                <button onclick="sendChatMessage()"
-                    style="background:#00d2ff; color:#000; border:none; width:45px; height:45px; border-radius:50%; display:flex; justify-content:center; align-items:center; font-size:18px; cursor:pointer;">➤</button>
+                    class="chat-message-input" autocomplete="off">
+                <button class="chat-send-button" onclick="sendChatMessage()" aria-label="Mesajı gönder">➤</button>
             </div>
         </div>
+    </div>
     </div>
     <!-- ==========================================
          🚀 PREMIUM ARAÇLAR (FAB, ISLAND, VIEWER)

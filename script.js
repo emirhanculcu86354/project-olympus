@@ -13,6 +13,8 @@ const firebaseConfig = {
 firebase.initializeApp(firebaseConfig);
 const auth = firebase.auth();
 const db = firebase.firestore();
+const rtdb = firebase.database();
+let presenceConnectionRef = null;
 
 db.settings({ cacheSizeBytes: firebase.firestore.CACHE_SIZE_UNLIMITED });
 
@@ -21,6 +23,7 @@ let isAppInitialized = false;
 
 auth.onAuthStateChanged(user => {
     if (user) {
+        setupRealtimePresence(user.uid);
         // 1. DURUM: KULLANICI ZATEN GİRİŞ YAPMIŞ
         document.getElementById('login-screen').classList.add('hidden');
 
@@ -60,6 +63,7 @@ auth.onAuthStateChanged(user => {
         listenForNotifications();
 
     } else {
+        if (presenceConnectionRef) presenceConnectionRef.off();
         // 2. DURUM: KULLANICI GİRİŞ YAPMAMIŞ (SADECE LOGIN EKRANI GÖSTERİLMELİ)
         const loadingScreen = document.getElementById('loading-screen');
         if (loadingScreen) loadingScreen.style.display = 'none'; // Animasyonu iptal et
@@ -78,6 +82,21 @@ document.getElementById('google-login-btn').addEventListener('click', () => {
 });
 
 window.logout = function () { auth.signOut(); }
+
+// Realtime Database Presence: bağlantı kopsa bile kullanıcıyı otomatik çevrimdışı yapar.
+function setupRealtimePresence(uid) {
+    if (presenceConnectionRef) presenceConnectionRef.off();
+    const statusRef = rtdb.ref(`status/${uid}`);
+    presenceConnectionRef = rtdb.ref('.info/connected');
+
+    presenceConnectionRef.on('value', snapshot => {
+        if (snapshot.val() !== true) return;
+        const offlineStatus = { state: 'offline', lastChanged: firebase.database.ServerValue.TIMESTAMP };
+        statusRef.onDisconnect().set(offlineStatus).then(() => {
+            statusRef.set({ state: 'online', lastChanged: firebase.database.ServerValue.TIMESTAMP });
+        });
+    });
+}
 
 async function loadDataFromCloud(uid) {
     const docRef = db.collection("users").doc(uid);
@@ -1000,6 +1019,8 @@ window.openProgressPhoto = function (id, event) {
     activeProgressPhotoId = id;
     updateFullscreenPhoto();
     const viewer = document.getElementById('fullscreen-image-viewer');
+    // Görüntüleyiciyi tüm uygulama katmanlarının (mesaj sayfası dahil) üstünde tutarız.
+    document.body.appendChild(viewer);
     viewer.classList.add('active');
     viewer.setAttribute('aria-hidden', 'false');
     if (navigator.vibrate) navigator.vibrate(10);
@@ -6343,10 +6364,26 @@ window.saveManualProgram = function () {
 // ==========================================
 let currentActiveChatId = null;
 let chatUnsubscribe = null; // Dinleyiciyi kapatmak için
+let currentChatTargetUid = null;
+let chatTypingTimer = null;
+let messagingOpenedFromHub = false;
+const presenceSubscriptions = new Map();
 
 // 1. Kişi Listesini Aç
 window.openChatListModal = async function () {
-    document.getElementById('chat-list-modal').style.display = 'flex';
+    const hub = document.getElementById('hub-screen');
+    const appContent = document.getElementById('app-content');
+    if (!document.body.classList.contains('messaging-open')) {
+        messagingOpenedFromHub = !hub.classList.contains('hidden') && hub.style.display !== 'none';
+    }
+    hub.classList.add('hidden');
+    hub.style.display = 'none';
+    appContent.classList.remove('hidden'); // Alt navigasyon mesaj sayfasında görünür kalır.
+    document.body.classList.add('messaging-open');
+    document.getElementById('messages-page').classList.add('active');
+    document.getElementById('messages-page').setAttribute('aria-hidden', 'false');
+    document.getElementById('messages-list-view').classList.add('active');
+    document.getElementById('chat-room-view').classList.remove('active');
     const listContainer = document.getElementById('chat-friends-list');
     listContainer.innerHTML = '<p style="color:gray; font-size:12px; text-align:center;">Arkadaşların aranıyor...</p>';
 
@@ -6362,20 +6399,45 @@ window.openChatListModal = async function () {
         }
 
         listContainer.innerHTML = '';
+        clearPresenceSubscriptions();
         for (let uid of following) {
             const userDoc = await db.collection("users").doc(uid).get();
             if (userDoc.exists) {
                 const uData = userDoc.data();
+                const chatId = [auth.currentUser.uid, uid].sort().join('_');
+                const messagesRef = db.collection("chats").doc(chatId).collection("messages");
+                const [latestSnapshot, unreadSnapshot] = await Promise.all([
+                    messagesRef.orderBy("timestamp", "desc").limit(1).get(),
+                    messagesRef.where("receiver", "==", auth.currentUser.uid).get()
+                ]);
+                const latestMessage = latestSnapshot.empty ? null : latestSnapshot.docs[0].data();
+                const unreadCount = unreadSnapshot.docs.filter(doc => doc.data().read === false).length;
+                const lastText = latestMessage ? latestMessage.text : 'Henüz mesaj yok';
+                const lastTime = latestMessage && latestMessage.timestamp
+                    ? latestMessage.timestamp.toDate().toLocaleTimeString('tr-TR', { hour: '2-digit', minute: '2-digit' })
+                    : '';
+                const presence = await getUserPresence(uid);
+                const presenceText = formatPresenceLabel(presence);
                 listContainer.innerHTML += `
-                    <div onclick="openChatRoom('${uid}', '${uData.name}', '${uData.photo || 'icon.png'}')" style="display:flex; align-items:center; gap:12px; background:#151515; padding:12px; border-radius:12px; border:1px solid #333; cursor:pointer; transition:0.2s;">
-                        <img src="${uData.photo || 'icon.png'}" style="width:45px; height:45px; border-radius:50%; object-fit:cover; border:2px solid #00d2ff;">
-                        <div style="flex:1;">
-                            <h4 style="color:#fff; margin:0; font-size:14px;">${uData.name}</h4>
-                            <span style="color:#888; font-size:11px;">Mesaj göndermek için dokun</span>
+                    <div class="chat-list-card" data-chat-uid="${uid}" data-search-text="${(uData.name + ' ' + lastText).toLocaleLowerCase('tr-TR')}" onclick="openChatRoom('${uid}', '${uData.name}', '${uData.photo || 'icon.png'}')">
+                        <div class="chat-list-avatar-wrap">
+                            <img src="${uData.photo || 'icon.png'}" alt="${uData.name}">
+                            <i class="chat-presence-dot ${presence && presence.state === 'online' ? 'is-online' : ''}"></i>
                         </div>
-                        <span style="color:#00d2ff;">💬</span>
+                        <div class="chat-list-card-content">
+                            <div class="chat-list-card-topline">
+                                <h4>${uData.name}</h4>
+                                <time>${lastTime}</time>
+                            </div>
+                            <small class="chat-presence-label">${presenceText}</small>
+                            <div class="chat-list-card-bottomline">
+                                <span>${lastText}</span>
+                                ${unreadCount ? `<b class="chat-unread-badge">${unreadCount > 9 ? '9+' : unreadCount}</b>` : ''}
+                            </div>
+                        </div>
                     </div>
                 `;
+                subscribeToUserPresence(uid);
             }
         }
     } catch (e) {
@@ -6383,35 +6445,116 @@ window.openChatListModal = async function () {
     }
 };
 
+// Mesaj alanı modal değil; uygulama içinde tam ekran bir sayfa olarak açılır.
+window.closeMessagingPage = function (returnToHub) {
+    const page = document.getElementById('messages-page');
+    page.classList.remove('active');
+    page.setAttribute('aria-hidden', 'true');
+    document.body.classList.remove('messaging-open');
+    clearPresenceSubscriptions();
+    if (chatUnsubscribe) chatUnsubscribe();
+    chatUnsubscribe = null;
+    currentActiveChatId = null;
+    currentChatTargetUid = null;
+
+    if (returnToHub && messagingOpenedFromHub) {
+        document.getElementById('app-content').classList.add('hidden');
+        const hub = document.getElementById('hub-screen');
+        hub.classList.remove('hidden');
+        hub.style.display = 'flex';
+    }
+};
+
+window.focusMessagesSearch = function () {
+    document.getElementById('messages-search-input').focus();
+};
+
+window.filterChatList = function (query) {
+    const normalizedQuery = query.toLocaleLowerCase('tr-TR').trim();
+    document.querySelectorAll('.chat-list-card').forEach(card => {
+        card.style.display = card.dataset.searchText.includes(normalizedQuery) ? '' : 'none';
+    });
+};
+
+function getUserPresence(uid) {
+    return rtdb.ref(`status/${uid}`).once('value')
+        .then(snapshot => snapshot.val())
+        .catch(() => null);
+}
+
+function formatPresenceLabel(presence) {
+    if (presence && presence.state === 'online') return 'Çevrimiçi';
+    if (!presence || !presence.lastChanged) return 'Son görülme bilinmiyor';
+    return `Son görülme ${new Date(presence.lastChanged).toLocaleString('tr-TR', { day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' })}`;
+}
+
+function updatePresenceElements(uid, presence) {
+    const isOnline = presence && presence.state === 'online';
+    document.querySelectorAll(`.chat-list-card[data-chat-uid="${uid}"]`).forEach(card => {
+        card.querySelector('.chat-presence-dot').classList.toggle('is-online', isOnline);
+        card.querySelector('.chat-presence-label').textContent = formatPresenceLabel(presence);
+    });
+
+    if (uid === currentChatTargetUid) {
+        document.getElementById('chat-room-presence-dot').classList.toggle('is-online', isOnline);
+        document.getElementById('chat-room-presence-text').textContent = formatPresenceLabel(presence);
+    }
+}
+
+function subscribeToUserPresence(uid) {
+    if (presenceSubscriptions.has(uid)) return;
+    const ref = rtdb.ref(`status/${uid}`);
+    const callback = snapshot => updatePresenceElements(uid, snapshot.val());
+    ref.on('value', callback);
+    presenceSubscriptions.set(uid, { ref, callback });
+}
+
+function clearPresenceSubscriptions() {
+    presenceSubscriptions.forEach(({ ref, callback }) => ref.off('value', callback));
+    presenceSubscriptions.clear();
+}
+
+function updateChatRoomPresence(uid) {
+    getUserPresence(uid).then(presence => updatePresenceElements(uid, presence));
+    subscribeToUserPresence(uid);
+}
+
 // 2. Özel Sohbet Odasını Aç
 window.openChatRoom = function (targetUid, targetName, targetPhoto) {
-    document.getElementById('chat-list-modal').style.display = 'none';
-    document.getElementById('chat-room-modal').style.display = 'flex';
+    document.getElementById('messages-list-view').classList.remove('active');
+    document.getElementById('chat-room-view').classList.add('active');
 
     document.getElementById('chat-room-name').innerText = targetName;
     document.getElementById('chat-room-avatar').src = targetPhoto;
 
     // Mesajlaşma Odası Kimliğini (ID) Oluştur: İki UID'yi alfabetik sıraya dizerek eşsiz bir oda yaratırız
     const myUid = auth.currentUser.uid;
+    currentChatTargetUid = targetUid;
     currentActiveChatId = [myUid, targetUid].sort().join('_');
 
+    updateChatRoomPresence(targetUid);
     listenForChatMessages(currentActiveChatId);
+    // Yazıyor göstergesi, oda açılırken karşı tarafın aktif olduğunu hissettirir.
+    setTimeout(showChatTypingIndicator, 450);
 };
 
 // 3. Sohbet Odasını Kapat
 window.closeChatRoom = function () {
-    document.getElementById('chat-room-modal').style.display = 'none';
+    document.getElementById('chat-room-view').classList.remove('active');
+    document.getElementById('messages-list-view').classList.add('active');
     if (chatUnsubscribe) {
         chatUnsubscribe(); // Odadan çıkınca veri dinlemeyi durdur (Tasarruf)
     }
     currentActiveChatId = null;
-    openChatListModal(); // Geri dönünce kişi listesini aç
+    currentChatTargetUid = null;
+    if (chatTypingTimer) clearTimeout(chatTypingTimer);
+    openChatListModal(); // Geri dönünce liste verilerini yeniler.
 };
 
 // 4. Gerçek Zamanlı Mesaj Dinleyici (WhatsApp Mantığı)
 function listenForChatMessages(chatId) {
     const container = document.getElementById('chat-messages-container');
-    container.innerHTML = '<p style="color:gray; font-size:12px; text-align:center;">Şifreli sohbet başlatılıyor...</p>';
+    container.innerHTML = '<p class="chat-empty-state">Şifreli sohbet başlatılıyor...</p>';
 
     // Eğer eski bir dinleyici varsa iptal et
     if (chatUnsubscribe) chatUnsubscribe();
@@ -6423,10 +6566,11 @@ function listenForChatMessages(chatId) {
             container.innerHTML = '';
 
             if (snapshot.empty) {
-                container.innerHTML = '<p style="color:#555; font-size:12px; text-align:center; margin-top:20px;">İlk mesajı gönderen sen ol!</p>';
+                container.innerHTML = '<p class="chat-empty-state">İlk mesajı gönderen sen ol!</p>';
                 return;
             }
 
+            let previousDayKey = null;
             snapshot.forEach(doc => {
                 const msg = doc.data();
                 const isMe = msg.sender === auth.currentUser.uid;
@@ -6437,19 +6581,59 @@ function listenForChatMessages(chatId) {
                 if (msg.timestamp) {
                     const d = msg.timestamp.toDate();
                     timeStr = d.toLocaleTimeString('tr-TR', { hour: '2-digit', minute: '2-digit' });
+                    const dayKey = d.toLocaleDateString('tr-TR');
+                    if (dayKey !== previousDayKey) {
+                        container.insertAdjacentHTML('beforeend', `<div class="chat-day-divider"><span>${formatChatDayLabel(d)}</span></div>`);
+                        previousDayKey = dayKey;
+                    }
                 }
 
                 container.innerHTML += `
-                    <div class="chat-bubble ${bubbleClass}">
-                        ${msg.text}
-                        <span class="chat-timestamp">${timeStr}</span>
+                    <div class="chat-message-row ${isMe ? 'is-sent' : 'is-received'}">
+                        <div class="chat-bubble ${bubbleClass}">
+                            <span class="chat-bubble-text">${escapeChatText(msg.text)}</span>
+                            <span class="chat-timestamp">${timeStr}${isMe ? '<b class="chat-read-ticks">✓✓</b>' : ''}</span>
+                        </div>
                     </div>
                 `;
+
+                // Açık odadaki gelen mesajları okundu olarak işaretleriz.
+                if (!isMe && msg.receiver === auth.currentUser.uid && msg.read === false) {
+                    doc.ref.update({ read: true });
+                }
             });
 
             // Yeni mesaj gelince en alta kaydır
             container.scrollTop = container.scrollHeight;
         });
+}
+
+function formatChatDayLabel(date) {
+    const today = new Date();
+    const yesterday = new Date();
+    yesterday.setDate(today.getDate() - 1);
+    if (date.toDateString() === today.toDateString()) return 'Bugün';
+    if (date.toDateString() === yesterday.toDateString()) return 'Dün';
+    return date.toLocaleDateString('tr-TR', { day: 'numeric', month: 'long', year: 'numeric' });
+}
+
+function escapeChatText(text) {
+    const element = document.createElement('div');
+    element.textContent = text || '';
+    return element.innerHTML.replace(/\n/g, '<br>');
+}
+
+function showChatTypingIndicator() {
+    const container = document.getElementById('chat-messages-container');
+    if (!container || document.getElementById('chat-typing-indicator')) return;
+
+    const indicator = document.createElement('div');
+    indicator.id = 'chat-typing-indicator';
+    indicator.className = 'chat-typing-indicator';
+    indicator.innerHTML = '<span>Yazıyor</span><i></i><i></i><i></i>';
+    container.appendChild(indicator);
+    container.scrollTop = container.scrollHeight;
+    chatTypingTimer = setTimeout(() => indicator.remove(), 1800);
 }
 
 // 5. Mesaj Gönder
@@ -6465,6 +6649,8 @@ window.sendChatMessage = async function () {
         await db.collection("chats").doc(currentActiveChatId).collection("messages").add({
             text: text,
             sender: auth.currentUser.uid,
+            receiver: currentChatTargetUid,
+            read: false,
             timestamp: firebase.firestore.FieldValue.serverTimestamp()
         });
 
@@ -6480,6 +6666,13 @@ document.getElementById('chat-message-input').addEventListener('keypress', funct
     if (e.key === 'Enter') {
         sendChatMessage();
     }
+});
+
+// Alt navigasyondan başka bir bölüme geçildiğinde mesaj sayfası kapanır, navigasyon görünür kalır.
+document.querySelectorAll('.bottom-nav .nav-btn, .bottom-nav .hub-nav-btn').forEach(button => {
+    button.addEventListener('click', () => {
+        if (document.getElementById('messages-page').classList.contains('active')) closeMessagingPage(false);
+    });
 });
 // ==========================================
 // 🎯 YENİ TAKİP MERKEZİ FONKSİYONLARI
