@@ -310,6 +310,37 @@
                         <h4>Öğün Takibi</h4>
                         <p>Kalori Grafiği</p>
                     </div>
+                    <!-- YENİ EKLENEN TAKİP KARTLARI -->
+                    <div class="track-card" onclick="openTrackingModal('sleep')">
+                        <div class="track-icon">🌙</div>
+                        <h4>Uyku Takibi</h4>
+                        <p>Toparlanma Grafiği</p>
+                    </div>
+                    <div class="track-card" onclick="openTrackingModal('cardio')">
+                        <div class="track-icon">🏃‍♂️</div>
+                        <h4>Kardiyo</h4>
+                        <p>Adım & Mesafe</p>
+                    </div>
+                    <div class="track-card" onclick="openTrackingModal('active_kcal')">
+                        <div class="track-icon">🔥</div>
+                        <h4>Yakılan Kalori</h4>
+                        <p>Aktif Enerji</p>
+                    </div>
+                    <div class="track-card" onclick="openTrackingModal('heart_rate')">
+                        <div class="track-icon">❤️</div>
+                        <h4>Nabız (BPM)</h4>
+                        <p>Dinlenik Nabız</p>
+                    </div>
+                    <div class="track-card spec-track-card" onclick="openTrackingModal('calculator_1rm')">
+                        <div class="track-icon">🧮</div>
+                        <h4>1RM Motoru</h4>
+                        <p>Maks. Güç Hesabı</p>
+                    </div>
+                    <div class="track-card spec-track-card" onclick="openTrackingModal('supplements')">
+                        <div class="track-icon">💊</div>
+                        <h4>Yakıt Stoku</h4>
+                        <p>Supplement Takibi</p>
+                    </div>
                     <div class="track-card spec-track-card" onclick="openTrackingModal('deload_info')">
                         <div class="track-icon">⚙️</div>
                         <h4>Deload Motoru</h4>
@@ -547,6 +578,12 @@
                     <span style="font-size: 22px;">⚔️</span>
                     <span>OLYMPUS ARENA'YA GİR</span>
                 </button>
+                <!-- OLYMPUS SOHBET GİRİŞ BUTONU -->
+                <button class="arena-entry-btn" onclick="openChatListModal()"
+                    style="margin-top: 15px; background: linear-gradient(45deg, #002233, #0a0a0a); border-color: #00d2ff; color: #fff;">
+                    <span style="font-size: 22px;">💬</span>
+                    <span>OLYMPUS SOHBET</span>
+                </button>
                 <button class="arena-entry-btn" onclick="openSportsScreen()"
                     style="margin-top: 15px; background: linear-gradient(45deg, #0d3617, #151515); border-color: #27ae60; color: #fff;">
                     <span style="font-size: 22px;">⚽</span>
@@ -654,59 +691,150 @@
         </nav>
     </div>
 
-    <!-- APP CONTENT DIŞINDA KALAN, TEK ANATOMİ MODALI -->
-    <div id="anatomy-modal" style="display: none;">
-        <div class="modal-content">
-            <h2 style="color: var(--goldnova); margin-bottom: 15px; text-align: center;">Haftalık Anatomi & Analiz</h2>
+    <!-- ==========================================
+         🔥 TAM EKRAN 3D TERMAL ANATOMİ & ANALİZ SAYFASI
+         ========================================== -->
+    <div id="anatomy-modal" style="display: none; position: fixed; top: 0; left: 0; width: 100vw; height: 100dvh; background: #050505; z-index: 999999; flex-direction: column;">
+        
+        <!-- ÜST BAR: Başlık ve Hamburger Kapatma Butonu -->
+        <div style="display:flex; justify-content:space-between; align-items:center; padding: calc(env(safe-area-inset-top) + 15px) 20px 15px 20px; background: #0a0a0a; border-bottom: 1px solid #222; flex-shrink: 0;">
+            <h2 style="color: var(--goldnova); margin: 0; font-size: 18px; text-transform: uppercase; letter-spacing: 1px;">Termal Anatomi</h2>
+            <button onclick="closeAnatomy()" style="background: transparent; border: none; color: var(--goldnova); font-size: 26px; cursor: pointer; padding: 0;">☰</button>
+        </div>
 
-            <div
-                style="background: #1a1a1a; border-radius: 12px; padding: 20px; margin-bottom: 20px; text-align: center; position: relative;">
-                <svg viewBox="0 0 200 340"
-                    style="width: 100%; max-width: 220px; height: auto; margin: 0 auto; display: block; filter: drop-shadow(0 0 15px rgba(0,0,0,0.5));">
-                    <g fill="#2a2a2a" stroke="#151515" stroke-width="2">
-                        <polygon points="90,20 110,20 115,40 100,55 85,40" />
-                        <polygon points="95,55 105,55 110,70 90,70" />
-                    </g>
-                    <g id="muscle-chest" class="muscle-group" data-name="Göğüs (Chest)">
-                        <polygon points="98,72 65,72 70,105 98,110" />
-                        <polygon points="102,72 135,72 130,105 102,110" />
-                    </g>
-                    <g id="muscle-core" class="muscle-group" data-name="Karın (Core)">
-                        <polygon points="98,112 72,108 77,155 98,165" />
-                        <polygon points="102,112 128,108 123,155 102,165" />
-                    </g>
-                    <g id="muscle-arms-l" class="muscle-group" data-name="Sol Kol & Omuz">
-                        <polygon points="63,72 40,85 45,105 68,90" />
-                        <polygon points="45,107 30,140 45,145 60,110" />
-                        <polygon points="30,142 20,185 35,190 45,147" />
-                    </g>
-                    <g id="muscle-arms-r" class="muscle-group" data-name="Sağ Kol & Omuz">
-                        <polygon points="137,72 160,85 155,105 132,90" />
-                        <polygon points="155,107 170,140 155,145 140,110" />
-                        <polygon points="170,142 180,185 165,190 155,147" />
-                    </g>
-                    <g id="muscle-legs-l" class="muscle-group" data-name="Sol Bacak (Legs)">
-                        <polygon points="75,160 45,230 70,240 95,170" />
-                        <polygon points="48,245 45,310 65,315 72,245" />
-                    </g>
-                    <g id="muscle-legs-r" class="muscle-group" data-name="Sağ Bacak (Legs)">
-                        <polygon points="125,160 155,230 130,240 105,170" />
-                        <polygon points="152,245 155,310 135,315 128,245" />
-                    </g>
-                </svg>
+        <!-- İÇERİK: Tamamı Kaydırılabilir (Scroll) Alan -->
+        <div style="flex: 1; overflow-y: auto; padding: 20px; padding-bottom: 100px; -webkit-overflow-scrolling: touch; display: block;">
+            
+            <!-- 3D DÖNEBİLEN ANATOMİ KARTI -->
+            <div id="anatomy-card-wrapper" class="anatomy-card-container" style="cursor: default;">
+                <div class="anatomy-card-inner">
+                    
+                    <!-- ÖN YÜZ: YORGUNLUK / TOPARLANMA (TERMAL) -->
+                    <div class="anatomy-card-front" style="display: flex; flex-direction: column; justify-content: space-between; padding: 20px;">
+                        
+                        <div>
+                            <h3 style="color: #ff4444; font-size: 14px; text-align: center; margin-top: 0; margin-bottom: 10px; text-transform: uppercase; letter-spacing: 1px;">Yorgunluk & Toparlanma</h3>
+                            
+                            <!-- SVG ve Sayaçların Beraber Durduğu Kutu -->
+                            <div style="position: relative; width: 200px; margin: 0 auto;">
+                                <svg width="200" height="340" viewBox="0 0 200 340" style="display: block; margin: 0 auto;">
+                                    <g fill="#2a2a2a" stroke="#151515" stroke-width="1.5">
+                                        <polygon points="90,20 110,20 115,40 100,55 85,40" />
+                                        <polygon points="95,55 105,55 110,70 90,70" />
+                                    </g>
+                                    <g id="front-shoulders" class="muscle-group" data-name="Omuzlar (Deltoids)">
+                                        <polygon points="65,72 90,70 85,90 55,90" />
+                                        <polygon points="135,72 110,70 115,90 145,90" />
+                                    </g>
+                                    <g id="front-chest" class="muscle-group" data-name="Göğüs (Pectorals)">
+                                        <polygon points="98,72 85,90 70,105 98,110" />
+                                        <polygon points="102,72 115,90 130,105 102,110" />
+                                    </g>
+                                    <g id="front-core" class="muscle-group" data-name="Karın (Abs & Obliques)">
+                                        <polygon points="98,112 72,108 80,135 98,135" />
+                                        <polygon points="102,112 128,108 120,135 102,135" />
+                                        <polygon points="98,137 80,137 77,165 98,165" />
+                                        <polygon points="102,137 120,137 123,165 102,165" />
+                                    </g>
+                                    <g id="front-arms-upper" class="muscle-group" data-name="Üst Kol (Biceps/Triceps)">
+                                        <polygon points="55,92 40,85 45,115 60,110" />
+                                        <polygon points="145,92 160,85 155,115 140,110" />
+                                    </g>
+                                    <g id="front-arms-lower" class="muscle-group" data-name="Ön Kol (Forearms)">
+                                        <polygon points="45,117 30,140 35,160 55,115" />
+                                        <polygon points="155,117 170,140 165,160 145,115" />
+                                    </g>
+                                    <g id="front-legs-quads" class="muscle-group" data-name="Üst Bacak (Quadriceps)">
+                                        <polygon points="75,160 45,230 70,240 95,170" />
+                                        <polygon points="125,160 155,230 130,240 105,170" />
+                                    </g>
+                                    <g id="front-legs-calves" class="muscle-group" data-name="Alt Bacak (Calves)">
+                                        <polygon points="48,245 45,310 65,315 72,245" />
+                                        <polygon points="152,245 155,310 135,315 128,245" />
+                                    </g>
+                                </svg>
+                                <!-- SAATLERİN ÇIKACAĞI KATMAN -->
+                                <div id="recovery-timers-container" style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none;"></div>
+                            </div>
 
-                <div id="muscle-name-display"
-                    style="height: 20px; color: var(--goldnova); font-weight: 800; font-size: 16px; margin-top: 15px; opacity: 0; transition: opacity 0.3s ease;">
-                    Kas Adı
+                            <div style="display:flex; justify-content:center; gap:10px; margin-top:15px; font-size:9px; color:#888;">
+                                <span style="color:#ff4444;">■ Yorgun</span>
+                                <span style="color:#f39c12;">■ Toparlanıyor</span>
+                                <span style="color:#27ae60;">■ Hazır</span>
+                            </div>
+
+                            <div id="muscle-name-display" style="height: 15px; color: var(--goldnova); font-weight: 800; font-size: 13px; margin-top: 10px; opacity: 0; transition: opacity 0.3s ease; text-align: center;">
+                                Kas Adı
+                            </div>
+                        </div>
+
+                        <button onclick="toggleAnatomyCard(event)" style="background: #1a1a1a; color: var(--goldnova); border: 1px solid #333; padding: 12px; border-radius: 8px; font-size: 13px; font-weight: bold; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 8px; width: 100%;">
+                            <span>🔄</span> Haftalık Gelişimi Gör
+                        </button>
+                    </div>
+
+                    <!-- ARKA YÜZ: HAFTALIK ÇALIŞILANLAR -->
+                    <div class="anatomy-card-back" style="display: flex; flex-direction: column; justify-content: space-between; padding: 20px;">
+                        <div>
+                            <h3 style="color: #27ae60; font-size: 14px; text-align: center; margin-top: 0; margin-bottom: 10px; text-transform: uppercase; letter-spacing: 1px;">Haftalık Çalışılan Kaslar</h3>
+                            
+                            <!-- ARKA HARİTA GERİ GELDİ -->
+                            <div style="position: relative; width: 200px; margin: 0 auto 15px auto;">
+                                <svg width="200" height="340" viewBox="0 0 200 340" style="display: block; margin: 0 auto; will-change: transform;">
+                                    <g fill="#2a2a2a" stroke="#151515" stroke-width="1.5">
+                                        <polygon points="90,20 110,20 115,40 100,55 85,40" />
+                                        <polygon points="95,55 105,55 110,70 90,70" />
+                                    </g>
+                                    <g id="back-shoulders" class="muscle-group" data-name="Omuzlar">
+                                        <polygon points="65,72 90,70 85,90 55,90" />
+                                        <polygon points="135,72 110,70 115,90 145,90" />
+                                    </g>
+                                    <g id="back-chest" class="muscle-group" data-name="Göğüs">
+                                        <polygon points="98,72 85,90 70,105 98,110" />
+                                        <polygon points="102,72 115,90 130,105 102,110" />
+                                    </g>
+                                    <g id="back-core" class="muscle-group" data-name="Karın">
+                                        <polygon points="98,112 72,108 80,135 98,135" />
+                                        <polygon points="102,112 128,108 120,135 102,135" />
+                                        <polygon points="98,137 80,137 77,165 98,165" />
+                                        <polygon points="102,137 120,137 123,165 102,165" />
+                                    </g>
+                                    <g id="back-arms-upper" class="muscle-group" data-name="Üst Kol">
+                                        <polygon points="55,92 40,85 45,115 60,110" />
+                                        <polygon points="145,92 160,85 155,115 140,110" />
+                                    </g>
+                                    <g id="back-arms-lower" class="muscle-group" data-name="Ön Kol">
+                                        <polygon points="45,117 30,140 35,160 55,115" />
+                                        <polygon points="155,117 170,140 165,160 145,115" />
+                                    </g>
+                                    <g id="back-legs-quads" class="muscle-group" data-name="Üst Bacak">
+                                        <polygon points="75,160 45,230 70,240 95,170" />
+                                        <polygon points="125,160 155,230 130,240 105,170" />
+                                    </g>
+                                    <g id="back-legs-calves" class="muscle-group" data-name="Alt Bacak">
+                                        <polygon points="48,245 45,310 65,315 72,245" />
+                                        <polygon points="152,245 155,310 135,315 128,245" />
+                                    </g>
+                                </svg>
+                            </div>
+
+                            <ul id="worked-muscles-list" style="color: #fff; font-size: 11px; line-height: 1.8; padding-left: 0; list-style: none; text-align: center; margin-bottom: 0;">
+                                <!-- JS Dolduracak -->
+                            </ul>
+                        </div>
+                        <button onclick="toggleAnatomyCard(event)" style="background: #1a1a1a; color: #888; border: 1px solid #333; padding: 12px; border-radius: 8px; font-size: 13px; font-weight: bold; cursor: pointer; width: 100%; margin-top: 10px;">
+                            🔄 Yorgunluk Haritasına Dön
+                        </button>
+                    </div>
+
                 </div>
-                <p style="font-size: 10px; color: #666; margin-top: 5px;">İsmini görmek için kasın üzerine basılı tutun.
-                </p>
             </div>
 
-            <div id="all-charts-container" class="modal-body" style="text-align: left;">
+            <!-- GRAFİKLERİN AKTIĞI ALAN (Boşluklar ve Scroll İçin Düzenlendi) -->
+            <div id="all-charts-container" style="margin-top: 30px; display: block;">
+                <!-- JS Burayı Dolduracak -->
             </div>
-
-            <button class="save-btn" onclick="closeAnatomy()" style="margin-top: 15px;">Kapat</button>
+            
         </div>
     </div>
     <!-- BAŞARI ROZETLERİ MODALI -->
@@ -1914,92 +2042,134 @@
     <!-- ==========================================
          🛠️ YENİ PROGRAM OLUŞTURMA SİHİRBAZI MODALI
          ========================================== -->
-    <div id="new-profile-modal" class="hidden" style="position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background-color: rgba(10, 10, 10, 0.95); z-index: 6100; display: flex; flex-direction: column; justify-content: center; align-items: center; backdrop-filter: blur(8px);">
-        
-        <h2 style="color: var(--goldnova); font-size: 22px; margin-bottom: 10px; text-transform: uppercase; letter-spacing: 2px;">Yeni Sistem İnşası</h2>
-        <p style="color: #888; font-size: 14px; margin-bottom: 40px; text-align: center; max-width: 80%;">Programını nasıl oluşturmak istersin şampiyon?</p>
-        
+    <div id="new-profile-modal" class="hidden"
+        style="position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background-color: rgba(10, 10, 10, 0.95); z-index: 6100; display: flex; flex-direction: column; justify-content: center; align-items: center; backdrop-filter: blur(8px);">
+
+        <h2
+            style="color: var(--goldnova); font-size: 22px; margin-bottom: 10px; text-transform: uppercase; letter-spacing: 2px;">
+            Yeni Sistem İnşası</h2>
+        <p style="color: #888; font-size: 14px; margin-bottom: 40px; text-align: center; max-width: 80%;">Programını
+            nasıl oluşturmak istersin şampiyon?</p>
+
         <div style="display: flex; gap: 20px; flex-wrap: wrap; justify-content: center; max-width: 90%;">
-            
+
             <!-- YAPAY ZEKA BUTONU -->
-            <div onclick="startOlyAIWizard()" style="background: #151515; border: 2px solid #00d2ff; border-radius: 12px; padding: 30px 20px; width: 220px; text-align: center; cursor: pointer; transition: 0.3s; box-shadow: 0 10px 30px rgba(0, 210, 255, 0.1);" onmouseover="this.style.transform='translateY(-10px)'; this.style.boxShadow='0 15px 40px rgba(0, 210, 255, 0.3)';" onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='0 10px 30px rgba(0, 210, 255, 0.1)';">
+            <div onclick="startOlyAIWizard()"
+                style="background: #151515; border: 2px solid #00d2ff; border-radius: 12px; padding: 30px 20px; width: 220px; text-align: center; cursor: pointer; transition: 0.3s; box-shadow: 0 10px 30px rgba(0, 210, 255, 0.1);"
+                onmouseover="this.style.transform='translateY(-10px)'; this.style.boxShadow='0 15px 40px rgba(0, 210, 255, 0.3)';"
+                onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='0 10px 30px rgba(0, 210, 255, 0.1)';">
                 <div style="font-size: 50px; margin-bottom: 15px;">🤖</div>
                 <h3 style="color: #fff; font-size: 16px; margin: 0 0 10px 0;">Oly-AI Akıllı Antrenör</h3>
-                <p style="color: #888; font-size: 11px; margin: 0; line-height: 1.4;">Bana hedeflerinden bahset, yapay zeka motorum sana özel kusursuz bir 5 günlük sistem çıkarsın.</p>
+                <p style="color: #888; font-size: 11px; margin: 0; line-height: 1.4;">Bana hedeflerinden bahset, yapay
+                    zeka motorum sana özel kusursuz bir 5 günlük sistem çıkarsın.</p>
             </div>
 
             <!-- MANUEL KÜTÜPHANE BUTONU -->
-            <div onclick="openManualBuilder()" style="background: #151515; border: 2px solid #27ae60; border-radius: 12px; padding: 30px 20px; width: 220px; text-align: center; cursor: pointer; transition: 0.3s; box-shadow: 0 10px 30px rgba(39, 174, 96, 0.1);" onmouseover="this.style.transform='translateY(-10px)'; this.style.boxShadow='0 15px 40px rgba(39, 174, 96, 0.3)';" onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='0 10px 30px rgba(39, 174, 96, 0.1)';">
+            <div onclick="openManualBuilder()"
+                style="background: #151515; border: 2px solid #27ae60; border-radius: 12px; padding: 30px 20px; width: 220px; text-align: center; cursor: pointer; transition: 0.3s; box-shadow: 0 10px 30px rgba(39, 174, 96, 0.1);"
+                onmouseover="this.style.transform='translateY(-10px)'; this.style.boxShadow='0 15px 40px rgba(39, 174, 96, 0.3)';"
+                onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='0 10px 30px rgba(39, 174, 96, 0.1)';">
                 <div style="font-size: 50px; margin-bottom: 15px;">⚙️</div>
                 <h3 style="color: #fff; font-size: 16px; margin: 0 0 10px 0;">Manuel İnşa (Builder)</h3>
-                <p style="color: #888; font-size: 11px; margin: 0; line-height: 1.4;">Kapsamlı egzersiz kütüphanesini aç. Hareketleri sürükle, setleri yaz ve kendi sistemini tasarla.</p>
+                <p style="color: #888; font-size: 11px; margin: 0; line-height: 1.4;">Kapsamlı egzersiz kütüphanesini
+                    aç. Hareketleri sürükle, setleri yaz ve kendi sistemini tasarla.</p>
             </div>
 
         </div>
 
-        <button onclick="closeNewProfileModal()" style="margin-top: 50px; padding: 10px 40px; background: transparent; color: #ff4444; border: 1px solid #c0392b; border-radius: 4px; font-size: 14px; cursor: pointer; font-weight:bold;">İPTAL</button>
+        <button onclick="closeNewProfileModal()"
+            style="margin-top: 50px; padding: 10px 40px; background: transparent; color: #ff4444; border: 1px solid #c0392b; border-radius: 4px; font-size: 14px; cursor: pointer; font-weight:bold;">İPTAL</button>
     </div>
     <!-- ==========================================
          🤖 OLY-AI AKILLI PROGRAM SİHİRBAZI
          ========================================== -->
-    <div id="oly-ai-wizard-modal" class="hidden" style="position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background-color: rgba(15, 15, 15, 0.98); z-index: 6200; display: flex; flex-direction: column; justify-content: flex-start; align-items: center; padding-top: 50px; overflow-y: auto;">
-        
-        <h2 style="color: #00d2ff; font-size: 24px; margin-bottom: 5px; text-transform: uppercase; letter-spacing: 2px;">🤖 Oly-AI SİHİRBAZI</h2>
-        <p style="color: #888; font-size: 13px; margin-bottom: 30px; text-align: center; max-width: 80%;">Hedeflerini belirle, senin için kusursuz bir sistem inşa edeyim.</p>
-        
-        <div style="background: #1a1a1a; border: 1px solid #333; border-radius: 12px; padding: 20px; width: 90%; max-width: 400px; margin-bottom: 20px; box-shadow: 0 10px 30px rgba(0,0,0,0.5);">
-            
-            <label style="color: var(--goldnova); font-size: 12px; font-weight: bold; margin-bottom: 8px; display: block;">1. Ana Hedefin Nedir?</label>
-            <select id="ai-goal" style="width: 100%; background: #000; color: #fff; border: 1px solid #555; padding: 10px; border-radius: 6px; font-size: 14px; margin-bottom: 20px; outline: none;">
+    <div id="oly-ai-wizard-modal" class="hidden"
+        style="position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background-color: rgba(15, 15, 15, 0.98); z-index: 6200; display: flex; flex-direction: column; justify-content: flex-start; align-items: center; padding-top: 50px; overflow-y: auto;">
+
+        <h2
+            style="color: #00d2ff; font-size: 24px; margin-bottom: 5px; text-transform: uppercase; letter-spacing: 2px;">
+            🤖 Oly-AI SİHİRBAZI</h2>
+        <p style="color: #888; font-size: 13px; margin-bottom: 30px; text-align: center; max-width: 80%;">Hedeflerini
+            belirle, senin için kusursuz bir sistem inşa edeyim.</p>
+
+        <div
+            style="background: #1a1a1a; border: 1px solid #333; border-radius: 12px; padding: 20px; width: 90%; max-width: 400px; margin-bottom: 20px; box-shadow: 0 10px 30px rgba(0,0,0,0.5);">
+
+            <label
+                style="color: var(--goldnova); font-size: 12px; font-weight: bold; margin-bottom: 8px; display: block;">1.
+                Ana Hedefin Nedir?</label>
+            <select id="ai-goal"
+                style="width: 100%; background: #000; color: #fff; border: 1px solid #555; padding: 10px; border-radius: 6px; font-size: 14px; margin-bottom: 20px; outline: none;">
                 <option value="Hipertrofi (Kas Büyümesi)">Kas Kütlesi (Hipertrofi)</option>
                 <option value="Maksimum Güç (Strength)">Saf Güç (Strength)</option>
                 <option value="Yağ Yakımı ve Kondisyon">Definisyon / Yağ Yakımı</option>
             </select>
 
-            <label style="color: var(--goldnova); font-size: 12px; font-weight: bold; margin-bottom: 8px; display: block;">2. Haftada Kaç Gün İdman Yapabilirsin?</label>
-            <select id="ai-days" style="width: 100%; background: #000; color: #fff; border: 1px solid #555; padding: 10px; border-radius: 6px; font-size: 14px; margin-bottom: 20px; outline: none;">
+            <label
+                style="color: var(--goldnova); font-size: 12px; font-weight: bold; margin-bottom: 8px; display: block;">2.
+                Haftada Kaç Gün İdman Yapabilirsin?</label>
+            <select id="ai-days"
+                style="width: 100%; background: #000; color: #fff; border: 1px solid #555; padding: 10px; border-radius: 6px; font-size: 14px; margin-bottom: 20px; outline: none;">
                 <option value="3">3 Gün (Full Body / Üst-Alt)</option>
                 <option value="4">4 Gün (Upper / Lower)</option>
                 <option value="5" selected>5 Gün (Bro Split / İt-Çek-Bacak)</option>
                 <option value="6">6 Gün (Agresif İt-Çek-Bacak)</option>
             </select>
 
-            <label style="color: var(--goldnova); font-size: 12px; font-weight: bold; margin-bottom: 8px; display: block;">3. Tecrübe Seviyen?</label>
-            <select id="ai-level" style="width: 100%; background: #000; color: #fff; border: 1px solid #555; padding: 10px; border-radius: 6px; font-size: 14px; margin-bottom: 20px; outline: none;">
+            <label
+                style="color: var(--goldnova); font-size: 12px; font-weight: bold; margin-bottom: 8px; display: block;">3.
+                Tecrübe Seviyen?</label>
+            <select id="ai-level"
+                style="width: 100%; background: #000; color: #fff; border: 1px solid #555; padding: 10px; border-radius: 6px; font-size: 14px; margin-bottom: 20px; outline: none;">
                 <option value="Başlangıç">Başlangıç (0-1 Yıl)</option>
                 <option value="Orta" selected>Orta Seviye (1-3 Yıl)</option>
                 <option value="İleri">İleri Seviye (3+ Yıl)</option>
             </select>
-            
-            <label style="color: var(--goldnova); font-size: 12px; font-weight: bold; margin-bottom: 8px; display: block;">4. Programın Adı Ne Olsun?</label>
-            <input type="text" id="ai-prog-name" placeholder="Örn: Yaz Definisyonu" style="width: 100%; background: #000; color: #fff; border: 1px solid #555; padding: 10px; border-radius: 6px; font-size: 14px; box-sizing: border-box; outline: none;">
+
+            <label
+                style="color: var(--goldnova); font-size: 12px; font-weight: bold; margin-bottom: 8px; display: block;">4.
+                Programın Adı Ne Olsun?</label>
+            <input type="text" id="ai-prog-name" placeholder="Örn: Yaz Definisyonu"
+                style="width: 100%; background: #000; color: #fff; border: 1px solid #555; padding: 10px; border-radius: 6px; font-size: 14px; box-sizing: border-box; outline: none;">
         </div>
 
         <div style="display: flex; gap: 15px; margin-bottom: 50px;">
-            <button onclick="closeOlyAIWizard()" style="padding: 12px 25px; background: transparent; color: #888; border: 1px solid #555; border-radius: 6px; font-size: 14px; cursor: pointer; font-weight:bold;">İPTAL</button>
-            <button id="btn-generate-ai" onclick="generateAIProgram()" style="padding: 12px 25px; background: #00d2ff; color: #000; border: none; border-radius: 6px; font-size: 14px; cursor: pointer; font-weight:bold; box-shadow: 0 4px 15px rgba(0, 210, 255, 0.4); transition: 0.3s;">🚀 PROGRAMI YARAT</button>
+            <button onclick="closeOlyAIWizard()"
+                style="padding: 12px 25px; background: transparent; color: #888; border: 1px solid #555; border-radius: 6px; font-size: 14px; cursor: pointer; font-weight:bold;">İPTAL</button>
+            <button id="btn-generate-ai" onclick="generateAIProgram()"
+                style="padding: 12px 25px; background: #00d2ff; color: #000; border: none; border-radius: 6px; font-size: 14px; cursor: pointer; font-weight:bold; box-shadow: 0 4px 15px rgba(0, 210, 255, 0.4); transition: 0.3s;">🚀
+                PROGRAMI YARAT</button>
         </div>
     </div>
     <!-- ==========================================
          ⚙️ MANUEL PROGRAM İNŞA (BUILDER) EKRANI
          ========================================== -->
-    <div id="manual-builder-modal" class="hidden" style="position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background-color: #0a0a0a; z-index: 6300; display: flex; flex-direction: column; overflow: hidden;">
-        
+    <div id="manual-builder-modal" class="hidden"
+        style="position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background-color: #0a0a0a; z-index: 6300; display: flex; flex-direction: column; overflow: hidden;">
+
         <!-- ÜST BAR -->
-        <div style="width: 100%; height: 60px; background: #151515; display: flex; justify-content: space-between; align-items: center; padding: 0 15px; border-bottom: 2px solid #27ae60; box-sizing: border-box; flex-shrink: 0;">
-            <button onclick="closeManualBuilder()" style="background: transparent; color: #ff4444; border: 1px solid #c0392b; padding: 6px 12px; border-radius: 4px; font-weight: bold; cursor: pointer;">İPTAL</button>
-            <input type="text" id="builder-prog-name" placeholder="Program Adı (Örn: Güç Bloku)" style="background: #000; color: #fff; border: 1px solid #333; padding: 8px; border-radius: 4px; text-align: center; width: 200px; font-size: 13px; outline:none;">
-            <button onclick="saveManualProgram()" style="background: #27ae60; color: #fff; border: none; padding: 8px 15px; border-radius: 4px; font-weight: bold; cursor: pointer; box-shadow: 0 0 10px rgba(39, 174, 96, 0.4);">💾 KAYDET</button>
+        <div
+            style="width: 100%; height: 60px; background: #151515; display: flex; justify-content: space-between; align-items: center; padding: 0 15px; border-bottom: 2px solid #27ae60; box-sizing: border-box; flex-shrink: 0;">
+            <button onclick="closeManualBuilder()"
+                style="background: transparent; color: #ff4444; border: 1px solid #c0392b; padding: 6px 12px; border-radius: 4px; font-weight: bold; cursor: pointer;">İPTAL</button>
+            <input type="text" id="builder-prog-name" placeholder="Program Adı (Örn: Güç Bloku)"
+                style="background: #000; color: #fff; border: 1px solid #333; padding: 8px; border-radius: 4px; text-align: center; width: 200px; font-size: 13px; outline:none;">
+            <button onclick="saveManualProgram()"
+                style="background: #27ae60; color: #fff; border: none; padding: 8px 15px; border-radius: 4px; font-weight: bold; cursor: pointer; box-shadow: 0 0 10px rgba(39, 174, 96, 0.4);">💾
+                KAYDET</button>
         </div>
 
         <!-- İÇERİK (2 SÜTUN: Günler ve Kütüphane) -->
         <div style="display: flex; flex: 1; overflow: hidden; flex-wrap: wrap;">
-            
+
             <!-- SOL: GÜNLER VE EKLENEN HAREKETLER -->
-            <div style="flex: 1; min-width: 300px; background: #111; border-right: 1px solid #333; padding: 15px; overflow-y: auto; box-sizing: border-box;">
+            <div
+                style="flex: 1; min-width: 300px; background: #111; border-right: 1px solid #333; padding: 15px; overflow-y: auto; box-sizing: border-box;">
                 <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
                     <h3 style="color: #fff; margin: 0; font-size: 16px;">📅 İdman Günleri</h3>
-                    <button onclick="addNewBuilderDay()" style="background: transparent; color: var(--goldnova); border: 1px solid var(--goldnova); padding: 5px 10px; border-radius: 4px; font-size: 11px; cursor: pointer;">+ Yeni Gün Ekle</button>
+                    <button onclick="addNewBuilderDay()"
+                        style="background: transparent; color: var(--goldnova); border: 1px solid var(--goldnova); padding: 5px 10px; border-radius: 4px; font-size: 11px; cursor: pointer;">+
+                        Yeni Gün Ekle</button>
                 </div>
                 <div id="builder-days-container" style="display: flex; flex-direction: column; gap: 15px;">
                     <!-- JS Burayı Dolduracak -->
@@ -2007,17 +2177,24 @@
             </div>
 
             <!-- SAĞ: EGZERSİZ KÜTÜPHANESİ -->
-            <div style="width: 350px; flex-grow: 1; background: #0a0a0a; padding: 15px; overflow-y: auto; box-sizing: border-box;">
+            <div
+                style="width: 350px; flex-grow: 1; background: #0a0a0a; padding: 15px; overflow-y: auto; box-sizing: border-box;">
                 <h3 style="color: #00d2ff; margin: 0 0 15px 0; font-size: 16px;">📚 Egzersiz Kütüphanesi</h3>
-                
+
                 <!-- Kategori Sekmeleri -->
                 <div style="display: flex; gap: 5px; flex-wrap: wrap; margin-bottom: 15px;">
-                    <button class="lib-tab-btn active" onclick="switchLibraryTab('chest', this)" style="background: #222; color: #fff; border: 1px solid #00d2ff; padding: 5px 10px; border-radius: 4px; cursor: pointer; font-size: 11px;">Göğüs</button>
-                    <button class="lib-tab-btn" onclick="switchLibraryTab('back', this)" style="background: #222; color: #888; border: 1px solid #333; padding: 5px 10px; border-radius: 4px; cursor: pointer; font-size: 11px;">Sırt</button>
-                    <button class="lib-tab-btn" onclick="switchLibraryTab('legs', this)" style="background: #222; color: #888; border: 1px solid #333; padding: 5px 10px; border-radius: 4px; cursor: pointer; font-size: 11px;">Bacak</button>
-                    <button class="lib-tab-btn" onclick="switchLibraryTab('shoulders', this)" style="background: #222; color: #888; border: 1px solid #333; padding: 5px 10px; border-radius: 4px; cursor: pointer; font-size: 11px;">Omuz</button>
-                    <button class="lib-tab-btn" onclick="switchLibraryTab('arms', this)" style="background: #222; color: #888; border: 1px solid #333; padding: 5px 10px; border-radius: 4px; cursor: pointer; font-size: 11px;">Kol</button>
-                    <button class="lib-tab-btn" onclick="switchLibraryTab('core', this)" style="background: #222; color: #888; border: 1px solid #333; padding: 5px 10px; border-radius: 4px; cursor: pointer; font-size: 11px;">Core</button>
+                    <button class="lib-tab-btn active" onclick="switchLibraryTab('chest', this)"
+                        style="background: #222; color: #fff; border: 1px solid #00d2ff; padding: 5px 10px; border-radius: 4px; cursor: pointer; font-size: 11px;">Göğüs</button>
+                    <button class="lib-tab-btn" onclick="switchLibraryTab('back', this)"
+                        style="background: #222; color: #888; border: 1px solid #333; padding: 5px 10px; border-radius: 4px; cursor: pointer; font-size: 11px;">Sırt</button>
+                    <button class="lib-tab-btn" onclick="switchLibraryTab('legs', this)"
+                        style="background: #222; color: #888; border: 1px solid #333; padding: 5px 10px; border-radius: 4px; cursor: pointer; font-size: 11px;">Bacak</button>
+                    <button class="lib-tab-btn" onclick="switchLibraryTab('shoulders', this)"
+                        style="background: #222; color: #888; border: 1px solid #333; padding: 5px 10px; border-radius: 4px; cursor: pointer; font-size: 11px;">Omuz</button>
+                    <button class="lib-tab-btn" onclick="switchLibraryTab('arms', this)"
+                        style="background: #222; color: #888; border: 1px solid #333; padding: 5px 10px; border-radius: 4px; cursor: pointer; font-size: 11px;">Kol</button>
+                    <button class="lib-tab-btn" onclick="switchLibraryTab('core', this)"
+                        style="background: #222; color: #888; border: 1px solid #333; padding: 5px 10px; border-radius: 4px; cursor: pointer; font-size: 11px;">Core</button>
                 </div>
 
                 <div id="builder-library-items" style="display: flex; flex-direction: column; gap: 8px;">
@@ -2025,6 +2202,58 @@
                 </div>
             </div>
 
+        </div>
+    </div>
+    <!-- ==========================================
+         💬 OLYMPUS SOHBET: KİŞİ LİSTESİ
+         ========================================== -->
+    <div id="chat-list-modal" class="modal" style="z-index: 7000;">
+        <div class="modal-content" style="max-height: 80vh;">
+            <div
+                style="display:flex; justify-content:space-between; align-items:center; margin-bottom:15px; border-bottom:1px solid #333; padding-bottom:10px;">
+                <h2 style="color:#00d2ff; margin:0;">Mesajlar</h2>
+                <button onclick="document.getElementById('chat-list-modal').style.display='none'"
+                    style="background:transparent; border:none; color:#ff4444; font-size:18px; cursor:pointer;">[X]</button>
+            </div>
+            <p style="color:#888; font-size:12px; margin-bottom:15px;">Sohbet etmek için takip ettiğin bir sporcuyu seç.
+            </p>
+            <div id="chat-friends-list" style="flex:1; overflow-y:auto; display:flex; flex-direction:column; gap:10px;">
+                <p style="color:gray; font-size:12px; text-align:center;">Kişiler yükleniyor...</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- ==========================================
+         💬 OLYMPUS SOHBET: MESAJLAŞMA ODASI
+         ========================================== -->
+    <div id="chat-room-modal" class="modal" style="z-index: 7100; padding:0; background:rgba(0,0,0,0.95);">
+        <div class="modal-content"
+            style="width:100%; height:100vh; max-width:600px; border-radius:0; border:none; display:flex; flex-direction:column; padding:0;">
+
+            <!-- Üst Bar -->
+            <div
+                style="background:#111; padding:calc(env(safe-area-inset-top) + 15px) 15px 15px 15px; display:flex; align-items:center; gap:15px; border-bottom:1px solid #333;">
+                <button onclick="closeChatRoom()"
+                    style="background:transparent; border:none; color:var(--goldnova); font-size:24px; cursor:pointer;">←</button>
+                <img id="chat-room-avatar" src="icon.png"
+                    style="width:40px; height:40px; border-radius:50%; object-fit:cover; border:2px solid #00d2ff;">
+                <h3 id="chat-room-name" style="color:#fff; margin:0; font-size:16px;">Sporcu</h3>
+            </div>
+
+            <!-- Mesajların Aktığı Alan -->
+            <div id="chat-messages-container"
+                style="flex:1; background:#0a0a0a; padding:15px; overflow-y:auto; display:flex; flex-direction:column; gap:10px;">
+                <!-- Mesajlar Buraya Düşecek -->
+            </div>
+
+            <!-- Mesaj Yazma Alanı -->
+            <div
+                style="background:#111; padding:10px 15px calc(env(safe-area-inset-bottom) + 10px) 15px; border-top:1px solid #333; display:flex; gap:10px;">
+                <input type="text" id="chat-message-input" placeholder="Bir mesaj yaz..."
+                    style="flex:1; background:#222; border:1px solid #444; color:#fff; padding:12px 15px; border-radius:20px; outline:none; font-size:14px;">
+                <button onclick="sendChatMessage()"
+                    style="background:#00d2ff; color:#000; border:none; width:45px; height:45px; border-radius:50%; display:flex; justify-content:center; align-items:center; font-size:18px; cursor:pointer;">➤</button>
+            </div>
         </div>
     </div>
 

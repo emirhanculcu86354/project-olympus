@@ -450,15 +450,42 @@ window.finishWorkout = function () {
 
     const activeDayData = programData[currentPhase].find(x => x.day == calculatedDay);
     if (activeDayData && activeDayData.muscles) {
+        // Eski Sistem
         let worked = JSON.parse(localStorage.getItem('olympus_worked_muscles')) || [];
-        activeDayData.muscles.forEach(m => {
-            if (!worked.includes(m)) worked.push(m);
-        });
+        activeDayData.muscles.forEach(m => { if (!worked.includes(m)) worked.push(m); });
         localStorage.setItem('olympus_worked_muscles', JSON.stringify(worked));
+        
+        // YENİ SİSTEM: Saatli ve Sayaçlı Toparlanma Hafızası
+        let workedV2 = JSON.parse(localStorage.getItem('olympus_worked_muscles_v2')) || {};
+        const now = Date.now();
+        activeDayData.muscles.forEach(m => { workedV2[m] = now; });
+        localStorage.setItem('olympus_worked_muscles_v2', JSON.stringify(workedV2));
     }
 
     // YENİ: İdman bitince 150 Puan Ekle
     if (window.addOlympusPoints) window.addOlympusPoints(150, "İdman Tamamlandı");
+    // --- YENİ: OTOMATİK SUPPLEMENT STOK DÜŞME MOTORU ---
+    let supps = JSON.parse(localStorage.getItem('olympus_supp_stock'));
+    if (supps) {
+        // İdman bittiği için stoklardan 1'er servis düş (Sıfırın altına inmesin)
+        if (supps.whey > 0) supps.whey--;
+        if (supps.creatine > 0) supps.creatine--;
+        if (supps.carnitine > 0) supps.carnitine--;
+        localStorage.setItem('olympus_supp_stock', JSON.stringify(supps));
+
+        // Kritik Stok Kontrolü (5 servisin altına inenleri bul)
+        let warnings = [];
+        if(supps.whey <= 5 && supps.whey > 0) warnings.push("Whey Protein");
+        if(supps.creatine <= 5 && supps.creatine > 0) warnings.push("Kreatin");
+        if(supps.carnitine <= 5 && supps.carnitine > 0) warnings.push("L-Karnitin");
+        if(supps.electro <= 5 && supps.electro > 0) warnings.push("Elektrolit");
+
+        if(warnings.length > 0) {
+            setTimeout(() => {
+                alert(`⚠️ YAKIT KRİTİK SEVİYEDE:\n\n${warnings.join(", ")} stokların 5 servisin altına düştü. Yeni sipariş verme vakti yaklaşıyor şampiyon!`);
+            }, 1500); // Ana tebrik mesajından 1.5 saniye sonra uyarır
+        }
+    }
 
     alert("🔥 İDMAN TAMAMLANDI!\n🏆 KAS HARİTAN GÜNCELLENDİ VE 150 OLYMPUS KAZANDIN!");
     toggleAct(3, true);
@@ -752,6 +779,72 @@ window.openTrackingModal = function (type) {
         `;
         setTimeout(() => drawModalChart(calHistory, 'Kalori (kcal)', '#44ff44'), 100);
     }
+    else if (type === 'sleep') {
+        title.innerText = "Uyku & Toparlanma";
+        let sleepHistory = JSON.parse(localStorage.getItem('olympus_sleep_history')) || [];
+        body.innerHTML = `
+            <div class="input-group"><label>Dün Geceki Uyku (Saat)</label><input type="number" step="0.5" id="m-sleep" placeholder="Örn: 7.5"></div>
+            <button class="save-btn" onclick="saveSleep()">Kaydet</button>
+            <div style="background:#151515; padding:5px; border-radius:10px; margin-top:10px;"><canvas id="modalChart"></canvas></div>
+        `;
+        setTimeout(() => drawModalChart(sleepHistory, 'Uyku (Saat)', '#8a2be2'), 100);
+    }
+    else if (type === 'cardio') {
+        title.innerText = "Adım & Kardiyo";
+        let cardioHistory = JSON.parse(localStorage.getItem('olympus_cardio_history')) || [];
+        body.innerHTML = `
+            <div class="input-group"><label>Bugünkü Adım Sayısı</label><input type="number" id="m-steps" placeholder="Örn: 10000"></div>
+            <button class="save-btn" onclick="saveCardio()">Kaydet</button>
+            <div style="background:#151515; padding:5px; border-radius:10px; margin-top:10px;"><canvas id="modalChart"></canvas></div>
+        `;
+        setTimeout(() => drawModalChart(cardioHistory, 'Adım', '#27ae60'), 100);
+    }
+    else if (type === 'calculator_1rm') {
+        title.innerText = "1RM (Maks. Güç) Hesaplayıcı";
+        body.innerHTML = `
+            <p style="color:#888; font-size:12px; margin-bottom:15px; text-align:center;">Kaldırdığın ağırlığı ve tekrarı gir, teorik 1 tekrar maksimumunu (1RM) bul.</p>
+            <div class="form-grid">
+                <div class="input-group"><label>Ağırlık (kg)</label><input type="number" id="calc-w" placeholder="Örn: 100"></div>
+                <div class="input-group"><label>Tekrar</label><input type="number" id="calc-r" placeholder="Örn: 8"></div>
+            </div>
+            <button class="save-btn" onclick="calculate1RM()" style="background:#00d2ff; color:#000;">Hesapla</button>
+            <div id="calc-result" style="margin-top:20px; text-align:center; font-size:32px; color:var(--goldnova); font-weight:900;">-- kg</div>
+        `;
+    }
+    else if (type === 'supplements') {
+        title.innerText = "Yakıt & Supplement Stoku";
+        let supps = JSON.parse(localStorage.getItem('olympus_supp_stock')) || { whey: 0, creatine: 0, carnitine: 0, electro: 0 };
+        body.innerHTML = `
+            <p style="color:#888; font-size:12px; margin-bottom:15px; text-align:center;">Elindeki ürünlerin kalan servis sayılarını takip et.</p>
+            <div class="form-grid">
+                <div class="input-group"><label>Whey Protein (Servis)</label><input type="number" id="sup-whey" value="${supps.whey}"></div>
+                <div class="input-group"><label>Kreatin (Servis)</label><input type="number" id="sup-creatine" value="${supps.creatine}"></div>
+                <div class="input-group"><label>L-Karnitin (Servis)</label><input type="number" id="sup-carnitine" value="${supps.carnitine}"></div>
+                <div class="input-group"><label>Elektrolit (Servis)</label><input type="number" id="sup-electro" value="${supps.electro}"></div>
+            </div>
+            <button class="save-btn" onclick="saveSupplements()">Stoku Güncelle</button>
+        `;
+    }
+    else if (type === 'active_kcal') {
+        title.innerText = "Aktif Yakılan Kalori";
+        let kcalHistory = JSON.parse(localStorage.getItem('olympus_active_kcal_history')) || [];
+        body.innerHTML = `
+            <div class="input-group"><label>Bugün Yakılan Enerji (kcal)</label><input type="number" id="m-active-kcal" placeholder="Örn: 650"></div>
+            <button class="save-btn" onclick="saveActiveKcal()" style="background:#ea580c; color:#fff;">Kaydet</button>
+            <div style="background:#151515; padding:5px; border-radius:10px; margin-top:10px;"><canvas id="modalChart"></canvas></div>
+        `;
+        setTimeout(() => drawModalChart(kcalHistory, 'Yakılan (kcal)', '#ea580c'), 100);
+    }
+    else if (type === 'heart_rate') {
+        title.innerText = "Dinlenik Nabız (BPM)";
+        let bpmHistory = JSON.parse(localStorage.getItem('olympus_bpm_history')) || [];
+        body.innerHTML = `
+            <div class="input-group"><label>Dinlenik Nabız (BPM)</label><input type="number" id="m-bpm" placeholder="Örn: 62"></div>
+            <button class="save-btn" onclick="saveBPM()" style="background:#ef4444; color:#fff;">Kaydet</button>
+            <div style="background:#151515; padding:5px; border-radius:10px; margin-top:10px;"><canvas id="modalChart"></canvas></div>
+        `;
+        setTimeout(() => drawModalChart(bpmHistory, 'Nabız (BPM)', '#ef4444'), 100);
+    }
     else if (type === 'deload_info') {
         title.innerText = "Deload Motoru Yapısı";
         body.innerHTML = `<p style="color:var(--text-muted); font-size:14px; line-height:1.5;"><strong>Çalışma Prensibi:</strong> Sistem, İdman Hacmi alanına girdiğin Bench Press ve Squat 1RM verilerini analiz eder.<br><br>Eğer 3 ardışık kayıt boyunca güç artışı yaşanmadıysa veya gerileme varsa, sinir sisteminin aşırı zorlandığını fark ederek profil ekranında sana otomatik bir <strong>Deload (Aktif Dinlenme Haftası)</strong> uyarısı fırlatır.</p>`;
@@ -839,36 +932,46 @@ function loadProfileData() {
     }
 }
 
-// 5. ANATOMİ MODALI VE YÖNETİMİ
 window.openAnatomy = function () {
     const modal = document.getElementById('anatomy-modal');
-    modal.style.display = 'block';
+    modal.style.display = 'flex'; 
     setTimeout(() => { modal.classList.add('open'); }, 10);
 
     updateAnatomyView();
+    // Modal açıldığında kaslara dokunma dinleyicilerini tekrar aktif et
+    if(typeof initMuscleInteractions === 'function') initMuscleInteractions();
 
-    // TÜM GRAFİKLERİ BURAYA EKLİYORUZ
     const container = document.getElementById('all-charts-container');
     container.innerHTML = `
         <div style="margin-bottom: 25px;">
             <h4 style="color:var(--goldnova); font-size:12px; margin-bottom:5px;">AĞIRLIK DEĞİŞİMİ (KG)</h4>
-            <div style="height: 150px; background:#151515; padding:5px; border-radius:10px;"><canvas id="chart-weight"></canvas></div>
+            <div style="position: relative; height: 160px; background:#151515; padding:10px; border-radius:10px;"><canvas id="chart-weight"></canvas></div>
+        </div>
+        <div style="margin-bottom: 25px;">
+            <h4 style="color:var(--goldnova); font-size:12px; margin-bottom:5px;">ADIM & KARDİYO (GÜNLÜK)</h4>
+            <div style="position: relative; height: 160px; background:#151515; padding:10px; border-radius:10px;"><canvas id="chart-cardio"></canvas></div>
+        </div>
+        <div style="margin-bottom: 25px;">
+            <h4 style="color:var(--goldnova); font-size:12px; margin-bottom:5px;">UYKU & TOPARLANMA (SAAT)</h4>
+            <div style="position: relative; height: 160px; background:#151515; padding:10px; border-radius:10px;"><canvas id="chart-sleep"></canvas></div>
         </div>
         <div style="margin-bottom: 25px;">
             <h4 style="color:var(--goldnova); font-size:12px; margin-bottom:5px;">GÜNLÜK KALORİ (KCAL)</h4>
-            <div style="height: 150px; background:#151515; padding:5px; border-radius:10px;"><canvas id="chart-cal"></canvas></div>
+            <div style="position: relative; height: 160px; background:#151515; padding:10px; border-radius:10px;"><canvas id="chart-cal"></canvas></div>
         </div>
         <div style="margin-bottom: 25px;">
             <h4 style="color:var(--goldnova); font-size:12px; margin-bottom:5px;">YAĞ ORANI (%)</h4>
-            <div style="height: 150px; background:#151515; padding:5px; border-radius:10px;"><canvas id="chart-fat"></canvas></div>
+            <div style="position: relative; height: 160px; background:#151515; padding:10px; border-radius:10px;"><canvas id="chart-fat"></canvas></div>
         </div>
         <div style="margin-bottom: 25px;">
             <h4 style="color:var(--goldnova); font-size:12px; margin-bottom:5px;">İDMAN HACMİ (1RM)</h4>
-            <div style="height: 150px; background:#151515; padding:5px; border-radius:10px;"><canvas id="chart-volume"></canvas></div>
+            <div style="position: relative; height: 160px; background:#151515; padding:10px; border-radius:10px;"><canvas id="chart-volume"></canvas></div>
         </div>
     `;
 
     drawSpecificChart('chart-weight', JSON.parse(localStorage.getItem('olympus_history'))?.map(h => ({ date: h.date.split('.')[0], val: h.weight })), '#f6c000');
+    drawSpecificChart('chart-cardio', JSON.parse(localStorage.getItem('olympus_cardio_history')), '#27ae60');
+    drawSpecificChart('chart-sleep', JSON.parse(localStorage.getItem('olympus_sleep_history')), '#8a2be2');
     drawSpecificChart('chart-cal', JSON.parse(localStorage.getItem('olympus_cal_history')), '#44ff44');
     drawSpecificChart('chart-fat', JSON.parse(localStorage.getItem('olympus_fat_history')), '#00d2ff');
     drawVolumeChart('chart-volume');
@@ -880,12 +983,149 @@ window.closeAnatomy = function () {
     setTimeout(() => { modal.style.display = 'none'; }, 400);
 };
 
-function updateAnatomyView() {
-    document.querySelectorAll('.muscle-group').forEach(m => m.classList.remove('worked'));
-    const workedMuscles = JSON.parse(localStorage.getItem('olympus_worked_muscles')) || [];
-    workedMuscles.forEach(m => { const el = document.getElementById('muscle-' + m); if (el) el.classList.add('worked'); });
-}
+// 3. 48 SAATLİK TOPARLANMA MOTORU VE YÜZEN SAATLER
+let anatomyTimerInterval = null;
 
+window.updateAnatomyView = function() {
+    document.querySelectorAll('.muscle-group').forEach(m => {
+        m.classList.remove('heat-red', 'heat-orange', 'heat-green');
+    });
+
+    // İdman saatlerini çek (Eğer eski veri varsa boş obje döndürür)
+    const workedV2 = JSON.parse(localStorage.getItem('olympus_worked_muscles_v2')) || {};
+    const workedMuscles = JSON.parse(localStorage.getItem('olympus_worked_muscles')) || [];
+    
+    const muscleMap = {
+        'chest': 'chest', 'arms-l': 'arms-upper', 'arms-r': 'arms-upper',
+        'core': 'core', 'legs-l': 'legs-quads', 'legs-r': 'legs-quads', 'shoulders': 'shoulders'
+    };
+
+    // Saatlerin Çıkacağı Koordinatlar ve Kusursuz Ok Uzunlukları
+    const badgePositions = {
+        'chest': { top: '27%', align: 'left', lineLen: '85px' },
+        'shoulders': { top: '22%', align: 'right', lineLen: '65px' },
+        'arms-upper': { top: '29%', align: 'right', lineLen: '45px' },
+        'core': { top: '42%', align: 'left', lineLen: '85px' },
+        'legs-quads': { top: '60%', align: 'right', lineLen: '60px' },
+        'legs-calves': { top: '82%', align: 'left', lineLen: '50px' }
+    };
+
+    const updateColorsAndTimers = () => {
+        const now = Date.now();
+        const timerContainer = document.getElementById('recovery-timers-container');
+        if (timerContainer) timerContainer.innerHTML = '';
+        
+        let workedNamesTR = [];
+
+        workedMuscles.forEach(m => {
+            let targetMuscle = muscleMap[m] || m; 
+            const frontEl = document.getElementById('front-' + targetMuscle); 
+            const backEl = document.getElementById('back-' + targetMuscle);
+
+            // Türkçe Liste İçin Veri Hazırla
+            let trName = "";
+            if(m === 'chest') trName = "Göğüs";
+            if(m.includes('arms')) trName = "Kol";
+            if(m === 'core') trName = "Karın (Core)";
+            if(m.includes('legs')) trName = "Bacak";
+            if(m === 'shoulders') trName = "Omuz";
+            
+            // Eğer V2 (Saatli) veri varsa, 48 saatlik zekayı devreye sok
+            let state = 'green';
+            let hoursLeft = 0;
+            let timeColor = "#27ae60";
+
+            if (workedV2[m]) {
+                const hoursPassed = (now - workedV2[m]) / (1000 * 60 * 60);
+                if (hoursPassed < 24) {
+                    state = 'red';
+                    hoursLeft = Math.ceil(48 - hoursPassed);
+                    timeColor = "#ff4444";
+                } else if (hoursPassed < 48) {
+                    state = 'orange';
+                    hoursLeft = Math.ceil(48 - hoursPassed);
+                    timeColor = "#f39c12";
+                }
+            } else {
+                state = 'red';
+                hoursLeft = 48;
+                timeColor = "#ff4444";
+                workedV2[m] = now;
+                localStorage.setItem('olympus_worked_muscles_v2', JSON.stringify(workedV2));
+            }
+
+            // ÖN YÜZ BOYAMA VE ÇİZGİLİ SAAT YERLEŞİMİ (UCU NOKTALI OKLAR)
+            if (frontEl) {
+                frontEl.classList.remove('heat-red', 'heat-orange', 'heat-green');
+                frontEl.classList.add('heat-' + state);
+                
+                let pos = badgePositions[targetMuscle];
+                if(state !== 'green' && pos && timerContainer) {
+                    if(!document.getElementById('badge-' + targetMuscle)) {
+                        
+                        // Kutunun nerede duracağı ve çizginin nereye uzayacağı
+                        let posCSS = pos.align === 'left' 
+                            ? `top: ${pos.top}; left: 0; transform: translate(-100%, -50%);` 
+                            : `top: ${pos.top}; right: 0; transform: translate(100%, -50%);`;
+                        
+                        let lineCSS = pos.align === 'left'
+                            ? `left: 100%; width: ${pos.lineLen};`
+                            : `right: 100%; width: ${pos.lineLen};`;
+                            
+                        // Çizginin ucundaki şık hedef noktasının (dot) konumu
+                        let dotCSS = pos.align === 'left' ? 'right: -3px;' : 'left: -3px;';
+
+                        timerContainer.innerHTML += `
+                            <div id="badge-${targetMuscle}" class="recovery-pointer" style="${posCSS} color: ${timeColor}; border-color: ${timeColor};">
+                                <div class="pointer-line" style="${lineCSS} background-color: ${timeColor};">
+                                    <div style="position: absolute; ${dotCSS} top: -2px; width: 6px; height: 6px; border-radius: 50%; background-color: ${timeColor};"></div>
+                                </div>
+                                ⏳ ${hoursLeft}s
+                            </div>
+                        `;
+                    }
+                }
+            }
+
+            // ARKA YÜZ BOYAMA
+            if (backEl) backEl.classList.add('heat-green');
+            
+            if (trName) workedNamesTR.push({ name: trName, state: state, hours: hoursLeft });
+        });
+
+        // Çalışılmayan Kasları Yeşil (Hazır) Yap
+        document.querySelectorAll('.anatomy-card-front .muscle-group:not(.heat-red):not(.heat-orange)').forEach(m => {
+            m.classList.add('heat-green');
+        });
+
+        // ARKA YÜZ LİSTESİNİ DOLDUR
+        const listEl = document.getElementById('worked-muscles-list');
+        if (listEl) {
+            listEl.innerHTML = '';
+            const uniqueNames = [];
+            const filteredList = workedNamesTR.filter(item => {
+                if(uniqueNames.includes(item.name)) return false;
+                uniqueNames.push(item.name); return true;
+            });
+
+            if (filteredList.length === 0) {
+                listEl.innerHTML = '<li style="color:#888;">Henüz dinlenik durumdasın.</li>';
+            } else {
+                filteredList.forEach(item => {
+                    let statusIcon = item.state === 'red' ? '🔥 Kırmızı' : (item.state === 'orange' ? '⚡ Turuncu' : '✅ Yeşil');
+                    listEl.innerHTML += `<li style="border-bottom: 1px dashed #333; padding: 4px 0;"><strong>${item.name}:</strong> <span style="color:#aaa; font-size:11px;">${statusIcon}</span></li>`;
+                });
+            }
+        }
+    };
+
+    // İŞTE BİR ÖNCEKİ KODDA EKSİK BIRAKTIĞIM KISIM:
+    updateColorsAndTimers();
+    
+    // Her 1 dakikada bir saatleri canlı güncelle
+    if (anatomyTimerInterval) clearInterval(anatomyTimerInterval);
+    anatomyTimerInterval = setInterval(updateColorsAndTimers, 60000);
+};
 function drawSpecificChart(canvasId, data, color) {
     const ctx = document.getElementById(canvasId)?.getContext('2d');
     if (!ctx || !data || data.length === 0) return;
@@ -909,37 +1149,35 @@ function drawVolumeChart(canvasId) {
     });
 }
 // KASLARA BASILI TUTMA (İNTERAKTİF) ÖZELLİĞİ
-function initMuscleInteractions() {
+// 1. KONSOL HATASINI ÇÖZEN DOKUNMA MOTORU
+window.initMuscleInteractions = function() {
     const display = document.getElementById('muscle-name-display');
     const groups = document.querySelectorAll('.muscle-group');
 
     groups.forEach(group => {
         const name = group.getAttribute('data-name');
-
-        const showLabel = (e) => {
-            display.innerText = name;
-            display.style.opacity = '1';
+        
+        const showLabel = () => {
+            if(display) {
+                display.innerText = name;
+                display.style.opacity = '1';
+            }
             group.classList.add('active-touch');
-            // Telefonda küçük bir titreşim (Destekleyen cihazlarda)
-            if (navigator.vibrate) navigator.vibrate(15);
         };
-
         const hideLabel = () => {
-            display.style.opacity = '0';
+            if(display) display.style.opacity = '0';
             group.classList.remove('active-touch');
         };
 
-        // Mobil Cihazlar İçin (Dokunma)
-        group.addEventListener('touchstart', showLabel, { passive: true });
-        group.addEventListener('touchend', hideLabel);
-        group.addEventListener('touchcancel', hideLabel);
-
-        // Bilgisayarlar İçin (Mouse)
-        group.addEventListener('mousedown', showLabel);
-        group.addEventListener('mouseup', hideLabel);
-        group.addEventListener('mouseleave', hideLabel);
+        // Eski event listener'ları temizle ve güvenli bağla
+        group.onmousedown = showLabel;
+        group.onmouseup = hideLabel;
+        group.onmouseleave = hideLabel;
+        group.ontouchstart = showLabel;
+        group.ontouchend = hideLabel;
+        group.ontouchcancel = hideLabel;
     });
-}
+};
 // ==========================================
 // OLY CHAT & AI MOTORU FONKSİYONLARI
 // ==========================================
@@ -3672,7 +3910,7 @@ window.addHubPhoto = function (event) {
 
 function loadHubPhotos() {
     const track = document.getElementById('hub-carousel-track');
-    
+
     // 1. Sabit Logo Slaytı
     track.innerHTML = `
         <div class="hub-slide" style="min-width: 100%; height: 100%; display: flex; justify-content: center; align-items: center; background: #000;">
@@ -4770,14 +5008,14 @@ window.removeFactoryComponent = function (id) {
 // ==========================================
 // 📄 OTOMATİK E-PLAN & MÜHENDİSLİK RAPORU JENERATÖRÜ
 // ==========================================
-window.generateEPlanPDF = function() {
+window.generateEPlanPDF = function () {
     const plcSelect = document.getElementById('vplc-model');
     const plcModelText = plcSelect.options[plcSelect.selectedIndex].text;
     const plcCode = document.getElementById('vplc-code').value.trim() || "Kod yazılmadı.";
     let dateStr = new Date().toLocaleDateString('tr-TR');
-    
+
     let fieldComps = factoryComponents.filter(c => c.type !== 'control_panel');
-    
+
     // 1. I/O LİSTESİ OLUŞTURUCU
     let ioListHTML = `
         <table style="width:100%; border-collapse:collapse; font-size:11px; margin-bottom:20px;">
@@ -4791,8 +5029,8 @@ window.generateEPlanPDF = function() {
             <tbody>
     `;
     fieldComps.forEach(comp => {
-        if(comp.in) ioListHTML += `<tr><td style="padding:6px; border:1px solid #ccc; font-weight:bold; color:#00509e;">${comp.in}</td><td style="padding:6px; border:1px solid #ccc; color:#27ae60;">DI (Dijital Giriş)</td><td style="padding:6px; border:1px solid #ccc;">${comp.name} (Sensör/Buton)</td></tr>`;
-        if(comp.out) ioListHTML += `<tr><td style="padding:6px; border:1px solid #ccc; font-weight:bold; color:#c0392b;">${comp.out}</td><td style="padding:6px; border:1px solid #ccc; color:#f39c12;">DO (Dijital Çıkış)</td><td style="padding:6px; border:1px solid #ccc;">${comp.name} (Aktüatör/Motor)</td></tr>`;
+        if (comp.in) ioListHTML += `<tr><td style="padding:6px; border:1px solid #ccc; font-weight:bold; color:#00509e;">${comp.in}</td><td style="padding:6px; border:1px solid #ccc; color:#27ae60;">DI (Dijital Giriş)</td><td style="padding:6px; border:1px solid #ccc;">${comp.name} (Sensör/Buton)</td></tr>`;
+        if (comp.out) ioListHTML += `<tr><td style="padding:6px; border:1px solid #ccc; font-weight:bold; color:#c0392b;">${comp.out}</td><td style="padding:6px; border:1px solid #ccc; color:#f39c12;">DO (Dijital Çıkış)</td><td style="padding:6px; border:1px solid #ccc;">${comp.name} (Aktüatör/Motor)</td></tr>`;
     });
     ioListHTML += `</tbody></table>`;
 
@@ -4803,9 +5041,9 @@ window.generateEPlanPDF = function() {
     // 3. ⚙️ MÜHENDİSLİK HESAPLAMALARI (AKILLI PANO)
     let totalKw = 0;
     fieldComps.forEach(comp => {
-        if(comp.type === 'ac_motor' || comp.type === 'vfd_drive' || comp.type === 'conveyor') totalKw += 1.5; // Varsayılan 1.5 kW motor yükü
+        if (comp.type === 'ac_motor' || comp.type === 'vfd_drive' || comp.type === 'conveyor') totalKw += 1.5; // Varsayılan 1.5 kW motor yükü
     });
-    
+
     let currentAmps = (totalKw * 1000) / (380 * 1.732 * 0.8); // 3 faz akım hesabı
     let recommendedCable = currentAmps > 16 ? "4x4 mm²" : (currentAmps > 10 ? "4x2.5 mm²" : "4x1.5 mm²");
     let heatDissipation = totalKw * 0.05 * 1000; // %5 Isı kaybı
@@ -4856,23 +5094,23 @@ window.generateEPlanPDF = function() {
     let screenWidth = window.innerWidth;
     if (screenWidth < 850) {
         currentPdfZoom = (screenWidth - 40) / 800;
-        if(currentPdfZoom > 1) currentPdfZoom = 1;
+        if (currentPdfZoom > 1) currentPdfZoom = 1;
         document.getElementById('pdf-zoom-wrapper').style.transform = `scale(${currentPdfZoom})`;
         document.getElementById('pdf-zoom-level').innerText = Math.round(currentPdfZoom * 100) + '%';
     }
 
-    document.getElementById('pdf-download-btn').onclick = function() {
+    document.getElementById('pdf-download-btn').onclick = function () {
         if (typeof showToast === "function") showToast("E-Plan Hazırlanıyor...");
         const btn = document.getElementById('pdf-download-btn');
         btn.innerText = "⏳ İndiriliyor..."; btn.disabled = true;
 
         const opt = {
             margin: 0, filename: 'CULbase_EPlan_' + trackingId + '.pdf',
-            image: { type: 'jpeg', quality: 1.0 }, 
+            image: { type: 'jpeg', quality: 1.0 },
             html2canvas: { scale: 2, useCORS: true, letterRendering: true, backgroundColor: '#ffffff', scrollY: 0 },
             jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' }
         };
-        
+
         html2pdf().set(opt).from(document.getElementById('pdf-preview-content')).save().then(() => {
             if (typeof showToast === "function") showToast("E-Plan İndirildi!");
             btn.innerText = "📥 İNDİR"; btn.disabled = false;
@@ -5420,10 +5658,10 @@ window.startTroubleshootingGame = function () {
 // 🎬 OLYMPUS PROFİL & PROGRAM YÖNETİCİSİ
 // ==========================================
 
-window.openProfileSwitcher = function() {
+window.openProfileSwitcher = function () {
     const screen = document.getElementById('profile-switcher-screen');
     const container = document.getElementById('workout-profiles-container');
-    
+
     // Geçerli Google kullanıcısının bilgilerini al
     const p = JSON.parse(localStorage.getItem('olympus_profile')) || {};
     const defaultName = document.getElementById('profile-name-display').innerText || "Şampiyon";
@@ -5440,7 +5678,7 @@ window.openProfileSwitcher = function() {
     // 1. ANA PROFİL (Standart Program - Asla Silinmez)
     let defaultBorder = activeProfileId === 'default' ? 'border: 3px solid #f6c000;' : 'border: 3px solid transparent;';
     let defaultOpacity = activeProfileId === 'default' ? 'opacity: 1;' : 'opacity: 0.6;';
-    
+
     container.innerHTML += `
         <div onclick="selectWorkoutProfile('default')" style="display:flex; flex-direction:column; align-items:center; cursor:pointer; transition:0.3s; ${defaultOpacity}" onmouseover="this.style.opacity='1'" onmouseout="if('${activeProfileId}' !== 'default') this.style.opacity='0.6'">
             <img src="${defaultPhoto}" style="width: 80px; height: 80px; border-radius: 8px; object-fit: cover; ${defaultBorder} box-shadow: 0 4px 10px rgba(0,0,0,0.5);">
@@ -5453,7 +5691,7 @@ window.openProfileSwitcher = function() {
     customProfiles.forEach(prof => {
         let border = activeProfileId === prof.id ? 'border: 3px solid #00d2ff;' : 'border: 3px solid transparent;';
         let opacity = activeProfileId === prof.id ? 'opacity: 1;' : 'opacity: 0.6;';
-        
+
         container.innerHTML += `
             <div onclick="selectWorkoutProfile('${prof.id}')" style="display:flex; flex-direction:column; align-items:center; cursor:pointer; transition:0.3s; ${opacity}" onmouseover="this.style.opacity='1'" onmouseout="if('${activeProfileId}' !== '${prof.id}') this.style.opacity='0.6'">
                 <div style="width: 80px; height: 80px; border-radius: 8px; background: #222; ${border} display:flex; justify-content:center; align-items:center; font-size:30px; box-shadow: 0 4px 10px rgba(0,0,0,0.5);">
@@ -5480,22 +5718,22 @@ window.openProfileSwitcher = function() {
     if (navigator.vibrate) navigator.vibrate(20);
 };
 
-window.closeProfileSwitcher = function() {
+window.closeProfileSwitcher = function () {
     document.getElementById('profile-switcher-screen').classList.add('hidden');
     document.getElementById('profile-switcher-screen').style.display = 'none';
 };
 
-window.selectWorkoutProfile = function(profileId) {
+window.selectWorkoutProfile = function (profileId) {
     // Seçilen profili hafızaya kaydet
     localStorage.setItem('olympus_active_profile_id', profileId);
-    
+
     // Görsel geribildirim
     if (navigator.vibrate) navigator.vibrate([30, 50]);
-    
+
     // Sistemi yeniden yükle (Şimdilik sadece ekranı kapatıp yeniliyoruz, ileride programData'yı değiştirecek)
     closeProfileSwitcher();
     calculateCurrentDay(); // Takvimi güncelle
-    
+
     if (typeof showToast === "function") {
         showToast(profileId === 'default' ? "Standart Programa Geçildi!" : "Özel Programa Geçildi!");
     } else {
@@ -5557,19 +5795,19 @@ const exerciseLibrary = {
 // ==========================================
 // 🛠️ YENİ PROGRAM SEÇİCİ YÖNLENDİRMELERİ
 // ==========================================
-window.openProfileBuilderType = function() {
+window.openProfileBuilderType = function () {
     // Önce profil değiştirici arka planını gizleyelim (şık dursun)
     document.getElementById('profile-switcher-screen').style.display = 'none';
-    
+
     // Yeni modalı aç
     const modal = document.getElementById('new-profile-modal');
     modal.classList.remove('hidden');
     modal.style.display = 'flex';
-    
+
     if (navigator.vibrate) navigator.vibrate(20);
 };
 
-window.closeNewProfileModal = function() {
+window.closeNewProfileModal = function () {
     document.getElementById('new-profile-modal').style.display = 'none';
     // Geri dönerken profil değiştiriciyi tekrar göster
     document.getElementById('profile-switcher-screen').style.display = 'flex';
@@ -5579,28 +5817,28 @@ window.closeNewProfileModal = function() {
 // 🤖 OLY-AI SİHİRBAZ MOTORU (PROFİL YARATICI)
 // ==========================================
 
-window.startOlyAIWizard = function() {
+window.startOlyAIWizard = function () {
     // 1. Seçim modalını gizle
     document.getElementById('new-profile-modal').style.display = 'none';
-    
+
     // 2. Sihirbazı aç
     const wizard = document.getElementById('oly-ai-wizard-modal');
     wizard.classList.remove('hidden');
     wizard.style.display = 'flex';
 };
 
-window.closeOlyAIWizard = function() {
+window.closeOlyAIWizard = function () {
     document.getElementById('oly-ai-wizard-modal').style.display = 'none';
     document.getElementById('new-profile-modal').style.display = 'flex';
 };
 
-window.generateAIProgram = function() {
+window.generateAIProgram = function () {
     const goal = document.getElementById('ai-goal').value;
     const days = parseInt(document.getElementById('ai-days').value);
     const level = document.getElementById('ai-level').value;
     let progName = document.getElementById('ai-prog-name').value.trim();
-    
-    if(!progName) progName = "Oly-AI Özel Program";
+
+    if (!progName) progName = "Oly-AI Özel Program";
 
     const btn = document.getElementById('btn-generate-ai');
     btn.innerText = "⏳ OLY DÜŞÜNÜYOR...";
@@ -5614,12 +5852,12 @@ window.generateAIProgram = function() {
     setTimeout(() => {
         // Yeni bir Profil Kimliği (ID) oluştur
         const newProfileId = 'custom_' + Date.now();
-        
+
         // Hedefe göre otomatik profil ikonu ata
         let pIcon = '🏋️‍♂️';
-        if(goal.includes('Hipertrofi')) pIcon = '🦍';
-        else if(goal.includes('Yağ Yakımı')) pIcon = '⚡';
-        else if(goal.includes('Güç')) pIcon = '🦾';
+        if (goal.includes('Hipertrofi')) pIcon = '🦍';
+        else if (goal.includes('Yağ Yakımı')) pIcon = '⚡';
+        else if (goal.includes('Güç')) pIcon = '🦾';
 
         const newProfile = {
             id: newProfileId,
@@ -5633,9 +5871,9 @@ window.generateAIProgram = function() {
         let customProfiles = JSON.parse(localStorage.getItem('olympus_custom_profiles')) || [];
         customProfiles.push(newProfile);
         localStorage.setItem('olympus_custom_profiles', JSON.stringify(customProfiles));
-        
+
         alert(`✅ SİSTEM HAZIR! \n\nOly-AI senin için "${progName}" adlı ${days} günlük ${level} seviye programı hazırladı! \n\nNetflix menüsüne eklenmiştir.`);
-        
+
         // Butonu eski haline getir
         btn.innerText = "🚀 PROGRAMI YARAT";
         btn.style.background = "#00d2ff";
@@ -5647,8 +5885,8 @@ window.generateAIProgram = function() {
 
         // Tüm pencereleri kapatıp Profil Seçiciyi (Netflix Ekranını) güncel liste ile tekrar aç
         document.getElementById('oly-ai-wizard-modal').style.display = 'none';
-        openProfileSwitcher(); 
-        
+        openProfileSwitcher();
+
     }, 2000); // 2 Saniyelik gerçekçi düşünme payı
 };
 
@@ -5659,38 +5897,38 @@ window.generateAIProgram = function() {
 let customBuilderDays = []; // Yeni yazılan programın günlerini tutacak
 let activeBuilderDay = 1;   // Hangi güne hareket ekleneceğini belirler
 
-window.openManualBuilder = function() {
+window.openManualBuilder = function () {
     document.getElementById('new-profile-modal').style.display = 'none';
-    
+
     // Değişkenleri sıfırla
     document.getElementById('builder-prog-name').value = '';
     customBuilderDays = [
         { day: 1, title: "Gün 1: Yeni İdman", rest: false, ex: [] }
     ];
     activeBuilderDay = 1;
-    
+
     document.getElementById('manual-builder-modal').classList.remove('hidden');
     document.getElementById('manual-builder-modal').style.display = 'flex';
-    
+
     renderBuilderDays();
     switchLibraryTab('chest', document.querySelector('.lib-tab-btn')); // İlk açılışta Göğüs sekmesi gelsin
 };
 
-window.closeManualBuilder = function() {
+window.closeManualBuilder = function () {
     document.getElementById('manual-builder-modal').style.display = 'none';
     document.getElementById('new-profile-modal').style.display = 'flex';
 };
 
 // --- SOL SÜTUN: GÜNLERİ ÇİZ ---
 // --- SOL SÜTUN: GÜNLERİ ÇİZ ---
-window.renderBuilderDays = function() {
+window.renderBuilderDays = function () {
     const container = document.getElementById('builder-days-container');
     container.innerHTML = '';
-    
+
     customBuilderDays.forEach((dayData, dIndex) => {
         let isSelected = activeBuilderDay === dayData.day;
         let borderStyle = isSelected ? "border: 2px solid var(--goldnova);" : "border: 1px solid #333;";
-        
+
         let exListHTML = dayData.ex.map((e, eIndex) => `
             <div style="background:#000; padding:8px; margin-top:5px; border-radius:4px; border-left:3px solid #00d2ff; display:flex; justify-content:space-between; align-items:center;">
                 <div>
@@ -5728,34 +5966,34 @@ window.renderBuilderDays = function() {
         `;
     });
 };
-window.addNewBuilderDay = function() {
+window.addNewBuilderDay = function () {
     let newDayNum = customBuilderDays.length + 1;
     customBuilderDays.push({ day: newDayNum, title: `Gün ${newDayNum}: Yeni İdman`, rest: false, ex: [] });
     activeBuilderDay = newDayNum; // Otomatik olarak yeni güne odaklan
     renderBuilderDays();
 };
 
-window.setActiveBuilderDay = function(dayNum) {
+window.setActiveBuilderDay = function (dayNum) {
     activeBuilderDay = dayNum;
     renderBuilderDays();
 };
 
-window.updateDayTitle = function(index, newTitle) {
+window.updateDayTitle = function (index, newTitle) {
     customBuilderDays[index].title = newTitle;
 };
 
-window.toggleRestDay = function(index, isRest) {
+window.toggleRestDay = function (index, isRest) {
     customBuilderDays[index].rest = isRest;
     renderBuilderDays();
 };
 
-window.removeExFromDay = function(dIndex, eIndex) {
+window.removeExFromDay = function (dIndex, eIndex) {
     customBuilderDays[dIndex].ex.splice(eIndex, 1);
     renderBuilderDays();
 };
 
 // --- SAĞ SÜTUN: KÜTÜPHANEYİ ÇİZ VE HAREKET EKLE ---
-window.switchLibraryTab = function(category, btnElement) {
+window.switchLibraryTab = function (category, btnElement) {
     // Buton stillerini ayarla
     document.querySelectorAll('.lib-tab-btn').forEach(b => {
         b.style.borderColor = '#333';
@@ -5768,7 +6006,7 @@ window.switchLibraryTab = function(category, btnElement) {
     container.innerHTML = '';
 
     const items = exerciseLibrary[category] || [];
-    
+
     items.forEach(item => {
         container.innerHTML += `
             <div style="background: #1a1a1a; padding: 10px; border-radius: 6px; border: 1px solid #333; display: flex; justify-content: space-between; align-items: center;">
@@ -5779,16 +6017,16 @@ window.switchLibraryTab = function(category, btnElement) {
     });
 };
 
-window.promptExDetails = function(name, defTempo, defRpe) {
+window.promptExDetails = function (name, defTempo, defRpe) {
     // Hangi güne ekleniyor kontrol et
     let dayIndex = customBuilderDays.findIndex(d => d.day === activeBuilderDay);
-    if(dayIndex === -1 || customBuilderDays[dayIndex].rest) {
+    if (dayIndex === -1 || customBuilderDays[dayIndex].rest) {
         alert("Lütfen önce sol taraftan hareket eklenebilir (Dinlenme olmayan) bir gün seçin!");
         return;
     }
 
     let scheme = prompt(`[${name}] için Set ve Tekrar (Örn: 4 x 8-12):`, "3 x 10");
-    if(!scheme) return;
+    if (!scheme) return;
 
     let tempo = prompt(`Tempo:`, defTempo);
     let rpe = prompt(`RPE (Zorluk 1-10):`, defRpe);
@@ -5801,13 +6039,13 @@ window.promptExDetails = function(name, defTempo, defRpe) {
     });
 
     renderBuilderDays();
-    if(navigator.vibrate) navigator.vibrate(20);
+    if (navigator.vibrate) navigator.vibrate(20);
 };
 
 // --- FİNAL: YENİ PROGRAMI KAYDET ---
-window.saveManualProgram = function() {
+window.saveManualProgram = function () {
     let progName = document.getElementById('builder-prog-name').value.trim();
-    if(!progName) {
+    if (!progName) {
         alert("Lütfen üst kısımdan programa bir isim verin!");
         return;
     }
@@ -5820,7 +6058,7 @@ window.saveManualProgram = function() {
         icon: '⚙️', // Manuel yapıldığı için Dişli ikonu
         date: new Date().toLocaleDateString('tr-TR'),
         // Sistemin okuyabilmesi için güncel format:
-        programData: customBuilderDays 
+        programData: customBuilderDays
     };
 
     let customProfiles = JSON.parse(localStorage.getItem('olympus_custom_profiles')) || [];
@@ -5831,7 +6069,231 @@ window.saveManualProgram = function() {
     // adaptasyonu daha sonra uygulayacağız. Şu an başarıyla hafızaya aldık!
 
     alert(`✅ MÜKEMMEL İŞ! \n\n"${progName}" adlı kendi kurduğun sistem başarıyla kaydedildi! Netflix menüsüne eklenmiştir.`);
-    
+
     document.getElementById('manual-builder-modal').style.display = 'none';
     openProfileSwitcher(); // Ekranı yenile
+};
+// ==========================================
+// 💬 OLYMPUS GERÇEK ZAMANLI SOHBET MOTORU
+// ==========================================
+let currentActiveChatId = null;
+let chatUnsubscribe = null; // Dinleyiciyi kapatmak için
+
+// 1. Kişi Listesini Aç
+window.openChatListModal = async function () {
+    document.getElementById('chat-list-modal').style.display = 'flex';
+    const listContainer = document.getElementById('chat-friends-list');
+    listContainer.innerHTML = '<p style="color:gray; font-size:12px; text-align:center;">Arkadaşların aranıyor...</p>';
+
+    if (!auth.currentUser) return;
+
+    try {
+        const myDoc = await db.collection("users").doc(auth.currentUser.uid).get();
+        const following = myDoc.exists ? (myDoc.data().following || []) : [];
+
+        if (following.length === 0) {
+            listContainer.innerHTML = '<p style="color:gray; font-size:12px; text-align:center;">Kimseyi takip etmiyorsun. Önce Arena\'dan sporcu bul!</p>';
+            return;
+        }
+
+        listContainer.innerHTML = '';
+        for (let uid of following) {
+            const userDoc = await db.collection("users").doc(uid).get();
+            if (userDoc.exists) {
+                const uData = userDoc.data();
+                listContainer.innerHTML += `
+                    <div onclick="openChatRoom('${uid}', '${uData.name}', '${uData.photo || 'icon.png'}')" style="display:flex; align-items:center; gap:12px; background:#151515; padding:12px; border-radius:12px; border:1px solid #333; cursor:pointer; transition:0.2s;">
+                        <img src="${uData.photo || 'icon.png'}" style="width:45px; height:45px; border-radius:50%; object-fit:cover; border:2px solid #00d2ff;">
+                        <div style="flex:1;">
+                            <h4 style="color:#fff; margin:0; font-size:14px;">${uData.name}</h4>
+                            <span style="color:#888; font-size:11px;">Mesaj göndermek için dokun</span>
+                        </div>
+                        <span style="color:#00d2ff;">💬</span>
+                    </div>
+                `;
+            }
+        }
+    } catch (e) {
+        listContainer.innerHTML = '<p style="color:#ff4444; font-size:12px; text-align:center;">Kişiler yüklenemedi.</p>';
+    }
+};
+
+// 2. Özel Sohbet Odasını Aç
+window.openChatRoom = function (targetUid, targetName, targetPhoto) {
+    document.getElementById('chat-list-modal').style.display = 'none';
+    document.getElementById('chat-room-modal').style.display = 'flex';
+
+    document.getElementById('chat-room-name').innerText = targetName;
+    document.getElementById('chat-room-avatar').src = targetPhoto;
+
+    // Mesajlaşma Odası Kimliğini (ID) Oluştur: İki UID'yi alfabetik sıraya dizerek eşsiz bir oda yaratırız
+    const myUid = auth.currentUser.uid;
+    currentActiveChatId = [myUid, targetUid].sort().join('_');
+
+    listenForChatMessages(currentActiveChatId);
+};
+
+// 3. Sohbet Odasını Kapat
+window.closeChatRoom = function () {
+    document.getElementById('chat-room-modal').style.display = 'none';
+    if (chatUnsubscribe) {
+        chatUnsubscribe(); // Odadan çıkınca veri dinlemeyi durdur (Tasarruf)
+    }
+    currentActiveChatId = null;
+    openChatListModal(); // Geri dönünce kişi listesini aç
+};
+
+// 4. Gerçek Zamanlı Mesaj Dinleyici (WhatsApp Mantığı)
+function listenForChatMessages(chatId) {
+    const container = document.getElementById('chat-messages-container');
+    container.innerHTML = '<p style="color:gray; font-size:12px; text-align:center;">Şifreli sohbet başlatılıyor...</p>';
+
+    // Eğer eski bir dinleyici varsa iptal et
+    if (chatUnsubscribe) chatUnsubscribe();
+
+    // Veritabanını anlık (canlı) dinle
+    chatUnsubscribe = db.collection("chats").doc(chatId).collection("messages")
+        .orderBy("timestamp", "asc")
+        .onSnapshot((snapshot) => {
+            container.innerHTML = '';
+
+            if (snapshot.empty) {
+                container.innerHTML = '<p style="color:#555; font-size:12px; text-align:center; margin-top:20px;">İlk mesajı gönderen sen ol!</p>';
+                return;
+            }
+
+            snapshot.forEach(doc => {
+                const msg = doc.data();
+                const isMe = msg.sender === auth.currentUser.uid;
+                const bubbleClass = isMe ? 'chat-bubble-sent' : 'chat-bubble-received';
+
+                // Zamanı ayarla
+                let timeStr = "";
+                if (msg.timestamp) {
+                    const d = msg.timestamp.toDate();
+                    timeStr = d.toLocaleTimeString('tr-TR', { hour: '2-digit', minute: '2-digit' });
+                }
+
+                container.innerHTML += `
+                    <div class="chat-bubble ${bubbleClass}">
+                        ${msg.text}
+                        <span class="chat-timestamp">${timeStr}</span>
+                    </div>
+                `;
+            });
+
+            // Yeni mesaj gelince en alta kaydır
+            container.scrollTop = container.scrollHeight;
+        });
+}
+
+// 5. Mesaj Gönder
+window.sendChatMessage = async function () {
+    const input = document.getElementById('chat-message-input');
+    const text = input.value.trim();
+
+    if (!text || !currentActiveChatId || !auth.currentUser) return;
+
+    input.value = ''; // Inputu hemen temizle
+
+    try {
+        await db.collection("chats").doc(currentActiveChatId).collection("messages").add({
+            text: text,
+            sender: auth.currentUser.uid,
+            timestamp: firebase.firestore.FieldValue.serverTimestamp()
+        });
+
+        if (navigator.vibrate) navigator.vibrate(20);
+    } catch (e) {
+        console.error("Mesaj gönderilemedi:", e);
+        alert("Bağlantı sorunu! Mesaj iletilemedi.");
+    }
+};
+
+// Klavyede Enter'a basınca gönderme
+document.getElementById('chat-message-input').addEventListener('keypress', function (e) {
+    if (e.key === 'Enter') {
+        sendChatMessage();
+    }
+});
+// ==========================================
+// 🎯 YENİ TAKİP MERKEZİ FONKSİYONLARI
+// ==========================================
+window.saveSleep = function() {
+    const val = document.getElementById('m-sleep').value;
+    if(val) {
+        let history = JSON.parse(localStorage.getItem('olympus_sleep_history')) || [];
+        history.push({ date: new Date().toLocaleDateString('tr-TR'), val: val });
+        localStorage.setItem('olympus_sleep_history', JSON.stringify(history));
+        openTrackingModal('sleep'); // Ekranı ve grafiği yenile
+        if(navigator.vibrate) navigator.vibrate(20);
+    }
+};
+
+window.saveCardio = function() {
+    const val = document.getElementById('m-steps').value;
+    if(val) {
+        let history = JSON.parse(localStorage.getItem('olympus_cardio_history')) || [];
+        history.push({ date: new Date().toLocaleDateString('tr-TR'), val: val });
+        localStorage.setItem('olympus_cardio_history', JSON.stringify(history));
+        openTrackingModal('cardio');
+        if(navigator.vibrate) navigator.vibrate(20);
+    }
+};
+
+window.calculate1RM = function() {
+    const w = parseFloat(document.getElementById('calc-w').value);
+    const r = parseFloat(document.getElementById('calc-r').value);
+    if(w > 0 && r > 0) {
+        // Epley Formülü: 1RM = Ağırlık * (1 + (Tekrar / 30))
+        const orm = w * (1 + (r / 30));
+        document.getElementById('calc-result').innerText = orm.toFixed(1) + " kg";
+        if(navigator.vibrate) navigator.vibrate([20, 40]);
+    } else {
+        alert("Lütfen geçerli bir ağırlık ve tekrar girin.");
+    }
+};
+
+window.saveSupplements = function() {
+    const s = {
+        whey: document.getElementById('sup-whey').value || 0,
+        creatine: document.getElementById('sup-creatine').value || 0,
+        carnitine: document.getElementById('sup-carnitine').value || 0,
+        electro: document.getElementById('sup-electro').value || 0
+    };
+    localStorage.setItem('olympus_supp_stock', JSON.stringify(s));
+    
+    document.getElementById('tracking-modal').style.display='none';
+    if(navigator.vibrate) navigator.vibrate(50);
+    alert("Yakıt stoku başarıyla güncellendi! ⚡");
+};
+window.saveActiveKcal = function() {
+    const val = document.getElementById('m-active-kcal').value;
+    if(val) {
+        let history = JSON.parse(localStorage.getItem('olympus_active_kcal_history')) || [];
+        history.push({ date: new Date().toLocaleDateString('tr-TR'), val: val });
+        localStorage.setItem('olympus_active_kcal_history', JSON.stringify(history));
+        openTrackingModal('active_kcal');
+        if(navigator.vibrate) navigator.vibrate(20);
+    }
+};
+
+window.saveBPM = function() {
+    const val = document.getElementById('m-bpm').value;
+    if(val) {
+        let history = JSON.parse(localStorage.getItem('olympus_bpm_history')) || [];
+        history.push({ date: new Date().toLocaleDateString('tr-TR'), val: val });
+        localStorage.setItem('olympus_bpm_history', JSON.stringify(history));
+        openTrackingModal('heart_rate');
+        if(navigator.vibrate) navigator.vibrate(20);
+    }
+};
+// Termal Anatomi Kartını Döndürme Motoru
+window.toggleAnatomyCard = function(event) {
+    if (event) event.stopPropagation(); // Tıklamanın arkaya geçip başka şeyleri bozmasını engeller
+    const card = document.getElementById('anatomy-card-wrapper');
+    if (card) {
+        card.classList.toggle('flipped');
+        if (navigator.vibrate) navigator.vibrate(20);
+    }
 };
