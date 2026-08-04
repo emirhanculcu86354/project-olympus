@@ -553,11 +553,16 @@
                         <p class="subtitle" style="margin-bottom:0; color:#888;">Project Olympus</p>
                     </div>
                 </div>
-                <!-- TAKİPÇİ VE TAKİP EDİLEN İSTATİSTİKLERİ (TIKLANABİLİR) -->
+
+                <!-- TAKİPÇİ VE SKOR (Sadeleştirildi) -->
                 <div style="display: flex; justify-content: center; gap: 40px; margin: 15px 0 20px 0;">
                     <div style="text-align: center; cursor: pointer;" onclick="openFollowList('following')">
                         <strong id="profile-following" style="color:var(--goldnova); font-size:20px;">0</strong><br>
                         <span style="font-size:11px; color:#888;">Takip Edilen</span>
+                    </div>
+                    <div class="score-circle" onclick="openBadgesModal()"
+                        style="cursor: pointer; width: 60px; height: 60px; font-size: 22px; margin-top:-10px; box-shadow: 0 0 15px rgba(246, 192, 0, 0.3);">
+                        <span id="weekly-score">100</span><small style="font-size:12px;">%</small>
                     </div>
                     <div style="text-align: center; cursor: pointer;" onclick="openFollowList('followers')">
                         <strong id="profile-followers" style="color:var(--goldnova); font-size:20px;">0</strong><br>
@@ -565,47 +570,54 @@
                     </div>
                 </div>
 
-                <!-- GÜNCELLENMİŞ BAŞARI SKORU (Tıklanabilir) -->
-                <div class="score-container" onclick="openBadgesModal()" style="cursor: pointer; transition: 0.2s;">
-                    <div class="score-circle"><span id="weekly-score">100</span><small>%</small></div>
-                    <div class="score-text">
-                        Haftalık Başarı Skoru
-                        <br><span style="font-size:10px; color:var(--goldnova);">🏆 Rozetleri Görmek İçin Dokun</span>
+                <!-- YENİ: 7 GÜNLÜK STREAK TAKVİMİ -->
+                <div class="streak-container">
+                    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px;">
+                        <h3 style="font-size:14px; margin:0; color:#fff;">Haftalık Seri 🔥</h3>
+                    </div>
+                    <div id="streak-days" style="display:flex; justify-content:space-between;"></div>
+                </div>
+
+                <!-- YENİ: MODERN AKSİYON MENÜSÜ (GRID) -->
+                <div class="profile-action-grid">
+                    <div class="action-card" onclick="openArenaScreen()">
+                        <div class="action-icon">⚔️</div>
+                        <div class="action-text">Arena</div>
+                    </div>
+                    <div class="action-card" onclick="openChatListModal()">
+                        <div class="action-icon" style="color:#00d2ff;">💬</div>
+                        <div class="action-text">Sohbet</div>
+                    </div>
+                    <div class="action-card" onclick="openSportsScreen()">
+                        <div class="action-icon" style="color:#27ae60;">⚽</div>
+                        <div class="action-text">Sporlar</div>
+                    </div>
+                    <div class="action-card" onclick="document.getElementById('settings-modal').style.display='flex'">
+                        <div class="action-icon" style="color:#888;">⚙️</div>
+                        <div class="action-text">Ayarlar</div>
                     </div>
                 </div>
-                <!-- OLYMPUS ARENA GİRİŞ BUTONU -->
-                <button class="arena-entry-btn" onclick="openArenaScreen()">
-                    <span style="font-size: 22px;">⚔️</span>
-                    <span>OLYMPUS ARENA'YA GİR</span>
-                </button>
-                <!-- OLYMPUS SOHBET GİRİŞ BUTONU -->
-                <button class="arena-entry-btn" onclick="openChatListModal()"
-                    style="margin-top: 15px; background: linear-gradient(45deg, #002233, #0a0a0a); border-color: #00d2ff; color: #fff;">
-                    <span style="font-size: 22px;">💬</span>
-                    <span>OLYMPUS SOHBET</span>
-                </button>
-                <button class="arena-entry-btn" onclick="openSportsScreen()"
-                    style="margin-top: 15px; background: linear-gradient(45deg, #0d3617, #151515); border-color: #27ae60; color: #fff;">
-                    <span style="font-size: 22px;">⚽</span>
-                    <span>FC OLYMPUS</span>
-                </button>
 
-                <button class="save-btn"
-                    style="background:#252525; color:var(--goldnova); border: 1px solid var(--goldnova); margin-top:20px;"
-                    onclick="document.getElementById('settings-modal').style.display='flex'">Ayarlar &
-                    Tercihler</button>
-
-                <h3 style="margin-top: 30px; margin-bottom: 10px;">Güncel İstatistikler</h3>
-                <div class="form-grid">
-                    <div class="read-only-stat"><span>Kilo:</span> <strong id="ro-weight">-- kg</strong></div>
-                    <div class="read-only-stat"><span>Boy:</span> <strong id="ro-height">-- cm</strong></div>
-                    <div class="read-only-stat"><span>Bel:</span> <strong id="ro-waist">-- cm</strong></div>
-                    <div class="read-only-stat"><span>Göğüs:</span> <strong id="ro-chest">-- cm</strong></div>
-                    <div class="read-only-stat"><span>Omuz:</span> <strong id="ro-shoulder">-- cm</strong></div>
-                    <div class="read-only-stat"><span>Kol:</span> <strong id="ro-arm">-- cm</strong></div>
-                    <div class="read-only-stat"><span>Basen:</span> <strong id="ro-hips">-- cm</strong></div>
-                    <div class="read-only-stat"><span>Kalf:</span> <strong id="ro-calf">-- cm</strong></div>
+                <!-- YENİ: İLERLEME GALERİSİ -->
+                <div
+                    style="display:flex; justify-content:space-between; align-items:center; margin-top:25px; margin-bottom:15px;">
+                    <h3 style="margin:0; font-size:16px;">📸 Gelişim Galerisi</h3>
+                    <button class="edit-btn" onclick="document.getElementById('progress-img-upload').click()"
+                        style="font-size:11px;">+ Ekle</button>
+                    <input type="file" id="progress-img-upload" accept="image/*" style="display:none;"
+                        onchange="addProgressPhoto(event)">
                 </div>
+                <div id="progress-gallery" class="progress-gallery">
+                    <!-- JS Dolduracak -->
+                </div>
+
+                <!-- GÜNCELLENDİ: AKILLI ÖLÇÜLER VE TREND OKLARI -->
+                <h3 style="margin-top: 30px; margin-bottom: 10px; font-size:16px;">📊 Ölçü Trendleri</h3>
+                <div class="form-grid" id="profile-stats-grid">
+                    <p style="color:gray; font-size:12px; grid-column: span 2; text-align:center;">Ölçüler yükleniyor...
+                    </p>
+                </div>
+
                 <div style="height: 80px;"></div>
             </section>
             <!-- OLYMPUS ARENA EKRANI (Buraya Ekliyoruz) -->
@@ -694,30 +706,40 @@
     <!-- ==========================================
          🔥 TAM EKRAN 3D TERMAL ANATOMİ & ANALİZ SAYFASI
          ========================================== -->
-    <div id="anatomy-modal" style="display: none; position: fixed; top: 0; left: 0; width: 100vw; height: 100dvh; background: #050505; z-index: 999999; flex-direction: column;">
-        
+    <div id="anatomy-modal"
+        style="display: none; position: fixed; top: 0; left: 0; width: 100vw; height: 100dvh; background: #050505; z-index: 999999; flex-direction: column;">
+
         <!-- ÜST BAR: Başlık ve Hamburger Kapatma Butonu -->
-        <div style="display:flex; justify-content:space-between; align-items:center; padding: calc(env(safe-area-inset-top) + 15px) 20px 15px 20px; background: #0a0a0a; border-bottom: 1px solid #222; flex-shrink: 0;">
-            <h2 style="color: var(--goldnova); margin: 0; font-size: 18px; text-transform: uppercase; letter-spacing: 1px;">Termal Anatomi</h2>
-            <button onclick="closeAnatomy()" style="background: transparent; border: none; color: var(--goldnova); font-size: 26px; cursor: pointer; padding: 0;">☰</button>
+        <div
+            style="display:flex; justify-content:space-between; align-items:center; padding: calc(env(safe-area-inset-top) + 15px) 20px 15px 20px; background: #0a0a0a; border-bottom: 1px solid #222; flex-shrink: 0;">
+            <h2
+                style="color: var(--goldnova); margin: 0; font-size: 18px; text-transform: uppercase; letter-spacing: 1px;">
+                Termal Anatomi</h2>
+            <button onclick="closeAnatomy()"
+                style="background: transparent; border: none; color: var(--goldnova); font-size: 26px; cursor: pointer; padding: 0;">☰</button>
         </div>
 
         <!-- İÇERİK: Tamamı Kaydırılabilir (Scroll) Alan -->
-        <div style="flex: 1; overflow-y: auto; padding: 20px; padding-bottom: 100px; -webkit-overflow-scrolling: touch; display: block;">
-            
+        <div
+            style="flex: 1; overflow-y: auto; padding: 20px; padding-bottom: 100px; -webkit-overflow-scrolling: touch; display: block;">
+
             <!-- 3D DÖNEBİLEN ANATOMİ KARTI -->
             <div id="anatomy-card-wrapper" class="anatomy-card-container" style="cursor: default;">
                 <div class="anatomy-card-inner">
-                    
+
                     <!-- ÖN YÜZ: YORGUNLUK / TOPARLANMA (TERMAL) -->
-                    <div class="anatomy-card-front" style="display: flex; flex-direction: column; justify-content: space-between; padding: 20px;">
-                        
+                    <div class="anatomy-card-front"
+                        style="display: flex; flex-direction: column; justify-content: space-between; padding: 20px;">
+
                         <div>
-                            <h3 style="color: #ff4444; font-size: 14px; text-align: center; margin-top: 0; margin-bottom: 10px; text-transform: uppercase; letter-spacing: 1px;">Yorgunluk & Toparlanma</h3>
-                            
+                            <h3
+                                style="color: #ff4444; font-size: 14px; text-align: center; margin-top: 0; margin-bottom: 10px; text-transform: uppercase; letter-spacing: 1px;">
+                                Yorgunluk & Toparlanma</h3>
+
                             <!-- SVG ve Sayaçların Beraber Durduğu Kutu -->
                             <div style="position: relative; width: 200px; margin: 0 auto;">
-                                <svg width="200" height="340" viewBox="0 0 200 340" style="display: block; margin: 0 auto;">
+                                <svg width="200" height="340" viewBox="0 0 200 340"
+                                    style="display: block; margin: 0 auto;">
                                     <g fill="#2a2a2a" stroke="#151515" stroke-width="1.5">
                                         <polygon points="90,20 110,20 115,40 100,55 85,40" />
                                         <polygon points="95,55 105,55 110,70 90,70" />
@@ -754,33 +776,42 @@
                                     </g>
                                 </svg>
                                 <!-- SAATLERİN ÇIKACAĞI KATMAN -->
-                                <div id="recovery-timers-container" style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none;"></div>
+                                <div id="recovery-timers-container"
+                                    style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none;">
+                                </div>
                             </div>
 
-                            <div style="display:flex; justify-content:center; gap:10px; margin-top:15px; font-size:9px; color:#888;">
+                            <div
+                                style="display:flex; justify-content:center; gap:10px; margin-top:15px; font-size:9px; color:#888;">
                                 <span style="color:#ff4444;">■ Yorgun</span>
                                 <span style="color:#f39c12;">■ Toparlanıyor</span>
                                 <span style="color:#27ae60;">■ Hazır</span>
                             </div>
 
-                            <div id="muscle-name-display" style="height: 15px; color: var(--goldnova); font-weight: 800; font-size: 13px; margin-top: 10px; opacity: 0; transition: opacity 0.3s ease; text-align: center;">
+                            <div id="muscle-name-display"
+                                style="height: 15px; color: var(--goldnova); font-weight: 800; font-size: 13px; margin-top: 10px; opacity: 0; transition: opacity 0.3s ease; text-align: center;">
                                 Kas Adı
                             </div>
                         </div>
 
-                        <button onclick="toggleAnatomyCard(event)" style="background: #1a1a1a; color: var(--goldnova); border: 1px solid #333; padding: 12px; border-radius: 8px; font-size: 13px; font-weight: bold; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 8px; width: 100%;">
+                        <button onclick="toggleAnatomyCard(event)"
+                            style="background: #1a1a1a; color: var(--goldnova); border: 1px solid #333; padding: 12px; border-radius: 8px; font-size: 13px; font-weight: bold; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 8px; width: 100%;">
                             <span>🔄</span> Haftalık Gelişimi Gör
                         </button>
                     </div>
 
                     <!-- ARKA YÜZ: HAFTALIK ÇALIŞILANLAR -->
-                    <div class="anatomy-card-back" style="display: flex; flex-direction: column; justify-content: space-between; padding: 20px;">
+                    <div class="anatomy-card-back"
+                        style="display: flex; flex-direction: column; justify-content: space-between; padding: 20px;">
                         <div>
-                            <h3 style="color: #27ae60; font-size: 14px; text-align: center; margin-top: 0; margin-bottom: 10px; text-transform: uppercase; letter-spacing: 1px;">Haftalık Çalışılan Kaslar</h3>
-                            
+                            <h3
+                                style="color: #27ae60; font-size: 14px; text-align: center; margin-top: 0; margin-bottom: 10px; text-transform: uppercase; letter-spacing: 1px;">
+                                Haftalık Çalışılan Kaslar</h3>
+
                             <!-- ARKA HARİTA GERİ GELDİ -->
                             <div style="position: relative; width: 200px; margin: 0 auto 15px auto;">
-                                <svg width="200" height="340" viewBox="0 0 200 340" style="display: block; margin: 0 auto; will-change: transform;">
+                                <svg width="200" height="340" viewBox="0 0 200 340"
+                                    style="display: block; margin: 0 auto; will-change: transform;">
                                     <g fill="#2a2a2a" stroke="#151515" stroke-width="1.5">
                                         <polygon points="90,20 110,20 115,40 100,55 85,40" />
                                         <polygon points="95,55 105,55 110,70 90,70" />
@@ -818,11 +849,13 @@
                                 </svg>
                             </div>
 
-                            <ul id="worked-muscles-list" style="color: #fff; font-size: 11px; line-height: 1.8; padding-left: 0; list-style: none; text-align: center; margin-bottom: 0;">
+                            <ul id="worked-muscles-list"
+                                style="color: #fff; font-size: 11px; line-height: 1.8; padding-left: 0; list-style: none; text-align: center; margin-bottom: 0;">
                                 <!-- JS Dolduracak -->
                             </ul>
                         </div>
-                        <button onclick="toggleAnatomyCard(event)" style="background: #1a1a1a; color: #888; border: 1px solid #333; padding: 12px; border-radius: 8px; font-size: 13px; font-weight: bold; cursor: pointer; width: 100%; margin-top: 10px;">
+                        <button onclick="toggleAnatomyCard(event)"
+                            style="background: #1a1a1a; color: #888; border: 1px solid #333; padding: 12px; border-radius: 8px; font-size: 13px; font-weight: bold; cursor: pointer; width: 100%; margin-top: 10px;">
                             🔄 Yorgunluk Haritasına Dön
                         </button>
                     </div>
@@ -834,7 +867,7 @@
             <div id="all-charts-container" style="margin-top: 30px; display: block;">
                 <!-- JS Burayı Dolduracak -->
             </div>
-            
+
         </div>
     </div>
     <!-- BAŞARI ROZETLERİ MODALI -->

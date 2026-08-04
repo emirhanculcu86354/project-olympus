@@ -879,7 +879,12 @@ window.saveFatData = function (fatVal) {
 }
 
 window.saveMeasurements = function () {
-    const p = JSON.parse(localStorage.getItem('olympus_profile')) || {};
+    // 1. Yeni veriyi kaydetmeden önce eskini 'old' olarak yedekle (Trend oku için)
+    const old_p = JSON.parse(localStorage.getItem('olympus_profile')) || {};
+    localStorage.setItem('olympus_profile_old', JSON.stringify(old_p));
+
+    // 2. Yeni Verileri Al
+    const p = { ...old_p }; // Mevcutları koru
     p.w = document.getElementById('m-w').value; p.height = document.getElementById('m-height').value;
     p.waist = document.getElementById('m-waist').value; p.neck = document.getElementById('m-neck').value;
     p.chest = document.getElementById('m-chest').value; p.shoulder = document.getElementById('m-shoulder').value;
@@ -889,11 +894,107 @@ window.saveMeasurements = function () {
 
     if (p.w) {
         let history = JSON.parse(localStorage.getItem('olympus_history')) || [];
-        history.push({ date: new Date().toLocaleDateString('tr-TR'), weight: p.w }); localStorage.setItem('olympus_history', JSON.stringify(history));
+        history.push({ date: new Date().toLocaleDateString('tr-TR'), weight: p.w }); 
+        localStorage.setItem('olympus_history', JSON.stringify(history));
     }
 
-    syncDataToCloud();
-    document.getElementById('tracking-modal').style.display = 'none'; loadProfileData();
+    if(typeof syncDataToCloud === 'function') syncDataToCloud();
+    document.getElementById('tracking-modal').style.display = 'none'; 
+    loadProfileData(); // Okların hesaplanması için yeniden yükle
+};
+
+// ==========================================
+// 📅 STREAK TAKVİMİ VE FOTOĞRAF GALERİSİ
+// ==========================================
+window.renderStreakCalendar = function() {
+    const container = document.getElementById('streak-days');
+    if(!container) return;
+
+    const days = ['Pzt', 'Sal', 'Çar', 'Per', 'Cum', 'Cmt', 'Paz'];
+    // JavaScript'te 0 = Pazar'dır. Bizim dizimizde 6 = Pazar, 0 = Pazartesi olacak.
+    let todayIndex = new Date().getDay() === 0 ? 6 : new Date().getDay() - 1; 
+    
+    // Gerçek bir sistemde idman veya görev tamamlanınca buralar true yapılır.
+    // Şimdilik motivasyon için kullanıcının uygulamaya girdiği anı (bugünü) yeşil yakıyoruz!
+    let streakData = JSON.parse(localStorage.getItem('olympus_streak_data')) || [false, false, false, false, false, false, false];
+    
+    // Hafta başındaysak takvimi sıfırla
+    if (todayIndex === 0 && new Date().getHours() < 2) streakData = [false, false, false, false, false, false, false];
+
+    streakData[todayIndex] = true;
+    localStorage.setItem('olympus_streak_data', JSON.stringify(streakData));
+
+    container.innerHTML = '';
+    days.forEach((day, index) => {
+        let isActive = streakData[index];
+        let activeClass = isActive ? 'active' : '';
+        container.innerHTML += `
+            <div class="streak-day ${activeClass}">
+                <div class="streak-circle">${day.charAt(0)}</div>
+                <span class="streak-day-label">${day}</span>
+            </div>
+        `;
+    });
+};
+
+window.addProgressPhoto = function (event) {
+    const file = event.target.files[0];
+    if (file) {
+        const reader = new FileReader();
+        reader.onload = function (e) {
+            let photos = JSON.parse(localStorage.getItem('olympus_progress_photos')) || [];
+            
+            // Cihaz hafızasını şişirmemek için maks 10 fotoğraf (Eski olanı silmez, uyarır)
+            if(photos.length >= 10) {
+                alert("Maksimum 10 fotoğraf yükleyebilirsin. Yenisini eklemek için lütfen eskilerden birini sil!");
+                return;
+            }
+            
+            photos.push({
+                id: Date.now(),
+                date: new Date().toLocaleDateString('tr-TR'),
+                img: e.target.result // Base64 Olarak Cihaza (LocalStorage) Kaydediliyor
+            });
+            localStorage.setItem('olympus_progress_photos', JSON.stringify(photos));
+            renderProgressGallery();
+            if (navigator.vibrate) navigator.vibrate(20);
+        };
+        reader.readAsDataURL(file); // Resmi metne çevirir
+    }
+};
+
+window.renderProgressGallery = function() {
+    const container = document.getElementById('progress-gallery');
+    if(!container) return;
+
+    let photos = JSON.parse(localStorage.getItem('olympus_progress_photos')) || [];
+    
+    container.innerHTML = '';
+    if(photos.length === 0) {
+        container.innerHTML = '<p style="color:#888; font-size:12px; margin:auto; padding:20px 0; font-style:italic;">Formunu belgelemek için bir fotoğraf ekle.</p>';
+        return;
+    }
+
+    // En yeni fotoğraf en solda (başta) gözüksün diye reverse atıyoruz
+    photos.slice().reverse().forEach(p => {
+        container.innerHTML += `
+            <div class="progress-item">
+                <img src="${p.img}">
+                <button class="progress-delete" onclick="deleteProgressPhoto(${p.id})">✖</button>
+                <div class="progress-date">${p.date}</div>
+            </div>
+        `;
+    });
+};
+
+window.deleteProgressPhoto = function(id) {
+    if(confirm("Bu gelişim fotoğrafını silmek istediğine emin misin?")) {
+        let photos = JSON.parse(localStorage.getItem('olympus_progress_photos')) || [];
+        photos = photos.filter(p => p.id !== id);
+        localStorage.setItem('olympus_progress_photos', JSON.stringify(photos));
+        renderProgressGallery();
+        if (navigator.vibrate) navigator.vibrate(30);
+    }
 }
 
 window.save1RM = function () {
@@ -918,19 +1019,66 @@ window.saveMacros = function () {
     }
 }
 
-function loadProfileData() {
+// GÜNCELLENMİŞ: Akıllı Ölçüler ve Trend Okları
+window.loadProfileData = function() {
     const p = JSON.parse(localStorage.getItem('olympus_profile'));
-    if (p) {
-        if (p.w) document.getElementById('ro-weight').innerText = `${p.w} kg`;
-        if (p.height) document.getElementById('ro-height').innerText = `${p.height} cm`;
-        if (p.waist) document.getElementById('ro-waist').innerText = `${p.waist} cm`;
-        if (p.chest) document.getElementById('ro-chest').innerText = `${p.chest} cm`;
-        if (p.shoulder) document.getElementById('ro-shoulder').innerText = `${p.shoulder} cm`;
-        if (p.arm) document.getElementById('ro-arm').innerText = `${p.arm} cm`;
-        if (p.hips) document.getElementById('ro-hips').innerText = `${p.hips} cm`;
-        if (p.calf) document.getElementById('ro-calf').innerText = `${p.calf} cm`;
+    // Bir önceki (eski) ölçüleri de çekiyoruz ki kıyaslama yapabilelim
+    const p_old = JSON.parse(localStorage.getItem('olympus_profile_old')) || {};
+    const grid = document.getElementById('profile-stats-grid');
+    
+    if (!grid) return;
+    grid.innerHTML = '';
+
+    if (!p) {
+        grid.innerHTML = '<p style="color:#888; font-size:12px; grid-column:span 2; text-align:center;">Ölçüm verisi yok. Takip merkezinden girin.</p>';
+    } else {
+        const metrics = [
+            { key: 'w', label: 'Kilo', unit: 'kg' },
+            { key: 'height', label: 'Boy', unit: 'cm' },
+            { key: 'waist', label: 'Bel', unit: 'cm' },
+            { key: 'chest', label: 'Göğüs', unit: 'cm' },
+            { key: 'shoulder', label: 'Omuz', unit: 'cm' },
+            { key: 'arm', label: 'Kol', unit: 'cm' },
+            { key: 'hips', label: 'Basen', unit: 'cm' },
+            { key: 'calf', label: 'Kalf', unit: 'cm' },
+            { key: 'thigh', label: 'İç Bacak', unit: 'cm' }
+        ];
+
+        metrics.forEach(m => {
+            if (p[m.key]) {
+                let currentVal = parseFloat(p[m.key]);
+                let oldVal = parseFloat(p_old[m.key]);
+                let trendHTML = '';
+
+                // Eski değer varsa ve yeni değerden farklıysa trend okunu hesapla
+                if (!isNaN(oldVal) && oldVal !== currentVal) {
+                    let diff = (currentVal - oldVal).toFixed(1);
+                    if (diff > 0) {
+                        // Kilo ve Bel artışı uyarı (Kırmızı), Kas (Omuz, Kol vs) artışı başarıdır (Yeşil)
+                        let color = (m.key === 'w' || m.key === 'waist') ? '#ff4444' : '#27ae60';
+                        trendHTML = `<span style="color:${color}; font-size:11px; font-weight:bold; margin-top:4px;">📈 +${diff}</span>`;
+                    } else {
+                        // Azalış: Kilo/bel ise Yeşil, Kas kaybediyorsa Kırmızı
+                        let color = (m.key === 'w' || m.key === 'waist') ? '#27ae60' : '#ff4444';
+                        trendHTML = `<span style="color:${color}; font-size:11px; font-weight:bold; margin-top:4px;">📉 ${diff}</span>`;
+                    }
+                }
+
+                grid.innerHTML += `
+                    <div class="read-only-stat">
+                        <span>${m.label}</span> 
+                        <strong style="color:var(--goldnova); font-size:18px;">${currentVal} <small style="font-size:11px; color:#888;">${m.unit}</small></strong>
+                        ${trendHTML}
+                    </div>
+                `;
+            }
+        });
     }
-}
+
+    // Profil her açıldığında Streak Takvimini ve Galeriyi de yükle
+    if (typeof renderStreakCalendar === 'function') renderStreakCalendar();
+    if (typeof renderProgressGallery === 'function') renderProgressGallery();
+};
 
 window.openAnatomy = function () {
     const modal = document.getElementById('anatomy-modal');
