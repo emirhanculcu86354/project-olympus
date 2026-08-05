@@ -161,6 +161,58 @@ const dietData = {
     6: { title: "Cmt: Orta Karb.", meals: [{ t: "1. Ana Öğün (12:00)", d: "3 Yumurtalı, 50g Yulaf Unlu Krep, 1 Tatlı Kaşığı Bal", alt: "Değişim: 3 Haşlanmış Yumurta, 2 Dilim Ekmek", i: "🥞" }, { t: "Ara Öğün (16:30)", d: "1 Porsiyon Meyve, 15g Yer Fıstığı", alt: "Değişim: 1 Yeşil Elma, 10 Çiğ Badem", i: "🍎" }, { t: "Ara Öğün (18:30)", d: "1 Ölçek Whey Protein (İdman yapıldıysa)", alt: "Değişim: Gerekirse 100g Lor", i: "🥤" }, { t: "2. Ana Öğün (19:30)", d: "200g Tavuk Göğsü, 100g Makarna, Havuç/Brokoli", alt: "Değişim: 180g Ton Balığı, 100g Pirinç", i: "🍗" }] },
     7: { title: "Paz: Cheat Meal", meals: [{ t: "1. Ana Öğün (12:00)", d: "Menemen (4 Yumurta), 2 Dilim Ekmek, 50g Peynir", alt: "Değişim: Standart Türk Kahvaltısı", i: "🍳" }, { t: "Ara Öğün (16:00)", d: "1 Kase Yoğurt veya Sade Kahve", alt: "Değişim: Yeşil Çay", i: "☕" }, { t: "2. Ana Öğün (19:00)", d: "SERBEST ÖĞÜN: Pizza, Burger vb.", alt: "Değişim: İstenilen herhangi bir menü", i: "🍔" }] }
 };
+// ==========================================
+// 🌸 DİLALAM ÖZEL PROGRAMI (PDF'TEN AKTARILDI)
+// ==========================================
+const dilalaProgramData = {
+    p1: [
+        { day: 1, title: "Pazartesi: Kardiyo", muscles: ["core", "legs-l", "legs-r"], rest: false, ex: [{ name: "Tempolu Yürüyüş", scheme: "45 Dk", tempo: "Sabit", rpe: 6 }] },
+        { day: 2, title: "Salı: Alt Vücut", muscles: ["legs-l", "legs-r", "core"], rest: false, ex: [{ name: "Spor Öncesi Isınma", scheme: "5-10 Dk", tempo: "Dinamik", rpe: "-" }, { name: "Squat", scheme: "4 x 12", tempo: "2-0-1-0", rpe: 7 }, { name: "Glute Bridge", scheme: "3 x 15", tempo: "2-1-1-0", rpe: 7 }, { name: "Reverse Lunge", scheme: "3 x 10", tempo: "2-0-1-0", rpe: 7.5 }, { name: "Mekik (Crunch)", scheme: "3 x 15", tempo: "1-0-1-1", rpe: 7 }, { name: "Spor Sonrası Esneme", scheme: "5 Dk", tempo: "Statik", rpe: "-" }] },
+        { day: 3, title: "Çarşamba: Alt Vücut 2", muscles: ["legs-l", "legs-r", "core"], rest: false, ex: [{ name: "Spor Öncesi Isınma", scheme: "5 Dk", tempo: "Dinamik", rpe: "-" }, { name: "Sumo Squat", scheme: "3 x 12", tempo: "2-0-1-0", rpe: 7 }, { name: "Step Back Lunge", scheme: "3 x 10", tempo: "2-0-1-0", rpe: 7.5 }, { name: "Side Leg Raise", scheme: "3 x 15", tempo: "1-0-1-0", rpe: 7 }, { name: "Glute Bridge Hold", scheme: "3 x 30 sn", tempo: "Statik", rpe: 8 }, { name: "Leg Raise", scheme: "3 x 12", tempo: "2-0-1-0", rpe: 7 }, { name: "Dead Bug", scheme: "3 x 12", tempo: "2-0-1-0", rpe: 7 }, { name: "Russian Twist", scheme: "3 x 10-12", tempo: "1-0-1-0", rpe: 7 }, { name: "Spor Sonrası Esneme", scheme: "5 Dk", tempo: "Statik", rpe: "-" }] },
+        { day: 4, title: "Perşembe: Kardiyo", muscles: ["core", "legs-l", "legs-r"], rest: false, ex: [{ name: "Tempolu Yürüyüş", scheme: "45 Dk", tempo: "Sabit", rpe: 6 }] },
+        { day: 5, title: "Cuma: Glute Odaklı", muscles: ["legs-l", "legs-r", "core"], rest: false, ex: [{ name: "Spor Öncesi Isınma", scheme: "5 Dk", tempo: "Dinamik", rpe: "-" }, { name: "Squat Pulse", scheme: "3 x 15", tempo: "Dinamik", rpe: 7.5 }, { name: "Glute Bridge", scheme: "4 x 15", tempo: "2-1-1-0", rpe: 7.5 }, { name: "Donkey Kick", scheme: "3 x 15", tempo: "2-0-1-0", rpe: 7 }, { name: "Side Leg Raise", scheme: "3 x 15", tempo: "1-0-1-0", rpe: 7 }, { name: "Mountain Climber (Yavaş)", scheme: "3 x 20", tempo: "2-0-2-0", rpe: 7.5 }, { name: "Spor Sonrası Esneme", scheme: "5 Dk", tempo: "Statik", rpe: "-" }] },
+        { day: 6, title: "Cumartesi: Uzun Kardiyo", muscles: ["core", "legs-l", "legs-r"], rest: false, ex: [{ name: "Uzun Yürüyüş", scheme: "75-90 Dk", tempo: "Sabit", rpe: 6 }, { name: "Ekstra Yoga", scheme: "İsteğe Bağlı", tempo: "Rahatlatıcı", rpe: "-" }] },
+        { day: 7, title: "Pazar: Aktif Dinlenme", muscles: [], rest: true, ex: [{ name: "Hafif Yürüyüş", scheme: "30 Dk", tempo: "Yavaş", rpe: 4 }] }
+    ]
+};
+
+const dilalaDietData = {
+    1: { title: "Pzt: Menü 1 & 2", meals: [{ t: "Uyarı", d: "Aç karna 500 ml su içilecek!", alt: "Rafine şeker, gece yemek yasak!", i: "💧" }, { t: "Öğle (Menü 1)", d: "2 Haşlanmış yumurta, Domates/Salatalık, Çay/Sade kahve", alt: "Hamur işi yasak", i: "🍳" }, { t: "Akşam (Menü 1)", d: "150-200 gr Tavuk, 4 Kaşık pirinç, Büyük Salata", alt: "Asitli içecek yok", i: "🍗" }] },
+    2: { title: "Sal: Menü 2 & 3", meals: [{ t: "Uyarı", d: "Aç karna 500 ml su içilecek!", alt: "Günde 2.5 Litre Su!", i: "💧" }, { t: "Öğle (Menü 2)", d: "Omlet (2 yumurta), Lor peyniri, Yeşillik", alt: "Gece atıştırması yasak", i: "🍳" }, { t: "Akşam (Menü 2)", d: "150-200 gr Tavuk, Haşlanmış Patates (90gr), Yoğurt", alt: "Erken kalk, geç yatma!", i: "🍗" }] },
+    3: { title: "Çar: Menü 3 & 4", meals: [{ t: "Uyarı", d: "Aç karna 500 ml su içilecek!", alt: "Pes etmek yok!", i: "💧" }, { t: "Öğle (Menü 3)", d: "Yoğurt/Süt, 5 kaşık yulaf, Yarım Muz", alt: "Paketli abur cubur yasak", i: "🥣" }, { t: "Akşam (Menü 3)", d: "Köfte, Büyük Salata", alt: "Cadının evi yasak :)", i: "🧆" }] },
+    4: { title: "Per: Menü 4 & 5", meals: [{ t: "Uyarı", d: "Aç karna 500 ml su içilecek!", alt: "Kurallara uyulacak", i: "💧" }, { t: "Öğle (Menü 4)", d: "Yoğurt/Kefir, 5 kaşık yulaf, Çilek", alt: "Maden suyu serbest", i: "🍓" }, { t: "Akşam (Menü 4)", d: "150-200 gr Hindi Göğsü, Yoğurt, Salata", alt: "Sağlıklı yağlar serbest", i: "🍗" }] },
+    5: { title: "Cum: Menü 5 & 6", meals: [{ t: "Uyarı", d: "Aç karna 500 ml su içilecek!", alt: "Fast food kesinlikle yasak!", i: "💧" }, { t: "Öğle (Menü 5)", d: "Kabak Yemeği, Yoğurt", alt: "Beyaz ekmek yok", i: "🥒" }, { t: "Akşam (Menü 5)", d: "Ton Balıklı Salata, Bol Yeşillik", alt: "Program atlamak yok", i: "🐟" }] },
+    6: { title: "Cmt: Menü 6 & 7", meals: [{ t: "Uyarı", d: "Aç karna 500 ml su içilecek!", alt: "Şekerli herhangi bir şey yasak", i: "💧" }, { t: "Öğle (Menü 6)", d: "Ispanak Yemeği, Yoğurt", alt: "Kızartma yasak", i: "🥬" }, { t: "Akşam (Menü 6)", d: "Tavuklu Salata (150-200 gr Tavuk)", alt: "Pes etmek yok hanımefendi!!!", i: "🥗" }] },
+    7: { title: "Paz: Menü 7 & 8", meals: [{ t: "Uyarı", d: "Aç karna 500 ml su içilecek!", alt: "7-8 Saat Uyku", i: "💧" }, { t: "Öğle (Menü 7)", d: "Menemen, Peynir, Salata", alt: "Sabah yürüyüşü unutulmayacak", i: "🍳" }, { t: "Akşam (Menü 7)", d: "Et Sote, Sebze, 3 Kaşık Bulgur", alt: "Seni çoook seviyorum! :)", i: "🥩" }] }
+};
+
+window.toggleDilalaMode = function () {
+    const checkbox = document.getElementById('dilala-toggle-checkbox');
+    const isDilala = checkbox.checked;
+
+    if (isDilala) {
+        // YENİ: Şifre Sorusu
+        let pass = prompt("🌸 Dilala Moduna giriş için şifreyi giriniz:");
+        
+        if (pass === "19.11.2025" || pass === "19112025") {
+            document.body.classList.add('dilala-mode');
+            localStorage.setItem('olympus_dilala_mode', 'true');
+            if (navigator.vibrate) navigator.vibrate([100, 50, 100]);
+            alert("Hoşgeldin Aşguuuummm! 🌸💕\n\nSenin için özel kuralların ve programın yüklendi:\n- Gece yemek yok!\n- Şeker ve paketli gıda yasak!\n- Pes Etmek Yok Hanımefendi!!!\n- Seni çoook seviyorum! :)");
+        } else {
+            alert("Hatalı şifre! Sadece özel kişiler girebilir. 🔒");
+            checkbox.checked = false; // Şalteri geri kapat
+            return;
+        }
+    } else {
+        document.body.classList.remove('dilala-mode');
+        localStorage.setItem('olympus_dilala_mode', 'false');
+        if (navigator.vibrate) navigator.vibrate(30);
+    }
+
+    renderWorkouts();
+    renderDiet();
+};
 
 // 3. SİSTEM DEĞİŞKENLERİ VE BAŞLATMA
 let currentPhase = 'p1';
@@ -219,6 +271,21 @@ document.addEventListener("DOMContentLoaded", () => {
             const target = btn.getAttribute('data-target');
             screens.forEach(s => s.classList.remove('active'));
             document.getElementById(target).classList.add('active');
+
+            if (target === 'diet-sec') {
+                if (btnAll) btnAll.style.display = 'none'; // Diyet sekmesinde "Tümü" sekmesini gizle
+                if (viewMode === 'all') { viewMode = 'today'; updateCalendarTabs(); } // Tümü'nde kaldıysa zorla Bugüne at
+                if (dayTracker) dayTracker.style.display = 'flex'; // Diyet ekranında takvim görünür
+                
+            } else if (target === 'workout-sec') {
+                if (btnAll) btnAll.style.display = ''; // İdman sekmesinde "Tümü" sekmesini geri getir
+                if (dayTracker) dayTracker.style.display = 'flex'; // İdman ekranında takvim görünür
+                
+            } else {
+                // DİYET VE İDMAN HARİCİNDEKİ TÜM EKRANLARDA (Görev, Takip, Profil) TAKVİMİ GİZLE
+                if (dayTracker) dayTracker.style.display = 'none';
+            
+            }
 
             if (target === 'profile-sec') {
                 updateWeeklyScore();
@@ -321,15 +388,18 @@ function updateCalendarTabs() {
     calculateCurrentDay();
 }
 
-function renderWorkouts() {
+window.renderWorkouts = function() {
     let isTomorrow = (viewMode === 'tomorrow');
     const container = document.getElementById('days-container');
     container.innerHTML = '';
 
+    // AKTİF PROGRAMI SEÇ (DİLALA MODU AÇIKSA ONDAN ÇEK, DEĞİLSE NORMALDEN)
+    const activeProg = document.body.classList.contains('dilala-mode') ? dilalaProgramData['p1'] : programData[currentPhase];
+
     if (viewMode === 'all') {
         document.getElementById('workout-day-title').innerText = "Tüm Program";
         document.getElementById('workout-day-desc').innerText = "Görmek istediğiniz güne dokunun.";
-        programData[currentPhase].forEach(d => {
+        activeProg.forEach(d => {
             const card = document.createElement('div');
             card.className = `card ${d.rest ? 'rest-day' : ''}`;
             card.innerHTML = `<h3>${d.title}</h3><p>${d.rest ? 'Dinlenme Günü' : 'Detayları görmek için dokun.'}</p>`;
@@ -337,7 +407,8 @@ function renderWorkouts() {
             container.appendChild(card);
         });
     } else {
-        const d = programData[currentPhase].find(x => x.day == calculatedDay);
+        // BUGÜN VE YARIN SEKMELERİ İÇİN DÜZELTİLMİŞ KISIM
+        const d = activeProg.find(x => x.day == calculatedDay);
         if (d) {
             document.getElementById('workout-day-title').innerText = d.title;
             document.getElementById('workout-day-desc').innerText = viewMode === 'tomorrow' ? "Yarının Planı" : "Bugünün Planı";
@@ -348,7 +419,7 @@ function renderWorkouts() {
             container.appendChild(card);
         }
     }
-}
+};
 
 function showWorkoutModal(dayData) {
     document.getElementById('main-header').style.display = 'none';
@@ -454,7 +525,8 @@ window.finishWorkout = function () {
     document.getElementById('main-header').style.display = 'block';
     confetti({ particleCount: 150, spread: 80, colors: ['#f6c000', '#fff'] });
 
-    const activeDayData = programData[currentPhase].find(x => x.day == calculatedDay);
+    const activeProg = document.body.classList.contains('dilala-mode') ? dilalaProgramData['p1'] : programData[currentPhase];
+    const activeDayData = activeProg.find(x => x.day == calculatedDay);
     if (activeDayData && activeDayData.muscles) {
         // Eski Sistem
         let worked = JSON.parse(localStorage.getItem('olympus_worked_muscles')) || [];
@@ -509,7 +581,8 @@ function renderDiet() {
     container.innerHTML = '';
 
     let targetDay = viewMode === 'all' ? 1 : calculatedDay;
-    const d = dietData[targetDay];
+    const activeDiet = document.body.classList.contains('dilala-mode') ? dilalaDietData : dietData;
+    const d = activeDiet[targetDay];
     document.getElementById('diet-day-desc').innerText = isTomorrow ? `Yarın: Gün ${targetDay} - ${d.title}` : `Bugün: Gün ${targetDay} - ${d.title}`;
 
     d.meals.forEach((m, index) => {
@@ -2274,6 +2347,11 @@ document.addEventListener('DOMContentLoaded', () => {
     if (savedTheme === 'light') {
         document.body.classList.add('light-mode');
         if (checkbox) checkbox.checked = true;
+    }
+    if (localStorage.getItem('olympus_dilala_mode') === 'true') {
+        document.body.classList.add('dilala-mode');
+        const dCheckbox = document.getElementById('dilala-toggle-checkbox');
+        if (dCheckbox) dCheckbox.checked = true;
     }
 });
 // ==========================================

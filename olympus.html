@@ -101,27 +101,25 @@
                 </div>
             </div>
 
+
             <!-- Gizli Fotoğraf Yükleme Butonu -->
             <button onclick="document.getElementById('hub-photo-upload').click()" class="hub-memory-button">📷
                 Anı Ekle</button>
             <input type="file" id="hub-photo-upload" accept="image/*" style="display: none;"
                 onchange="addHubPhoto(event)">
         </div>
+        <div class="hub-widget-wrap">
+            <div class="hub-status-widget" onclick="rotateHubWidget()">
+                <div class="hub-status-copy">
+                    <span>Sistem Durumu</span>
+                    <h4 id="hub-widget-title">Yükleniyor...</h4>
+                </div>
+                <div class="hub-status-icon">⚡</div>
+            </div>
+        </div>
 
         <main class="hub-content">
 
-            <div style="width: 100%; height: 76px; min-height: 76px; max-height: 76px; margin-bottom: 15px; overflow: hidden; display: block;">
-
-                <!-- HAVADA ASILI WIDGET -->
-                <div class="hub-status-widget" onclick="rotateHubWidget()" style="height: 100%; width: 100%; box-sizing: border-box; margin: 0;">
-                    <div class="hub-status-copy">
-                        <span>Sistem Durumu</span>
-                        <h4 id="hub-widget-title">Yükleniyor...</h4>
-                    </div>
-                    <div class="hub-status-icon">⚡</div>
-                </div>
-
-            </div>
 
             <!-- KUSURSUZ 4'LÜ GRID DÜZENİ -->
             <div class="hub-grid">
@@ -695,6 +693,15 @@
                         </div>
                         <div class="input-group" style="margin-top:15px;"><label>Program Başlangıç Tarihi</label><input
                                 type="date" id="start-date" class="date-input" style="width:100%; padding:14px;"></div>
+                    </div>
+                    <!-- YENİ: DİLALA MODU -->
+                    <div class="input-group"
+                        style="margin-top: 15px; display: flex; justify-content: space-between; align-items: center; background: #151515; padding: 12px 15px; border-radius: 12px; border: 1px solid #ff85a2;">
+                        <label style="margin: 0; font-size: 14px; color: #ff85a2; font-weight: bold;">🌸 Dilala Modu</label>
+                        <label class="ios-switch">
+                            <input type="checkbox" id="dilala-toggle-checkbox" onchange="toggleDilalaMode()">
+                            <span class="ios-slider"></span>
+                        </label>
                     </div>
                     <!-- YENİ: iOS TARZI TEMA DEĞİŞTİRİCİ (TOGGLE) -->
                     <div class="input-group"

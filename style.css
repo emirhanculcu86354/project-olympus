@@ -3028,11 +3028,13 @@ input:checked+.ios-slider:before {
 }
 
 .hub-topbar {
+    position: relative; /* Fotoğrafın referans noktası */
     display: flex;
     align-items: center;
-    justify-content: space-between;
-    flex: 0 0 auto;
-    padding: calc(env(safe-area-inset-top) + 18px) 20px 16px;
+    width: 100%;
+    box-sizing: border-box;
+    /* Soldan başlık boşluğu, sağdan fotoğrafın taşmaması için pay bıraktık */
+    padding: calc(env(safe-area-inset-top) + 18px) 80px 16px 20px; 
 }
 
 .hub-eyebrow,
@@ -3054,13 +3056,18 @@ input:checked+.ios-slider:before {
     letter-spacing: -0.8px;
 }
 
+/* FOTOĞRAFI BAŞLIKLARDAN KOPARIP SAĞ ÜST KÖŞEYE MİLİMETRİK SABİTLEDİK */
 .hub-profile-orb {
+    position: absolute;
+    right: 15px; /* Sağdan tam sınır */
+    top: calc(env(safe-area-inset-top) + 18px); /* Başlıkla aynı üst hiza */
     width: 46px;
     height: 46px;
     padding: 2px;
     border: 1px solid rgba(255, 196, 0, 0.7);
     border-radius: 50%;
     background: linear-gradient(145deg, rgba(255, 196, 0, 0.32), #151515);
+    z-index: 20;
 }
 
 .hub-profile-orb img {
@@ -3128,7 +3135,12 @@ input:checked+.ios-slider:before {
     -webkit-overflow-scrolling: touch;
 }
 
-.hub-widget-wrap { flex: 0 0 76px; }
+.hub-widget-wrap { 
+    flex: 0 0 76px; 
+    /* YENİ: Genişliği ve dış boşlukları tam olarak fotoğrafla aynı yaptık */
+    width: calc(100% - 32px); 
+    margin: 16px 16px 0 16px; 
+}
 .hub-status-widget {
     display: flex;
     align-items: center;
@@ -3713,4 +3725,38 @@ input:checked+.ios-slider:before {
     object-position: center;
     cursor: zoom-in;
     transition: transform 0.25s ease;
+}
+/* ==========================================
+   🌸 DİLALAM MODU STİLLERİ
+   ========================================== */
+body.dilala-mode {
+    --goldnova: #ff85a2; /* Soft pembe / Rose gold vurgu rengi */
+}
+
+body.dilala-mode .hub-shell {
+    background: radial-gradient(circle at 85% 0%, rgba(255, 133, 162, 0.12), transparent 30%), #090909;
+}
+
+body.dilala-mode .hub-card-olympus {
+    --hub-glow: rgba(255, 133, 162, 0.25);
+    border-color: rgba(255, 133, 162, 0.42) !important;
+}
+
+body.dilala-mode .hub-card-olympus .hub-card-kicker {
+    color: #ff85a2;
+}
+
+body.dilala-mode .brand-title {
+    color: #ff85a2;
+    text-shadow: 0 0 10px rgba(255, 133, 162, 0.4);
+}
+
+body.dilala-mode .hub-profile-orb {
+    border-color: rgba(255, 133, 162, 0.7);
+    background: linear-gradient(145deg, rgba(255, 133, 162, 0.32), #151515);
+}
+
+body.dilala-mode .panic-btn {
+    background: linear-gradient(135deg, #ff6b8b, #ff4069);
+    box-shadow: 0 0 15px rgba(255, 107, 139, 0.4);
 }
