@@ -3013,6 +3013,182 @@ input:checked+.ios-slider:before {
 @media (min-width:601px) { .messages-page { left:50%; width:min(100%, 600px); right:auto; transform:translateX(calc(-50% + 20px)); border-left:1px solid #2b2b2b; border-right:1px solid #2b2b2b; } .messages-page.active { transform:translateX(-50%); } }
 
 /* ==========================================
+   PHASE 1 — HUB DESIGN SYSTEM
+   Hub'a özel kurallar; uygulamanın diğer ekranlarına dokunmaz.
+   ========================================== */
+#hub-screen.hub-shell {
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-start;
+    overflow: hidden;
+    background:
+        radial-gradient(circle at 85% 0%, rgba(255, 196, 0, 0.12), transparent 30%),
+        #090909;
+    color: #fff;
+}
+
+.hub-topbar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex: 0 0 auto;
+    padding: calc(env(safe-area-inset-top) + 18px) 20px 16px;
+}
+
+.hub-eyebrow,
+.hub-card-kicker {
+    display: block;
+    color: #9e9e9e;
+    font-size: 9px;
+    font-weight: 800;
+    letter-spacing: 1.45px;
+    text-transform: uppercase;
+}
+
+.hub-topbar h1 {
+    margin: 5px 0 0;
+    color: #fff;
+    font-family: 'Montserrat', -apple-system, sans-serif;
+    font-size: clamp(18px, 5vw, 23px);
+    font-weight: 850;
+    letter-spacing: -0.8px;
+}
+
+.hub-profile-orb {
+    width: 46px;
+    height: 46px;
+    padding: 2px;
+    border: 1px solid rgba(255, 196, 0, 0.7);
+    border-radius: 50%;
+    background: linear-gradient(145deg, rgba(255, 196, 0, 0.32), #151515);
+}
+
+.hub-profile-orb img {
+    display: block;
+    width: 100%;
+    height: 100%;
+    border-radius: 50%;
+    object-fit: cover;
+}
+
+.hub-carousel-container {
+    position: relative;
+    width: calc(100% - 32px) !important;
+    height: clamp(178px, 27vh, 242px) !important;
+    min-height: 0 !important;
+    margin: 0 16px;
+    overflow: hidden;
+    border: 1px solid #2a2a2a !important;
+    border-radius: 26px;
+    background: #151515;
+    box-shadow: 0 12px 28px rgba(0, 0, 0, 0.22) !important;
+}
+
+#hub-carousel-track {
+    height: 100% !important;
+    transition: transform 350ms cubic-bezier(.2, .85, .25, 1) !important;
+}
+
+.hub-slide { background: #151515 !important; }
+.hub-brand-slide { background: radial-gradient(circle, #24200f 0%, #151515 48%, #0d0d0d 100%) !important; }
+.hub-brand-slide img {
+    width: 112px !important;
+    height: 112px !important;
+    object-fit: contain !important;
+    filter: drop-shadow(0 10px 20px rgba(255, 196, 0, 0.22)) !important;
+}
+
+.hub-memory-button {
+    position: absolute;
+    right: 12px;
+    bottom: 12px;
+    min-height: 34px;
+    padding: 0 12px;
+    border: 1px solid rgba(255, 255, 255, 0.18);
+    border-radius: 22px;
+    color: #fff;
+    background: rgba(9, 9, 9, 0.72);
+    backdrop-filter: blur(12px);
+    font: inherit;
+    font-size: 11px;
+    font-weight: 700;
+    cursor: pointer;
+    transition: transform 220ms cubic-bezier(.2, .85, .25, 1), background 220ms ease;
+}
+.hub-memory-button:active { transform: scale(.94); background: #252525; }
+
+.hub-content {
+    display: flex;
+    min-height: 0;
+    flex: 1;
+    flex-direction: column;
+    gap: 16px;
+    overflow-y: auto;
+    padding: 18px 16px max(18px, env(safe-area-inset-bottom));
+    -webkit-overflow-scrolling: touch;
+}
+
+.hub-widget-wrap { flex: 0 0 76px; }
+.hub-status-widget {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    width: 100%;
+    height: 100%;
+    padding: 14px;
+    border: 1px solid #2a2a2a;
+    border-radius: 18px;
+    background: linear-gradient(115deg, #1d1d1d, #151515);
+    cursor: pointer;
+    transition: transform 260ms cubic-bezier(.2, .9, .25, 1), border-color 260ms ease, background 260ms ease;
+}
+.hub-status-widget:active { transform: scale(.985); border-color: rgba(255, 196, 0, .55); }
+.hub-status-copy { min-width: 0; }
+.hub-status-copy span { display:block; margin-bottom:5px; color:#ffc400; font-size:9px; font-weight:800; letter-spacing:1.3px; text-transform:uppercase; }
+.hub-status-copy h4 { overflow:hidden; margin:0; color:#fff; font-size:14px; font-weight:700; text-overflow:ellipsis; white-space:nowrap; }
+.hub-status-icon { display:grid; width:42px; height:42px; flex:0 0 auto; place-items:center; border:1px solid rgba(255,196,0,.24); border-radius:14px; color:#ffc400; background:rgba(255,196,0,.08); font-size:18px; }
+
+.hub-grid { display:grid; grid-template-columns:repeat(2, minmax(0, 1fr)); gap:12px; }
+#hub-screen .hub-card {
+    position: relative;
+    display: flex;
+    min-height: 142px;
+    flex-direction: column;
+    overflow: hidden;
+    padding: 15px !important;
+    border: 1px solid #2a2a2a !important;
+    border-radius: 18px;
+    background: #151515 !important;
+    cursor: pointer;
+    isolation: isolate;
+    transition: transform 280ms cubic-bezier(.2, .9, .25, 1), border-color 280ms ease, background 280ms ease;
+}
+#hub-screen .hub-card::before { content:""; position:absolute; z-index:-1; inset:0; opacity:.85; background:radial-gradient(circle at 100% 0%, var(--hub-glow, rgba(255,196,0,.16)), transparent 56%); }
+#hub-screen .hub-card:active { transform:scale(.97); filter:none; }
+#hub-screen .hub-card h3 { margin:7px 0 0; color:#fff !important; font-size:17px !important; font-weight:800; letter-spacing:-.35px; }
+#hub-screen .hub-card p { margin:5px 0 0; color:#9e9e9e !important; font-size:10px !important; line-height:1.4; }
+.hub-card-icon { margin-top:auto; color:#fff; font-size:30px; line-height:1; text-align:right; filter:grayscale(.1); }
+.hub-card-olympus { --hub-glow: rgba(255,196,0,.25); border-color:rgba(255,196,0,.42) !important; }
+.hub-card-olympus .hub-card-kicker { color:#ffc400; }
+.hub-card-arcade { --hub-glow: rgba(168,85,247,.27); }
+.hub-card-arcade .hub-card-kicker { color:#c084fc; }
+.hub-card-business { --hub-glow: rgba(56,189,248,.23); }
+.hub-card-business .hub-card-kicker { color:#38bdf8; }
+.hub-card-soon { opacity:.64; border-style:dashed !important; cursor:default !important; }
+.hub-card-soon .hub-card-kicker { color:#777; }
+
+.hub-greeting { margin-top:auto; padding:7px 4px 0; text-align:center; }
+.hub-greeting h2 { margin:0; color:#9e9e9e; font-size:12px; font-weight:500; letter-spacing:.35px; }
+.hub-greeting p { margin:4px 0 0; color:#fff; font-family:'Caveat', cursive; font-size:25px; font-weight:600; line-height:1; }
+
+@media (min-width: 650px) {
+    #hub-screen.hub-shell { width:min(100%, 600px); margin:0 auto; }
+    .hub-carousel-container { height:250px !important; }
+    .hub-grid { grid-template-columns:repeat(4, minmax(0, 1fr)); }
+    #hub-screen .hub-card { min-height:154px; }
+}
+
+/* ==========================================
    🔥 3D TERMAL ANATOMİ KARTI VE EKRAN STİLLERİ
    ========================================== */
 #anatomy-modal {
@@ -3241,33 +3417,6 @@ input:checked+.ios-slider:before {
 }
 
 /* İlerleme (Before/After) Galerisi */
-.progress-gallery {
-    display: flex;
-    gap: 15px;
-    overflow-x: auto;
-    padding-bottom: 10px;
-    scroll-snap-type: x mandatory;
-}
-
-.progress-item {
-    position: relative;
-    min-width: 140px;
-    height: 180px;
-    border-radius: 12px;
-    overflow: hidden;
-    border: 2px solid #333;
-    scroll-snap-align: start;
-    flex-shrink: 0;
-    background: #111;
-}
-
-.progress-item img {
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-    cursor: zoom-in;
-    transition: transform 0.25s ease;
-}
 
 .progress-item:hover img {
     transform: scale(1.04);
@@ -3511,3 +3660,57 @@ input:checked+.ios-slider:before {
 .ring-red { stroke: #ff4444; }
 .ring-green { stroke: #27ae60; }
 .ring-blue { stroke: #00d2ff; }
+
+/* 3. Dynamic Island (Canlı İdman Kapsülü) Kesin Çözüm */
+.dynamic-island { 
+    position: fixed; 
+    top: max(15px, env(safe-area-inset-top)); /* Telefon çentiğini aşar */
+    left: 50%; 
+    transform: translateX(-50%) translateY(-150px); 
+    background: #000; 
+    border: 1px solid #333; 
+    border-radius: 30px; 
+    width: 200px; 
+    height: 40px; 
+    z-index: 2147483647 !important; /* Tarayıcının izin verdiği en yüksek katman */
+    display: flex; justify-content: space-between; align-items: center; padding: 0 15px; color: #fff; 
+    box-shadow: 0 15px 40px rgba(0,0,0,0.9); 
+    transition: all 0.6s cubic-bezier(0.68, -0.55, 0.265, 1.55); 
+    cursor: pointer; overflow: hidden; 
+}
+.dynamic-island.active { transform: translateX(-50%) translateY(0); width: 280px; }
+
+/* Fotoğrafların yayık (squished) olmasını kökten çözen stil */
+.progress-gallery {
+    display: flex;
+    gap: 15px;
+    overflow-x: auto;
+    padding-bottom: 15px;
+    scroll-snap-type: x mandatory;
+    align-items: center; /* Kartların esnemesini önler */
+}
+
+.progress-item {
+    position: relative;
+    width: 160px !important;       /* Sabit genişlik */
+    min-width: 160px !important;
+    height: 220px !important;      /* Sabit yükseklik */
+    border-radius: 12px;
+    overflow: hidden;
+    border: 2px solid #333;
+    scroll-snap-align: start;
+    flex-shrink: 0;
+    background: #000;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.progress-item img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover !important;  /* Resmi ezmeden sığdırır, taşıyanları kırpar */
+    object-position: center;
+    cursor: zoom-in;
+    transition: transform 0.25s ease;
+}

@@ -399,6 +399,7 @@ window.startActiveWorkout = function (dayData) {
     document.getElementById('active-workout-screen').classList.remove('hidden');
     const player = document.getElementById('spotify-floating-player');
     if (player) player.classList.remove('hidden');
+    if (typeof showDynamicIsland === 'function') showDynamicIsland("⚡ İdman Başlatıldı!");
 
     renderActiveExercise();
 }
@@ -881,6 +882,7 @@ window.saveFatData = function (fatVal) {
 
     syncDataToCloud();
     openTrackingModal('fat');
+    if (typeof showDynamicIsland === 'function') showDynamicIsland("✅ Ölçüler Kaydedildi!");
 }
 
 window.saveMeasurements = function () {
@@ -906,6 +908,8 @@ window.saveMeasurements = function () {
     if (typeof syncDataToCloud === 'function') syncDataToCloud();
     document.getElementById('tracking-modal').style.display = 'none';
     loadProfileData(); // Okların hesaplanması için yeniden yükle
+
+    if (typeof showDynamicIsland === 'function') showDynamicIsland("✅ Ölçüler Kaydedildi!");
 };
 
 // ==========================================
@@ -947,26 +951,47 @@ window.addProgressPhoto = function (event) {
     if (file) {
         const reader = new FileReader();
         reader.onload = function (e) {
-            let photos = JSON.parse(localStorage.getItem('olympus_progress_photos')) || [];
+            const img = new Image();
+            img.onload = function () {
+                // Canvas ile resmi küçültme (Kompresyon)
+                const canvas = document.createElement('canvas');
+                const MAX_WIDTH = 800; // Telefon kameraları çok büyük çeker, 800px'e sınırla
+                let width = img.width;
+                let height = img.height;
 
-            // Cihaz hafızasını şişirmemek için maks 10 fotoğraf (Eski olanı silmez, uyarır)
-            if (photos.length >= 10) {
-                alert("Maksimum 10 fotoğraf yükleyebilirsin. Yenisini eklemek için lütfen eskilerden birini sil!");
-                return;
-            }
+                if (width > MAX_WIDTH) {
+                    height *= MAX_WIDTH / width;
+                    width = MAX_WIDTH;
+                }
 
-            photos.push({
-                id: Date.now(),
-                date: new Date().toLocaleDateString('tr-TR'),
-                img: e.target.result, // Base64 Olarak Cihaza (LocalStorage) Kaydediliyor
-                // Fotoğrafın çekildiği günkü ölçüleri ayrıca saklarız.
-                measurements: getProgressPhotoMeasurements()
-            });
-            localStorage.setItem('olympus_progress_photos', JSON.stringify(photos));
-            renderProgressGallery();
-            if (navigator.vibrate) navigator.vibrate(20);
+                canvas.width = width;
+                canvas.height = height;
+                const ctx = canvas.getContext('2d');
+                ctx.drawImage(img, 0, 0, width, height);
+
+                // Küçültülmüş resmi Base64'e çevir (Kalite %70)
+                const compressedBase64 = canvas.toDataURL('image/jpeg', 0.7);
+
+                let photos = JSON.parse(localStorage.getItem('olympus_progress_photos')) || [];
+                if (photos.length >= 10) {
+                    alert("Maksimum 10 fotoğraf yükleyebilirsin. Yenisini eklemek için lütfen eskilerden birini sil!");
+                    return;
+                }
+
+                photos.push({
+                    id: Date.now(),
+                    date: new Date().toLocaleDateString('tr-TR'),
+                    img: compressedBase64, // Sıkıştırılmış veriyi kaydet
+                    measurements: typeof getProgressPhotoMeasurements === 'function' ? getProgressPhotoMeasurements() : {}
+                });
+
+                localStorage.setItem('olympus_progress_photos', JSON.stringify(photos));
+                renderProgressGallery();
+                if (navigator.vibrate) navigator.vibrate(20);
+            };
+            img.src = e.target.result;
         };
-        reader.readAsDataURL(file); // Resmi metne çevirir
+        reader.readAsDataURL(file);
     }
 };
 
@@ -1054,7 +1079,7 @@ window.openFullscreenPhoto = function (src) {
     if (photo) openProgressPhoto(photo.id);
 };
 
-window.closeFullscreenPhoto = function() {
+window.closeFullscreenPhoto = function () {
     const viewer = document.getElementById('fullscreen-image-viewer');
     viewer.classList.remove('active');
     viewer.setAttribute('aria-hidden', 'true');
@@ -1105,6 +1130,7 @@ window.save1RM = function () {
     let volHistory = JSON.parse(localStorage.getItem('olympus_vol_history')) || [];
     volHistory.push({ date: new Date().toLocaleDateString('tr-TR'), bench: b, squat: s, dl: dl });
     localStorage.setItem('olympus_vol_history', JSON.stringify(volHistory));
+    if (typeof showDynamicIsland === 'function') showDynamicIsland("✅ Ölçüler Kaydedildi!");
 
     syncDataToCloud();
     openTrackingModal('volume');
@@ -1118,6 +1144,7 @@ window.saveMacros = function () {
         syncDataToCloud();
         openTrackingModal('macros');
     }
+    if (typeof showDynamicIsland === 'function') showDynamicIsland("✅ Ölçüler Kaydedildi!");
 }
 
 // GÜNCELLENMİŞ: Akıllı Ölçüler ve Trend Okları
@@ -1157,11 +1184,11 @@ window.loadProfileData = function () {
                     if (diff > 0) {
                         // Kilo ve Bel artışı uyarı (Kırmızı), Kas (Omuz, Kol vs) artışı başarıdır (Yeşil)
                         let color = (m.key === 'w' || m.key === 'waist') ? '#ff4444' : '#27ae60';
-                        trendHTML = `<span style="color:${color}; font-size:11px; font-weight:bold; margin-top:4px;">📈 +${diff}</span>`;
+                        trendHTML = `<span style="color:${color}; font-size:14px; font-weight:bold; display:block; margin-top:5px; background:rgba(0,0,0,0.2); padding:3px 8px; border-radius:5px;">📈 +${diff}</span>`;
                     } else {
                         // Azalış: Kilo/bel ise Yeşil, Kas kaybediyorsa Kırmızı
                         let color = (m.key === 'w' || m.key === 'waist') ? '#27ae60' : '#ff4444';
-                        trendHTML = `<span style="color:${color}; font-size:11px; font-weight:bold; margin-top:4px;">📉 ${diff}</span>`;
+                        trendHTML = `<span style="color:${color}; font-size:14px; font-weight:bold; display:block; margin-top:5px; background:rgba(0,0,0,0.2); padding:3px 8px; border-radius:5px;">📉 ${diff}</span>`;
                     }
                 }
 
@@ -6783,35 +6810,41 @@ window.fabAddWater = function () {
 };
 
 window.fabOpenWorkout = function () {
-    // Arena sekmesine direkt uçuş
-    if (typeof openArenaScreen === 'function') openArenaScreen();
-    toggleFAB();
+    // 1. Tüm ekranları kapat, asıl idman sekmesini aktif et
+    document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+    document.getElementById('workout-sec').classList.add('active');
+
+    // 2. Alt menüdeki ikonun ışığını da İdman sekmesine kaydır
+    document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
+    document.querySelector('[data-target="workout-sec"]').classList.add('active');
+
+    toggleFAB(); // Menüyü kapat
 };
 // ==========================================
 // 🚀 PREMIUM SİSTEM MOTORLARI (FAB & ISLAND)
 // ==========================================
 
 // FAB (+) Butonunu Açıp Kapatan Motor
-window.toggleFAB = function() {
+window.toggleFAB = function () {
     const mainBtn = document.getElementById('fab-main');
     const menu = document.getElementById('fab-menu');
-    if(mainBtn) mainBtn.classList.toggle('active');
-    if(menu) menu.classList.toggle('active');
-    if(navigator.vibrate) navigator.vibrate(20);
+    if (mainBtn) mainBtn.classList.toggle('active');
+    if (menu) menu.classList.toggle('active');
+    if (navigator.vibrate) navigator.vibrate(20);
 };
 
 // Tepeden İnen Dynamic Island Motoru
-window.showDynamicIsland = function(text) {
+window.showDynamicIsland = function (text) {
     const island = document.getElementById('dynamic-island');
     const textEl = document.getElementById('di-text');
-    
-    if(textEl) textEl.innerText = text;
-    if(island) island.classList.add('active');
-    if(navigator.vibrate) navigator.vibrate([10, 30, 10]); 
-    
+
+    if (textEl) textEl.innerText = text;
+    if (island) island.classList.add('active');
+    if (navigator.vibrate) navigator.vibrate([10, 30, 10]);
+
     // 5 Saniye sonra adayı otomatik gizle
     setTimeout(() => {
-        if(island) island.classList.remove('active');
+        if (island) island.classList.remove('active');
     }, 5000);
 };
 // ==========================================
@@ -6819,16 +6852,16 @@ window.showDynamicIsland = function(text) {
 // ==========================================
 
 // Günlük Halkaları Canlı Verilerle Dolduran Motor
-window.calculateRealDailyProgress = function() {
+window.calculateRealDailyProgress = function () {
     // 1. Mavi Halka: Su Tüketimi
     let wData = JSON.parse(localStorage.getItem('olympus_water_obj')) || { amount: 0 };
     let wGoal = parseInt(localStorage.getItem('olympus_water_goal') || 3000);
     let waterPct = (wData.amount / wGoal) * 100;
 
     // 2. Kırmızı Halka: Bugün İdman Yapıldı mı? (Streak Verisi)
-    let streakData = JSON.parse(localStorage.getItem('olympus_streak_data')) || [false,false,false,false,false,false,false];
-    let todayIndex = new Date().getDay() === 0 ? 6 : new Date().getDay() - 1; 
-    let workoutPct = streakData[todayIndex] ? 100 : 0; 
+    let streakData = JSON.parse(localStorage.getItem('olympus_streak_data')) || [false, false, false, false, false, false, false];
+    let todayIndex = new Date().getDay() === 0 ? 6 : new Date().getDay() - 1;
+    let workoutPct = streakData[todayIndex] ? 100 : 0;
 
     // 3. Yeşil Halka: Görev Tamamlama Oranı (Görev sekmesindeki yüzdelik)
     let acts = JSON.parse(localStorage.getItem('olympus_acts')) || [];
@@ -6839,10 +6872,10 @@ window.calculateRealDailyProgress = function() {
     const wRing = document.getElementById('ring-workout');
     const cRing = document.getElementById('ring-calories');
     const waRing = document.getElementById('ring-water');
-    
-    if(wRing) wRing.style.strokeDashoffset = 314 - (314 * Math.min(workoutPct, 100) / 100);
-    if(cRing) cRing.style.strokeDashoffset = 238 - (238 * Math.min(calPct, 100) / 100);
-    if(waRing) waRing.style.strokeDashoffset = 163 - (163 * Math.min(waterPct, 100) / 100);
+
+    if (wRing) wRing.style.strokeDashoffset = 314 - (314 * Math.min(workoutPct, 100) / 100);
+    if (cRing) cRing.style.strokeDashoffset = 238 - (238 * Math.min(calPct, 100) / 100);
+    if (waRing) waRing.style.strokeDashoffset = 163 - (163 * Math.min(waterPct, 100) / 100);
 };
 
 // Sayfa her yüklendiğinde ve profil sekmesine geçildiğinde halkaları otomatik güncelle
