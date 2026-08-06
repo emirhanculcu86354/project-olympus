@@ -186,33 +186,137 @@ const dilalaDietData = {
     7: { title: "Paz: Menü 7 & 8", meals: [{ t: "Uyarı", d: "Aç karna 500 ml su içilecek!", alt: "7-8 Saat Uyku", i: "💧" }, { t: "Öğle (Menü 7)", d: "Menemen, Peynir, Salata", alt: "Sabah yürüyüşü unutulmayacak", i: "🍳" }, { t: "Akşam (Menü 7)", d: "Et Sote, Sebze, 3 Kaşık Bulgur", alt: "Seni çoook seviyorum! :)", i: "🥩" }] }
 };
 
+// ==========================================
+// 🌸 DİLALAM MODU: ZAMAN KAPSÜLÜ VE TAKVİM MOTORU
+// ==========================================
+const specialDates = [
+    { name: "Tanışma Yıldönümü", month: 7, day: 26, icon: "🌸" },
+    { name: "Sevgililer Günü", month: 2, day: 14, icon: "💖" },
+    { name: "İlişki Yıldönümü", month: 11, day: 19, icon: "👩‍❤️‍👨" },
+    { name: "Dilala Doğum Günü", month: 8, day: 18, icon: "🎂" },
+    { name: "Emoç Doğum Günü", month: 2, day: 3, icon: "🎂" }
+];
+
 window.toggleDilalaMode = function () {
     const checkbox = document.getElementById('dilala-toggle-checkbox');
     const isDilala = checkbox.checked;
 
     if (isDilala) {
-        // YENİ: Şifre Sorusu
-        let pass = prompt("🌸 Dilala Moduna giriş için şifreyi giriniz:");
+        let pass = prompt("🌸 Dilala Moduna giriş için şifreyi (Tarihimizi) giriniz:");
         
         if (pass === "19.11.2025" || pass === "19112025") {
             document.body.classList.add('dilala-mode');
             localStorage.setItem('olympus_dilala_mode', 'true');
+            
+            // 1. Yeni Dilala Dashboard'u Göster
+            document.getElementById('profile-dilala-btn-container').classList.remove('hidden');
+            startDilalaTimer();
+
+            // 2. Görevleri Değiştir (Kendi görevlerini yedeğe al)
+            localStorage.setItem('olympus_acts_backup', JSON.stringify(activities));
+            activities = [
+                { id: 101, text: "🌸 Günaydın Mesajı At", done: false },
+                { id: 102, text: "💕 Seni Seviyorum De", done: false },
+                { id: 103, text: "📸 Anı Fotoğrafı Çek/Bak", done: false }
+            ];
+            saveAndRenderActivities();
+
             if (navigator.vibrate) navigator.vibrate([100, 50, 100]);
-            alert("Hoşgeldin Aşguuuummm! 🌸💕\n\nSenin için özel kuralların ve programın yüklendi:\n- Gece yemek yok!\n- Şeker ve paketli gıda yasak!\n- Pes Etmek Yok Hanımefendi!!!\n- Seni çoook seviyorum! :)");
+            alert("Hoşgeldin Aşguuuummm! 🌸💕\n\nSenin için özel kuralların ve programın yüklendi!");
         } else {
             alert("Hatalı şifre! Sadece özel kişiler girebilir. 🔒");
-            checkbox.checked = false; // Şalteri geri kapat
+            checkbox.checked = false; 
             return;
         }
     } else {
         document.body.classList.remove('dilala-mode');
         localStorage.setItem('olympus_dilala_mode', 'false');
+        
+        // Dashboard'u Gizle ve Görevleri Geri Yükle
+        document.getElementById('profile-dilala-btn-container').classList.add('hidden');
+        if (dilalaTimerInterval) clearInterval(dilalaTimerInterval);
+        
+        let backupActs = JSON.parse(localStorage.getItem('olympus_acts_backup'));
+        if (backupActs) {
+            activities = backupActs;
+            saveAndRenderActivities();
+        }
+
         if (navigator.vibrate) navigator.vibrate(30);
     }
 
     renderWorkouts();
     renderDiet();
 };
+
+let dilalaTimerInterval;
+function startDilalaTimer() {
+    const relDate = new Date('2025-11-19T00:00:00');
+    const meetDate = new Date('2025-07-26T00:00:00');
+
+    if(dilalaTimerInterval) clearInterval(dilalaTimerInterval);
+    renderDilalaCalendar(); // Takvimi çiz
+
+    dilalaTimerInterval = setInterval(() => {
+        const now = new Date();
+
+        // 1. İlişki ve Tanışma Geçen Süre Sayaçları
+        let diffRel = now - relDate;
+        let diffMeet = now - meetDate;
+        
+        if(diffRel > 0) document.getElementById('dilala-rel-counter').innerText = formatTimeDiff(diffRel);
+        if(diffMeet > 0) document.getElementById('dilala-meet-counter').innerText = formatTimeDiff(diffMeet);
+
+        // 2. Yaklaşan Etkinliği Bulma ve Geri Sayım
+        let nextEvent = null;
+        let minDiff = Infinity;
+
+        specialDates.forEach(ev => {
+            let evDate = new Date(now.getFullYear(), ev.month - 1, ev.day);
+            if (now > evDate) {
+                evDate.setFullYear(now.getFullYear() + 1); // Bu yıl geçtiyse seneye bak
+            }
+            let diff = evDate - now;
+            if (diff < minDiff) {
+                minDiff = diff;
+                nextEvent = { ...ev, dateObj: evDate, diff: diff };
+            }
+        });
+
+        if (nextEvent) {
+            document.getElementById('dilala-next-event').innerHTML = `
+                Yaklaşan: <strong>${nextEvent.icon} ${nextEvent.name}</strong><br>
+                <span id="dilala-next-countdown">${formatTimeDiff(nextEvent.diff)} Kaldı</span>
+            `;
+        }
+    }, 1000);
+}
+
+function formatTimeDiff(ms) {
+    const days = Math.floor(ms / (1000 * 60 * 60 * 24));
+    const hours = Math.floor((ms / (1000 * 60 * 60)) % 24);
+    const minutes = Math.floor((ms / 1000 / 60) % 60);
+    const seconds = Math.floor((ms / 1000) % 60);
+    return `${days}g ${hours}s ${minutes}d ${seconds}sn`;
+}
+
+function renderDilalaCalendar() {
+    const listEl = document.getElementById('dilala-events-list');
+    if(!listEl) return;
+    listEl.innerHTML = '';
+    
+    // Tarihleri yıl içindeki sıraya göre dizelim
+    let sortedDates = [...specialDates].sort((a,b) => (a.month*100+a.day) - (b.month*100+b.day));
+    
+    sortedDates.forEach(ev => {
+        listEl.innerHTML += `
+            <div class="dilala-event-item">
+                <span class="event-name">${ev.icon} ${ev.name}</span>
+                <span class="event-date">${String(ev.day).padStart(2,'0')}.${String(ev.month).padStart(2,'0')}</span>
+            </div>
+        `;
+    });
+}
 
 // 3. SİSTEM DEĞİŞKENLERİ VE BAŞLATMA
 let currentPhase = 'p1';
@@ -232,6 +336,17 @@ let activities = JSON.parse(localStorage.getItem('olympus_acts')) || [
 ];
 
 document.addEventListener("DOMContentLoaded", () => {
+    // --- 🌸 DİLALA MODU HATIRLAMA MOTORU (SAYFA YÜKLENDİĞİ AN ÇALIŞIR) ---
+    if (localStorage.getItem('olympus_dilala_mode') === 'true') {
+        document.body.classList.add('dilala-mode');
+        const dCheckbox = document.getElementById('dilala-toggle-checkbox');
+        if (dCheckbox) dCheckbox.checked = true;
+        
+        // ZAMAN KAPSÜLÜ YERİNE ARTIK PROFİLDEKİ BUTONU GÖSTER
+        const dilalaBtn = document.getElementById('profile-dilala-btn-container');
+        if(dilalaBtn) dilalaBtn.classList.remove('hidden');
+        if(typeof startDilalaTimer === 'function') startDilalaTimer();
+    }
     document.getElementById('save-settings-btn').addEventListener('click', () => {
         const d = document.getElementById('start-date').value;
         const n = document.getElementById('profile-name-input').value;
@@ -246,6 +361,7 @@ document.addEventListener("DOMContentLoaded", () => {
         checkDeloadEngine();
         // YENİ EKLENEN KISIM: Modal yüklendiğinde tıklama olaylarını dinlemeye başla
         initMuscleInteractions();
+        
     });
 
     const dateInput = document.getElementById('start-date');
@@ -276,15 +392,15 @@ document.addEventListener("DOMContentLoaded", () => {
                 if (btnAll) btnAll.style.display = 'none'; // Diyet sekmesinde "Tümü" sekmesini gizle
                 if (viewMode === 'all') { viewMode = 'today'; updateCalendarTabs(); } // Tümü'nde kaldıysa zorla Bugüne at
                 if (dayTracker) dayTracker.style.display = 'flex'; // Diyet ekranında takvim görünür
-                
+
             } else if (target === 'workout-sec') {
                 if (btnAll) btnAll.style.display = ''; // İdman sekmesinde "Tümü" sekmesini geri getir
                 if (dayTracker) dayTracker.style.display = 'flex'; // İdman ekranında takvim görünür
-                
+
             } else {
                 // DİYET VE İDMAN HARİCİNDEKİ TÜM EKRANLARDA (Görev, Takip, Profil) TAKVİMİ GİZLE
                 if (dayTracker) dayTracker.style.display = 'none';
-            
+
             }
 
             if (target === 'profile-sec') {
@@ -388,7 +504,7 @@ function updateCalendarTabs() {
     calculateCurrentDay();
 }
 
-window.renderWorkouts = function() {
+window.renderWorkouts = function () {
     let isTomorrow = (viewMode === 'tomorrow');
     const container = document.getElementById('days-container');
     container.innerHTML = '';
@@ -463,14 +579,56 @@ function renderModalExercises(exArray) {
     });
 }
 
+// --- İDMAN SİSTEMİ GLOBAL DEĞİŞKENLERİ ---
+let currentSetIndex = 1;
+let totalSetsForEx = 1;
+let isWorkoutMinimized = false;
+let totalWorkoutSeconds = 0;
+let totalWorkoutInterval = null;
+let isResting = false;
+
+// Saniyeyi Dakika:Saniye formatına çevirir
+function formatWorkoutTime(totalSeconds) {
+    const h = Math.floor(totalSeconds / 3600);
+    const m = Math.floor((totalSeconds % 3600) / 60);
+    const s = totalSeconds % 60;
+    if (h > 0) return `${h}:${m.toString().padStart(2, '0')}:${s.toString().padStart(2, '0')}`;
+    return `${m.toString().padStart(2, '0')}:${s.toString().padStart(2, '0')}`;
+}
+
 window.startActiveWorkout = function (dayData) {
     activeWorkout = dayData.ex;
     currentExIndex = 0;
+    currentSetIndex = 1; 
+    isWorkoutMinimized = false;
+    isResting = false;
+    
+    const fab = document.querySelector('.fab-container');
+    const oly = document.getElementById('oly-avatar');
+    if(fab) fab.style.display = 'none';
+    if(oly) oly.style.display = 'none';
+
+    totalWorkoutSeconds = 0;
+    if(totalWorkoutInterval) clearInterval(totalWorkoutInterval);
+    document.getElementById('workout-total-time').innerText = "00:00"; // Emojisiz Apple stili
+    
+    totalWorkoutInterval = setInterval(() => {
+        totalWorkoutSeconds++;
+        let timeFormatted = formatWorkoutTime(totalWorkoutSeconds);
+        document.getElementById('workout-total-time').innerText = timeFormatted;
+        
+        // Dinamik Ada formatı güncellendi
+        if (isWorkoutMinimized && !isResting && activeWorkout[currentExIndex]) {
+            updateWorkoutIsland(activeWorkout[currentExIndex].name, `Set ${currentSetIndex}/${totalSetsForEx}`, timeFormatted);
+        }
+    }, 1000);
+    
     document.getElementById('workout-modal').style.display = 'none';
     document.getElementById('active-workout-screen').classList.remove('hidden');
     const player = document.getElementById('spotify-floating-player');
     if (player) player.classList.remove('hidden');
-    if (typeof showDynamicIsland === 'function') showDynamicIsland("⚡ İdman Başlatıldı!");
+
+    if(typeof showDynamicIsland === 'function') showDynamicIsland("⚡ İdman Başlatıldı!");
 
     renderActiveExercise();
 }
@@ -481,9 +639,31 @@ function renderActiveExercise() {
         return;
     }
     const ex = activeWorkout[currentExIndex];
+    
+    let setMatch = ex.scheme.match(/^(\d+)/);
+    totalSetsForEx = setMatch ? parseInt(setMatch[1]) : 1;
+    
+    if(currentSetIndex > totalSetsForEx) {
+        currentExIndex++;
+        currentSetIndex = 1;
+        renderActiveExercise();
+        return;
+    }
+
     document.getElementById('player-progress').innerText = `${currentExIndex + 1} / ${activeWorkout.length} Hareket`;
     document.getElementById('player-ex-name').innerText = ex.name;
-    document.getElementById('player-ex-details').innerText = `Set: ${ex.scheme} | Tempo: ${ex.tempo} | RPE: ${ex.rpe}`;
+    document.getElementById('player-ex-details').innerText = `Set: ${currentSetIndex} / ${totalSetsForEx}`;
+    document.getElementById('player-ex-subdetails').innerText = `Hedef: ${ex.scheme} | Tempo: ${ex.tempo} | RPE: ${ex.rpe}`;
+
+    let exHistory = JSON.parse(localStorage.getItem('olympus_ex_history')) || {};
+    let lastRecord = exHistory[ex.name];
+    if (lastRecord) {
+        document.getElementById('player-history-data').innerText = `${lastRecord.weight} kg / ${lastRecord.reps} Tekrar`;
+        document.getElementById('player-history-data').style.color = "#27ae60"; 
+    } else {
+        document.getElementById('player-history-data').innerText = `Kayıt Yok`;
+        document.getElementById('player-history-data').style.color = "#fff";
+    }
 
     document.getElementById('player-weight').value = '';
     document.getElementById('player-reps').value = '';
@@ -494,85 +674,185 @@ function renderActiveExercise() {
 }
 
 window.saveSetAndRest = function () {
+    let currentWeight = document.getElementById('player-weight').value;
+    let currentReps = document.getElementById('player-reps').value;
+    let currentExName = activeWorkout[currentExIndex].name;
+    
+    if (currentWeight && currentReps) {
+        let exHistory = JSON.parse(localStorage.getItem('olympus_ex_history')) || {};
+        let lastRecord = exHistory[currentExName];
+        
+        if(!lastRecord || parseFloat(currentWeight) >= parseFloat(lastRecord.weight)) {
+            exHistory[currentExName] = { 
+                weight: currentWeight, 
+                reps: currentReps, 
+                date: new Date().toLocaleDateString('tr-TR') 
+            };
+            localStorage.setItem('olympus_ex_history', JSON.stringify(exHistory));
+        }
+    }
+
     document.getElementById('player-save-btn').classList.add('hidden');
     document.getElementById('player-timer-display').classList.remove('hidden');
     document.getElementById('player-next-btn').classList.remove('hidden');
 
+    if(currentSetIndex >= totalSetsForEx) {
+        document.getElementById('player-next-btn').innerText = "Sonraki Harekete Geç ⏭";
+    } else {
+        document.getElementById('player-next-btn').innerText = `Sonraki Sete Geç (${currentSetIndex + 1}/${totalSetsForEx}) ⏩`;
+    }
+
     let sec = isExpressMode ? 45 : 90;
     document.getElementById('timer-seconds').innerText = sec;
+    
+    isResting = true;
+    
+    // YENİ DİNAMİK ADA: "Hareket | Set X Dinlenme | Süre"
+    updateWorkoutIsland(currentExName, `Dinlenme (${currentSetIndex})`, sec);
 
     clearInterval(timerInterval);
     timerInterval = setInterval(() => {
         sec--;
         document.getElementById('timer-seconds').innerText = sec;
+        
+        if (isWorkoutMinimized) updateWorkoutIsland(currentExName, `Dinlenme (${currentSetIndex})`, sec);
+        
         if (sec <= 0) {
             clearInterval(timerInterval);
+            isResting = false;
             if (navigator.vibrate) navigator.vibrate([400, 200, 400]);
-            alert("Dinlenme Bitti! Sete Başla!");
+            if(typeof showDynamicIsland === 'function') showDynamicIsland("⏰ Dinlenme Bitti! Sete Başla!");
         }
     }, 1000);
 }
 
 window.nextExercise = function () {
     clearInterval(timerInterval);
-    currentExIndex++;
+    isResting = false;
+    currentSetIndex++; 
+    
+    if(isWorkoutMinimized) restoreWorkout();
     renderActiveExercise();
+}
+
+window.minimizeWorkout = function() {
+    isWorkoutMinimized = true;
+    document.getElementById('active-workout-screen').classList.add('hidden');
+    document.getElementById('app-content').classList.remove('hidden'); 
+    document.getElementById('main-header').style.display = 'block';
+    
+    const island = document.getElementById('dynamic-island');
+    island.classList.add('active');
+    island.classList.add('workout-mode');
+    island.onclick = restoreWorkout;
+};
+
+window.restoreWorkout = function() {
+    isWorkoutMinimized = false;
+    document.getElementById('active-workout-screen').classList.remove('hidden');
+    
+    const island = document.getElementById('dynamic-island');
+    island.classList.remove('active');
+    island.classList.remove('workout-mode');
+    island.onclick = function() { this.classList.remove('active'); }; 
+};
+
+function updateWorkoutIsland(exName, setInfo, timeVal) {
+    const island = document.getElementById('dynamic-island');
+    const textEl = document.getElementById('di-text');
+    
+    if(island && island.classList.contains('active')) {
+        if(island.classList.contains('workout-mode')) {
+            // İDMAN MODU: 2 Satırlı, Şık, Kalın Ada Görünümü (İkonlara çarpmasın diye padding eklendi)
+            textEl.innerHTML = `
+                <div style="text-align: center; color:var(--goldnova); font-weight:900; font-size: 15px; margin-bottom: 5px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; padding: 0 15px;">${exName}</div>
+                <div style="display: flex; justify-content: space-between; align-items: center; width: 100%;">
+                    <span style="color:#aaa; font-weight:bold; font-size: 12px;">${setInfo}</span>
+                    <span style="font-family:'Courier New', monospace; font-weight:bold; color:#fff; font-size: 14px;">⏱️ ${timeVal}</span>
+                </div>
+            `;
+        } else {
+            // NORMAL BİLDİRİM MODU
+            textEl.innerText = exName;
+        }
+    }
 }
 
 window.finishWorkout = function () {
     clearInterval(timerInterval);
+    clearInterval(totalWorkoutInterval);
+    
+    // FAB ve OLY'yi Geri Getir
+    const fab = document.querySelector('.fab-container');
+    const oly = document.getElementById('oly-avatar');
+    if(fab) fab.style.display = 'flex';
+    if(oly) oly.style.display = 'flex';
+
     document.getElementById('active-workout-screen').classList.add('hidden');
     document.getElementById('main-header').style.display = 'block';
-    confetti({ particleCount: 150, spread: 80, colors: ['#f6c000', '#fff'] });
+    if(typeof confetti === 'function') confetti({ particleCount: 150, spread: 80, colors: ['#f6c000', '#fff'] });
 
     const activeProg = document.body.classList.contains('dilala-mode') ? dilalaProgramData['p1'] : programData[currentPhase];
     const activeDayData = activeProg.find(x => x.day == calculatedDay);
+
+    // 🏆 YENİ: İDMANI GEÇMİŞE KAYDET
+    let pastWorkouts = JSON.parse(localStorage.getItem('olympus_past_workouts')) || [];
+    pastWorkouts.push({
+        id: Date.now(),
+        date: new Date().toLocaleDateString('tr-TR'),
+        time: new Date().toLocaleTimeString('tr-TR', { hour: '2-digit', minute: '2-digit' }),
+        title: activeDayData ? activeDayData.title : "Serbest İdman",
+        duration: formatWorkoutTime(totalWorkoutSeconds)
+    });
+    localStorage.setItem('olympus_past_workouts', JSON.stringify(pastWorkouts));
+
+    // Kasları Kaydetme
     if (activeDayData && activeDayData.muscles) {
-        // Eski Sistem
         let worked = JSON.parse(localStorage.getItem('olympus_worked_muscles')) || [];
         activeDayData.muscles.forEach(m => { if (!worked.includes(m)) worked.push(m); });
         localStorage.setItem('olympus_worked_muscles', JSON.stringify(worked));
 
-        // YENİ SİSTEM: Saatli ve Sayaçlı Toparlanma Hafızası
         let workedV2 = JSON.parse(localStorage.getItem('olympus_worked_muscles_v2')) || {};
         const now = Date.now();
         activeDayData.muscles.forEach(m => { workedV2[m] = now; });
         localStorage.setItem('olympus_worked_muscles_v2', JSON.stringify(workedV2));
     }
 
-    // YENİ: İdman bitince 150 Puan Ekle
     if (window.addOlympusPoints) window.addOlympusPoints(150, "İdman Tamamlandı");
-    // --- YENİ: OTOMATİK SUPPLEMENT STOK DÜŞME MOTORU ---
+    
     let supps = JSON.parse(localStorage.getItem('olympus_supp_stock'));
     if (supps) {
-        // İdman bittiği için stoklardan 1'er servis düş (Sıfırın altına inmesin)
         if (supps.whey > 0) supps.whey--;
         if (supps.creatine > 0) supps.creatine--;
         if (supps.carnitine > 0) supps.carnitine--;
         localStorage.setItem('olympus_supp_stock', JSON.stringify(supps));
-
-        // Kritik Stok Kontrolü (5 servisin altına inenleri bul)
-        let warnings = [];
-        if (supps.whey <= 5 && supps.whey > 0) warnings.push("Whey Protein");
-        if (supps.creatine <= 5 && supps.creatine > 0) warnings.push("Kreatin");
-        if (supps.carnitine <= 5 && supps.carnitine > 0) warnings.push("L-Karnitin");
-        if (supps.electro <= 5 && supps.electro > 0) warnings.push("Elektrolit");
-
-        if (warnings.length > 0) {
-            setTimeout(() => {
-                alert(`⚠️ YAKIT KRİTİK SEVİYEDE:\n\n${warnings.join(", ")} stokların 5 servisin altına düştü. Yeni sipariş verme vakti yaklaşıyor şampiyon!`);
-            }, 1500); // Ana tebrik mesajından 1.5 saniye sonra uyarır
-        }
     }
 
-    alert("🔥 İDMAN TAMAMLANDI!\n🏆 KAS HARİTAN GÜNCELLENDİ VE 150 OLYMPUS KAZANDIN!");
+    alert(`🔥 İDMAN TAMAMLANDI!\n⏱️ Toplam Süre: ${formatWorkoutTime(totalWorkoutSeconds)}\n🏆 Kas haritan güncellendi ve 150 Olympus kazandın!`);
     toggleAct(3, true);
 }
 
 window.exitWorkoutPlayer = function () {
-    clearInterval(timerInterval);
-    document.getElementById('active-workout-screen').classList.add('hidden');
-    document.getElementById('main-header').style.display = 'block';
+    if(confirm("🛑 DİKKAT!\nİdmanı yarıda kesip çıkmak istediğine emin misin? Bu işlem idmanı sonlandırır.")) {
+        clearInterval(timerInterval);
+        clearInterval(totalWorkoutInterval);
+        
+        // FAB ve OLY'yi Geri Getir
+        const fab = document.querySelector('.fab-container');
+        const oly = document.getElementById('oly-avatar');
+        if(fab) fab.style.display = 'flex';
+        if(oly) oly.style.display = 'flex';
+
+        document.getElementById('active-workout-screen').classList.add('hidden');
+        document.getElementById('main-header').style.display = 'block';
+        
+        const island = document.getElementById('dynamic-island');
+        if(island) {
+            island.classList.remove('active');
+            island.classList.remove('workout-mode');
+            island.onclick = function() { this.classList.remove('active'); };
+        }
+    }
 }
 
 function renderDiet() {
@@ -932,6 +1212,29 @@ window.openTrackingModal = function (type) {
         title.innerText = "Makro Manipülasyonu";
         body.innerHTML = `<p style="color:var(--text-muted); font-size:14px; line-height:1.5;"><strong>Strateji Mantığı:</strong> US Navy formülüyle hesaplanan yağ oranındaki değişim trendine göre kalori hedefini dinamik yönetir.<br><br>Yağ oranının %12'nin altına düşmesi durumunda kas kütlesini korumak için karbonhidrat kaynaklarını otomatik artırmanı tavsiye ederken, platolarda temiz definisyon için makroları manipüle etmeni sağlar.</p>`;
     }
+    else if (type === 'past_workouts') {
+        title.innerText = "Geçmiş İdmanlar";
+        let pastWorkouts = JSON.parse(localStorage.getItem('olympus_past_workouts')) || [];
+        if(pastWorkouts.length === 0) {
+            body.innerHTML = `<p style="color:#888; text-align:center;">Henüz tamamlanmış bir idman kaydı yok.</p>`;
+        } else {
+            let html = '<div style="display:flex; flex-direction:column; gap:10px;">';
+            // Yeni idmanlar en üstte görünsün diye tersine çeviriyoruz
+            pastWorkouts.slice().reverse().forEach(w => {
+                html += `
+                    <div style="background:#151515; border:1px solid #333; border-left:3px solid var(--goldnova); padding:10px; border-radius:8px;">
+                        <div style="display:flex; justify-content:space-between; margin-bottom:5px;">
+                            <strong style="color:#fff;">${w.title}</strong>
+                            <span style="color:#888; font-size:11px;">${w.date} - ${w.time}</span>
+                        </div>
+                        <span style="color:var(--goldnova); font-size:12px; font-weight:bold;">⏱️ Toplam Süre: ${w.duration}</span>
+                    </div>
+                `;
+            });
+            html += '</div>';
+            body.innerHTML = html;
+        }
+    }    
     document.getElementById('tracking-modal').style.display = 'flex';
 }
 
@@ -6960,3 +7263,198 @@ window.calculateRealDailyProgress = function () {
 document.addEventListener('DOMContentLoaded', () => {
     calculateRealDailyProgress();
 });
+// ==========================================
+// 🍃 ZEN MODU MOTORU (4-7-8 TEKNİĞİ)
+// ==========================================
+let zenInterval;
+let zenTimeout1, zenTimeout2;
+
+window.startZenMode = function() {
+    document.getElementById('zen-screen').classList.remove('hidden');
+    if(typeof toggleFAB === 'function') toggleFAB(); // FAB menüsünü kapat
+    
+    // Motoru hemen başlat ve her 19 saniyede bir tekrar et (4+7+8 = 19)
+    runZenCycle();
+    zenInterval = setInterval(runZenCycle, 19000);
+}
+
+function runZenCycle() {
+    const circle = document.getElementById('zen-circle');
+    const text = document.getElementById('zen-instruction');
+
+    // 1. NEFES AL (4 Saniye)
+    circle.style.transition = 'all 4s ease-in-out';
+    circle.className = 'zen-circle inhale';
+    text.innerText = "Nefes Al...";
+    if (navigator.vibrate) navigator.vibrate(50); // Ufak bir titreşimle uyar
+
+    // 2. TUT (7 Saniye)
+    zenTimeout1 = setTimeout(() => {
+        circle.className = 'zen-circle hold';
+        text.innerText = "Tut...";
+    }, 4000);
+
+    // 3. NEFES VER (8 Saniye)
+    zenTimeout2 = setTimeout(() => {
+        circle.style.transition = 'all 8s ease-in-out';
+        circle.className = 'zen-circle exhale';
+        text.innerText = "Nefes Ver...";
+    }, 11000);
+}
+
+window.stopZenMode = function() {
+    clearInterval(zenInterval);
+    clearTimeout(zenTimeout1);
+    clearTimeout(zenTimeout2);
+    document.getElementById('zen-screen').classList.add('hidden');
+    document.getElementById('zen-circle').className = 'zen-circle'; // Sıfırla
+}
+// ==========================================
+// ✈️ KAVUŞMA SAYACI DİNAMİK MOTORU
+// ==========================================
+window.openReunionSettings = function() {
+    document.getElementById('reunion-modal').classList.remove('hidden');
+    
+    // Hafızadaki eski verileri kutulara doldur (Yazmaya üşenmemen için)
+    const savedFrom = localStorage.getItem('dilala_reunion_from') || 'Sakarya';
+    const savedTo = localStorage.getItem('dilala_reunion_to') || 'Tarsus';
+    const savedDate = localStorage.getItem('dilala_reunion_date'); 
+    
+    document.getElementById('reunion-input-from').value = savedFrom;
+    document.getElementById('reunion-input-to').value = savedTo;
+    if(savedDate) document.getElementById('reunion-input-date').value = savedDate;
+}
+
+window.closeReunionSettings = function() {
+    document.getElementById('reunion-modal').classList.add('hidden');
+}
+
+window.saveReunionSettings = function() {
+    const from = document.getElementById('reunion-input-from').value || 'Nereden';
+    const to = document.getElementById('reunion-input-to').value || 'Nereye';
+    const date = document.getElementById('reunion-input-date').value;
+
+    if(!date) {
+        alert("Lütfen kavuşacağınız tarihi seç!");
+        return;
+    }
+
+    // Seçimlerini sistemin derin hafızasına kazı
+    localStorage.setItem('dilala_reunion_from', from);
+    localStorage.setItem('dilala_reunion_to', to);
+    localStorage.setItem('dilala_reunion_date', date);
+
+    closeReunionSettings();
+    updateReunionCounter(); // Kapatır kapatmaz sayacı güncelle
+}
+
+function updateReunionCounter() {
+    const counterEl = document.getElementById('reunion-countdown');
+    if(!counterEl) return;
+
+    // Şehir isimlerini hafızadan çekip ekrana bas
+    const savedFrom = localStorage.getItem('dilala_reunion_from') || 'Sakarya';
+    const savedTo = localStorage.getItem('dilala_reunion_to') || 'Tarsus';
+    const fromEl = document.getElementById('reunion-from-city');
+    const toEl = document.getElementById('reunion-to-city');
+    if(fromEl) fromEl.innerText = savedFrom;
+    if(toEl) toEl.innerText = savedTo;
+
+    const savedDate = localStorage.getItem('dilala_reunion_date');
+    
+    // Eğer henüz tarih seçilmediyse kullanıcıyı uyar
+    if(!savedDate) {
+        counterEl.innerHTML = "<span style='font-size:16px; color:#ffb3c6;'>Hedef Seçmek İçin Dokun</span>";
+        return;
+    }
+
+    const targetDate = new Date(savedDate);
+    const now = new Date();
+    const diff = targetDate - now;
+    
+    if (diff <= 0) {
+        counterEl.innerHTML = "🎉 KAVUŞTUK! 🎉";
+        counterEl.style.color = "#27ae60";
+        return;
+    }
+
+    counterEl.style.color = "#fff"; // Yazı rengini sıfırla
+
+    const d = Math.floor(diff / (1000 * 60 * 60 * 24));
+    const h = Math.floor((diff / (1000 * 60 * 60)) % 24);
+    const m = Math.floor((diff / 1000 / 60) % 60);
+    const s = Math.floor((diff / 1000) % 60);
+
+    counterEl.innerHTML = `${d} <span style="font-size:12px; color:#ffb3c6;">GÜN</span> ${h} <span style="font-size:12px; color:#ffb3c6;">SA</span> ${m} <span style="font-size:12px; color:#ffb3c6;">DK</span> ${s} <span style="font-size:12px; color:#ffb3c6;">SN</span>`;
+}
+
+// Bunu DilalaTimer'a entegre et
+const originalStartDilalaTimer = startDilalaTimer;
+startDilalaTimer = function() {
+    originalStartDilalaTimer();
+    setInterval(updateReunionCounter, 1000);
+    checkLetterStatus(); // Posta kutusu durumunu kontrol et
+};
+
+// DİJİTAL POSTA KUTUSU KİLİT SİSTEMİ
+function checkLetterStatus() {
+    const todayStr = new Date().toLocaleDateString('tr-TR');
+    const lastOpenedDate = localStorage.getItem('dilala_letter_date');
+    const statusText = document.getElementById('letter-status-text');
+    const statusIcon = document.getElementById('letter-status-icon');
+    const lockIcon = document.querySelector('.letter-lock');
+
+    if(lastOpenedDate === todayStr) {
+        statusText.innerText = "Bugünün notu okundu. Yarına kadar bekle!";
+        statusIcon.innerText = "📬";
+        if(lockIcon) lockIcon.innerText = "⏳";
+    } else {
+        statusText.innerText = "Yeni bir not seni bekliyor, açmak için dokun!";
+        statusIcon.innerText = "💌";
+        if(lockIcon) lockIcon.innerText = "🔑";
+    }
+}
+const loveLetters = [
+    "Bugün ne olursa olsun gülümsemeyi unutma, çünkü gülüşün Sakarya'dan burayı aydınlatıyor.",
+    "Mesafeler uzak olabilir ama kalbim tam şu an senin yanında atıyor.",
+    "Bugünün görevi: Aynaya bak ve benim gözümden ne kadar kusursuz olduğunu gör.",
+    "Aramızdaki kilometreler, sana olan sevgimin yanında bir hiç kalır. İyi ki varsın!",
+    "Her yeni gün, sana kavuşacağım o güne bir adım daha yaklaşmak demek."
+];
+window.openLoveLetter = function() {
+    const todayStr = new Date().toLocaleDateString('tr-TR');
+    const lastOpenedDate = localStorage.getItem('dilala_letter_date');
+    let currentIndex = parseInt(localStorage.getItem('dilala_letter_index')) || 0;
+
+    if(lastOpenedDate === todayStr) {
+        // Zaten açılmışsa o günkü notu tekrar göster
+        alert(`📬 Bugünün Notu:\n\n"${loveLetters[currentIndex]}"`);
+    } else {
+        // Yeni gün, yeni not
+        if (navigator.vibrate) navigator.vibrate([100, 50, 100]);
+        let nextIndex = (currentIndex + 1) % loveLetters.length;
+        if(lastOpenedDate === null) nextIndex = 0; // İlk günse sıfırdan başla
+        
+        localStorage.setItem('dilala_letter_date', todayStr);
+        localStorage.setItem('dilala_letter_index', nextIndex);
+        
+        alert(`✨ Mektup Kilidi Açıldı! ✨\n\n"${loveLetters[nextIndex]}"`);
+        checkLetterStatus();
+    }
+}
+window.openDilalaScreen = function() {
+    const screen = document.getElementById('dilala-special-screen');
+    if (screen) {
+        screen.style.display = 'flex'; // Sınıf yerine doğrudan display açıyoruz
+        if (typeof startDilalaTimer === 'function') startDilalaTimer();
+    } else {
+        alert("Hata: Dilala ekranı bulunamadı!");
+    }
+}
+
+window.closeDilalaScreen = function() {
+    const screen = document.getElementById('dilala-special-screen');
+    if (screen) {
+        screen.style.display = 'none'; // Doğrudan kapatıyoruz
+    }
+}

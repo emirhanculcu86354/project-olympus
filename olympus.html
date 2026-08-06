@@ -48,32 +48,77 @@
         </div>
     </div>
 
-    <div id="active-workout-screen" class="full-screen-overlay hidden" style="background-color: #000; z-index: 2000;">
-        <div class="workout-player-header">
-            <span id="player-progress">1 / 6 Hareket</span>
-            <button class="close-player-btn" onclick="exitWorkoutPlayer()">Kapat X</button>
+    <!-- 🏋️‍♂️ AKTİF İDMAN EKRANI (APPLE / NIKE TRAINING STİLİ) -->
+    <div id="active-workout-screen" class="full-screen-overlay hidden"
+        style="background-color: #050505; z-index: 2000; justify-content: flex-start;">
+
+        <!-- ÜST BAR: Sadece Hareket İlerlemesi ve Kontroller -->
+        <div class="workout-player-header"
+            style="display:flex; justify-content:space-between; align-items:center; width:100%; padding:calc(env(safe-area-inset-top) + 20px) 20px 20px 20px; box-sizing:border-box; border-bottom:1px solid #222; background:#111;">
+            <button class="edit-btn" onclick="minimizeWorkout()"
+                style="border-color:#00d2ff; color:#00d2ff; padding:8px 12px; font-size:12px;">👇 Aşağı Al</button>
+            <span id="player-progress"
+                style="color:var(--goldnova); font-weight:900; font-size:16px; letter-spacing:1px;">1 / 6 Hareket</span>
+            <button class="edit-btn" onclick="exitWorkoutPlayer()"
+                style="border-color:#ff4444; color:#ff4444; padding:8px 12px; font-size:12px;">⏹ Bitir</button>
         </div>
-        <div class="workout-player-body">
+
+        <!-- ORTA ALAN: Hareket Detayları ve Form -->
+        <div class="workout-player-body"
+            style="padding:20px; flex:1; display:flex; flex-direction:column; justify-content:center; width:100%;">
             <h2 id="player-ex-name"
-                style="color:var(--goldnova); font-size:28px; text-align:center; margin-bottom:5px;">Bench Press</h2>
-            <p id="player-ex-details" style="color:#888; text-align:center; margin-bottom:30px;">Set: 4 x 8 | Tempo:
-                3-1-1-0 | RPE: 8.5</p>
-            <div class="form-grid" style="max-width: 300px; margin: 0 auto; gap:15px;">
-                <div class="input-group"><label style="text-align:center;">Ağırlık (kg)</label><input type="number"
-                        id="player-weight" style="font-size:24px; text-align:center; font-weight:bold;"></div>
-                <div class="input-group"><label style="text-align:center;">Tekrar</label><input type="number"
-                        id="player-reps" style="font-size:24px; text-align:center; font-weight:bold;"></div>
+                style="color:var(--goldnova); font-size:28px; text-align:center; margin-bottom:5px;">Yükleniyor...</h2>
+
+            <div
+                style="background:#151515; border:1px solid #333; padding:10px; border-radius:8px; margin:10px auto 25px auto; text-align:center; max-width:320px;">
+                <p id="player-ex-details" style="color:#fff; font-weight:bold; font-size:14px; margin-bottom:5px;">Set:
+                    1 / 3</p>
+                <p id="player-ex-subdetails" style="color:#888; font-size:11px;">Hedef: 4x8 | Tempo: 3-1-1-0 | RPE: 8.5
+                </p>
             </div>
+
+            <!-- İDMAN HAFIZASI RADARI -->
+            <div id="player-history-banner"
+                style="background: rgba(246, 192, 0, 0.1); border: 1px dashed var(--goldnova); border-radius: 8px; padding: 10px; text-align: center; margin: 0 auto 20px auto; max-width: 300px; color: var(--goldnova); font-size: 12px;">
+                Geçen İdman: <strong id="player-history-data" style="font-size: 14px; color: #fff;">Kayıt Yok</strong>
+            </div>
+
+            <div class="form-grid" style="max-width: 300px; margin: 0 auto; gap:15px; width:100%;">
+                <div class="input-group"><label style="text-align:center; color:var(--goldnova);">Ağırlık
+                        (kg)</label><input type="number" id="player-weight"
+                        style="font-size:24px; text-align:center; font-weight:bold; border-color:var(--goldnova);">
+                </div>
+                <div class="input-group"><label style="text-align:center; color:var(--goldnova);">Tekrar</label><input
+                        type="number" id="player-reps"
+                        style="font-size:24px; text-align:center; font-weight:bold; border-color:var(--goldnova);">
+                </div>
+            </div>
+
             <div id="player-timer-display" class="hidden" style="text-align:center; margin-top:30px;">
                 <p style="color:#888;">Dinlenme Süresi</p>
-                <h1 style="color:var(--goldnova); font-size:48px;" id="timer-seconds">90</h1>
+                <h1 style="color:var(--goldnova); font-size:56px; text-shadow:0 0 20px rgba(246, 192, 0, 0.3);"
+                    id="timer-seconds">90</h1>
             </div>
         </div>
-        <div class="workout-player-footer">
-            <button id="player-save-btn" class="save-btn" onclick="saveSetAndRest()">Seti Kaydet & Dinlen</button>
-            <button id="player-next-btn" class="edit-btn hidden"
-                style="width:100%; padding:15px; font-size:16px; margin-top:10px;" onclick="nextExercise()">Sonraki
-                Harekete Geç</button>
+
+        <!-- ALT BUTONLAR VE DEV SÜRE SAYACI -->
+        <div class="workout-player-footer"
+            style="padding:0 20px 30px 20px; width:100%; box-sizing:border-box; display:flex; flex-direction:column; align-items:center;">
+
+            <!-- APPLE STİLİ BÜYÜK SAYAÇ -->
+            <div id="workout-total-time-container" style="margin-bottom: 25px; text-align: center;">
+                <span
+                    style="color:#666; font-size:11px; text-transform:uppercase; letter-spacing:3px; font-weight:bold;">Geçen
+                    Süre</span>
+                <div id="workout-total-time"
+                    style="color:#fff; font-size:52px; font-family:'Helvetica Neue', Helvetica, Arial, sans-serif; font-weight:200; letter-spacing:1px; margin-top:5px; line-height:1;">
+                    00:00</div>
+            </div>
+
+            <button id="player-save-btn" class="save-btn" onclick="saveSetAndRest()"
+                style="font-size:18px; padding:18px; width:100%; margin:0;">Seti Kaydet & Dinlen</button>
+            <button id="player-next-btn" class="edit-btn hidden" onclick="nextExercise()"
+                style="width:100%; padding:18px; font-size:16px; border-color:var(--goldnova); color:var(--goldnova); margin:0;"></button>
         </div>
     </div>
     <!-- ==========================================
@@ -350,6 +395,12 @@
                         <h4>Makro Manipülasyon</h4>
                     </div>
                 </div>
+                <!-- YENİ: GEÇMİŞ İDMANLAR KARTI -->
+                <div class="track-card spec-track-card" onclick="openTrackingModal('past_workouts')">
+                    <div class="track-icon">📚</div>
+                    <h4>İdman Geçmişi</h4>
+                    <p>Eski Kayıtlar</p>
+                </div>
                 <div id="tracking-modal" class="modal">
                     <div class="modal-content">
                         <h2 id="track-modal-title" style="margin-bottom: 15px; color:var(--goldnova);">Başlık</h2>
@@ -601,6 +652,14 @@
                     </div>
                     <div id="streak-days" style="display:flex; justify-content:space-between;"></div>
                 </div>
+                <!-- 🌸 PROFİLDEKİ DİLALA GİRİŞ BUTONU (Sadece mod açıkken görünür) -->
+                <div id="profile-dilala-btn-container" class="hidden"
+                    style="margin: 15px 0; padding: 0 20px; text-align: center;">
+                    <button onclick="openDilalaScreen()"
+                        style="background: linear-gradient(135deg, #ff6b8b, #ff4069); border: none; padding: 15px; border-radius: 12px; color: white; font-weight: bold; font-size: 16px; box-shadow: 0 5px 15px rgba(255,107,139,0.4); width: 100%; cursor: pointer;">
+                        🌸 Bizim Alanımız
+                    </button>
+                </div>
 
                 <!-- YENİ: MODERN AKSİYON MENÜSÜ (GRID) -->
                 <div class="profile-action-grid">
@@ -697,7 +756,8 @@
                     <!-- YENİ: DİLALA MODU -->
                     <div class="input-group"
                         style="margin-top: 15px; display: flex; justify-content: space-between; align-items: center; background: #151515; padding: 12px 15px; border-radius: 12px; border: 1px solid #ff85a2;">
-                        <label style="margin: 0; font-size: 14px; color: #ff85a2; font-weight: bold;">🌸 Dilala Modu</label>
+                        <label style="margin: 0; font-size: 14px; color: #ff85a2; font-weight: bold;">🌸 Dilala
+                            Modu</label>
                         <label class="ios-switch">
                             <input type="checkbox" id="dilala-toggle-checkbox" onchange="toggleDilalaMode()">
                             <span class="ios-slider"></span>
@@ -740,6 +800,7 @@
                 <button class="fab-btn" onclick="fabAddWater()" style="color:#00d2ff;" title="Hızlı Su Ekle">💧</button>
                 <button class="fab-btn" onclick="fabOpenWorkout()" style="color:#ff4444;"
                     title="Olympus Arenası">🏋️</button>
+                <button class="fab-btn" onclick="startZenMode()" data-tooltip="Zen Modu">🍃</button>
             </div>
             <button id="fab-main" class="fab-main" onclick="toggleFAB()">+</button>
         </div>
@@ -2364,7 +2425,129 @@
         <button class="progress-viewer-nav progress-viewer-next" type="button" onclick="changeFullscreenPhoto(1, event)"
             aria-label="Sonraki fotoğraf">›</button>
     </div>
+    <!-- 🍃 ZEN MODU (SİNİR SİSTEMİ SIFIRLAMA) -->
+    <div id="zen-screen" class="full-screen-overlay hidden"
+        style="background-color: #050505; z-index: 9999; justify-content: center; align-items: center; flex-direction: column;">
+        <h2 style="color: #00d2ff; font-weight: 300; letter-spacing: 4px; margin-bottom: 60px;">RECOVERY</h2>
+        <div class="zen-circle" id="zen-circle"></div>
+        <h1 id="zen-instruction"
+            style="color: #fff; margin-top: 60px; font-size: 28px; font-weight: bold; letter-spacing: 1px;">Hazırlan...
+        </h1>
+        <button onclick="stopZenMode()"
+            style="margin-top: 80px; background: transparent; border: 1px solid #ff4444; color: #ff4444; padding: 12px 40px; border-radius: 30px; font-size: 16px; letter-spacing: 2px;">BİTİR</button>
+    </div>
+    <!-- ✈️ KAVUŞMA AYARLARI MODALI -->
+    <div id="reunion-modal" class="full-screen-overlay hidden"
+        style="background-color: rgba(0,0,0,0.85); z-index: 3000; justify-content: center; align-items: center;">
+        <div
+            style="background: #111; border: 1px solid #ff4069; padding: 25px; border-radius: 16px; width: 85%; max-width: 350px; box-shadow: 0 10px 30px rgba(255, 64, 105, 0.3);">
+            <h3 style="color: #ffb3c6; text-align: center; margin-top: 0; margin-bottom: 20px; font-size: 16px;">✈️ Rota
+                ve Tarih Belirle</h3>
 
+            <div class="input-group" style="margin-bottom: 15px;">
+                <label style="color: #ff85a2; font-size: 12px; margin-bottom: 5px; display: block;">Nereden:</label>
+                <input type="text" id="reunion-input-from" placeholder="Örn: Sakarya"
+                    style="width: 100%; padding: 12px; border-radius: 8px; border: 1px solid #333; background: #050505; color: #fff; box-sizing: border-box;">
+            </div>
+
+            <div class="input-group" style="margin-bottom: 15px;">
+                <label style="color: #ff85a2; font-size: 12px; margin-bottom: 5px; display: block;">Nereye:</label>
+                <input type="text" id="reunion-input-to" placeholder="Örn: Tarsus"
+                    style="width: 100%; padding: 12px; border-radius: 8px; border: 1px solid #333; background: #050505; color: #fff; box-sizing: border-box;">
+            </div>
+
+            <div class="input-group" style="margin-bottom: 25px;">
+                <label style="color: #ff85a2; font-size: 12px; margin-bottom: 5px; display: block;">Kavuşma Tarihi ve
+                    Saati:</label>
+                <input type="datetime-local" id="reunion-input-date"
+                    style="width: 100%; padding: 12px; border-radius: 8px; border: 1px solid #333; background: #050505; color: #fff; box-sizing: border-box; color-scheme: dark;">
+            </div>
+
+            <div style="display: flex; gap: 10px;">
+                <button onclick="closeReunionSettings()"
+                    style="flex: 1; padding: 12px; border-radius: 8px; background: transparent; border: 1px solid #555; color: #ccc; cursor: pointer;">İptal</button>
+                <button onclick="saveReunionSettings()"
+                    style="flex: 1; padding: 12px; border-radius: 8px; background: linear-gradient(135deg, #ff6b8b, #ff4069); border: none; color: #fff; font-weight: bold; cursor: pointer;">Kaydet</button>
+            </div>
+        </div>
+    </div>
+    <!-- 🌸 DİLALA ÖZEL ALANI (TAM EKRAN PENCERE) -->
+    <div id="dilala-special-screen" class="full-screen-overlay"
+        style="display: none; background-color: #050102; z-index: 99999; overflow: hidden; position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; justify-content: flex-start;">
+        <!-- YENİ: Arka Planda Yüzen Renk Dalgaları ve Cam Efekti -->
+        <div class="romantic-bg-blob blob-1"></div>
+        <div class="romantic-bg-blob blob-2"></div>
+        <div class="romantic-glass-overlay"></div>
+
+        <!-- İçerik Alanı (Camın Üstünde Duran Kısım) -->
+        <div
+            style="position: relative; z-index: 2; width: 100%; height: 100%; display: flex; flex-direction: column; padding-top: calc(env(safe-area-inset-top) + 20px);">
+
+
+            <!-- Üst Bar ve Kapat Butonu -->
+            <div
+                style="display: flex; justify-content: space-between; align-items: center; width: 100%; padding: 0 20px 20px 20px; border-bottom: 1px solid rgba(255, 64, 105, 0.2); margin-bottom: 20px; box-sizing: border-box;">
+                <h2 style="color: #ff85a2; margin: 0; font-size: 20px; text-shadow: 0 0 10px rgba(255, 133, 162, 0.5);">
+                    🌸 Bizim Alanımız</h2>
+                <button onclick="closeDilalaScreen()"
+                    style="background: rgba(255, 64, 105, 0.1); border: 1px solid #ff4069; color: #ff4069; padding: 8px 15px; border-radius: 8px; font-weight: bold; backdrop-filter: blur(5px);">Kapat</button>
+            </div>
+
+            <!-- İçerik Alanı (Kaydırılabilir) -->
+            <div style="width: 100%; padding: 0 20px 40px 20px; overflow-y: auto; box-sizing: border-box;">
+
+                <!-- AZ ÖNCE KESTİĞİN DİLALA DASHBOARD'U BURAYA YAPIŞTIR (Kodu aşağıda verdim) -->
+                <div id="dilala-dashboard"
+                    style="display: flex; flex-direction: column; gap: 15px; margin-bottom: 20px;">
+
+                    <!-- ✈️ KAVUŞMA SAYACI (DİNAMİK) -->
+                    <div class="dilala-reunion-board" onclick="openReunionSettings()" style="cursor: pointer;">
+                        <div class="reunion-header">
+                            <span class="city" id="reunion-from-city">Nereden</span>
+                            <span class="plane-icon">✈️</span>
+                            <span class="city" id="reunion-to-city">Nereye</span>
+                        </div>
+                        <h3 class="reunion-title">Kavuşmaya Kalan Zaman</h3>
+                        <div id="reunion-countdown" class="reunion-counter">Tarih Seçmek İçin Dokun</div>
+                        <p class="reunion-footer">Mesafeler sadece rakamlardan ibarettir.</p>
+                    </div>
+
+                    <!-- 💌 DİJİTAL POSTA KUTUSU -->
+                    <div class="dilala-love-letter" onclick="openLoveLetter()">
+                        <div class="letter-icon" id="letter-status-icon">💌</div>
+                        <div class="letter-texts">
+                            <h4>Günün Gizli Notu</h4>
+                            <p id="letter-status-text">Kilidi açmak için dokun</p>
+                        </div>
+                        <div class="letter-lock">🔒</div>
+                    </div>
+
+                    <!-- 💑 ZAMAN KAPSÜLLERİ -->
+                    <div class="dilala-capsule">
+                        <div class="dilala-date-box">
+                            <span class="dilala-icon">👩‍❤️‍👨</span>
+                            <h4>Sevgililik Dönemimiz</h4>
+                            <div id="dilala-rel-counter" class="dilala-counter">Hesaplanıyor...</div>
+                            <span class="dilala-date-text">19 Kasım 2025'ten beri</span>
+                        </div>
+                        <div class="dilala-date-box">
+                            <span class="dilala-icon">🌸</span>
+                            <h4>Tanışma Dönemimiz</h4>
+                            <div id="dilala-meet-counter" class="dilala-counter">Hesaplanıyor...</div>
+                            <span class="dilala-date-text">26 Temmuz 2025'ten beri</span>
+                        </div>
+                    </div>
+
+                    <!-- 📅 ÖZEL GÜNLER TAKVİMİ -->
+                    <div class="dilala-calendar-section">
+                        <h3 class="dilala-cal-title">📅 Özel Günler Takvimi</h3>
+                        <div id="dilala-next-event" class="dilala-next-event"></div>
+                        <div id="dilala-events-list" class="dilala-events-list"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
     <script src="script.js"></script>
 </body>
 

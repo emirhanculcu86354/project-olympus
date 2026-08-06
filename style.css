@@ -3760,3 +3760,346 @@ body.dilala-mode .panic-btn {
     background: linear-gradient(135deg, #ff6b8b, #ff4069);
     box-shadow: 0 0 15px rgba(255, 107, 139, 0.4);
 }
+/* ==========================================
+   🌸 DİLALAM MODU: ZAMAN KAPSÜLÜ VE TAKVİM STİLLERİ
+   ========================================== */
+#dilala-dashboard {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+    margin-bottom: 25px;
+    animation: fade 0.5s ease;
+}
+
+.dilala-capsule {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+}
+
+.dilala-date-box {
+    background: linear-gradient(135deg, #1a050b, #2a0812);
+    border: 1px solid #ff85a2;
+    padding: 15px 8px;
+    border-radius: 14px;
+    text-align: center;
+    box-shadow: 0 5px 15px rgba(255,133,162,0.15);
+}
+
+.dilala-icon {
+    font-size: 24px;
+    display: block;
+    margin-bottom: 5px;
+    animation: pulse 2s infinite;
+}
+
+.dilala-date-box h4 {
+    color: #ffb3c6;
+    font-size: 10px;
+    margin: 0 0 8px 0;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.dilala-counter {
+    color: #fff;
+    font-size: 13px;
+    font-family: 'Courier New', monospace;
+    font-weight: bold;
+    margin-bottom: 5px;
+}
+
+.dilala-date-text {
+    color: #888;
+    font-size: 9px;
+}
+
+/* Takvim Kısmı */
+.dilala-calendar-section {
+    background: #111;
+    border: 1px dashed #ff85a2;
+    border-radius: 14px;
+    padding: 15px;
+}
+
+.dilala-cal-title {
+    color: #ff85a2;
+    font-size: 14px;
+    margin: 0 0 12px 0;
+    text-align: center;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+}
+
+.dilala-next-event {
+    background: linear-gradient(90deg, rgba(255,133,162,0.15), transparent);
+    border-left: 3px solid #ff85a2;
+    padding: 12px;
+    border-radius: 6px;
+    margin-bottom: 15px;
+    text-align: center;
+    color: #fff;
+    font-size: 12px;
+}
+
+#dilala-next-countdown {
+    color: #ffb3c6;
+    font-weight: bold;
+    font-family: 'Courier New', monospace;
+    font-size: 14px;
+    display: block;
+    margin-top: 5px;
+}
+
+.dilala-events-list {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.dilala-event-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background: #0a0a0a;
+    padding: 12px;
+    border-radius: 8px;
+    border: 1px solid #333;
+    font-size: 12px;
+}
+
+.dilala-event-item span.event-name {
+    color: #fff;
+    font-weight: bold;
+}
+
+.dilala-event-item span.event-date {
+    color: #ff85a2;
+    font-weight: bold;
+}
+/* YENİ: İdman (Workout) İçin Özel Genişletilmiş Dinamik Ada */
+.dynamic-island.workout-mode {
+    height: 65px !important;
+    border-radius: 22px !important;
+    padding: 10px 20px !important;
+    align-items: center !important;
+}
+
+/* YENİ: İdman (Workout) İçin Özel Genişletilmiş Dinamik Ada */
+.dynamic-island.workout-mode {
+    height: 65px !important;
+    border-radius: 22px !important;
+    padding: 10px 20px !important;
+    align-items: center !important;
+}
+
+/* İkonları gizlemek YERİNE mutlak (absolute) konumla köşelere asıyoruz */
+.dynamic-island.workout-mode .di-icon {
+    display: block !important;
+    position: absolute;
+    top: 10px;
+    left: 15px;
+    font-size: 13px;
+}
+
+.dynamic-island.workout-mode .di-wave {
+    display: flex !important;
+    position: absolute;
+    top: 12px;
+    right: 15px;
+}
+
+.dynamic-island.workout-mode > div:first-child {
+    width: 100%;
+}
+
+.dynamic-island.workout-mode #di-text {
+    width: 100%;
+    max-width: none;
+    white-space: normal;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    height: 100%;
+    margin-top: 5px; /* Yazıyı ikonların hizasından hafifçe aşağı iter */
+}
+/* 🍃 ZEN MODU STİLLERİ */
+.zen-circle {
+    width: 140px;
+    height: 140px;
+    border-radius: 50%;
+    background: radial-gradient(circle, rgba(0, 210, 255, 0.4) 0%, rgba(0, 210, 255, 0.05) 100%);
+    box-shadow: 0 0 30px rgba(0, 210, 255, 0.2);
+    transform: scale(1);
+    /* Geçiş süresi JS içinden dinamik verilecek */
+}
+
+.zen-circle.inhale {
+    transform: scale(2.2);
+    background: radial-gradient(circle, rgba(0, 210, 255, 0.7) 0%, rgba(0, 210, 255, 0.2) 100%);
+    box-shadow: 0 0 60px rgba(0, 210, 255, 0.5);
+}
+
+.zen-circle.hold {
+    transform: scale(2.2); /* Büyümüş halde bekler */
+}
+
+.zen-circle.exhale {
+    transform: scale(1);
+}
+/* ==========================================
+   ✈️ KAVUŞMA SAYACI & 💌 POSTA KUTUSU STİLLERİ
+   ========================================== */
+.dilala-reunion-board {
+    background: linear-gradient(135deg, #2a0812, #1a050b);
+    border: 1px solid #ff4069;
+    border-radius: 16px;
+    padding: 20px;
+    text-align: center;
+    box-shadow: 0 8px 25px rgba(255, 64, 105, 0.2);
+    position: relative;
+    overflow: hidden;
+}
+
+.reunion-header {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 15px;
+    margin-bottom: 15px;
+}
+
+.reunion-header .city {
+    color: #fff;
+    font-weight: 900;
+    font-size: 16px;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+}
+
+.reunion-header .plane-icon {
+    font-size: 20px;
+    animation: fly 3s infinite ease-in-out;
+}
+
+@keyframes fly {
+    0% { transform: translateX(-5px) translateY(2px); }
+    50% { transform: translateX(5px) translateY(-2px); }
+    100% { transform: translateX(-5px) translateY(2px); }
+}
+
+.reunion-title {
+    color: #ffb3c6;
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 1.5px;
+    margin: 0 0 10px 0;
+}
+
+.reunion-counter {
+    color: #fff;
+    font-size: 26px;
+    font-family: 'Courier New', monospace;
+    font-weight: bold;
+    text-shadow: 0 0 15px rgba(255, 133, 162, 0.6);
+    margin-bottom: 10px;
+}
+
+.reunion-footer {
+    color: #888;
+    font-size: 10px;
+    margin: 0;
+    font-style: italic;
+}
+
+/* Posta Kutusu */
+.dilala-love-letter {
+    background: #111;
+    border: 1px dashed #ff85a2;
+    border-radius: 14px;
+    padding: 15px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.dilala-love-letter:active {
+    transform: scale(0.97);
+    background: #1a050b;
+}
+
+.letter-icon {
+    font-size: 32px;
+    margin-right: 15px;
+}
+
+.letter-texts {
+    flex: 1;
+    text-align: left;
+}
+
+.letter-texts h4 {
+    color: #ff85a2;
+    margin: 0 0 5px 0;
+    font-size: 14px;
+}
+
+.letter-texts p {
+    color: #888;
+    margin: 0;
+    font-size: 11px;
+}
+
+.letter-lock {
+    font-size: 20px;
+}
+/* ==========================================
+   🌸 ROMANTİK BLUR (GLASSMORPHISM) EFEKTİ
+   ========================================== */
+.romantic-bg-blob {
+    position: absolute;
+    border-radius: 50%;
+    filter: blur(70px); /* Işığı dağıtan devasa blur */
+    opacity: 0.65;
+    animation: floatBlobs 12s infinite alternate ease-in-out;
+    z-index: 0;
+}
+
+.blob-1 {
+    width: 350px;
+    height: 350px;
+    background: #ff4069; /* Neon Pembe */
+    top: -100px;
+    left: -100px;
+    animation-delay: 0s;
+}
+
+.blob-2 {
+    width: 300px;
+    height: 300px;
+    background: #6b001a; /* Derin Bordo */
+    bottom: 50px;
+    right: -100px;
+    animation-delay: -6s;
+}
+
+/* Tüm ekranı kaplayan, modüllerin altındaki puslu cam */
+.romantic-glass-overlay {
+    position: absolute;
+    top: 0; left: 0; width: 100%; height: 100%;
+    background: rgba(10, 2, 4, 0.55);
+    backdrop-filter: blur(40px); /* İçeriyi derinleştiren Apple tarzı blur */
+    -webkit-backdrop-filter: blur(40px);
+    z-index: 1;
+}
+
+@keyframes floatBlobs {
+    0% { transform: translate(0, 0) scale(1); }
+    50% { transform: translate(40px, 60px) scale(1.1); }
+    100% { transform: translate(-20px, 30px) scale(1.2); }
+}
+#dilala-special-screen {
+    z-index: 99999 !important;
+}
