@@ -25,6 +25,9 @@
     <script src="https://www.gstatic.com/firebasejs/10.8.1/firebase-database-compat.js"></script>
     <!-- JS-DOS EMÜLATÖR MOTORU -->
     <script src="https://js-dos.com/6.22/current/js-dos.js"></script>
+    <!-- 🗺️ HARİTA VE GPS KÜTÜPHANELERİ (Leaflet) -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 
 </head>
 
@@ -801,6 +804,13 @@
                 <button class="fab-btn" onclick="fabOpenWorkout()" style="color:#ff4444;"
                     title="Olympus Arenası">🏋️</button>
                 <button class="fab-btn" onclick="startZenMode()" data-tooltip="Zen Modu">🍃</button>
+            </div>
+            <!-- YENİ: Sola Doğru Açılan Kardiyo Menüsü -->
+            <div class="fab-menu-horizontal" id="fab-cardio-menu">
+                <button class="fab-btn cardio-btn" onclick="openCardioScreen('run')"
+                    style="border-color: #ff4a00; color: #ff4a00;">🏃‍♂️</button>
+                <button class="fab-btn cardio-btn" onclick="openCardioScreen('cycle')"
+                    style="border-color: #00d2ff; color: #00d2ff;">🚴‍♂️</button>
             </div>
             <button id="fab-main" class="fab-main" onclick="toggleFAB()">+</button>
         </div>
@@ -2544,8 +2554,83 @@
                         <div id="dilala-next-event" class="dilala-next-event"></div>
                         <div id="dilala-events-list" class="dilala-events-list"></div>
                     </div>
+                    <!-- 📸 POLAROID ANI DUVARI BUTONU -->
+                    <div style="margin-top: 10px; margin-bottom: 30px; text-align: center;">
+                        <button onclick="openPolaroidWall()" style="background: rgba(255, 64, 105, 0.15); border: 1px dashed #ff4069; color: #ffb3c6; padding: 15px 30px; border-radius: 12px; font-weight: bold; font-size: 16px; backdrop-filter: blur(5px); cursor: pointer; width: 100%; box-shadow: 0 4px 15px rgba(255,64,105,0.1); transition: all 0.3s;">
+                            📸 Polaroid Anı Duvarını Aç
+                        </button>
+                    </div>
                 </div>
             </div>
+        </div>
+    </div>
+    <!-- 🏃‍♂️ KARDİYO & CANLI GPS EKRANI -->
+    <div id="cardio-screen" class="full-screen-overlay" style="display: none; background-color: #050505; z-index: 9999; flex-direction: column; justify-content: space-between; position: fixed; top: 0; left: 0; width: 100vw; height: 100vh;">
+        
+        <!-- HEADER -->
+        <div class="workout-player-header" style="display:flex; justify-content:space-between; align-items:center; width:100%; padding:calc(env(safe-area-inset-top) + 20px) 20px 20px 20px; box-sizing:border-box; border-bottom:1px solid #222; background:#111;">
+            <span id="cardio-title" style="color:var(--goldnova); font-weight:900; font-size:16px; letter-spacing:1px;">🏃‍♂️ Serbest Koşu</span>
+            <button class="edit-btn" onclick="closeCardioScreen()" style="border-color:#ff4444; color:#ff4444; padding:8px 12px; font-size:12px;">X Kapat</button>
+        </div>
+
+        <!-- ORTA ALAN (Kaydırılabilir) -->
+        <div style="flex: 1; overflow-y: auto; display: flex; flex-direction: column; align-items: center; padding: 20px 0; width: 100%;">
+            
+            <div style="text-align: center; margin-bottom: 20px;">
+                <span style="color:#666; font-size:11px; text-transform:uppercase; letter-spacing:3px; font-weight:bold;">Süre</span>
+                <div id="cardio-timer-display" style="color:#fff; font-size:52px; font-family:'Helvetica Neue', Helvetica, Arial, sans-serif; font-weight:200; letter-spacing:1px; line-height:1; margin-top:5px;">00:00:00</div>
+            </div>
+
+            <!-- CANLI VERİ -->
+            <div id="cardio-live-dashboard" style="display: none; width: 100%; flex-direction: column; align-items: center;">
+                <div style="display: flex; justify-content: space-between; width: 90%; max-width: 350px; margin-bottom: 20px; background: #111; border: 1px solid #333; padding: 15px; border-radius: 12px;">
+                    <div style="text-align: center; flex: 1;">
+                        <span style="color:#ff4a00; font-size:11px; font-weight:bold; letter-spacing: 1px;">MESAFE (KM)</span>
+                        <div id="cardio-distance-display" style="color:#fff; font-size:28px; font-weight:bold;">0.00</div>
+                    </div>
+                    <div style="text-align: center; flex: 1; border-left: 1px solid #333;">
+                        <span style="color:#888; font-size:11px; font-weight:bold; letter-spacing: 1px;">TEMPO (Pace)</span>
+                        <div id="cardio-pace-display" style="color:#fff; font-size:28px; font-weight:bold;">--:--</div>
+                    </div>
+                </div>
+                
+                <!-- HARİTA KUTUSU VE MERKEZLEME BUTONU -->
+                <div style="position: relative; width: 90%; max-width: 350px; height: 280px; margin-bottom: 20px;">
+                    <div id="cardio-map" style="width: 100%; height: 100%; border-radius: 12px; border: 1px solid #333; z-index: 1;"></div>
+                    <button onclick="recenterCardioMap()" style="position: absolute; bottom: 15px; right: 15px; z-index: 1000; background: rgba(17, 17, 17, 0.8); border: 1px solid #00d2ff; color: #00d2ff; width: 40px; height: 40px; border-radius: 50%; display: flex; justify-content: center; align-items: center; font-size: 20px; cursor: pointer; backdrop-filter: blur(5px);">📍</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- ALT SABİT BUTONLAR (Ekrana Çivilendi, Artık Ezilmez) -->
+        <div style="padding: 10px 20px 30px 20px; width: 100%; box-sizing: border-box; background: #050505; display: flex; justify-content: center;">
+            <button id="cardio-start-btn" onclick="startCardioTimer()" style="background: #27ae60; border: none; color: white; width: 100px; height: 100px; border-radius: 50%; font-size: 18px; font-weight: bold; box-shadow: 0 0 30px rgba(39, 174, 96, 0.4); cursor: pointer;">BAŞLA</button>
+            
+            <div id="cardio-action-btns" style="display: none; gap: 15px; width: 100%; max-width: 350px;">
+                <button onclick="stopCardioTimer()" style="flex: 1; padding: 18px; border-radius: 12px; background: #ff4444; border: none; color: #fff; font-weight: bold; font-size: 16px;">BİTİR</button>
+                <button onclick="saveCardioSession()" style="flex: 1; padding: 18px; border-radius: 12px; background: #00d2ff; border: none; color: #000; font-weight: bold; font-size: 16px;">KAYDET</button>
+            </div>
+        </div>
+    </div>
+    <!-- 📸 POLAROID ANI DUVARI EKRANI -->
+    <div id="polaroid-wall-screen" class="full-screen-overlay" style="display: none; background-color: #110508; z-index: 999999; flex-direction: column; justify-content: flex-start; overflow: hidden; position: fixed; top: 0; left: 0; width: 100vw; height: 100vh;">
+        
+        <!-- Arka Plan Efekti -->
+        <div style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: radial-gradient(circle at center, rgba(255,64,105,0.1) 0%, rgba(0,0,0,0.8) 100%); z-index: 0; pointer-events: none;"></div>
+
+        <!-- Üst Bar -->
+        <div style="padding: calc(env(safe-area-inset-top) + 20px) 20px 10px 20px; display: flex; justify-content: space-between; align-items: center; z-index: 10;">
+            <h2 style="color: #ffb3c6; margin: 0; font-family: 'Courier New', monospace; letter-spacing: 2px;">📸 Duvarımız</h2>
+            <button onclick="closePolaroidWall()" style="background: transparent; border: 1px solid #ff4069; color: #ff4069; padding: 8px 15px; border-radius: 8px;">Kapat</button>
+        </div>
+
+        <div style="text-align: center; z-index: 10; margin-bottom: 10px;">
+            <span style="color: #888; font-size: 11px; font-style: italic;">Notu okumak için fotoğrafa dokun</span>
+        </div>
+
+        <!-- Polaroidlerin Dağılacağı Alan -->
+        <div id="polaroid-container" style="flex: 1; position: relative; width: 100%; height: 100%; z-index: 5;">
+            <!-- JS ile buraya fotoğraflar eklenecek -->
         </div>
     </div>
     <script src="script.js"></script>

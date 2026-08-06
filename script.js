@@ -7209,8 +7209,14 @@ window.fabOpenWorkout = function () {
 window.toggleFAB = function () {
     const mainBtn = document.getElementById('fab-main');
     const menu = document.getElementById('fab-menu');
+    const cardioMenu = document.getElementById('fab-cardio-menu'); // YENİ: Kardiyo Menüsü
+    const container = document.querySelector('.fab-container'); // YENİ: CSS animasyonu için ana kapsayıcı
+
     if (mainBtn) mainBtn.classList.toggle('active');
     if (menu) menu.classList.toggle('active');
+    if (cardioMenu) cardioMenu.classList.toggle('active'); // YENİ: Kardiyo menüsünü aç/kapat
+    if (container) container.classList.toggle('active'); // YENİ: Sola kayma efektini tetikler
+
     if (navigator.vibrate) navigator.vibrate(20);
 };
 
@@ -7456,5 +7462,339 @@ window.closeDilalaScreen = function() {
     const screen = document.getElementById('dilala-special-screen');
     if (screen) {
         screen.style.display = 'none'; // Doğrudan kapatıyoruz
+    }
+}
+// ==========================================
+// 🗺️ CANLI GPS VE KARDİYO MOTORU (GELİŞMİŞ)
+// ==========================================
+let cardioInterval;
+let cardioSeconds = 0;
+let cardioType = 'run';
+
+let cardioMap = null;
+let cardioPolyline = null;
+let cardioPath = [];
+let cardioDistanceKm = 0;
+let geoWatchId = null;
+
+// YENİ HARİTA DEĞİŞKENLERİ
+let cardioUserMarker = null;
+let lastKnownLocation = null;
+let isFirstLocation = true;
+
+window.openCardioScreen = function(type) {
+    if(typeof toggleFAB === 'function') toggleFAB(); 
+    
+    // Alttaki menüleri tamamen gizle ki butonları ezmesin
+    const fabContainer = document.querySelector('.fab-container');
+    if(fabContainer) fabContainer.style.display = 'none';
+    
+    cardioType = type;
+    document.getElementById('cardio-screen').style.display = 'flex';
+    document.getElementById('cardio-title').innerText = type === 'run' ? "🏃‍♂️ Serbest Koşu" : "🚴‍♂️ Açık Hava Bisiklet";
+    
+    clearInterval(cardioInterval);
+    if(geoWatchId) navigator.geolocation.clearWatch(geoWatchId);
+    cardioSeconds = 0;
+    cardioDistanceKm = 0;
+    cardioPath = [];
+    isFirstLocation = true;
+    lastKnownLocation = null;
+    
+    updateCardioDisplay();
+    document.getElementById('cardio-distance-display').innerText = "0.00";
+    document.getElementById('cardio-pace-display').innerText = "--:--";
+    
+    document.getElementById('cardio-start-btn').style.display = 'block';
+    document.getElementById('cardio-action-btns').style.display = 'none';
+    document.getElementById('cardio-live-dashboard').style.display = 'none';
+}
+
+window.closeCardioScreen = function() {
+    clearInterval(cardioInterval);
+    if(geoWatchId) navigator.geolocation.clearWatch(geoWatchId);
+    document.getElementById('cardio-screen').style.display = 'none';
+    
+    // Alt menüleri geri getir
+    const fabContainer = document.querySelector('.fab-container');
+    if(fabContainer) fabContainer.style.display = 'flex';
+}
+
+window.startCardioTimer = function() {
+    document.getElementById('cardio-start-btn').style.display = 'none';
+    document.getElementById('cardio-action-btns').style.display = 'flex';
+    document.getElementById('cardio-live-dashboard').style.display = 'flex'; 
+    
+    initCardioMap();
+    startGPSTracking();
+
+    if (navigator.vibrate) navigator.vibrate([100, 100, 100]);
+    if(typeof showDynamicIsland === 'function') showDynamicIsland(cardioType === 'run' ? "🛰️ Koşu Takip Ediliyor!" : "🛰️ Sürüş Takip Ediliyor!");
+
+    cardioInterval = setInterval(() => {
+        cardioSeconds++;
+        updateCardioDisplay();
+        calculateLivePace();
+    }, 1000);
+}
+
+function initCardioMap() {
+    if (!cardioMap) {
+        cardioMap = L.map('cardio-map', { zoomControl: false }).setView([40.77, 30.39], 15);
+        L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', { attribution: '© OS' }).addTo(cardioMap);
+        cardioPolyline = L.polyline([], {color: '#ff4a00', weight: 5, opacity: 0.8, shadowBlur: 10, shadowColor: '#ff4a00'}).addTo(cardioMap);
+    } else {
+        cardioPolyline.setLatLngs([]);
+        if(cardioUserMarker) { 
+            cardioMap.removeLayer(cardioUserMarker); 
+            cardioUserMarker = null; 
+        }
+    }
+    setTimeout(() => { cardioMap.invalidateSize(); }, 300);
+}
+
+// YENİ MERKEZLEME FONKSİYONU 📍
+window.recenterCardioMap = function() {
+    if(lastKnownLocation && cardioMap) {
+        cardioMap.flyTo(lastKnownLocation, 17, { animate: true, duration: 1 });
+    }
+}
+
+function startGPSTracking() {
+    if ("geolocation" in navigator) {
+        geoWatchId = navigator.geolocation.watchPosition(
+            (position) => {
+                const lat = position.coords.latitude;
+                const lng = position.coords.longitude;
+                const newPos = [lat, lng];
+                lastKnownLocation = newPos;
+                
+                cardioPath.push(newPos);
+                cardioPolyline.setLatLngs(cardioPath);
+                
+                // MAVİ NOKTAYI GÜNCELLE
+                if(!cardioUserMarker) {
+                    cardioUserMarker = L.circleMarker(newPos, { radius: 8, fillColor: '#00d2ff', color: '#fff', weight: 2, opacity: 1, fillOpacity: 0.9 }).addTo(cardioMap);
+                } else {
+                    cardioUserMarker.setLatLng(newPos);
+                }
+
+                // Sadece ilk sinyalde kamerayı zorla merkeze alır, sonra kullanıcı haritayı özgürce kaydırabilir
+                if(isFirstLocation) {
+                    cardioMap.setView(newPos, 16);
+                    isFirstLocation = false;
+                }
+
+                if (cardioPath.length > 1) {
+                    const lastPos = cardioPath[cardioPath.length - 2];
+                    const d = calculateHaversineDistance(lastPos[0], lastPos[1], lat, lng);
+                    cardioDistanceKm += d;
+                    document.getElementById('cardio-distance-display').innerText = cardioDistanceKm.toFixed(2);
+                }
+            },
+            (error) => { 
+                console.error("GPS Sinyali Alınamıyor: ", error); 
+                if(error.code === 1) {
+                    alert("📍 GPS Hatası: Haritanın çalışması için tarayıcıdan (adres çubuğundaki kilit ikonundan) 'Konum' izni vermen gerekiyor patron!");
+                }
+            },
+            { enableHighAccuracy: true, maximumAge: 5000, timeout: 10000 }
+        );
+    }
+}
+
+function calculateHaversineDistance(lat1, lon1, lat2, lon2) {
+    const R = 6371; 
+    const dLat = (lat2 - lat1) * Math.PI / 180;
+    const dLon = (lon2 - lon1) * Math.PI / 180;
+    const a = Math.sin(dLat/2) * Math.sin(dLat/2) + Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) * Math.sin(dLon/2) * Math.sin(dLon/2);
+    const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+    return R * c;
+}
+
+function updateCardioDisplay() {
+    const h = Math.floor(cardioSeconds / 3600);
+    const m = Math.floor((cardioSeconds % 3600) / 60);
+    const s = cardioSeconds % 60;
+    document.getElementById('cardio-timer-display').innerText = 
+        `${h > 0 ? h.toString().padStart(2, '0') + ':' : ''}${m.toString().padStart(2, '0')}:${s.toString().padStart(2, '0')}`;
+}
+
+function calculateLivePace() {
+    if(cardioDistanceKm <= 0.05) return; 
+    const totalMinutes = cardioSeconds / 60;
+    const paceDec = totalMinutes / cardioDistanceKm;
+    const paceMin = Math.floor(paceDec);
+    const paceSec = Math.round((paceDec - paceMin) * 60);
+    document.getElementById('cardio-pace-display').innerText = `${paceMin}:${paceSec.toString().padStart(2, '0')}`;
+}
+
+window.stopCardioTimer = function() {
+    clearInterval(cardioInterval);
+    if(geoWatchId) navigator.geolocation.clearWatch(geoWatchId);
+}
+
+// 🏆 GEÇMİŞ ANTRENMANLARA KAYDETME
+window.saveCardioSession = function() {
+    if(cardioDistanceKm <= 0) {
+        alert("Hiç mesafe kat etmemişsin şampiyon, hareket et!");
+        return;
+    }
+    const pace = document.getElementById('cardio-pace-display').innerText;
+    const duration = document.getElementById('cardio-timer-display').innerText;
+    const title = cardioType === 'run' ? "Açık Hava Koşusu" : "Bisiklet Sürüşü";
+
+    let pastWorkouts = JSON.parse(localStorage.getItem('olympus_past_workouts')) || [];
+    pastWorkouts.push({
+        id: Date.now(),
+        date: new Date().toLocaleDateString('tr-TR'),
+        time: new Date().toLocaleTimeString('tr-TR', { hour: '2-digit', minute: '2-digit' }),
+        title: `${cardioType === 'run' ? '🏃‍♂️' : '🚴‍♂️'} ${title}`,
+        duration: `${cardioDistanceKm.toFixed(2)} km | ⏱️ ${duration} | ⚡ ${pace}`
+    });
+    localStorage.setItem('olympus_past_workouts', JSON.stringify(pastWorkouts));
+
+    alert(`🔥 TEBRİKLER!\n\nToplam: ${cardioDistanceKm.toFixed(2)} km\nSüre: ${duration}\nTempo: ${pace}\n\nKayıt "İdman Geçmişi" kısmına eklendi!`);
+    closeCardioScreen();
+}
+// ==========================================
+// 📸 POLAROID ANI DUVARI MOTORU
+// ==========================================
+
+// Kendi resimlerini eklemek için 'img' kısmına 'resim1.jpg' gibi dosya yolları verebilirsin
+const dilalaMemories = [
+    { img: 'https://picsum.photos/400/400?random=1', note: 'Sakarya\'nın o gri günlerini bile güneş gibi aydınlattığın an...' },
+    { img: 'https://picsum.photos/400/400?random=2', note: 'Tarsus sıcağından daha çok içimi ısıtan o efsane gülüşün.' },
+    { img: 'https://picsum.photos/400/400?random=3', note: 'Aramızdaki kilometrelerin sadece haritada olduğunu anladığım gün.' },
+    { img: 'https://picsum.photos/400/400?random=4', note: 'Beraber kurduğumuz o devasa hayallerin küçük bir karesi.' },
+    { img: 'https://picsum.photos/400/400?random=5', note: 'Zaman dursa ve bu anın içinde sonsuza dek kalsak...' }
+];
+
+window.openPolaroidWall = function() {
+    document.getElementById('polaroid-wall-screen').style.display = 'flex';
+    renderPolaroids();
+}
+
+window.closePolaroidWall = function() {
+    document.getElementById('polaroid-wall-screen').style.display = 'none';
+}
+
+function renderPolaroids() {
+    const container = document.getElementById('polaroid-container');
+    container.innerHTML = '';
+    
+    container.style.display = 'block';
+    container.style.position = 'relative';
+    container.style.width = '100%';
+    container.style.height = '100%';
+    container.style.overflowY = 'auto'; // Aşağı kaydırmayı açar
+    
+    const scrollArea = document.createElement('div');
+    scrollArea.style.position = 'relative';
+    scrollArea.style.width = '100%';
+    // Duvarın boyunu 850px'den 1600px'e çıkardık (Kaydırdıkça devam eder)
+    scrollArea.style.height = '1600px'; 
+    container.appendChild(scrollArea);
+
+    // İp sayısını 3'ten 6'ya çıkardık
+    const wires = [
+        { top: 80 },    // 1. İp
+        { top: 320 },   // 2. İp
+        { top: 560 },   // 3. İp
+        { top: 800 },   // 4. İp
+        { top: 1040 },  // 5. İp
+        { top: 1280 }   // 6. İp
+    ];
+
+    function getWireSag(xPercent) {
+        const ellipseX = xPercent + 10; 
+        const dx = (ellipseX - 60) / 60; 
+        return 40 * (1 + Math.sqrt(1 - (dx * dx))); 
+    }
+
+    // 1. İpleri ve Minik Ampulleri Gerelim
+    wires.forEach(wire => {
+        const wireEl = document.createElement('div');
+        wireEl.className = 'horizontal-led-wire';
+        wireEl.style.top = `${wire.top}px`;
+        
+        // Her ipe 10 yerine 15 LED ekledik, daha ışıl ışıl olacak
+        for(let i=0; i<15; i++) {
+            const bulb = document.createElement('div');
+            bulb.className = 'wire-bulb';
+            
+            const xPercent = 2 + (Math.random() * 96); 
+            bulb.style.left = `${xPercent}%`; 
+            bulb.style.top = `${getWireSag(xPercent)}px`; 
+            bulb.style.animationDelay = `${Math.random() * 3}s`;
+            wireEl.appendChild(bulb);
+        }
+        scrollArea.appendChild(wireEl);
+    });
+
+    // =========================================
+    // 📸 UZUN DUVAR İÇİN YENİ SLOTLAR
+    // Yeni tellere fotoğraflar için kusursuz pozisyonlar eklendi
+    // =========================================
+    const photoSlots = [
+        { wireIndex: 0, left: 15, rot: -4 },
+        { wireIndex: 0, left: 65, rot: 3 },
+        { wireIndex: 1, left: 40, rot: -2 },
+        { wireIndex: 2, left: 20, rot: 4 },
+        { wireIndex: 2, left: 68, rot: -3 },
+        { wireIndex: 3, left: 35, rot: 2 },
+        { wireIndex: 4, left: 12, rot: -4 },
+        { wireIndex: 4, left: 62, rot: 5 },
+        { wireIndex: 5, left: 45, rot: -1 }
+    ];
+
+    // 2. Fotoğrafları Özel Slotlara As
+    dilalaMemories.forEach((mem, index) => {
+        const slot = photoSlots[index % photoSlots.length];
+        const targetWire = wires[slot.wireIndex];
+        
+        const sagY = getWireSag(slot.left);
+        const topPos = targetWire.top + sagY - 12; 
+
+        const wrap = document.createElement('div');
+        wrap.className = 'polaroid-wrap';
+        wrap.style.top = `${topPos}px`;
+        wrap.style.left = `${slot.left}%`;
+        wrap.style.transform = `rotate(${slot.rot}deg)`; 
+        wrap.style.zIndex = index + 5;
+        
+        wrap.innerHTML = `
+            <div class="wood-clip" style="transform: translateX(-50%) rotate(${Math.random() * 16 - 8}deg);"></div>
+            <div class="polaroid-card" onclick="togglePolaroidFlip(this)">
+                <div class="polaroid-front">
+                    <img src="${mem.img}" alt="Anı">
+                </div>
+                <div class="polaroid-back">
+                    <div class="polaroid-back-text">${mem.note}</div>
+                </div>
+            </div>
+        `;
+        scrollArea.appendChild(wrap);
+    });
+}
+// Fotoğrafa tıklayınca öne alıp döndüren fonksiyon
+window.togglePolaroidFlip = function(cardElement) {
+    const wrap = cardElement.parentElement;
+    
+    // Zaten dönmüşse geri çevir
+    if (cardElement.classList.contains('flipped')) {
+        cardElement.classList.remove('flipped');
+        setTimeout(() => { wrap.classList.remove('active-front'); }, 300);
+    } else {
+        // Diğer açık olanları kapat
+        document.querySelectorAll('.polaroid-card.flipped').forEach(el => {
+            el.classList.remove('flipped');
+            el.parentElement.classList.remove('active-front');
+        });
+        
+        // Tıklananı en öne getir ve çevir
+        wrap.classList.add('active-front');
+        cardElement.classList.add('flipped');
+        if (navigator.vibrate) navigator.vibrate(50); // Hissiyat
     }
 }
