@@ -202,7 +202,7 @@ window.toggleDilalaMode = function () {
     const isDilala = checkbox.checked;
 
     if (isDilala) {
-        let pass = prompt("🌸 Dilala Moduna giriş için şifreyi (Tarihimizi) giriniz:");
+        let pass = prompt("🌸 Dilala Moduna giriş için şifreyi giriniz:");
         
         if (pass === "19.11.2025" || pass === "19112025") {
             document.body.classList.add('dilala-mode');
