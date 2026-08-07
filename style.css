@@ -4790,84 +4790,24 @@ body.dilala-mode .panic-btn {
     filter: grayscale(0) opacity(1);
 }
 /* ==========================================
-   ✉️ OLYSOCIAL X-STİLİ MESAJLAŞMA (DM) ARAYÜZÜ
+   🛠️ OLYSOCIAL YAMA PAKETİ (Z-INDEX VE ETKİLEŞİMLER)
    ========================================== */
-#messages-page {
-    background-color: #000 !important;
-}
+/* Bildirim ve Mesajların Üste Çıkması */
+#notifications-modal { z-index: 8000 !important; }
+#messages-page { z-index: 7000 !important; background-color: #000 !important; }
 
-#chat-friends-list {
-    padding: 0 !important;
-}
+/* X (Twitter) Stili Mesajlaşma Zorlaması */
+.chat-list-card { background: transparent !important; border-bottom: 1px solid #2f3336 !important; border-radius: 0 !important; padding: 15px !important; margin: 0 !important; }
+.chat-list-avatar-wrap img { border: none !important; border-radius: 50% !important; }
+.chat-bubble { border-radius: 20px !important; box-shadow: none !important; }
+.chat-bubble-received { background: #2f3336 !important; color: #fff !important; border-bottom-left-radius: 4px !important; }
+.chat-bubble-sent { background: #1d9bf0 !important; color: #fff !important; border-bottom-right-radius: 4px !important; }
+.chat-input-area { background: #000 !important; border-top: 1px solid #2f3336 !important; }
+.chat-input-area input { background: #2f3336 !important; color: #fff !important; border-radius: 20px !important; }
 
-.chat-list-card {
-    background: transparent !important;
-    border-bottom: 1px solid #2f3336 !important;
-    border-radius: 0 !important;
-    padding: 15px !important;
-    margin: 0 !important;
-    transition: background 0.2s;
-}
-
-.chat-list-card:active {
-    background: rgba(255,255,255,0.05) !important;
-}
-
-.chat-list-avatar-wrap img {
-    border: none !important;
-    border-radius: 50%;
-}
-
-.chat-list-card-topline h4 {
-    font-size: 15px !important;
-    font-weight: bold !important;
-    color: #fff !important;
-}
-
-/* Mesaj Balonları (X Stili) */
-#chat-room-view {
-    background: #000 !important;
-}
-
-#chat-messages-container {
-    background: #000 !important;
-    padding: 20px 15px !important;
-}
-
-.chat-bubble {
-    border-radius: 20px !important;
-    padding: 10px 15px !important;
-    font-size: 15px !important;
-    line-height: 1.4 !important;
-    box-shadow: none !important;
-}
-
-.chat-bubble-received {
-    background: #2f3336 !important; /* X koyu gri */
-    color: #fff !important;
-    border-bottom-left-radius: 4px !important;
-}
-
-.chat-bubble-sent {
-    background: #1d9bf0 !important; /* X mavi */
-    color: #fff !important;
-    border-bottom-right-radius: 4px !important;
-}
-
-#chat-room-header {
-    background: rgba(0,0,0,0.85) !important;
-    backdrop-filter: blur(10px) !important;
-    border-bottom: 1px solid #2f3336 !important;
-}
-
-.chat-input-area {
-    background: #000 !important;
-    border-top: 1px solid #2f3336 !important;
-}
-
-.chat-input-area input {
-    background: #2f3336 !important;
-    border-radius: 20px !important;
-    padding: 12px 20px !important;
-    color: #fff !important;
-}
+/* Etkileşim Butonları Geçişleri */
+.x-action { cursor: pointer; transition: color 0.2s, transform 0.1s; }
+.x-action:active { transform: scale(0.8); }
+.x-action.liked { color: #f91880 !important; }
+.x-action.rt { color: #00ba7c !important; }
+.x-action.replied { color: #1d9bf0 !important; }

@@ -2720,18 +2720,6 @@
                             style="color:#888; font-size:12px;">Takipçi</span></div>
                 </div>
             </div>
-
-            <!-- Menü Seçenekleri ve Envanter -->
-            <div style="flex: 1; overflow-y: auto; padding: 20px; display:flex; flex-direction:column; gap:15px;">
-                <button onclick="closeProfileSidebar()" style="background:transparent; border:none; color:#fff; font-size:16px; font-weight:bold; text-align:left; cursor:pointer;">👤 Profil</button>
-                
-                <button style="background:transparent; border:none; color:#fff; font-size:16px; font-weight:bold; text-align:left; cursor:default; margin-top:10px;">🎒 Envanter (Kasa)</button>
-                <!-- KAYIP ENVANTER LİSTESİ BURAYA EKLENDİ -->
-                <div id="inventory-list" style="display: flex; flex-direction: column; gap: 10px; padding-left: 10px;"></div>
-                
-                <button onclick="alert('Ayarlar menüsü yapım aşamasında.')" style="background:transparent; border:none; color:#fff; font-size:16px; font-weight:bold; text-align:left; cursor:pointer; margin-top:10px;">⚙️ Ayarlar ve Gizlilik</button>
-            </div>
-
             <!-- Çıkış Butonu -->
             <div style="padding: 20px; border-top: 1px solid #222; background: #050505;">
                 <button onclick="closeOlympusDashboardAndSidebar()"
@@ -2739,6 +2727,19 @@
                     X Ekranı Kapat
                 </button>
             </div>
+
+            <!-- Menü Seçenekleri ve Envanter -->
+            <div style="flex: 1; overflow-y: auto; padding: 20px; display:flex; flex-direction:column; gap:15px;">
+                <!-- PROFIL BUTONU AKTİF EDİLDİ -->
+                <button onclick="openOlySocialProfile()" style="background:transparent; border:none; color:#fff; font-size:16px; font-weight:bold; text-align:left; cursor:pointer;">👤 Profil</button>
+                
+                <button style="background:transparent; border:none; color:#fff; font-size:16px; font-weight:bold; text-align:left; cursor:default;">🎒 Envanter (Kasa)</button>
+                <div id="inventory-list" style="display: flex; flex-direction: column; gap: 10px; padding-left: 10px;"></div>
+                
+                <!-- AYARLAR BUTONU AKTİF EDİLDİ -->
+                <button onclick="openSocialSettings()" style="background:transparent; border:none; color:#fff; font-size:16px; font-weight:bold; text-align:left; cursor:pointer; margin-top:10px;">⚙️ Ayarlar ve Gizlilik</button>
+            </div>
+
         </div>
 
         <!-- ÜST BAR (GÜNCELLENDİ - KESİN ÇÖZÜM) -->
@@ -2793,7 +2794,7 @@
         </div>
 
         <!-- YENİ PAYLAŞIM BUTONU (Mavi FAB) -->
-        <div id="x-fab" class="x-fab" onclick="alert('Yeni gönderi paylaşma ekranı yakında eklenecek!')">
+        <div id="x-fab" class="x-fab" onclick="openNewPostModal()">
             <svg viewBox="0 0 24 24" aria-hidden="true" style="width: 24px; height: 24px; fill: #fff;">
                 <g>
                     <path
@@ -2804,13 +2805,85 @@
             </svg>
         </div>
 
-        <!-- ALT NAVİGASYON BARI (AKTİF EDİLDİ) -->
+        <!-- OLYSOCIAL ALT NAVİGASYON BARI (GÜNCELLENDİ) -->
         <div class="x-bottom-nav">
             <div class="nav-item active" onclick="switchDashboardTab('feed', document.querySelector('.x-tab.active'))">🏠</div>
-            <div class="nav-item" onclick="closeOlympusDashboard(); openArenaScreen();">🔍</div>
+            <div class="nav-item" onclick="openArenaFromSocial()">🔍</div>
             <div class="nav-item" onclick="switchDashboardTab('market', null)">🛒</div>
+            <!-- BİLDİRİM VE DM DÜZELTİLDİ -->
             <div class="nav-item" onclick="openNotifications()">🔔</div>
-            <div class="nav-item" onclick="closeOlympusDashboard(); openChatListModal();">✉️</div>
+            <div class="nav-item" onclick="openChatListModal()">✉️</div>
+        </div>
+    </div>
+    <!-- 📝 OLYSOCIAL YENİ GÖNDERİ MODALI (DÜZELTİLDİ) -->
+    <div id="oly-new-post-modal" class="full-screen-overlay" style="display: none; background: #000; z-index: 9000; flex-direction: column; position: fixed; top: 0; left: 0; width: 100vw; height: 100vh;">
+        <!-- Butonlar en üste sağa sola yaslandı -->
+        <div style="display: flex; justify-content: space-between; align-items: center; padding: calc(env(safe-area-inset-top) + 15px) 15px 10px 15px; border-bottom: 1px solid #2f3336;">
+            <button onclick="closeNewPostModal()" style="background: transparent; color: #fff; border: none; font-size: 16px; cursor: pointer;">İptal</button>
+            <button onclick="submitNewPost()" style="background: #1d9bf0; color: #fff; border: none; border-radius: 20px; padding: 6px 16px; font-size: 14px; font-weight: bold; cursor: pointer;">Gönder</button>
+        </div>
+        <div style="display: flex; padding: 15px; gap: 12px; flex: 1;">
+            <img id="new-post-avatar" src="icon.png" style="width: 40px; height: 40px; border-radius: 50%; object-fit: cover;">
+            <textarea id="new-post-text" placeholder="Neler oluyor?" style="flex: 1; background: transparent; border: none; color: #fff; font-size: 18px; outline: none; resize: none; font-family: sans-serif; padding-top: 8px;"></textarea>
+        </div>
+    </div>
+
+    <!-- 👤 OLYSOCIAL ÖZEL PROFİL EKRANI -->
+    <div id="oly-social-profile-screen" class="full-screen-overlay" style="display: none; background: #000; z-index: 8500; flex-direction: column; position: fixed; top: 0; left: 0; width: 100vw; height: 100vh;">
+        
+        <!-- Profil Üst Bar -->
+        <div style="display: flex; align-items: center; gap: 20px; padding: calc(env(safe-area-inset-top) + 10px) 15px 10px 15px; background: rgba(0,0,0,0.85); backdrop-filter: blur(10px); z-index: 10; position: sticky; top: 0;">
+            <button onclick="closeOlySocialProfile()" style="background: transparent; color: #fff; border: none; font-size: 20px; cursor: pointer;">←</button>
+            <div>
+                <h2 id="osp-header-name" style="margin: 0; color: #fff; font-size: 18px; font-weight: 900;">Yükleniyor...</h2>
+                <span style="color: #71767b; font-size: 13px;">OlySocial Hesabı</span>
+            </div>
+        </div>
+
+        <!-- Kaydırılabilir İçerik -->
+        <div style="flex: 1; overflow-y: auto; display: flex; flex-direction: column;">
+            <!-- Arka Plan (Banner) ve Avatar -->
+            <div style="height: 120px; background: #2f3336; position: relative;">
+                <img src="https://images.unsplash.com/photo-1550684848-fac1c5b4e853?q=80&w=800&auto=format&fit=crop" style="width: 100%; height: 100%; object-fit: cover; opacity: 0.5;">
+                <img id="osp-avatar" src="icon.png" style="width: 75px; height: 75px; border-radius: 50%; border: 4px solid #000; position: absolute; bottom: -35px; left: 15px; object-fit: cover;">
+            </div>
+            
+            <!-- Profil Bilgileri -->
+            <div style="padding: 45px 15px 15px 15px;">
+                <h3 id="osp-name" style="margin: 0; color: #fff; font-size: 20px; font-weight: 900;">Yükleniyor...</h3>
+                <span id="osp-username" style="color: #71767b; font-size: 15px;">@kullanici</span>
+                <p style="color: #fff; font-size: 15px; margin: 10px 0; line-height: 1.4;">Makineleşme süreci devam ediyor. Disiplin, kodlama ve spor tek bir alanda. 🚀</p>
+                <div style="display: flex; gap: 15px; margin-top: 10px;">
+                    <div style="color: #fff; font-size: 14px;"><strong id="osp-following">0</strong> <span style="color: #71767b;">Takip edilen</span></div>
+                    <div style="color: #fff; font-size: 14px;"><strong id="osp-followers">0</strong> <span style="color: #71767b;">Takipçi</span></div>
+                </div>
+            </div>
+
+            <!-- Profil Sekmeleri -->
+            <div class="x-tabs-container" style="border-bottom: 1px solid #2f3336;">
+                <div class="x-tab active" onclick="switchOlyProfileTab('posts', this)">Gönderiler<div class="x-tab-indicator"></div></div>
+                <div class="x-tab" onclick="switchOlyProfileTab('replies', this)">Yanıtlar<div class="x-tab-indicator"></div></div>
+                <div class="x-tab" onclick="switchOlyProfileTab('reposts', this)">Yeniden...<div class="x-tab-indicator"></div></div>
+                <div class="x-tab" onclick="switchOlyProfileTab('likes', this)">Beğeni...<div class="x-tab-indicator"></div></div>
+            </div>
+
+            <!-- Profil Akışı -->
+            <div id="osp-feed-view" style="display: flex; flex-direction: column; padding-bottom: 50px;">
+                <!-- JS ile tıklanan sekmeye göre postlar dolacak -->
+            </div>
+        </div>
+    </div>
+
+    <!-- ⚙️ OLYSOCIAL AYARLAR MODALI -->
+    <div id="oly-social-settings-modal" class="full-screen-overlay" style="display: none; background: #000; z-index: 9000; flex-direction: column; position: fixed; top: 0; left: 0; width: 100vw; height: 100vh;">
+        <div style="display: flex; align-items: center; padding: calc(env(safe-area-inset-top) + 15px) 15px 15px 15px; border-bottom: 1px solid #2f3336; gap: 15px;">
+            <button onclick="document.getElementById('oly-social-settings-modal').style.display='none'" style="background: transparent; color: #fff; border: none; font-size: 22px; cursor: pointer;">←</button>
+            <h2 style="color: #fff; margin: 0; font-size: 18px; font-weight: 900;">Ayarlar ve Gizlilik</h2>
+        </div>
+        <div style="padding: 20px; display: flex; flex-direction: column; gap: 15px;">
+            <button onclick="editOlyUsername()" style="background: #111; border: 1px solid #333; color: #fff; padding: 15px; border-radius: 10px; text-align: left; font-size: 15px; font-weight: bold; cursor: pointer;">@ Kullanıcı Adını Değiştir</button>
+            <button onclick="alert('Hesap gizliliği şu an: HERKESE AÇIK');" style="background: #111; border: 1px solid #333; color: #fff; padding: 15px; border-radius: 10px; text-align: left; font-size: 15px; font-weight: bold; cursor: pointer;">Gizlilik (Hesap Türü)</button>
+            <button onclick="alert('Sessize alınan kelimeler ve hesaplar paneli eklenecek.');" style="background: #111; border: 1px solid #333; color: #fff; padding: 15px; border-radius: 10px; text-align: left; font-size: 15px; font-weight: bold; cursor: pointer;">Sessize Alınanlar</button>
         </div>
     </div>
     <script src="script.js"></script>
