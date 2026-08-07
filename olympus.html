@@ -2686,120 +2686,131 @@
             <!-- JS ile buraya fotoğraflar eklenecek -->
         </div>
     </div>
-    <!-- 📊 LIFE DASHBOARD & GELİŞİM PANOSU EKRANI -->
-    <div id="dashboard-screen" class="full-screen-overlay"
-        style="display: none; background-color: #050505; z-index: 6000; flex-direction: column; position: fixed; top: 0; left: 0; width: 100vw; height: 100vh;">
-
-        <!-- Üst Bar ve Coin Özeti -->
-        <div
-            style="padding: calc(env(safe-area-inset-top) + 20px) 20px 20px 20px; background: linear-gradient(to bottom, #111, transparent); border-bottom: 1px solid #222; display: flex; justify-content: space-between; align-items: center; z-index: 10;">
-            <div>
-                <h2 style="color: #fff; margin: 0; font-size: 20px; font-weight: 900; letter-spacing: 1px;">GELİŞİM LOGU
-                </h2>
-                <span
-                    style="color: var(--goldnova, #ffd700); font-weight: bold; font-family: monospace; font-size: 14px;">Kasa:
-                    <span id="dashboard-total-coins">0</span> OC 💰</span>
-            </div>
-            <button onclick="closeLifeDashboard()"
-                style="background: rgba(255, 68, 68, 0.1); border: 1px solid #ff4444; color: #ff4444; padding: 8px 15px; border-radius: 8px; font-weight: bold;">X
-                Kapat</button>
-        </div>
-
-        <!-- Zaman Tüneli (Feed) Alanı -->
-        <div id="dashboard-feed-container"
-            style="flex: 1; overflow-y: auto; padding: 20px; display: flex; flex-direction: column; gap: 15px;">
-            <!-- JavaScript ile kayıtlar buraya dizilecek -->
-        </div>
-    </div>
-    <!-- 🏆 UNIFIED LIFE & GELİŞİM PANOSU EKRANI -->
+    <!-- 𝕏lympus DASHBOARD (X-CLONE) EKRANI -->
     <div id="unified-dashboard-screen" class="full-screen-overlay"
-        style="display: none; background-color: #050505; z-index: 6000; flex-direction: column; position: fixed; top: 0; left: 0; width: 100vw; height: 100vh;">
+        style="display: none; background-color: #000; z-index: 6000; flex-direction: column; position: fixed; top: 0; left: 0; width: 100vw; height: 100vh;">
 
         <!-- 📱 SOL KAYDIRMALI PROFİL MENÜSÜ (SIDEBAR) -->
-        <div id="profile-sidebar-overlay" onclick="closeProfileSidebar()" style="display: none; position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: rgba(0,0,0,0.6); z-index: 6001; backdrop-filter: blur(3px);"></div>
-        
-        <div id="profile-sidebar" style="position: fixed; top: 0; left: -300px; width: 280px; height: 100vh; background: #0a0a0a; border-right: 1px solid #222; z-index: 6002; transition: left 0.3s cubic-bezier(0.4, 0, 0.2, 1); display: flex; flex-direction: column; padding-top: env(safe-area-inset-top);">
-            
-            <!-- Profil Bilgileri -->
-            <div style="padding: 20px; border-bottom: 1px solid #222; display: flex; flex-direction: column; gap: 15px;">
-                <div style="width: 70px; height: 70px; border-radius: 50%; background: #222; border: 2px solid #00d2ff; display: flex; justify-content: center; align-items: center; font-size: 35px; box-shadow: 0 0 15px rgba(0, 210, 255, 0.3);">
-                    👤
-                </div>
+        <div id="profile-sidebar-overlay" onclick="closeProfileSidebar()"
+            style="display: none; position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: rgba(0,0,0,0.6); z-index: 6001; backdrop-filter: blur(3px);">
+        </div>
+
+        <div id="profile-sidebar"
+            style="position: fixed; top: 0; left: -300px; width: 280px; height: 100vh; background: #0a0a0a; border-right: 1px solid #222; z-index: 6002; transition: left 0.3s cubic-bezier(0.4, 0, 0.2, 1); display: flex; flex-direction: column; padding-top: env(safe-area-inset-top);">
+
+            <!-- Profil Bilgileri (Google'dan Çekilecek) -->
+            <div
+                style="padding: 20px; border-bottom: 1px solid #222; display: flex; flex-direction: column; gap: 10px;">
+                <img id="sidebar-avatar" src="icon.png"
+                    style="width: 60px; height: 60px; border-radius: 50%; border: 2px solid #00d2ff; object-fit: cover; box-shadow: 0 0 15px rgba(0, 210, 255, 0.3);">
                 <div>
-                    <h3 style="color: #fff; margin: 0; font-size: 20px; font-weight: 900;">Emirhan Çulcu</h3>
-                    <span style="color: #888; font-size: 13px;">Kurucu / Makine</span>
+                    <h3 id="sidebar-name" style="color: #fff; margin: 0; font-size: 18px; font-weight: 900;">
+                        Yükleniyor...</h3>
+                    <div style="display:flex; align-items:center; gap:8px; margin-top:2px;">
+                        <span id="sidebar-username" style="color: #888; font-size: 14px;">@kullaniciadi</span>
+                        <button onclick="editOlyUsername()"
+                            style="background:transparent; border:1px solid #333; border-radius:4px; color:#fff; font-size:10px; padding:2px 6px; cursor:pointer;">Düzenle</button>
+                    </div>
+                </div>
+                <!-- Takipçi İstatistikleri -->
+                <div style="display:flex; gap:15px; margin-top:10px;">
+                    <div style="color:#fff; font-size:14px;"><strong id="sidebar-following">0</strong> <span
+                            style="color:#888; font-size:12px;">Takip Edilen</span></div>
+                    <div style="color:#fff; font-size:14px;"><strong id="sidebar-followers">0</strong> <span
+                            style="color:#888; font-size:12px;">Takipçi</span></div>
                 </div>
             </div>
 
-            <!-- Satın Alınanlar (Envanter) Bölümü -->
-            <div style="flex: 1; overflow-y: auto; padding: 20px;">
-                <h4 style="color: #555; font-size: 12px; text-transform: uppercase; letter-spacing: 1px; margin: 0 0 15px 0; font-weight: bold;">Satın Alınanlar (Envanter)</h4>
-                <div id="inventory-list" style="display: flex; flex-direction: column; gap: 12px;">
-                    <!-- JS ile buraya eklenecek -->
-                </div>
+            <!-- Menü Seçenekleri ve Envanter -->
+            <div style="flex: 1; overflow-y: auto; padding: 20px; display:flex; flex-direction:column; gap:15px;">
+                <button onclick="closeProfileSidebar()" style="background:transparent; border:none; color:#fff; font-size:16px; font-weight:bold; text-align:left; cursor:pointer;">👤 Profil</button>
+                
+                <button style="background:transparent; border:none; color:#fff; font-size:16px; font-weight:bold; text-align:left; cursor:default; margin-top:10px;">🎒 Envanter (Kasa)</button>
+                <!-- KAYIP ENVANTER LİSTESİ BURAYA EKLENDİ -->
+                <div id="inventory-list" style="display: flex; flex-direction: column; gap: 10px; padding-left: 10px;"></div>
+                
+                <button onclick="alert('Ayarlar menüsü yapım aşamasında.')" style="background:transparent; border:none; color:#fff; font-size:16px; font-weight:bold; text-align:left; cursor:pointer; margin-top:10px;">⚙️ Ayarlar ve Gizlilik</button>
             </div>
 
-            <!-- Panoyu Tamamen Kapatma Butonu (Aşağıda Sabit) -->
+            <!-- Çıkış Butonu -->
             <div style="padding: 20px; border-top: 1px solid #222; background: #050505;">
-                <button onclick="closeOlympusDashboardAndSidebar()" style="background: rgba(255, 68, 68, 0.1); border: 1px solid #ff4444; color: #ff4444; padding: 15px; border-radius: 12px; font-weight: bold; width: 100%; font-size: 15px; transition: all 0.2s; cursor: pointer;">
-                    Ana Ekrana Dön (Kapat)
+                <button onclick="closeOlympusDashboardAndSidebar()"
+                    style="background: rgba(255, 68, 68, 0.1); border: 1px solid #ff4444; color: #ff4444; padding: 15px; border-radius: 12px; font-weight: bold; width: 100%; font-size: 15px; transition: all 0.2s; cursor: pointer;">
+                    X Ekranı Kapat
                 </button>
             </div>
         </div>
-        <!-- PROFİL MENÜSÜ SONU -->
 
-        <!-- YENİ ÜST BAR (Profil İkonlu ve Çarpı Butonsuz) -->
-        <div style="padding: calc(env(safe-area-inset-top) + 15px) 15px 10px 15px; background: linear-gradient(to bottom, #111, transparent); border-bottom: 1px solid #222; display: flex; align-items: center; gap: 15px;">
-            <!-- Profil İkonu (Tıklanınca Menüyü Açar) -->
-            <div onclick="openProfileSidebar()" style="width: 42px; height: 42px; border-radius: 50%; background: #1a1a1a; border: 2px solid #00d2ff; display: flex; justify-content: center; align-items: center; font-size: 20px; cursor: pointer; flex-shrink: 0; box-shadow: 0 0 10px rgba(0, 210, 255, 0.2);">
-                👤
-            </div>
-            <div>
-                <h2 style="color: #fff; margin: 0; font-size: 20px; font-weight: 900; letter-spacing: 1px; display: flex; align-items: center; gap: 8px;">Olympus Topluluğu <span style="font-size: 12px; background: rgba(0,210,255,0.2); color: #00d2ff; padding: 2px 6px; border-radius: 10px;">V2</span></h2>
-                <span style="color: #888; font-size: 11px;">#DisiplinHattı Gelişim Logları</span>
-            </div>
-        </div>
-
-        <!-- Sekme Butonları (Twitter/Instagram Profil Stili) -->
-        <div style="display: flex; background: #000; border-bottom: 1px solid #222;">
-            <button id="tab-feed-btn" onclick="switchDashboardTab('feed')"
-                style="flex: 1; padding: 15px; background: transparent; border: none; border-bottom: 3px solid #00d2ff; color: #00d2ff; font-weight: bold; font-size: 14px; text-transform: uppercase;">Arama
-                Akışı</button>
-            <button id="tab-market-btn" onclick="switchDashboardTab('market')"
-                style="flex: 1; padding: 15px; background: transparent; border: none; border-bottom: 3px solid transparent; color: #888; font-weight: bold; font-size: 14px; text-transform: uppercase;">Olympus
-                Kasa </button>
-        </div>
-
-        <!-- Bakiye Özeti (Market Sekmesine Tıklayınca Görünür) -->
-        <div id="market-balance-bar"
-            style="display: none; padding: 10px 20px; background: rgba(255, 215, 0, 0.05); border-bottom: 1px solid rgba(255, 215, 0, 0.2); justify-content: space-between; align-items: center;">
-            <span style="color: #888; font-size: 12px;">Güncel Kasa Bakiyesi:</span>
-            <span
-                style="color: var(--goldnova, #ffd700); font-weight: bold; font-family: monospace; font-size: 16px;"><span
-                    id="dashboard-total-coins">0</span> OC 💰</span>
-        </div>
-
-        <!-- 1. Gelişim Akışı Alanı (Feed) -->
-        <div id="dashboard-feed-view" style="display: flex; flex-direction: column; flex: 1; overflow-y: auto;">
-            <!-- JavaScript ile kayıtlar buraya dizilecek -->
-        </div>
-
-        <!-- 2. Mağaza Alanı (Market) -->
-        <div id="dashboard-market-view" style="display: none; flex-direction: column; flex: 1; height: 100%; overflow: hidden;">
+        <!-- ÜST BAR (GÜNCELLENDİ - KESİN ÇÖZÜM) -->
+        <div style="display: flex; align-items: center; justify-content: space-between; padding: calc(env(safe-area-inset-top) + 15px) 15px 10px 15px; background: rgba(0,0,0,0.85); backdrop-filter: blur(10px); z-index: 10; position: relative;">
             
-            <!-- SABİT KASA BAKİYESİ VE BAŞLIK -->
-            <div style="padding: 15px 20px; background: rgba(25, 25, 25, 0.95); border-bottom: 1px solid #333; z-index: 10; display: flex; flex-direction: column; gap: 5px;">
-                <h3 style="color: #fff; margin: 0; font-size: 16px; font-weight: bold;">Kara Borsa (Zırh Odası)</h3>
-                <div style="display: flex; justify-content: space-between; align-items: center;">
-                    <span style="color: #888; font-size: 12px;">Kazandığın Coin'leri Harca</span>
-                    <span style="color: var(--goldnova, #ffd700); font-weight: bold; font-family: monospace; font-size: 16px;">Kasa: <span id="dashboard-total-coins">0</span> OC 💰</span>
+            <!-- SOL BÖLÜM (Profil İkonu) -->
+            <div style="flex: 1; display: flex; justify-content: flex-start;">
+                <img id="oly-social-top-avatar" src="icon.png" onclick="openProfileSidebar()" style="width: 36px; height: 36px; border-radius: 50%; border: 1px solid #444; object-fit: cover; cursor: pointer; display: block; background: #111;">
+            </div>
+
+            <!-- ORTA BÖLÜM (Logo) -->
+            <div style="flex: 2; text-align: center; font-size: 18px; font-weight: 900; color: #fff; font-family: sans-serif; letter-spacing: 2px;">
+                OLYSOCIAL
+            </div>
+
+            <!-- SAĞ BÖLÜM (Hizalama İçin Boşluk) -->
+            <div style="flex: 1;"></div>
+            
+        </div>
+
+        <!-- SEKMELER (Sana Özel vb.) -->
+        <div class="x-tabs-container">
+            <div class="x-tab active" onclick="switchDashboardTab('feed', this)">Sana özel<div class="x-tab-indicator">
                 </div>
             </div>
-
-            <!-- KAYDIRILABİLİR ÜRÜN LİSTESİ -->
-            <div id="dashboard-market-items-container" class="premium-market-container" style="flex: 1; overflow-y: auto; padding: 15px 20px 40px 20px;">
-                <!-- JavaScript ile ürünler buraya dizilecek -->
+            <div class="x-tab" onclick="switchDashboardTab('feed', this)">Takip ediliyor<div class="x-tab-indicator">
+                </div>
             </div>
+            <div class="x-tab" onclick="switchDashboardTab('feed', this)">Galatasaray<div class="x-tab-indicator"></div>
+            </div>
+            <div class="x-tab" onclick="switchDashboardTab('feed', this)">Vatan<div class="x-tab-indicator"></div>
+            </div>
+        </div>
+
+        <!-- 1. AKIŞ (FEED) GÖRÜNÜMÜ -->
+        <div id="dashboard-feed-view"
+            style="flex: 1; overflow-y: auto; display: flex; flex-direction: column; padding-bottom: 80px;">
+            <!-- JS ile postlar buraya dolacak -->
+        </div>
+
+        <!-- 2. MARKET (KASA) GÖRÜNÜMÜ -->
+        <div id="dashboard-market-view"
+            style="display: none; flex: 1; overflow-y: auto; padding-bottom: 80px; flex-direction: column;">
+            <div style="padding: 15px 20px; border-bottom: 1px solid #2f3336;">
+                <h2 style="color: #fff; margin: 0; font-size: 18px;">Kara Borsa</h2>
+                <div style="color: #71767b; font-size: 13px; margin-top: 2px;">Kasa Bakiyesi: <span
+                        id="dashboard-total-coins" style="color: #1d9bf0; font-weight: bold;">0</span> OC</div>
+            </div>
+            <div id="dashboard-market-items-container" class="premium-market-container" style="padding-top: 15px;">
+                <!-- JS ile market ürünleri dolacak -->
+            </div>
+        </div>
+
+        <!-- YENİ PAYLAŞIM BUTONU (Mavi FAB) -->
+        <div id="x-fab" class="x-fab" onclick="alert('Yeni gönderi paylaşma ekranı yakında eklenecek!')">
+            <svg viewBox="0 0 24 24" aria-hidden="true" style="width: 24px; height: 24px; fill: #fff;">
+                <g>
+                    <path
+                        d="M23 3c-2.02.81-4.22 1.36-6.52 1.61 2.36-1.42 4.17-3.66 5.02-6.3-2.18 1.29-4.59 2.23-7.15 2.73C12.28 1.01 9.49 0 6.42 0 2.87 0 0 2.87 0 6.42c0 .5.06.99.16 1.46C2.93 7.6 7.78 4.96 11.02.73c-.55.95-.87 2.05-.87 3.23 0 2.23 1.13 4.19 2.85 5.34-1.84-.06-3.57-.56-5.08-1.4v.08c0 5.43 3.86 9.96 8.98 10.99-.9.25-1.85.38-2.84.38-.69 0-1.36-.07-2.01-.19 1.43 4.45 5.56 7.69 10.46 7.78C10.74 20.89 5.86 23 0 23c-.5 0-.99-.03-1.48-.09C4.94 25.4 10.79 27 17.07 27c20.48 0 31.68-16.97 31.68-31.68 0-.48-.01-.96-.03-1.44 2.17-1.57 4.06-3.53 5.56-5.75-.4.18-.84.34-1.28.48z"
+                        opacity="0" />
+                </g>
+                <path d="M11 11V4h2v7h7v2h-7v7h-2v-7H4v-2h7z" />
+            </svg>
+        </div>
+
+        <!-- ALT NAVİGASYON BARI (AKTİF EDİLDİ) -->
+        <div class="x-bottom-nav">
+            <div class="nav-item active" onclick="switchDashboardTab('feed', document.querySelector('.x-tab.active'))">🏠</div>
+            <div class="nav-item" onclick="closeOlympusDashboard(); openArenaScreen();">🔍</div>
+            <div class="nav-item" onclick="switchDashboardTab('market', null)">🛒</div>
+            <div class="nav-item" onclick="openNotifications()">🔔</div>
+            <div class="nav-item" onclick="closeOlympusDashboard(); openChatListModal();">✉️</div>
         </div>
     </div>
     <script src="script.js"></script>

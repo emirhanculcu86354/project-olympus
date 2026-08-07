@@ -3341,6 +3341,20 @@ function listenForNotifications() {
             if (doc.exists) {
                 const data = doc.data();
                 const notifs = data.notifications || [];
+                
+                // YENİ: Gelen son bildirim okunmamışsa Dinamik Adayı tetikle
+                if (notifs.length > 0) {
+                    const lastNotif = notifs[notifs.length - 1];
+                    if (lastNotif.read === false) {
+                        if(typeof showDynamicIsland === 'function') {
+                            showDynamicIsland("Bildirim 🔔", lastNotif.message.substring(0, 35) + "...", "🔔", 0);
+                        }
+                        // Bildirimi okundu olarak işaretle ki sürekli inmesin
+                        lastNotif.read = true;
+                        db.collection("users").doc(auth.currentUser.uid).update({ notifications: notifs });
+                    }
+                }
+                
                 renderNotifications(notifs);
             }
         });
@@ -7005,9 +7019,17 @@ function listenForChatMessages(chatId) {
                     </div>
                 `;
 
-                // Açık odadaki gelen mesajları okundu olarak işaretleriz.
-                if (!isMe && msg.receiver === auth.currentUser.uid && msg.read === false) {
-                    doc.ref.update({ read: true });
+                // Açık odadaki gelen mesajları okundu olarak işaretle
+                if (!isMe && msg.receiver === auth.currentUser.uid) {
+                    if (msg.read === false) {
+                        doc.ref.update({ read: true });
+                        
+                        // YENİ: DİNAMİK ADA BİLDİRİMİ TETİKLE!
+                        // Eğer mesaj o an ekranda değilsek veya başka bir yere bakıyorsak Ada insin
+                        if(typeof showDynamicIsland === 'function') {
+                            showDynamicIsland("Yeni Mesaj 💬", msg.text.substring(0, 30) + "...", "✉️", 0);
+                        }
+                    }
                 }
             });
 
@@ -7878,186 +7900,221 @@ window.togglePolaroidFlip = function (cardElement) {
         if (navigator.vibrate) navigator.vibrate(50); // Hissiyat
     }
 }
+
 // ==========================================
-// 🏆 UNIFIED LIFE & GELİŞİM PANOSU MOTORU
+// 𝕏lympus DASHBOARD & TOPLULUK MOTORU
 // ==========================================
 
-// 1. Mağaza Rafındaki Ürünler (Çeşitlendirildi ve Temalar Eklendi)
-// ID'ler: Digital Koleksiyon (digi_), Gerçek Hayat Ödülü (life_), Tema (theme_)
-const marketItems = [
-    // --- TEMALAR (Digital Özelleştirme) ---
-    { id: 'theme_default', name: 'Midnight Gold (Kendi Temamız)', desc: 'Sistemin orjinal karanlık ve altın teması.', price: 0, icon: '🌟', type: 'theme' },
-    { id: 'theme_cyberpunk', name: 'Cyberpunk Neon Teması', desc: 'Sistemin neon yeşili renklere büründürür.', price: 500, icon: '💚', type: 'theme' },
-    { id: 'theme_ midnight_blue', name: 'Sakarya Blue Teması', desc: 'Derin mavi tonlarında karanlık bir tema.', price: 500, icon: '💙', type: 'theme' },
-    { id: 'theme_tarsus_sunshine', name: 'Tarsus Sunshine Teması (Açık)', desc: 'Açık renkli, sıcak sarı bir tema.', price: 1000, icon: '☀️', type: 'theme' },
-
-    // --- DİGİTAL KOLEKSİYONLAR & ROZETLER ---
-    { id: 'digi_python_mentor', name: 'Python Mentor Rozeti', desc: 'Profilinde parlayacak nadir bir yazılım ikonu.', price: 1200, icon: '💻', type: 'digi' },
-    { id: 'digi_plc_architect', name: 'PLC Architect Rozeti', desc: 'Profilinde parlayacak nadir bir otomasyon ikonu.', price: 1200, icon: '⚙️', type: 'digi' },
-
-    // --- GERÇEK HAYAT ÖDÜLLERİ ---
-    { id: 'life_supplement_contribution', name: 'Supplement Fonuna Katkı', desc: 'Takviyelerin için birikim hesabına birikim fonu kilitler.', price: 2000, icon: '🍫', type: 'life' },
-    { id: 'life_travel_contribution', name: 'Tarsus Yol Fonu', desc: 'Seyahat birikim hesabına birikim fonu kilitler.', price: 5000, icon: '✈️', type: 'life' }
-];
-
-let appliedTheme = localStorage.getItem('olympus_applied_theme') || 'theme_default';
-
-// 2. Açma Fonksiyonu (Varsayılan olarak 'feed' sekmesi açılır)
-window.openOlympusDashboard = function (tab = 'feed') {
-    document.getElementById('unified-dashboard-screen').style.display = 'flex';
-    switchDashboardTab(tab);
-}
-
-window.closeOlympusDashboard = function () {
-    document.getElementById('unified-dashboard-screen').style.display = 'none';
-}
-
-// 3. Sekme Değiştirme Fonksiyonu
-window.switchDashboardTab = function (tabName) {
-    const feedBtn = document.getElementById('tab-feed-btn');
-    const marketBtn = document.getElementById('tab-market-btn');
+// ==========================================
+// 🔍 ÜST SEKMELER VE OTOMATİK İÇERİK MOTORU
+// ==========================================
+window.switchDashboardTab = function(tabName, clickedElement = null) {
     const feedView = document.getElementById('dashboard-feed-view');
     const marketView = document.getElementById('dashboard-market-view');
-    const balanceBar = document.getElementById('market-balance-bar');
+    const fab = document.getElementById('x-fab');
 
-    // Arayüzü Sıfırla
-    feedBtn.style.color = '#888'; feedBtn.style.borderBottomColor = 'transparent';
-    marketBtn.style.color = '#888'; marketBtn.style.borderBottomColor = 'transparent';
-    feedView.style.display = 'none'; marketView.style.display = 'none';
-    balanceBar.style.display = 'none';
-
-    if (tabName === 'feed') {
-        feedBtn.style.color = '#00d2ff'; feedBtn.style.borderBottomColor = '#00d2ff';
-        feedView.style.display = 'flex';
-        renderSocialFeed();
+    if(clickedElement && clickedElement.classList.contains('x-tab')) {
+        document.querySelectorAll('.x-tab').forEach(t => t.classList.remove('active'));
+        clickedElement.classList.add('active');
+        
+        const tabText = clickedElement.innerText.trim();
+        
+        if (tabName === 'feed') {
+            feedView.style.display = 'flex';
+            marketView.style.display = 'none';
+            if(fab) fab.style.display = 'flex';
+            
+            // Sekmeye Göre İçerik Üret
+            if(tabText === 'Galatasaray') {
+                renderAutomatedFeed('galatasaray');
+            } else if (tabText === 'Vatan') {
+                renderAutomatedFeed('vatan');
+            } else {
+                renderXFeed(); // Orijinal "Sana Özel" veya "Takip Ediliyor" akışı
+                
+                // Eğer "Takip ediliyor" ise reklamları gizle (renderXFeed çalıştıktan hemen sonra)
+                setTimeout(() => {
+                    if (tabText === 'Takip ediliyor') {
+                        document.querySelectorAll('.x-post').forEach(post => {
+                            if(post.innerHTML.includes('Reklam')) post.style.display = 'none';
+                        });
+                    }
+                }, 50);
+            }
+        }
     } else if (tabName === 'market') {
-        marketBtn.style.color = 'var(--goldnova, #ffd700)'; marketBtn.style.borderBottomColor = 'var(--goldnova, #ffd700)';
+        feedView.style.display = 'none';
         marketView.style.display = 'flex';
-        balanceBar.style.display = 'flex';
+        if(fab) fab.style.display = 'none';
         renderMarket();
     }
-}
+};
 
-// ==========================================
-// A. 📡 ARŞİV AKIŞI (FEED) MOTORU
-// Herkes için gelişim, Twitter gibi...
-// ==========================================
-
-function renderSocialFeed() {
+// 🇹🇷 OTOMATİK İÇERİK ÜRETİCİ (Vatan & Galatasaray) - KESİN ÇÖZÜM
+window.renderAutomatedFeed = function(type) {
     const container = document.getElementById('dashboard-feed-view');
-    container.innerHTML = '';
+    container.innerHTML = ''; 
 
-    // Gelişim Loglarını Çek
-    let feed = JSON.parse(localStorage.getItem('olympus_social_feed')) || [];
+    let fakePosts = [];
 
-    if (feed.length === 0) {
-        container.innerHTML = `
-            <div style="text-align: center; color: #555; margin-top: 50px; font-size: 14px; padding: 20px;">
-                <span style="font-size: 40px; display: block; margin-bottom: 10px;">📡</span>
-                Henüz bir veri yok. <br>Hadi makineyi çalıştırıp gelişimini paylaş!
-            </div>
-        `;
-        return;
+    if (type === 'vatan') {
+        fakePosts = [
+            {
+                name: "Milli Savunma", username: "@tcsavunma", verified: true, time: "1 sa",
+                text: "Kahraman Mehmetçik, vatan nöbetinde! 🇹🇷 Sınırlarımızda ve ötesinde milletimizin huzuru için daima hazırız. #MilliSavunma #Vatan",
+                icon: "https://ui-avatars.com/api/?name=MSB&background=e74c3c&color=fff&bold=true",
+                image: "https://images.unsplash.com/photo-1533668383344-933df9119c4d?q=80&w=800&auto=format&fit=crop", 
+                likes: "145B", rts: "45B", replies: "2B"
+            },
+            {
+                name: "Türk Silahlı Kuvvetleri", username: "@TSKGnkur", verified: true, time: "3 sa",
+                text: "Göklerdeyiz! Hürkuş ve Kızılelma gök vatanı korumaya devam ediyor. İstikbal göklerdedir. ✈️🇹🇷",
+                icon: "https://ui-avatars.com/api/?name=TSK&background=c0392b&color=fff&bold=true",
+                image: "", 
+                likes: "89B", rts: "12B", replies: "1.5B"
+            },
+            {
+                name: "Jandarma", username: "@Jandarma", verified: true, time: "5 sa",
+                text: "Vatan sevgisi imandandır. Karlı dağlarda, sarp kayalıklarda izimiz var. 🇹🇷",
+                icon: "https://ui-avatars.com/api/?name=JGK&background=2980b9&color=fff&bold=true",
+                image: "https://images.unsplash.com/photo-1596727362302-b8d891c42ab8?q=80&w=800&auto=format&fit=crop", 
+                likes: "210B", rts: "65B", replies: "4B"
+            }
+        ];
+    } else if (type === 'galatasaray') {
+        fakePosts = [
+            {
+                name: "Galatasaray SK", username: "@GalatasaraySK", verified: true, time: "12 dk",
+                text: "Hedef 25! 💛❤️ Şampiyonluk yolunda Ali Sami Yen'de büyük coşku. #Hedef25 #Galatasaray",
+                icon: "https://ui-avatars.com/api/?name=GS&background=f1c40f&color=c0392b&bold=true",
+                image: "https://images.unsplash.com/photo-1518605368461-1eb2a1d261db?q=80&w=800&auto=format&fit=crop", 
+                likes: "1.2M", rts: "400B", replies: "15B"
+            },
+            {
+                name: "ultrAslan", username: "@ultrAslan", verified: true, time: "1 sa",
+                text: "Avrupa Fatihi Galatasaray! Bu armanın peşinde, kıtaları aşmaya hazırız! 🦁🔥",
+                icon: "https://ui-avatars.com/api/?name=uA&background=000&color=f1c40f&bold=true",
+                image: "",
+                likes: "85B", rts: "25B", replies: "1.2B"
+            },
+            {
+                name: "Galatasaray SK", username: "@GalatasaraySK", verified: true, time: "3 sa",
+                text: "KONSANTRASYON! 🦁💛❤️",
+                icon: "https://ui-avatars.com/api/?name=GS&background=f1c40f&color=c0392b&bold=true",
+                image: "https://images.unsplash.com/photo-1574629810360-7efbb1925536?q=80&w=800&auto=format&fit=crop", 
+                likes: "350B", rts: "80B", replies: "8B"
+            }
+        ];
     }
 
-    feed.forEach((item, index) => {
-        // İkona göre kategori ve etiket rengini belirle (SADECE SPOR/FİZİKSEL)
-        let kategoriEtiket = "Disiplin";
-        let etiketClass = "post-tag";
+    // Gönderileri Ekrana Bas
+    fakePosts.forEach(post => {
+        const div = document.createElement('div');
+        div.className = 'x-post';
         
-        if (item.icon.includes('🏃‍♂️') || item.icon.includes('🚴‍♂️')) { 
-            kategoriEtiket = "Kardiyo"; 
-            etiketClass += " run"; 
-        } else if (item.icon.includes('🏋️') || item.icon.includes('🦍')) { 
-            kategoriEtiket = "Güç & Hacim"; 
-            etiketClass += " gym"; 
-        } else if (item.icon.includes('💧') || item.icon.includes('🌅')) {
-            kategoriEtiket = "Alışkanlık";
-            etiketClass += " code"; // Rengi mavi/mor tonlarında tutmak için eski code sınıfını kullanıyoruz
-        }
+        let imageHTML = post.image ? `<div style="margin-top:10px; border-radius:16px; overflow:hidden; border:1px solid #2f3336;"><img src="${post.image}" style="width:100%; display:block;"></div>` : '';
 
-        const post = document.createElement('div');
-        post.className = 'social-post-card';
-
-        post.innerHTML = `
-            <div class="post-profile-pic">${item.icon}</div>
-            <div class="post-content">
-                <div class="post-header">
-                    <h3 class="post-name-title">Emirhan Çulcu <span class="${etiketClass}">${kategoriEtiket}</span></h3>
-                    <span class="post-time">${item.date} <br> ${item.time}</span>
+        div.innerHTML = `
+            <div class="x-avatar" style="overflow:hidden; display:flex; justify-content:center; align-items:center; background:#fff;">
+                <img src="${post.icon}" style="width:100%; height:100%; object-fit:contain; border-radius:50%;">
+            </div>
+            <div class="x-content">
+                <div class="x-header">
+                    <span class="x-name">${post.name}</span>
+                    <span class="x-verified"><svg viewBox="0 0 24 24" aria-label="Onaylı hesap" style="width:1.25em;height:1.25em;fill:currentColor;"><g><path d="M22.5 12.5c0-1.58-.875-2.95-2.148-3.6.154-.435.238-.905.238-1.4 0-2.21-1.71-3.998-3.918-3.998-.47 0-.92.084-1.336.25C14.818 2.415 13.51 1.5 12 1.5s-2.816.917-3.337 2.25c-.416-.165-.866-.25-1.336-.25-2.21 0-3.918 1.79-3.918 4 0 .495.084.965.238 1.4-1.273.65-2.148 2.02-2.148 3.6 0 1.46.74 2.746 1.846 3.45-.065.318-.1.646-.1 1.03 0 2.227 1.734 4.025 3.937 4.025.56 0 1.094-.127 1.587-.354C9.356 21.65 10.61 22.5 12 22.5c1.39 0 2.645-.85 3.25-2.096.494.227 1.028.354 1.587.354 2.203 0 3.937-1.798 3.937-4.025 0-.384-.035-.712-.1-1.03 1.107-.704 1.846-1.99 1.846-3.45zM10.7 16.5l-3.3-3.3 1.4-1.4 1.9 1.9 5.6-5.6 1.4 1.4-7 7z"></path></g></svg></span>
+                    <span class="x-username">${post.username}</span>
+                    <span class="x-time">· ${post.time}</span>
                 </div>
-                <p class="post-body">${item.title} - ${item.desc}</p>
-                ${item.earned > 0 ? `<div class="post-footer">💸 +${item.earned} OC kazandın!</div>` : ''}
+                <div class="x-text">${post.text}</div>
+                ${imageHTML}
+                <div class="x-actions">
+                    <div class="x-action">💬 ${post.replies}</div>
+                    <div class="x-action">🔁 ${post.rts}</div>
+                    <div class="x-action">❤️ ${post.likes}</div>
+                </div>
             </div>
         `;
-        container.appendChild(post);
+        container.appendChild(div);
     });
-}
+};
 
-// ==========================================
-// 🧪 TEST VERİLERİ (SADECE SPOR VE DİSİPLİN)
-// ==========================================
-if (!localStorage.getItem('olympus_test_data_loaded_v2')) {
-    // 10.000 Coin Yükle
-    localStorage.setItem('olympus_coins', 10000); 
-    
-    // Test Gelişim Akışı (Sadece Fitness & Fiziksel Gelişim)
-    const testFeed = [
-        { id: 1, date: "07.08.2026", time: "06:30", title: "Açık Hava Kardiyosu", desc: "Sakarya sokaklarında 5.2 km serbest koşu tamamlandı. Tempo: 5:40/km", icon: "🏃‍♂️", earned: 52 },
-        { id: 2, date: "06.08.2026", time: "19:45", title: "Ağırlık İdmanı: Göğüs & Triceps", desc: "Bench press rekoru kırıldı (85kg). İdman sonu Proteinocean Whey tüketildi.", icon: "🏋️", earned: 250 },
-        { id: 3, date: "05.08.2026", time: "07:00", title: "Disiplin: Erken Kalkış", desc: "Alarm ertelenmeden kalkıldı. Soğuk duş ve 1 litre su tüketimi tamamlandı.", icon: "💧", earned: 50 },
-        { id: 4, date: "04.08.2026", time: "18:15", title: "Ağırlık İdmanı: Sırt & Biceps", desc: "Deadlift ve Barbell Row odaklı ağır idman. Pump efsaneydi.", icon: "🦍", earned: 200 }
-    ];
-    localStorage.setItem('olympus_social_feed', JSON.stringify(testFeed));
-    localStorage.setItem('olympus_test_data_loaded_v2', 'true');
-    console.log("Spor odaklı test verileri yüklendi.");
-}
-
-// ==========================================
-// B. 🛒 OLYMPUS KASA (PREMIUM MARKET MOTORU)
-// ==========================================
-function renderMarket() {
-    const container = document.getElementById('dashboard-market-items-container');
+window.renderXFeed = function() {
+    const container = document.getElementById('dashboard-feed-view');
     container.innerHTML = ''; 
-    
-    let currentCoins = parseInt(localStorage.getItem('olympus_coins')) || 0;
-    appliedTheme = localStorage.getItem('olympus_applied_theme') || 'theme_default';
-    document.getElementById('dashboard-total-coins').innerText = currentCoins;
 
-    marketItems.forEach(item => {
-        const canAfford = currentCoins >= item.price;
-        const isCurrentlyApplied = item.id === appliedTheme;
-        
-        let buyBtnHTML = ``;
-        if (item.id === 'theme_default' && item.type === 'theme' && appliedTheme === 'theme_default') {
-            buyBtnHTML = `<button class="market-buy-btn disabled">Orjinal</button>`;
-        } else if (item.id === 'theme_default' && item.type === 'theme' && appliedTheme !== 'theme_default') {
-            buyBtnHTML = `<button class="market-buy-btn" onclick="applyTheme('theme_default')">Uygula</button>`;
-        } else if (isCurrentlyApplied) {
-            buyBtnHTML = `<button class="market-buy-btn disabled">Aktif</button>`;
-        } else if (canAfford) {
-            buyBtnHTML = `<button class="market-buy-btn" onclick="buyMarketItem('${item.id}', ${item.price}, '${item.name}', '${item.icon}', '${item.type}')">
-                ${item.price} OC
-            </button>`;
-        } else {
-            buyBtnHTML = `<button class="market-buy-btn disabled">${item.price} OC</button>`;
+    // Google (Firebase) Kullanıcı Bilgilerini Çek
+    const user = firebase.auth().currentUser;
+    let myPhoto = "icon.png";
+    let myName = "Şampiyon";
+    let myUsername = localStorage.getItem('olympus_username') || "@kullanici";
+
+    if (user) {
+        myPhoto = user.photoURL || "icon.png";
+        myName = user.displayName || "Şampiyon";
+    } else {
+        const localName = document.getElementById('profile-name-display');
+        if (localName && localName.innerText !== "Yükleniyor...") myName = localName.innerText;
+        const localImg = document.getElementById('header-profile-img');
+        if (localImg && localImg.src) myPhoto = localImg.src;
+    }
+
+    // Sahte Topluluk Verileri
+    const xFeed = [
+        {
+            name: "Proteinocean", username: "@proteinocean", verified: true, time: "Reklam", type: "ad",
+            text: "Sakarya'daki zorlu antrenmanlardan sonra kas yıkımını engelle. En sevilen Whey protein aromaları şimdi yenilenen stoklarıyla. 🏋️‍♂️💪",
+            icon: "🌊", likes: "12B", rts: "145", replies: "34"
+        },
+        {
+            name: "Galatasaray SK", username: "@GalatasaraySK", verified: true, time: "4 sa", type: "post",
+            text: "Bugün günlerden GALATASARAY! 🦁💛❤️",
+            icon: "🦁", likes: "85B", rts: "12B", replies: "1.2B"
         }
+    ];
+
+    // Senin Kendi LocalStorage Loglarını Gerçek Google Profil Fotoğrafınla Ekle
+    let localFeed = JSON.parse(localStorage.getItem('olympus_social_feed')) || [];
+    localFeed.forEach(item => {
+        xFeed.push({
+            name: myName, username: myUsername, verified: true, time: item.time, type: "post",
+            text: `[Sistem Logu: ${item.title}]<br>${item.desc} ${item.earned > 0 ? `<br><span style="color:#1d9bf0;">+${item.earned} OC Kazanıldı</span>` : ''}`,
+            icon: myPhoto, // Artık Emoji değil, senin Google Fotoğraf Linkin!
+            likes: "14", rts: "0", replies: "1"
+        });
+    });
+
+    // Feed'i Ekrana Bas
+    xFeed.forEach(post => {
+        const div = document.createElement('div');
+        div.className = 'x-post';
         
-        const card = document.createElement('div');
-        card.className = 'market-card';
-        card.innerHTML = `
-            <div class="market-item-left">
-                <div class="market-icon-wrapper">${item.icon}</div>
-            </div>
-            <div class="market-item-center">
-                <h3 class="market-title">${item.name}</h3>
-                <p class="market-desc">${item.desc}</p>
-            </div>
-            <div class="market-item-right">
-                ${buyBtnHTML}
+        // Zeka: İkon bir resim linki mi yoksa düz emoji mi kontrol et
+        let avatarHTML = '';
+        if (post.icon.includes('http') || post.icon.includes('.png') || post.icon.includes('.jpg') || post.icon.includes('base64')) {
+            avatarHTML = `<img src="${post.icon}" style="width: 100%; height: 100%; border-radius: 50%; object-fit: cover; display: block;">`;
+        } else {
+            avatarHTML = post.icon;
+        }
+
+        div.innerHTML = `
+            <div class="x-avatar" style="overflow: hidden; display: flex; justify-content: center; align-items: center;">${avatarHTML}</div>
+            <div class="x-content">
+                <div class="x-header">
+                    <span class="x-name">${post.name}</span>
+                    ${post.verified ? `<span class="x-verified"><svg viewBox="0 0 24 24" aria-label="Onaylı hesap" style="width:1.25em;height:1.25em;fill:currentColor;"><g><path d="M22.5 12.5c0-1.58-.875-2.95-2.148-3.6.154-.435.238-.905.238-1.4 0-2.21-1.71-3.998-3.918-3.998-.47 0-.92.084-1.336.25C14.818 2.415 13.51 1.5 12 1.5s-2.816.917-3.337 2.25c-.416-.165-.866-.25-1.336-.25-2.21 0-3.918 1.79-3.918 4 0 .495.084.965.238 1.4-1.273.65-2.148 2.02-2.148 3.6 0 1.46.74 2.746 1.846 3.45-.065.318-.1.646-.1 1.03 0 2.227 1.734 4.025 3.937 4.025.56 0 1.094-.127 1.587-.354C9.356 21.65 10.61 22.5 12 22.5c1.39 0 2.645-.85 3.25-2.096.494.227 1.028.354 1.587.354 2.203 0 3.937-1.798 3.937-4.025 0-.384-.035-.712-.1-1.03 1.107-.704 1.846-1.99 1.846-3.45zM10.7 16.5l-3.3-3.3 1.4-1.4 1.9 1.9 5.6-5.6 1.4 1.4-7 7z"></path></g></svg></span>` : ''}
+                    <span class="x-username">${post.username}</span>
+                    <span class="x-time">· ${post.time}</span>
+                </div>
+                <div class="x-text">${post.text}</div>
+                <div class="x-actions">
+                    <div class="x-action">💬 ${post.replies}</div>
+                    <div class="x-action">🔁 ${post.rts}</div>
+                    <div class="x-action">❤️ ${post.likes}</div>
+                    <div class="x-action">📊 1.1B</div>
+                </div>
             </div>
         `;
-        container.appendChild(card);
+        container.appendChild(div);
     });
 }
 
@@ -8175,3 +8232,220 @@ window.renderInventory = function() {
         container.appendChild(div);
     });
 }
+// ==========================================
+// 👤 OLYSOCIAL: DİNAMİK PROFİL VE KULLANICI ADI MOTORU
+// ==========================================
+
+window.updateOlySocialProfile = function() {
+    // 1. Google (Firebase) üzerinden aktif kullanıcıyı al
+    const user = firebase.auth().currentUser;
+    let name = "Şampiyon";
+    let photo = "icon.png";
+    
+    if (user && user.displayName) {
+        name = user.displayName;
+        photo = user.photoURL || "icon.png";
+    } else {
+        // Eğer Firebase geç yüklenirse yerel önbellekten al
+        name = document.getElementById('profile-name-display').innerText || "Şampiyon";
+        photo = document.getElementById('header-profile-img').src || "icon.png";
+    }
+
+    // 2. Kullanıcı adını (@username) localStorage'dan al veya otomatik oluştur
+    let username = localStorage.getItem('olympus_username');
+    if (!username) {
+        // İsimdeki boşlukları sil, küçük harfe çevir ve rastgele 3 rakam ekle
+        let baseName = name.toLowerCase().replace(/[^a-z0-9]/g, '');
+        username = "@" + baseName + Math.floor(Math.random() * 900 + 100);
+        localStorage.setItem('olympus_username', username);
+    }
+
+    // 3. HTML Elementlerini Güncelle
+    const topAvatar = document.getElementById('oly-social-top-avatar');
+    const sidebarAvatar = document.getElementById('sidebar-avatar');
+    const sidebarName = document.getElementById('sidebar-name');
+    const sidebarUsername = document.getElementById('sidebar-username');
+
+    if (topAvatar) topAvatar.src = photo;
+    if (sidebarAvatar) sidebarAvatar.src = photo;
+    if (sidebarName) sidebarName.innerText = name;
+    if (sidebarUsername) sidebarUsername.innerText = username;
+
+    // 4. Takipçi İstatistiklerini Güncelle (Senin profilindeki verileri çeker)
+    const followingEl = document.getElementById('profile-following');
+    const followersEl = document.getElementById('profile-followers');
+    if (followingEl && document.getElementById('sidebar-following')) {
+        document.getElementById('sidebar-following').innerText = followingEl.innerText;
+    }
+    if (followersEl && document.getElementById('sidebar-followers')) {
+        document.getElementById('sidebar-followers').innerText = followersEl.innerText;
+    }
+};
+
+window.editOlyUsername = function() {
+    let current = localStorage.getItem('olympus_username') || "@kullanici";
+    let newUsername = prompt("Yeni kullanıcı adını belirle (Sistem başına @ işaretini otomatik ekleyecektir):", current.replace('@', ''));
+    
+    if (newUsername && newUsername.trim() !== "") {
+        // Boşlukları sil ve küçük harfe çevir
+        newUsername = newUsername.trim().toLowerCase().replace(/\s+/g, '');
+        // Başında @ yoksa ekle
+        if (!newUsername.startsWith('@')) newUsername = '@' + newUsername;
+        
+        localStorage.setItem('olympus_username', newUsername);
+        document.getElementById('sidebar-username').innerText = newUsername;
+        
+        if (navigator.vibrate) navigator.vibrate(20);
+        alert("Kullanıcı adın başarıyla güncellendi: " + newUsername);
+    }
+};
+
+window.openOlympusDashboard = function(tab = 'feed') {
+    // 1. OLYSOCIAL ekranını görünür yap
+    const dashboardScreen = document.getElementById('unified-dashboard-screen');
+    if(dashboardScreen) dashboardScreen.style.display = 'flex';
+    
+    // 2. İstenen sekmeyi aç (Ana Akış veya Kasa)
+    if(typeof switchDashboardTab === 'function') {
+        switchDashboardTab(tab);
+    }
+    
+    // 3. Google Profil verilerini ve Takipçi sayılarını anında güncelle
+    if(typeof updateOlySocialProfile === 'function') {
+        updateOlySocialProfile();
+    }
+};
+// OLYSOCIAL Kapatma Motoru
+window.closeOlympusDashboard = function() {
+    const dashboardScreen = document.getElementById('unified-dashboard-screen');
+    if(dashboardScreen) dashboardScreen.style.display = 'none';
+};
+
+// ========================================
+// 🛒 OLYMPUS KASA (MARKET) MOTORU & TEMALAR
+// ==========================================
+const marketItems = [
+    { id: 'theme_default', name: 'Midnight Gold (Orjinal)', desc: 'Karanlık ve altın tema.', price: 0, icon: '🌟', type: 'theme' },
+    { id: 'theme_cyberpunk', name: 'Cyberpunk Neon', desc: 'Neon yeşili renkler.', price: 500, icon: '💚', type: 'theme' },
+    { id: 'theme_midnight_blue', name: 'Sakarya Blue', desc: 'Derin mavi tonlar.', price: 500, icon: '💙', type: 'theme' },
+    { id: 'theme_tarsus_sunshine', name: 'Tarsus Sunshine', desc: 'Açık renkli, sıcak tema.', price: 1000, icon: '☀️', type: 'theme' },
+    { id: 'digi_python_mentor', name: 'Python Mentor', desc: 'Nadir yazılım ikonu.', price: 1200, icon: '💻', type: 'digi' },
+    { id: 'digi_plc_architect', name: 'PLC Architect', desc: 'Nadir otomasyon ikonu.', price: 1200, icon: '⚙️', type: 'digi' },
+    { id: 'life_supplement_contribution', name: 'Supplement Katkısı', desc: 'Takviyeler için birikim fonu.', price: 2000, icon: '🍫', type: 'life' },
+    { id: 'life_travel_contribution', name: 'Tarsus Yol Fonu', desc: 'Seyahat birikim hesabı.', price: 5000, icon: '✈️', type: 'life' }
+];
+
+window.renderMarket = function() {
+    const container = document.getElementById('dashboard-market-items-container');
+    if(!container) return;
+    container.innerHTML = ''; 
+    
+    let currentCoins = parseInt(localStorage.getItem('olympus_coins')) || 0;
+    let appliedTheme = localStorage.getItem('olympus_applied_theme') || 'theme_default';
+    
+    const coinEl = document.getElementById('dashboard-total-coins');
+    if(coinEl) coinEl.innerText = currentCoins;
+
+    marketItems.forEach(item => {
+        const canAfford = currentCoins >= item.price;
+        const isCurrentlyApplied = item.id === appliedTheme;
+        
+        let buyBtnHTML = ``;
+        if (item.id === 'theme_default' && item.type === 'theme' && appliedTheme === 'theme_default') {
+            buyBtnHTML = `<button class="market-buy-btn disabled">Aktif</button>`;
+        } else if (item.id === 'theme_default' && item.type === 'theme' && appliedTheme !== 'theme_default') {
+            buyBtnHTML = `<button class="market-buy-btn" onclick="applyTheme('theme_default')">Uygula</button>`;
+        } else if (isCurrentlyApplied) {
+            buyBtnHTML = `<button class="market-buy-btn disabled">Aktif</button>`;
+        } else if (canAfford) {
+            buyBtnHTML = `<button class="market-buy-btn" onclick="buyMarketItem('${item.id}', ${item.price}, '${item.name}', '${item.icon}', '${item.type}')">
+                ${item.price} OC
+            </button>`;
+        } else {
+            buyBtnHTML = `<button class="market-buy-btn disabled">${item.price} OC</button>`;
+        }
+        
+        const card = document.createElement('div');
+        card.className = 'market-card';
+        card.innerHTML = `
+            <div class="market-item-left"><div class="market-icon-wrapper">${item.icon}</div></div>
+            <div class="market-item-center">
+                <h3 class="market-title">${item.name}</h3>
+                <p class="market-desc">${item.desc}</p>
+            </div>
+            <div class="market-item-right">${buyBtnHTML}</div>
+        `;
+        container.appendChild(card);
+    });
+};
+
+window.buyMarketItem = function(itemId, price, name, icon, type) {
+    let currentCoins = parseInt(localStorage.getItem('olympus_coins')) || 0;
+    if (currentCoins >= price) {
+        currentCoins -= price;
+        localStorage.setItem('olympus_coins', currentCoins);
+        
+        // Envantere Ekle
+        let inventory = JSON.parse(localStorage.getItem('olympus_inventory')) || [];
+        inventory.unshift({ id: itemId, name: name, icon: icon, date: new Date().toLocaleDateString('tr-TR') });
+        localStorage.setItem('olympus_inventory', JSON.stringify(inventory));
+        if(typeof renderInventory === 'function') renderInventory();
+        
+        renderMarket(); 
+        logToSocialFeed(`Satın Alındı: ${name}`, 'Envantere eklendi.', icon, -price);
+        
+        if(typeof showDynamicIsland === 'function') showDynamicIsland("Satın Alım Başarılı!", `${name} eklendi.`, "🛍️", 0);
+        
+        if (type === 'theme') { applyTheme(itemId); }
+    }
+};
+
+window.applyTheme = function(themeId) {
+    localStorage.setItem('olympus_applied_theme', themeId);
+    if (themeId === 'theme_cyberpunk') {
+        document.documentElement.style.setProperty('--goldnova', '#00ff00');
+        document.documentElement.style.setProperty('--bg-dark', '#000'); 
+        document.documentElement.style.setProperty('--text-light', '#fff');
+    } else if (themeId === 'theme_midnight_blue') {
+        document.documentElement.style.setProperty('--goldnova', '#00d2ff');
+        document.documentElement.style.setProperty('--bg-dark', '#0a0a0a'); 
+        document.documentElement.style.setProperty('--text-light', '#eee');
+    } else if (themeId === 'theme_tarsus_sunshine') {
+        document.documentElement.style.setProperty('--goldnova', '#ffcc00');
+        document.documentElement.style.setProperty('--bg-dark', '#eee'); 
+        document.documentElement.style.setProperty('--text-light', '#333');
+    } else {
+        document.documentElement.style.setProperty('--goldnova', '#ffd700');
+        document.documentElement.style.setProperty('--bg-dark', '#050505'); 
+        document.documentElement.style.setProperty('--text-light', '#fff');
+    }
+    renderMarket();
+};
+
+// ==========================================
+// 🔍 ÜST SEKMELER (TABS) İÇİN FİLTRELEME
+// ==========================================
+const originalSwitchDashboardTab = window.switchDashboardTab;
+window.switchDashboardTab = function(tabName, clickedElement = null) {
+    originalSwitchDashboardTab(tabName, clickedElement);
+    
+    // Eğer üst sekmelere (Sana Özel, Galatasaray vs.) tıklandıysa akışı filtrele
+    if(clickedElement && clickedElement.classList.contains('x-tab')) {
+        const tabText = clickedElement.innerText.trim();
+        const container = document.getElementById('dashboard-feed-view');
+        if(!container) return;
+        
+        const posts = container.querySelectorAll('.x-post');
+        posts.forEach(post => {
+            post.style.display = 'flex'; // Önce hepsini göster
+            
+            if(tabText === 'Takip ediliyor' && post.innerHTML.includes('Reklam')) {
+                post.style.display = 'none'; // Reklamları gizle
+            } else if (tabText === 'Galatasaray' && !post.innerHTML.includes('Galatasaray')) {
+                post.style.display = 'none'; // Sadece Galatasaray postları
+            } else if (tabText === 'Yazılım' && !post.innerHTML.includes('Sistem Logu')) {
+                post.style.display = 'none'; // Sadece loglar (veya kodlama ile ilgili şeyler)
+            }
+        });
+    }
+};
