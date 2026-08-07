@@ -203,11 +203,11 @@ window.toggleDilalaMode = function () {
 
     if (isDilala) {
         let pass = prompt("🌸 Dilala Moduna giriş için şifreyi giriniz:");
-        
+
         if (pass === "19.11.2025" || pass === "19112025") {
             document.body.classList.add('dilala-mode');
             localStorage.setItem('olympus_dilala_mode', 'true');
-            
+
             // 1. Yeni Dilala Dashboard'u Göster
             document.getElementById('profile-dilala-btn-container').classList.remove('hidden');
             startDilalaTimer();
@@ -225,17 +225,17 @@ window.toggleDilalaMode = function () {
             alert("Hoşgeldin Aşguuuummm! 🌸💕\n\nSenin için özel kuralların ve programın yüklendi!");
         } else {
             alert("Hatalı şifre! Sadece özel kişiler girebilir. 🔒");
-            checkbox.checked = false; 
+            checkbox.checked = false;
             return;
         }
     } else {
         document.body.classList.remove('dilala-mode');
         localStorage.setItem('olympus_dilala_mode', 'false');
-        
+
         // Dashboard'u Gizle ve Görevleri Geri Yükle
         document.getElementById('profile-dilala-btn-container').classList.add('hidden');
         if (dilalaTimerInterval) clearInterval(dilalaTimerInterval);
-        
+
         let backupActs = JSON.parse(localStorage.getItem('olympus_acts_backup'));
         if (backupActs) {
             activities = backupActs;
@@ -254,7 +254,7 @@ function startDilalaTimer() {
     const relDate = new Date('2025-11-19T00:00:00');
     const meetDate = new Date('2025-07-26T00:00:00');
 
-    if(dilalaTimerInterval) clearInterval(dilalaTimerInterval);
+    if (dilalaTimerInterval) clearInterval(dilalaTimerInterval);
     renderDilalaCalendar(); // Takvimi çiz
 
     dilalaTimerInterval = setInterval(() => {
@@ -263,9 +263,9 @@ function startDilalaTimer() {
         // 1. İlişki ve Tanışma Geçen Süre Sayaçları
         let diffRel = now - relDate;
         let diffMeet = now - meetDate;
-        
-        if(diffRel > 0) document.getElementById('dilala-rel-counter').innerText = formatTimeDiff(diffRel);
-        if(diffMeet > 0) document.getElementById('dilala-meet-counter').innerText = formatTimeDiff(diffMeet);
+
+        if (diffRel > 0) document.getElementById('dilala-rel-counter').innerText = formatTimeDiff(diffRel);
+        if (diffMeet > 0) document.getElementById('dilala-meet-counter').innerText = formatTimeDiff(diffMeet);
 
         // 2. Yaklaşan Etkinliği Bulma ve Geri Sayım
         let nextEvent = null;
@@ -302,17 +302,17 @@ function formatTimeDiff(ms) {
 
 function renderDilalaCalendar() {
     const listEl = document.getElementById('dilala-events-list');
-    if(!listEl) return;
+    if (!listEl) return;
     listEl.innerHTML = '';
-    
+
     // Tarihleri yıl içindeki sıraya göre dizelim
-    let sortedDates = [...specialDates].sort((a,b) => (a.month*100+a.day) - (b.month*100+b.day));
-    
+    let sortedDates = [...specialDates].sort((a, b) => (a.month * 100 + a.day) - (b.month * 100 + b.day));
+
     sortedDates.forEach(ev => {
         listEl.innerHTML += `
             <div class="dilala-event-item">
                 <span class="event-name">${ev.icon} ${ev.name}</span>
-                <span class="event-date">${String(ev.day).padStart(2,'0')}.${String(ev.month).padStart(2,'0')}</span>
+                <span class="event-date">${String(ev.day).padStart(2, '0')}.${String(ev.month).padStart(2, '0')}</span>
             </div>
         `;
     });
@@ -341,11 +341,11 @@ document.addEventListener("DOMContentLoaded", () => {
         document.body.classList.add('dilala-mode');
         const dCheckbox = document.getElementById('dilala-toggle-checkbox');
         if (dCheckbox) dCheckbox.checked = true;
-        
+
         // ZAMAN KAPSÜLÜ YERİNE ARTIK PROFİLDEKİ BUTONU GÖSTER
         const dilalaBtn = document.getElementById('profile-dilala-btn-container');
-        if(dilalaBtn) dilalaBtn.classList.remove('hidden');
-        if(typeof startDilalaTimer === 'function') startDilalaTimer();
+        if (dilalaBtn) dilalaBtn.classList.remove('hidden');
+        if (typeof startDilalaTimer === 'function') startDilalaTimer();
     }
     document.getElementById('save-settings-btn').addEventListener('click', () => {
         const d = document.getElementById('start-date').value;
@@ -361,7 +361,7 @@ document.addEventListener("DOMContentLoaded", () => {
         checkDeloadEngine();
         // YENİ EKLENEN KISIM: Modal yüklendiğinde tıklama olaylarını dinlemeye başla
         initMuscleInteractions();
-        
+
     });
 
     const dateInput = document.getElementById('start-date');
@@ -599,36 +599,36 @@ function formatWorkoutTime(totalSeconds) {
 window.startActiveWorkout = function (dayData) {
     activeWorkout = dayData.ex;
     currentExIndex = 0;
-    currentSetIndex = 1; 
+    currentSetIndex = 1;
     isWorkoutMinimized = false;
     isResting = false;
-    
+
     const fab = document.querySelector('.fab-container');
     const oly = document.getElementById('oly-avatar');
-    if(fab) fab.style.display = 'none';
-    if(oly) oly.style.display = 'none';
+    if (fab) fab.style.display = 'none';
+    if (oly) oly.style.display = 'none';
 
     totalWorkoutSeconds = 0;
-    if(totalWorkoutInterval) clearInterval(totalWorkoutInterval);
+    if (totalWorkoutInterval) clearInterval(totalWorkoutInterval);
     document.getElementById('workout-total-time').innerText = "00:00"; // Emojisiz Apple stili
-    
+
     totalWorkoutInterval = setInterval(() => {
         totalWorkoutSeconds++;
         let timeFormatted = formatWorkoutTime(totalWorkoutSeconds);
         document.getElementById('workout-total-time').innerText = timeFormatted;
-        
+
         // Dinamik Ada formatı güncellendi
         if (isWorkoutMinimized && !isResting && activeWorkout[currentExIndex]) {
             updateWorkoutIsland(activeWorkout[currentExIndex].name, `Set ${currentSetIndex}/${totalSetsForEx}`, timeFormatted);
         }
     }, 1000);
-    
+
     document.getElementById('workout-modal').style.display = 'none';
     document.getElementById('active-workout-screen').classList.remove('hidden');
     const player = document.getElementById('spotify-floating-player');
     if (player) player.classList.remove('hidden');
 
-    if(typeof showDynamicIsland === 'function') showDynamicIsland("⚡ İdman Başlatıldı!");
+    if (typeof showDynamicIsland === 'function') showDynamicIsland("⚡ İdman Başlatıldı!");
 
     renderActiveExercise();
 }
@@ -639,11 +639,11 @@ function renderActiveExercise() {
         return;
     }
     const ex = activeWorkout[currentExIndex];
-    
+
     let setMatch = ex.scheme.match(/^(\d+)/);
     totalSetsForEx = setMatch ? parseInt(setMatch[1]) : 1;
-    
-    if(currentSetIndex > totalSetsForEx) {
+
+    if (currentSetIndex > totalSetsForEx) {
         currentExIndex++;
         currentSetIndex = 1;
         renderActiveExercise();
@@ -659,7 +659,7 @@ function renderActiveExercise() {
     let lastRecord = exHistory[ex.name];
     if (lastRecord) {
         document.getElementById('player-history-data').innerText = `${lastRecord.weight} kg / ${lastRecord.reps} Tekrar`;
-        document.getElementById('player-history-data').style.color = "#27ae60"; 
+        document.getElementById('player-history-data').style.color = "#27ae60";
     } else {
         document.getElementById('player-history-data').innerText = `Kayıt Yok`;
         document.getElementById('player-history-data').style.color = "#fff";
@@ -677,16 +677,16 @@ window.saveSetAndRest = function () {
     let currentWeight = document.getElementById('player-weight').value;
     let currentReps = document.getElementById('player-reps').value;
     let currentExName = activeWorkout[currentExIndex].name;
-    
+
     if (currentWeight && currentReps) {
         let exHistory = JSON.parse(localStorage.getItem('olympus_ex_history')) || {};
         let lastRecord = exHistory[currentExName];
-        
-        if(!lastRecord || parseFloat(currentWeight) >= parseFloat(lastRecord.weight)) {
-            exHistory[currentExName] = { 
-                weight: currentWeight, 
-                reps: currentReps, 
-                date: new Date().toLocaleDateString('tr-TR') 
+
+        if (!lastRecord || parseFloat(currentWeight) >= parseFloat(lastRecord.weight)) {
+            exHistory[currentExName] = {
+                weight: currentWeight,
+                reps: currentReps,
+                date: new Date().toLocaleDateString('tr-TR')
             };
             localStorage.setItem('olympus_ex_history', JSON.stringify(exHistory));
         }
@@ -696,7 +696,7 @@ window.saveSetAndRest = function () {
     document.getElementById('player-timer-display').classList.remove('hidden');
     document.getElementById('player-next-btn').classList.remove('hidden');
 
-    if(currentSetIndex >= totalSetsForEx) {
+    if (currentSetIndex >= totalSetsForEx) {
         document.getElementById('player-next-btn').innerText = "Sonraki Harekete Geç ⏭";
     } else {
         document.getElementById('player-next-btn').innerText = `Sonraki Sete Geç (${currentSetIndex + 1}/${totalSetsForEx}) ⏩`;
@@ -704,9 +704,9 @@ window.saveSetAndRest = function () {
 
     let sec = isExpressMode ? 45 : 90;
     document.getElementById('timer-seconds').innerText = sec;
-    
+
     isResting = true;
-    
+
     // YENİ DİNAMİK ADA: "Hareket | Set X Dinlenme | Süre"
     updateWorkoutIsland(currentExName, `Dinlenme (${currentSetIndex})`, sec);
 
@@ -714,14 +714,14 @@ window.saveSetAndRest = function () {
     timerInterval = setInterval(() => {
         sec--;
         document.getElementById('timer-seconds').innerText = sec;
-        
+
         if (isWorkoutMinimized) updateWorkoutIsland(currentExName, `Dinlenme (${currentSetIndex})`, sec);
-        
+
         if (sec <= 0) {
             clearInterval(timerInterval);
             isResting = false;
             if (navigator.vibrate) navigator.vibrate([400, 200, 400]);
-            if(typeof showDynamicIsland === 'function') showDynamicIsland("⏰ Dinlenme Bitti! Sete Başla!");
+            if (typeof showDynamicIsland === 'function') showDynamicIsland("⏰ Dinlenme Bitti! Sete Başla!");
         }
     }, 1000);
 }
@@ -729,40 +729,40 @@ window.saveSetAndRest = function () {
 window.nextExercise = function () {
     clearInterval(timerInterval);
     isResting = false;
-    currentSetIndex++; 
-    
-    if(isWorkoutMinimized) restoreWorkout();
+    currentSetIndex++;
+
+    if (isWorkoutMinimized) restoreWorkout();
     renderActiveExercise();
 }
 
-window.minimizeWorkout = function() {
+window.minimizeWorkout = function () {
     isWorkoutMinimized = true;
     document.getElementById('active-workout-screen').classList.add('hidden');
-    document.getElementById('app-content').classList.remove('hidden'); 
+    document.getElementById('app-content').classList.remove('hidden');
     document.getElementById('main-header').style.display = 'block';
-    
+
     const island = document.getElementById('dynamic-island');
     island.classList.add('active');
     island.classList.add('workout-mode');
     island.onclick = restoreWorkout;
 };
 
-window.restoreWorkout = function() {
+window.restoreWorkout = function () {
     isWorkoutMinimized = false;
     document.getElementById('active-workout-screen').classList.remove('hidden');
-    
+
     const island = document.getElementById('dynamic-island');
     island.classList.remove('active');
     island.classList.remove('workout-mode');
-    island.onclick = function() { this.classList.remove('active'); }; 
+    island.onclick = function () { this.classList.remove('active'); };
 };
 
 function updateWorkoutIsland(exName, setInfo, timeVal) {
     const island = document.getElementById('dynamic-island');
     const textEl = document.getElementById('di-text');
-    
-    if(island && island.classList.contains('active')) {
-        if(island.classList.contains('workout-mode')) {
+
+    if (island && island.classList.contains('active')) {
+        if (island.classList.contains('workout-mode')) {
             // İDMAN MODU: 2 Satırlı, Şık, Kalın Ada Görünümü (İkonlara çarpmasın diye padding eklendi)
             textEl.innerHTML = `
                 <div style="text-align: center; color:var(--goldnova); font-weight:900; font-size: 15px; margin-bottom: 5px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; padding: 0 15px;">${exName}</div>
@@ -781,16 +781,16 @@ function updateWorkoutIsland(exName, setInfo, timeVal) {
 window.finishWorkout = function () {
     clearInterval(timerInterval);
     clearInterval(totalWorkoutInterval);
-    
+
     // FAB ve OLY'yi Geri Getir
     const fab = document.querySelector('.fab-container');
     const oly = document.getElementById('oly-avatar');
-    if(fab) fab.style.display = 'flex';
-    if(oly) oly.style.display = 'flex';
+    if (fab) fab.style.display = 'flex';
+    if (oly) oly.style.display = 'flex';
 
     document.getElementById('active-workout-screen').classList.add('hidden');
     document.getElementById('main-header').style.display = 'block';
-    if(typeof confetti === 'function') confetti({ particleCount: 150, spread: 80, colors: ['#f6c000', '#fff'] });
+    if (typeof confetti === 'function') confetti({ particleCount: 150, spread: 80, colors: ['#f6c000', '#fff'] });
 
     const activeProg = document.body.classList.contains('dilala-mode') ? dilalaProgramData['p1'] : programData[currentPhase];
     const activeDayData = activeProg.find(x => x.day == calculatedDay);
@@ -819,7 +819,7 @@ window.finishWorkout = function () {
     }
 
     if (window.addOlympusPoints) window.addOlympusPoints(150, "İdman Tamamlandı");
-    
+
     let supps = JSON.parse(localStorage.getItem('olympus_supp_stock'));
     if (supps) {
         if (supps.whey > 0) supps.whey--;
@@ -833,24 +833,24 @@ window.finishWorkout = function () {
 }
 
 window.exitWorkoutPlayer = function () {
-    if(confirm("🛑 DİKKAT!\nİdmanı yarıda kesip çıkmak istediğine emin misin? Bu işlem idmanı sonlandırır.")) {
+    if (confirm("🛑 DİKKAT!\nİdmanı yarıda kesip çıkmak istediğine emin misin? Bu işlem idmanı sonlandırır.")) {
         clearInterval(timerInterval);
         clearInterval(totalWorkoutInterval);
-        
+
         // FAB ve OLY'yi Geri Getir
         const fab = document.querySelector('.fab-container');
         const oly = document.getElementById('oly-avatar');
-        if(fab) fab.style.display = 'flex';
-        if(oly) oly.style.display = 'flex';
+        if (fab) fab.style.display = 'flex';
+        if (oly) oly.style.display = 'flex';
 
         document.getElementById('active-workout-screen').classList.add('hidden');
         document.getElementById('main-header').style.display = 'block';
-        
+
         const island = document.getElementById('dynamic-island');
-        if(island) {
+        if (island) {
             island.classList.remove('active');
             island.classList.remove('workout-mode');
-            island.onclick = function() { this.classList.remove('active'); };
+            island.onclick = function () { this.classList.remove('active'); };
         }
     }
 }
@@ -1215,7 +1215,7 @@ window.openTrackingModal = function (type) {
     else if (type === 'past_workouts') {
         title.innerText = "Geçmiş İdmanlar";
         let pastWorkouts = JSON.parse(localStorage.getItem('olympus_past_workouts')) || [];
-        if(pastWorkouts.length === 0) {
+        if (pastWorkouts.length === 0) {
             body.innerHTML = `<p style="color:#888; text-align:center;">Henüz tamamlanmış bir idman kaydı yok.</p>`;
         } else {
             let html = '<div style="display:flex; flex-direction:column; gap:10px;">';
@@ -1234,7 +1234,7 @@ window.openTrackingModal = function (type) {
             html += '</div>';
             body.innerHTML = html;
         }
-    }    
+    }
     document.getElementById('tracking-modal').style.display = 'flex';
 }
 
@@ -7220,20 +7220,100 @@ window.toggleFAB = function () {
     if (navigator.vibrate) navigator.vibrate(20);
 };
 
-// Tepeden İnen Dynamic Island Motoru
-window.showDynamicIsland = function (text) {
+// ==========================================
+// 💰 HABIT ECONOMY & DİNAMİK ADA MOTORU (HİBRİT)
+// ==========================================
+
+let olympusCoins = parseInt(localStorage.getItem('olympus_coins')) || 0;
+const coinDisplay = document.getElementById('island-coin-display');
+if (coinDisplay) coinDisplay.innerText = `${olympusCoins} OC`;
+
+window.closeDynamicIsland = function () {
     const island = document.getElementById('dynamic-island');
+    if (island) island.classList.remove('active');
+}
+
+// 🏝️ Senin Orijinal Fonksiyonunun Gelişmiş Hali
+window.showDynamicIsland = function (titleOrText, description = "", icon = "⚡", coinReward = 0, showWave = false) {
+    const island = document.getElementById('dynamic-island');
+    if (!island) return;
+
+    // 1. DURUM: ESKİ SİSTEM ÇAĞRISI (Eğer sadece metin gönderilmişse)
+    // Örn: showDynamicIsland("Aktif Antrenman");
+    if (description === "" && coinReward === 0) {
+        const textEl = document.getElementById('di-text');
+        if (textEl) {
+            textEl.innerText = titleOrText;
+            textEl.style.display = 'inline-block'; // Eski metni göster
+        }
+        if (coinDisplay) coinDisplay.style.display = 'none'; // Coin'i gizle
+
+        const waveEl = document.getElementById('di-wave-container');
+        if (waveEl) waveEl.style.display = 'flex'; // Dalgaları aç
+
+        island.classList.add('active');
+        if (navigator.vibrate) navigator.vibrate([10, 30, 10]);
+
+        // 5 Saniye sonra adayı otomatik gizle
+        setTimeout(() => { island.classList.remove('active'); }, 5000);
+        return; // Motoru burada durdur, aşağıya geçmesin
+    }
+
+    // 2. DURUM: YENİ COIN (HABIT ECONOMY) ÇAĞRISI
+    // Örn: showDynamicIsland("Koşu Tamamlandı", "5km koşuldu", "🏃‍♂️", 50);
     const textEl = document.getElementById('di-text');
+    if (textEl) textEl.style.display = 'none'; // Eski metni gizle
+    if (coinDisplay) coinDisplay.style.display = 'inline-block'; // Coin'i göster
 
-    if (textEl) textEl.innerText = text;
-    if (island) island.classList.add('active');
-    if (navigator.vibrate) navigator.vibrate([10, 30, 10]);
+    document.getElementById('island-title').innerText = titleOrText;
+    document.getElementById('island-desc').innerText = description;
+    document.getElementById('island-icon-large').innerText = icon;
 
-    // 5 Saniye sonra adayı otomatik gizle
-    setTimeout(() => {
-        if (island) island.classList.remove('active');
-    }, 5000);
+    const waveEl = document.getElementById('di-wave-container');
+    if (waveEl) waveEl.style.display = showWave ? 'flex' : 'none';
+
+    // Coin kazanımı varsa bakiyeye ekle
+    if (coinReward > 0) {
+        olympusCoins += coinReward;
+        localStorage.setItem('olympus_coins', olympusCoins);
+        document.getElementById('island-reward').innerText = `+${coinReward} 💰`;
+        document.getElementById('island-reward').style.display = 'block';
+        if (coinDisplay) coinDisplay.innerText = `${olympusCoins} OC`;
+    } else {
+        document.getElementById('island-reward').style.display = 'none';
+    }
+
+    island.classList.add('active');
+    island.classList.add('expanded'); // Adayı aşağı doğru büyüt
+    if (navigator.vibrate) navigator.vibrate([50, 100, 50]);
+
+    // 5 Saniye sonra adayı otomatik gizle ve küçült
+    if (!showWave) {
+        setTimeout(() => {
+            island.classList.remove('active');
+            island.classList.remove('expanded');
+        }, 5000);
+    }
+
+    // Kazanımı Sosyal/Gelişim Panosuna Kaydet
+    logToSocialFeed(titleOrText, description, icon, coinReward);
 };
+
+// 📈 Gelişim Panosu (Social Feed) Kaydedici
+function logToSocialFeed(title, description, icon, coinReward) {
+    let feed = JSON.parse(localStorage.getItem('olympus_social_feed')) || [];
+    feed.unshift({
+        id: Date.now(),
+        date: new Date().toLocaleDateString('tr-TR'),
+        time: new Date().toLocaleTimeString('tr-TR', { hour: '2-digit', minute: '2-digit' }),
+        title: title,
+        desc: description,
+        icon: icon,
+        earned: coinReward
+    });
+    if (feed.length > 50) feed.pop();
+    localStorage.setItem('olympus_social_feed', JSON.stringify(feed));
+}
 // ==========================================
 // 🎯 APPLE WATCH HALKALARI VE GALERİ DÜZENLEMELERİ
 // ==========================================
@@ -7275,10 +7355,10 @@ document.addEventListener('DOMContentLoaded', () => {
 let zenInterval;
 let zenTimeout1, zenTimeout2;
 
-window.startZenMode = function() {
+window.startZenMode = function () {
     document.getElementById('zen-screen').classList.remove('hidden');
-    if(typeof toggleFAB === 'function') toggleFAB(); // FAB menüsünü kapat
-    
+    if (typeof toggleFAB === 'function') toggleFAB(); // FAB menüsünü kapat
+
     // Motoru hemen başlat ve her 19 saniyede bir tekrar et (4+7+8 = 19)
     runZenCycle();
     zenInterval = setInterval(runZenCycle, 19000);
@@ -7308,7 +7388,7 @@ function runZenCycle() {
     }, 11000);
 }
 
-window.stopZenMode = function() {
+window.stopZenMode = function () {
     clearInterval(zenInterval);
     clearTimeout(zenTimeout1);
     clearTimeout(zenTimeout2);
@@ -7318,29 +7398,29 @@ window.stopZenMode = function() {
 // ==========================================
 // ✈️ KAVUŞMA SAYACI DİNAMİK MOTORU
 // ==========================================
-window.openReunionSettings = function() {
+window.openReunionSettings = function () {
     document.getElementById('reunion-modal').classList.remove('hidden');
-    
+
     // Hafızadaki eski verileri kutulara doldur (Yazmaya üşenmemen için)
     const savedFrom = localStorage.getItem('dilala_reunion_from') || 'Sakarya';
     const savedTo = localStorage.getItem('dilala_reunion_to') || 'Tarsus';
-    const savedDate = localStorage.getItem('dilala_reunion_date'); 
-    
+    const savedDate = localStorage.getItem('dilala_reunion_date');
+
     document.getElementById('reunion-input-from').value = savedFrom;
     document.getElementById('reunion-input-to').value = savedTo;
-    if(savedDate) document.getElementById('reunion-input-date').value = savedDate;
+    if (savedDate) document.getElementById('reunion-input-date').value = savedDate;
 }
 
-window.closeReunionSettings = function() {
+window.closeReunionSettings = function () {
     document.getElementById('reunion-modal').classList.add('hidden');
 }
 
-window.saveReunionSettings = function() {
+window.saveReunionSettings = function () {
     const from = document.getElementById('reunion-input-from').value || 'Nereden';
     const to = document.getElementById('reunion-input-to').value || 'Nereye';
     const date = document.getElementById('reunion-input-date').value;
 
-    if(!date) {
+    if (!date) {
         alert("Lütfen kavuşacağınız tarihi seç!");
         return;
     }
@@ -7356,20 +7436,20 @@ window.saveReunionSettings = function() {
 
 function updateReunionCounter() {
     const counterEl = document.getElementById('reunion-countdown');
-    if(!counterEl) return;
+    if (!counterEl) return;
 
     // Şehir isimlerini hafızadan çekip ekrana bas
     const savedFrom = localStorage.getItem('dilala_reunion_from') || 'Sakarya';
     const savedTo = localStorage.getItem('dilala_reunion_to') || 'Tarsus';
     const fromEl = document.getElementById('reunion-from-city');
     const toEl = document.getElementById('reunion-to-city');
-    if(fromEl) fromEl.innerText = savedFrom;
-    if(toEl) toEl.innerText = savedTo;
+    if (fromEl) fromEl.innerText = savedFrom;
+    if (toEl) toEl.innerText = savedTo;
 
     const savedDate = localStorage.getItem('dilala_reunion_date');
-    
+
     // Eğer henüz tarih seçilmediyse kullanıcıyı uyar
-    if(!savedDate) {
+    if (!savedDate) {
         counterEl.innerHTML = "<span style='font-size:16px; color:#ffb3c6;'>Hedef Seçmek İçin Dokun</span>";
         return;
     }
@@ -7377,7 +7457,7 @@ function updateReunionCounter() {
     const targetDate = new Date(savedDate);
     const now = new Date();
     const diff = targetDate - now;
-    
+
     if (diff <= 0) {
         counterEl.innerHTML = "🎉 KAVUŞTUK! 🎉";
         counterEl.style.color = "#27ae60";
@@ -7396,7 +7476,7 @@ function updateReunionCounter() {
 
 // Bunu DilalaTimer'a entegre et
 const originalStartDilalaTimer = startDilalaTimer;
-startDilalaTimer = function() {
+startDilalaTimer = function () {
     originalStartDilalaTimer();
     setInterval(updateReunionCounter, 1000);
     checkLetterStatus(); // Posta kutusu durumunu kontrol et
@@ -7410,14 +7490,14 @@ function checkLetterStatus() {
     const statusIcon = document.getElementById('letter-status-icon');
     const lockIcon = document.querySelector('.letter-lock');
 
-    if(lastOpenedDate === todayStr) {
+    if (lastOpenedDate === todayStr) {
         statusText.innerText = "Bugünün notu okundu. Yarına kadar bekle!";
         statusIcon.innerText = "📬";
-        if(lockIcon) lockIcon.innerText = "⏳";
+        if (lockIcon) lockIcon.innerText = "⏳";
     } else {
         statusText.innerText = "Yeni bir not seni bekliyor, açmak için dokun!";
         statusIcon.innerText = "💌";
-        if(lockIcon) lockIcon.innerText = "🔑";
+        if (lockIcon) lockIcon.innerText = "🔑";
     }
 }
 const loveLetters = [
@@ -7427,28 +7507,28 @@ const loveLetters = [
     "Aramızdaki kilometreler, sana olan sevgimin yanında bir hiç kalır. İyi ki varsın!",
     "Her yeni gün, sana kavuşacağım o güne bir adım daha yaklaşmak demek."
 ];
-window.openLoveLetter = function() {
+window.openLoveLetter = function () {
     const todayStr = new Date().toLocaleDateString('tr-TR');
     const lastOpenedDate = localStorage.getItem('dilala_letter_date');
     let currentIndex = parseInt(localStorage.getItem('dilala_letter_index')) || 0;
 
-    if(lastOpenedDate === todayStr) {
+    if (lastOpenedDate === todayStr) {
         // Zaten açılmışsa o günkü notu tekrar göster
         alert(`📬 Bugünün Notu:\n\n"${loveLetters[currentIndex]}"`);
     } else {
         // Yeni gün, yeni not
         if (navigator.vibrate) navigator.vibrate([100, 50, 100]);
         let nextIndex = (currentIndex + 1) % loveLetters.length;
-        if(lastOpenedDate === null) nextIndex = 0; // İlk günse sıfırdan başla
-        
+        if (lastOpenedDate === null) nextIndex = 0; // İlk günse sıfırdan başla
+
         localStorage.setItem('dilala_letter_date', todayStr);
         localStorage.setItem('dilala_letter_index', nextIndex);
-        
+
         alert(`✨ Mektup Kilidi Açıldı! ✨\n\n"${loveLetters[nextIndex]}"`);
         checkLetterStatus();
     }
 }
-window.openDilalaScreen = function() {
+window.openDilalaScreen = function () {
     const screen = document.getElementById('dilala-special-screen');
     if (screen) {
         screen.style.display = 'flex'; // Sınıf yerine doğrudan display açıyoruz
@@ -7458,7 +7538,7 @@ window.openDilalaScreen = function() {
     }
 }
 
-window.closeDilalaScreen = function() {
+window.closeDilalaScreen = function () {
     const screen = document.getElementById('dilala-special-screen');
     if (screen) {
         screen.style.display = 'none'; // Doğrudan kapatıyoruz
@@ -7482,54 +7562,54 @@ let cardioUserMarker = null;
 let lastKnownLocation = null;
 let isFirstLocation = true;
 
-window.openCardioScreen = function(type) {
-    if(typeof toggleFAB === 'function') toggleFAB(); 
-    
+window.openCardioScreen = function (type) {
+    if (typeof toggleFAB === 'function') toggleFAB();
+
     // Alttaki menüleri tamamen gizle ki butonları ezmesin
     const fabContainer = document.querySelector('.fab-container');
-    if(fabContainer) fabContainer.style.display = 'none';
-    
+    if (fabContainer) fabContainer.style.display = 'none';
+
     cardioType = type;
     document.getElementById('cardio-screen').style.display = 'flex';
     document.getElementById('cardio-title').innerText = type === 'run' ? "🏃‍♂️ Serbest Koşu" : "🚴‍♂️ Açık Hava Bisiklet";
-    
+
     clearInterval(cardioInterval);
-    if(geoWatchId) navigator.geolocation.clearWatch(geoWatchId);
+    if (geoWatchId) navigator.geolocation.clearWatch(geoWatchId);
     cardioSeconds = 0;
     cardioDistanceKm = 0;
     cardioPath = [];
     isFirstLocation = true;
     lastKnownLocation = null;
-    
+
     updateCardioDisplay();
     document.getElementById('cardio-distance-display').innerText = "0.00";
     document.getElementById('cardio-pace-display').innerText = "--:--";
-    
+
     document.getElementById('cardio-start-btn').style.display = 'block';
     document.getElementById('cardio-action-btns').style.display = 'none';
     document.getElementById('cardio-live-dashboard').style.display = 'none';
 }
 
-window.closeCardioScreen = function() {
+window.closeCardioScreen = function () {
     clearInterval(cardioInterval);
-    if(geoWatchId) navigator.geolocation.clearWatch(geoWatchId);
+    if (geoWatchId) navigator.geolocation.clearWatch(geoWatchId);
     document.getElementById('cardio-screen').style.display = 'none';
-    
+
     // Alt menüleri geri getir
     const fabContainer = document.querySelector('.fab-container');
-    if(fabContainer) fabContainer.style.display = 'flex';
+    if (fabContainer) fabContainer.style.display = 'flex';
 }
 
-window.startCardioTimer = function() {
+window.startCardioTimer = function () {
     document.getElementById('cardio-start-btn').style.display = 'none';
     document.getElementById('cardio-action-btns').style.display = 'flex';
-    document.getElementById('cardio-live-dashboard').style.display = 'flex'; 
-    
+    document.getElementById('cardio-live-dashboard').style.display = 'flex';
+
     initCardioMap();
     startGPSTracking();
 
     if (navigator.vibrate) navigator.vibrate([100, 100, 100]);
-    if(typeof showDynamicIsland === 'function') showDynamicIsland(cardioType === 'run' ? "🛰️ Koşu Takip Ediliyor!" : "🛰️ Sürüş Takip Ediliyor!");
+    if (typeof showDynamicIsland === 'function') showDynamicIsland(cardioType === 'run' ? "🛰️ Koşu Takip Ediliyor!" : "🛰️ Sürüş Takip Ediliyor!");
 
     cardioInterval = setInterval(() => {
         cardioSeconds++;
@@ -7542,20 +7622,20 @@ function initCardioMap() {
     if (!cardioMap) {
         cardioMap = L.map('cardio-map', { zoomControl: false }).setView([40.77, 30.39], 15);
         L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', { attribution: '© OS' }).addTo(cardioMap);
-        cardioPolyline = L.polyline([], {color: '#ff4a00', weight: 5, opacity: 0.8, shadowBlur: 10, shadowColor: '#ff4a00'}).addTo(cardioMap);
+        cardioPolyline = L.polyline([], { color: '#ff4a00', weight: 5, opacity: 0.8, shadowBlur: 10, shadowColor: '#ff4a00' }).addTo(cardioMap);
     } else {
         cardioPolyline.setLatLngs([]);
-        if(cardioUserMarker) { 
-            cardioMap.removeLayer(cardioUserMarker); 
-            cardioUserMarker = null; 
+        if (cardioUserMarker) {
+            cardioMap.removeLayer(cardioUserMarker);
+            cardioUserMarker = null;
         }
     }
     setTimeout(() => { cardioMap.invalidateSize(); }, 300);
 }
 
 // YENİ MERKEZLEME FONKSİYONU 📍
-window.recenterCardioMap = function() {
-    if(lastKnownLocation && cardioMap) {
+window.recenterCardioMap = function () {
+    if (lastKnownLocation && cardioMap) {
         cardioMap.flyTo(lastKnownLocation, 17, { animate: true, duration: 1 });
     }
 }
@@ -7568,19 +7648,19 @@ function startGPSTracking() {
                 const lng = position.coords.longitude;
                 const newPos = [lat, lng];
                 lastKnownLocation = newPos;
-                
+
                 cardioPath.push(newPos);
                 cardioPolyline.setLatLngs(cardioPath);
-                
+
                 // MAVİ NOKTAYI GÜNCELLE
-                if(!cardioUserMarker) {
+                if (!cardioUserMarker) {
                     cardioUserMarker = L.circleMarker(newPos, { radius: 8, fillColor: '#00d2ff', color: '#fff', weight: 2, opacity: 1, fillOpacity: 0.9 }).addTo(cardioMap);
                 } else {
                     cardioUserMarker.setLatLng(newPos);
                 }
 
                 // Sadece ilk sinyalde kamerayı zorla merkeze alır, sonra kullanıcı haritayı özgürce kaydırabilir
-                if(isFirstLocation) {
+                if (isFirstLocation) {
                     cardioMap.setView(newPos, 16);
                     isFirstLocation = false;
                 }
@@ -7592,9 +7672,9 @@ function startGPSTracking() {
                     document.getElementById('cardio-distance-display').innerText = cardioDistanceKm.toFixed(2);
                 }
             },
-            (error) => { 
-                console.error("GPS Sinyali Alınamıyor: ", error); 
-                if(error.code === 1) {
+            (error) => {
+                console.error("GPS Sinyali Alınamıyor: ", error);
+                if (error.code === 1) {
                     alert("📍 GPS Hatası: Haritanın çalışması için tarayıcıdan (adres çubuğundaki kilit ikonundan) 'Konum' izni vermen gerekiyor patron!");
                 }
             },
@@ -7604,11 +7684,11 @@ function startGPSTracking() {
 }
 
 function calculateHaversineDistance(lat1, lon1, lat2, lon2) {
-    const R = 6371; 
+    const R = 6371;
     const dLat = (lat2 - lat1) * Math.PI / 180;
     const dLon = (lon2 - lon1) * Math.PI / 180;
-    const a = Math.sin(dLat/2) * Math.sin(dLat/2) + Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) * Math.sin(dLon/2) * Math.sin(dLon/2);
-    const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+    const a = Math.sin(dLat / 2) * Math.sin(dLat / 2) + Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) * Math.sin(dLon / 2) * Math.sin(dLon / 2);
+    const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
     return R * c;
 }
 
@@ -7616,12 +7696,12 @@ function updateCardioDisplay() {
     const h = Math.floor(cardioSeconds / 3600);
     const m = Math.floor((cardioSeconds % 3600) / 60);
     const s = cardioSeconds % 60;
-    document.getElementById('cardio-timer-display').innerText = 
+    document.getElementById('cardio-timer-display').innerText =
         `${h > 0 ? h.toString().padStart(2, '0') + ':' : ''}${m.toString().padStart(2, '0')}:${s.toString().padStart(2, '0')}`;
 }
 
 function calculateLivePace() {
-    if(cardioDistanceKm <= 0.05) return; 
+    if (cardioDistanceKm <= 0.05) return;
     const totalMinutes = cardioSeconds / 60;
     const paceDec = totalMinutes / cardioDistanceKm;
     const paceMin = Math.floor(paceDec);
@@ -7629,14 +7709,14 @@ function calculateLivePace() {
     document.getElementById('cardio-pace-display').innerText = `${paceMin}:${paceSec.toString().padStart(2, '0')}`;
 }
 
-window.stopCardioTimer = function() {
+window.stopCardioTimer = function () {
     clearInterval(cardioInterval);
-    if(geoWatchId) navigator.geolocation.clearWatch(geoWatchId);
+    if (geoWatchId) navigator.geolocation.clearWatch(geoWatchId);
 }
 
 // 🏆 GEÇMİŞ ANTRENMANLARA KAYDETME
-window.saveCardioSession = function() {
-    if(cardioDistanceKm <= 0) {
+window.saveCardioSession = function () {
+    if (cardioDistanceKm <= 0) {
         alert("Hiç mesafe kat etmemişsin şampiyon, hareket et!");
         return;
     }
@@ -7670,30 +7750,30 @@ const dilalaMemories = [
     { img: 'https://picsum.photos/400/400?random=5', note: 'Zaman dursa ve bu anın içinde sonsuza dek kalsak...' }
 ];
 
-window.openPolaroidWall = function() {
+window.openPolaroidWall = function () {
     document.getElementById('polaroid-wall-screen').style.display = 'flex';
     renderPolaroids();
 }
 
-window.closePolaroidWall = function() {
+window.closePolaroidWall = function () {
     document.getElementById('polaroid-wall-screen').style.display = 'none';
 }
 
 function renderPolaroids() {
     const container = document.getElementById('polaroid-container');
     container.innerHTML = '';
-    
+
     container.style.display = 'block';
     container.style.position = 'relative';
     container.style.width = '100%';
     container.style.height = '100%';
     container.style.overflowY = 'auto'; // Aşağı kaydırmayı açar
-    
+
     const scrollArea = document.createElement('div');
     scrollArea.style.position = 'relative';
     scrollArea.style.width = '100%';
     // Duvarın boyunu 850px'den 1600px'e çıkardık (Kaydırdıkça devam eder)
-    scrollArea.style.height = '1600px'; 
+    scrollArea.style.height = '1600px';
     container.appendChild(scrollArea);
 
     // İp sayısını 3'ten 6'ya çıkardık
@@ -7707,9 +7787,9 @@ function renderPolaroids() {
     ];
 
     function getWireSag(xPercent) {
-        const ellipseX = xPercent + 10; 
-        const dx = (ellipseX - 60) / 60; 
-        return 40 * (1 + Math.sqrt(1 - (dx * dx))); 
+        const ellipseX = xPercent + 10;
+        const dx = (ellipseX - 60) / 60;
+        return 40 * (1 + Math.sqrt(1 - (dx * dx)));
     }
 
     // 1. İpleri ve Minik Ampulleri Gerelim
@@ -7717,15 +7797,15 @@ function renderPolaroids() {
         const wireEl = document.createElement('div');
         wireEl.className = 'horizontal-led-wire';
         wireEl.style.top = `${wire.top}px`;
-        
+
         // Her ipe 10 yerine 15 LED ekledik, daha ışıl ışıl olacak
-        for(let i=0; i<15; i++) {
+        for (let i = 0; i < 15; i++) {
             const bulb = document.createElement('div');
             bulb.className = 'wire-bulb';
-            
-            const xPercent = 2 + (Math.random() * 96); 
-            bulb.style.left = `${xPercent}%`; 
-            bulb.style.top = `${getWireSag(xPercent)}px`; 
+
+            const xPercent = 2 + (Math.random() * 96);
+            bulb.style.left = `${xPercent}%`;
+            bulb.style.top = `${getWireSag(xPercent)}px`;
             bulb.style.animationDelay = `${Math.random() * 3}s`;
             wireEl.appendChild(bulb);
         }
@@ -7752,17 +7832,17 @@ function renderPolaroids() {
     dilalaMemories.forEach((mem, index) => {
         const slot = photoSlots[index % photoSlots.length];
         const targetWire = wires[slot.wireIndex];
-        
+
         const sagY = getWireSag(slot.left);
-        const topPos = targetWire.top + sagY - 12; 
+        const topPos = targetWire.top + sagY - 12;
 
         const wrap = document.createElement('div');
         wrap.className = 'polaroid-wrap';
         wrap.style.top = `${topPos}px`;
         wrap.style.left = `${slot.left}%`;
-        wrap.style.transform = `rotate(${slot.rot}deg)`; 
+        wrap.style.transform = `rotate(${slot.rot}deg)`;
         wrap.style.zIndex = index + 5;
-        
+
         wrap.innerHTML = `
             <div class="wood-clip" style="transform: translateX(-50%) rotate(${Math.random() * 16 - 8}deg);"></div>
             <div class="polaroid-card" onclick="togglePolaroidFlip(this)">
@@ -7778,9 +7858,9 @@ function renderPolaroids() {
     });
 }
 // Fotoğrafa tıklayınca öne alıp döndüren fonksiyon
-window.togglePolaroidFlip = function(cardElement) {
+window.togglePolaroidFlip = function (cardElement) {
     const wrap = cardElement.parentElement;
-    
+
     // Zaten dönmüşse geri çevir
     if (cardElement.classList.contains('flipped')) {
         cardElement.classList.remove('flipped');
@@ -7791,10 +7871,307 @@ window.togglePolaroidFlip = function(cardElement) {
             el.classList.remove('flipped');
             el.parentElement.classList.remove('active-front');
         });
-        
+
         // Tıklananı en öne getir ve çevir
         wrap.classList.add('active-front');
         cardElement.classList.add('flipped');
         if (navigator.vibrate) navigator.vibrate(50); // Hissiyat
     }
+}
+// ==========================================
+// 🏆 UNIFIED LIFE & GELİŞİM PANOSU MOTORU
+// ==========================================
+
+// 1. Mağaza Rafındaki Ürünler (Çeşitlendirildi ve Temalar Eklendi)
+// ID'ler: Digital Koleksiyon (digi_), Gerçek Hayat Ödülü (life_), Tema (theme_)
+const marketItems = [
+    // --- TEMALAR (Digital Özelleştirme) ---
+    { id: 'theme_default', name: 'Midnight Gold (Kendi Temamız)', desc: 'Sistemin orjinal karanlık ve altın teması.', price: 0, icon: '🌟', type: 'theme' },
+    { id: 'theme_cyberpunk', name: 'Cyberpunk Neon Teması', desc: 'Sistemin neon yeşili renklere büründürür.', price: 500, icon: '💚', type: 'theme' },
+    { id: 'theme_ midnight_blue', name: 'Sakarya Blue Teması', desc: 'Derin mavi tonlarında karanlık bir tema.', price: 500, icon: '💙', type: 'theme' },
+    { id: 'theme_tarsus_sunshine', name: 'Tarsus Sunshine Teması (Açık)', desc: 'Açık renkli, sıcak sarı bir tema.', price: 1000, icon: '☀️', type: 'theme' },
+
+    // --- DİGİTAL KOLEKSİYONLAR & ROZETLER ---
+    { id: 'digi_python_mentor', name: 'Python Mentor Rozeti', desc: 'Profilinde parlayacak nadir bir yazılım ikonu.', price: 1200, icon: '💻', type: 'digi' },
+    { id: 'digi_plc_architect', name: 'PLC Architect Rozeti', desc: 'Profilinde parlayacak nadir bir otomasyon ikonu.', price: 1200, icon: '⚙️', type: 'digi' },
+
+    // --- GERÇEK HAYAT ÖDÜLLERİ ---
+    { id: 'life_supplement_contribution', name: 'Supplement Fonuna Katkı', desc: 'Takviyelerin için birikim hesabına birikim fonu kilitler.', price: 2000, icon: '🍫', type: 'life' },
+    { id: 'life_travel_contribution', name: 'Tarsus Yol Fonu', desc: 'Seyahat birikim hesabına birikim fonu kilitler.', price: 5000, icon: '✈️', type: 'life' }
+];
+
+let appliedTheme = localStorage.getItem('olympus_applied_theme') || 'theme_default';
+
+// 2. Açma Fonksiyonu (Varsayılan olarak 'feed' sekmesi açılır)
+window.openOlympusDashboard = function (tab = 'feed') {
+    document.getElementById('unified-dashboard-screen').style.display = 'flex';
+    switchDashboardTab(tab);
+}
+
+window.closeOlympusDashboard = function () {
+    document.getElementById('unified-dashboard-screen').style.display = 'none';
+}
+
+// 3. Sekme Değiştirme Fonksiyonu
+window.switchDashboardTab = function (tabName) {
+    const feedBtn = document.getElementById('tab-feed-btn');
+    const marketBtn = document.getElementById('tab-market-btn');
+    const feedView = document.getElementById('dashboard-feed-view');
+    const marketView = document.getElementById('dashboard-market-view');
+    const balanceBar = document.getElementById('market-balance-bar');
+
+    // Arayüzü Sıfırla
+    feedBtn.style.color = '#888'; feedBtn.style.borderBottomColor = 'transparent';
+    marketBtn.style.color = '#888'; marketBtn.style.borderBottomColor = 'transparent';
+    feedView.style.display = 'none'; marketView.style.display = 'none';
+    balanceBar.style.display = 'none';
+
+    if (tabName === 'feed') {
+        feedBtn.style.color = '#00d2ff'; feedBtn.style.borderBottomColor = '#00d2ff';
+        feedView.style.display = 'flex';
+        renderSocialFeed();
+    } else if (tabName === 'market') {
+        marketBtn.style.color = 'var(--goldnova, #ffd700)'; marketBtn.style.borderBottomColor = 'var(--goldnova, #ffd700)';
+        marketView.style.display = 'flex';
+        balanceBar.style.display = 'flex';
+        renderMarket();
+    }
+}
+
+// ==========================================
+// A. 📡 ARŞİV AKIŞI (FEED) MOTORU
+// Herkes için gelişim, Twitter gibi...
+// ==========================================
+
+function renderSocialFeed() {
+    const container = document.getElementById('dashboard-feed-view');
+    container.innerHTML = '';
+
+    // Gelişim Loglarını Çek
+    let feed = JSON.parse(localStorage.getItem('olympus_social_feed')) || [];
+
+    if (feed.length === 0) {
+        container.innerHTML = `
+            <div style="text-align: center; color: #555; margin-top: 50px; font-size: 14px; padding: 20px;">
+                <span style="font-size: 40px; display: block; margin-bottom: 10px;">📡</span>
+                Henüz bir veri yok. <br>Hadi makineyi çalıştırıp gelişimini paylaş!
+            </div>
+        `;
+        return;
+    }
+
+    feed.forEach((item, index) => {
+        // İkona göre kategori ve etiket rengini belirle (SADECE SPOR/FİZİKSEL)
+        let kategoriEtiket = "Disiplin";
+        let etiketClass = "post-tag";
+        
+        if (item.icon.includes('🏃‍♂️') || item.icon.includes('🚴‍♂️')) { 
+            kategoriEtiket = "Kardiyo"; 
+            etiketClass += " run"; 
+        } else if (item.icon.includes('🏋️') || item.icon.includes('🦍')) { 
+            kategoriEtiket = "Güç & Hacim"; 
+            etiketClass += " gym"; 
+        } else if (item.icon.includes('💧') || item.icon.includes('🌅')) {
+            kategoriEtiket = "Alışkanlık";
+            etiketClass += " code"; // Rengi mavi/mor tonlarında tutmak için eski code sınıfını kullanıyoruz
+        }
+
+        const post = document.createElement('div');
+        post.className = 'social-post-card';
+
+        post.innerHTML = `
+            <div class="post-profile-pic">${item.icon}</div>
+            <div class="post-content">
+                <div class="post-header">
+                    <h3 class="post-name-title">Emirhan Çulcu <span class="${etiketClass}">${kategoriEtiket}</span></h3>
+                    <span class="post-time">${item.date} <br> ${item.time}</span>
+                </div>
+                <p class="post-body">${item.title} - ${item.desc}</p>
+                ${item.earned > 0 ? `<div class="post-footer">💸 +${item.earned} OC kazandın!</div>` : ''}
+            </div>
+        `;
+        container.appendChild(post);
+    });
+}
+
+// ==========================================
+// 🧪 TEST VERİLERİ (SADECE SPOR VE DİSİPLİN)
+// ==========================================
+if (!localStorage.getItem('olympus_test_data_loaded_v2')) {
+    // 10.000 Coin Yükle
+    localStorage.setItem('olympus_coins', 10000); 
+    
+    // Test Gelişim Akışı (Sadece Fitness & Fiziksel Gelişim)
+    const testFeed = [
+        { id: 1, date: "07.08.2026", time: "06:30", title: "Açık Hava Kardiyosu", desc: "Sakarya sokaklarında 5.2 km serbest koşu tamamlandı. Tempo: 5:40/km", icon: "🏃‍♂️", earned: 52 },
+        { id: 2, date: "06.08.2026", time: "19:45", title: "Ağırlık İdmanı: Göğüs & Triceps", desc: "Bench press rekoru kırıldı (85kg). İdman sonu Proteinocean Whey tüketildi.", icon: "🏋️", earned: 250 },
+        { id: 3, date: "05.08.2026", time: "07:00", title: "Disiplin: Erken Kalkış", desc: "Alarm ertelenmeden kalkıldı. Soğuk duş ve 1 litre su tüketimi tamamlandı.", icon: "💧", earned: 50 },
+        { id: 4, date: "04.08.2026", time: "18:15", title: "Ağırlık İdmanı: Sırt & Biceps", desc: "Deadlift ve Barbell Row odaklı ağır idman. Pump efsaneydi.", icon: "🦍", earned: 200 }
+    ];
+    localStorage.setItem('olympus_social_feed', JSON.stringify(testFeed));
+    localStorage.setItem('olympus_test_data_loaded_v2', 'true');
+    console.log("Spor odaklı test verileri yüklendi.");
+}
+
+// ==========================================
+// B. 🛒 OLYMPUS KASA (PREMIUM MARKET MOTORU)
+// ==========================================
+function renderMarket() {
+    const container = document.getElementById('dashboard-market-items-container');
+    container.innerHTML = ''; 
+    
+    let currentCoins = parseInt(localStorage.getItem('olympus_coins')) || 0;
+    appliedTheme = localStorage.getItem('olympus_applied_theme') || 'theme_default';
+    document.getElementById('dashboard-total-coins').innerText = currentCoins;
+
+    marketItems.forEach(item => {
+        const canAfford = currentCoins >= item.price;
+        const isCurrentlyApplied = item.id === appliedTheme;
+        
+        let buyBtnHTML = ``;
+        if (item.id === 'theme_default' && item.type === 'theme' && appliedTheme === 'theme_default') {
+            buyBtnHTML = `<button class="market-buy-btn disabled">Orjinal</button>`;
+        } else if (item.id === 'theme_default' && item.type === 'theme' && appliedTheme !== 'theme_default') {
+            buyBtnHTML = `<button class="market-buy-btn" onclick="applyTheme('theme_default')">Uygula</button>`;
+        } else if (isCurrentlyApplied) {
+            buyBtnHTML = `<button class="market-buy-btn disabled">Aktif</button>`;
+        } else if (canAfford) {
+            buyBtnHTML = `<button class="market-buy-btn" onclick="buyMarketItem('${item.id}', ${item.price}, '${item.name}', '${item.icon}', '${item.type}')">
+                ${item.price} OC
+            </button>`;
+        } else {
+            buyBtnHTML = `<button class="market-buy-btn disabled">${item.price} OC</button>`;
+        }
+        
+        const card = document.createElement('div');
+        card.className = 'market-card';
+        card.innerHTML = `
+            <div class="market-item-left">
+                <div class="market-icon-wrapper">${item.icon}</div>
+            </div>
+            <div class="market-item-center">
+                <h3 class="market-title">${item.name}</h3>
+                <p class="market-desc">${item.desc}</p>
+            </div>
+            <div class="market-item-right">
+                ${buyBtnHTML}
+            </div>
+        `;
+        container.appendChild(card);
+    });
+}
+
+window.buyMarketItem = function (itemId, price, name, icon, type) {
+    let currentCoins = parseInt(localStorage.getItem('olympus_coins')) || 0;
+
+    if (currentCoins >= price) {
+        currentCoins -= price;
+        localStorage.setItem('olympus_coins', currentCoins);
+        olympusCoins = currentCoins; // Global değişkeni güncelle
+        // 🎒 ENVANTERE KAYDETME İŞLEMİ EKLENDİ
+        let inventory = JSON.parse(localStorage.getItem('olympus_inventory')) || [];
+        // Eğer ürün daha önce alınmamışsa veya tekrar alınabilen bir şeyse listeye ekle
+        inventory.unshift({ id: itemId, name: name, icon: icon, date: new Date().toLocaleDateString('tr-TR') });
+        localStorage.setItem('olympus_inventory', JSON.stringify(inventory));
+        renderInventory();
+        renderMarket();
+        logToSocialFeed(`Satın Alındı: ${name}`, 'Envantere kilitlendi.', icon, -price);
+
+        if (typeof showDynamicIsland === 'function') {
+            showDynamicIsland("Satın Alım Başarılı!", `${name} envantere eklendi.`, "🛍️", 0);
+        }
+
+        // Eğer satın alınan bir Tema ise, anında uygula
+        if (type === 'theme') {
+            localStorage.setItem('olympus_applied_theme', itemId);
+            applyTheme(itemId);
+        }
+
+    } else {
+        alert("Bunun için yeterli Olympus Coin'in yok şampiyon. Biraz daha disiplin!");
+    }
+}
+
+// 📐 Tema Uygulama Motoru
+window.applyTheme = function (themeId) {
+    localStorage.setItem('olympus_applied_theme', themeId);
+
+    // Global CSS değişkenlerini anında değiştir (Persistans için CSS'e kaydet)
+    if (themeId === 'theme_cyberpunk') {
+        document.documentElement.style.setProperty('--goldnova', '#00ff00'); // Neon Yeşil
+        document.documentElement.style.setProperty('--bg-dark', '#000');
+        document.documentElement.style.setProperty('--text-light', '#fff');
+    } else if (themeId === 'theme_ midnight_blue') {
+        document.documentElement.style.setProperty('--goldnova', '#00d2ff'); // Sakarya Mavisi
+        document.documentElement.style.setProperty('--bg-dark', '#0a0a0a');
+        document.documentElement.style.setProperty('--text-light', '#eee');
+    } else if (themeId === 'theme_tarsus_sunshine') {
+        document.documentElement.style.setProperty('--goldnova', '#ffcc00'); // Sıcak Sarı
+        document.documentElement.style.setProperty('--bg-dark', '#eee'); // Açık Arka Plan
+        document.documentElement.style.setProperty('--text-light', '#333'); // Koyu Metin
+    } else {
+        //theme_default - Orjinal Tema
+        document.documentElement.style.setProperty('--goldnova', '#ffd700'); // Altın
+        document.documentElement.style.setProperty('--bg-dark', '#050505');
+        document.documentElement.style.setProperty('--text-light', '#fff');
+    }
+
+    // Mağaza vitrinini yenile
+    renderMarket();
+}
+
+// Sayfa ilk yüklendiğinde temayı uygula
+window.addEventListener('load', () => {
+    appliedTheme = localStorage.getItem('olympus_applied_theme') || 'theme_default';
+    applyTheme(appliedTheme);
+});
+// ==========================================
+// 📱 PROFİL MENÜSÜ (SIDEBAR) VE ENVANTER MOTORU
+// ==========================================
+
+window.openProfileSidebar = function() {
+    document.getElementById('profile-sidebar-overlay').style.display = 'block';
+    // Menüyü soldan içeri kaydır
+    setTimeout(() => {
+        document.getElementById('profile-sidebar').style.left = '0';
+    }, 10);
+    renderInventory(); // Açılırken envanteri yenile
+}
+
+window.closeProfileSidebar = function() {
+    document.getElementById('profile-sidebar').style.left = '-300px';
+    // Animasyon bitince arkaplanı gizle
+    setTimeout(() => {
+        document.getElementById('profile-sidebar-overlay').style.display = 'none';
+    }, 300);
+}
+
+window.closeOlympusDashboardAndSidebar = function() {
+    closeProfileSidebar();
+    closeOlympusDashboard(); // Panoyu tamamen kapat
+}
+
+window.renderInventory = function() {
+    const container = document.getElementById('inventory-list');
+    let inventory = JSON.parse(localStorage.getItem('olympus_inventory')) || [];
+    
+    container.innerHTML = '';
+    
+    if (inventory.length === 0) {
+        container.innerHTML = `<p style="color: #555; font-size: 12px; text-align: center; margin-top: 10px;">Envanter boş. Marketten bir şeyler almalısın.</p>`;
+        return;
+    }
+    
+    inventory.forEach(item => {
+        const div = document.createElement('div');
+        div.className = 'inventory-item';
+        div.innerHTML = `
+            <div class="inventory-icon">${item.icon}</div>
+            <div class="inventory-details">
+                <h4>${item.name}</h4>
+                <p>Alınma: ${item.date}</p>
+            </div>
+        `;
+        container.appendChild(div);
+    });
 }
