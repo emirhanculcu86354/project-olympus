@@ -596,6 +596,41 @@ function formatWorkoutTime(totalSeconds) {
     return `${m.toString().padStart(2, '0')}:${s.toString().padStart(2, '0')}`;
 }
 
+// ==========================================
+// ⚡ ARKA PLAN & KİLİT EKRANI MEDYA MOTORU (YENİ)
+// ==========================================
+function startWorkoutBackgroundEngine(workoutTitle) {
+    const audio = document.getElementById('workout-bg-audio');
+    if(audio) audio.play().catch(e => console.log("Ses motoru başlatılamadı."));
+
+    if ('mediaSession' in navigator) {
+        navigator.mediaSession.metadata = new MediaMetadata({
+            title: workoutTitle,
+            artist: 'Project Olympus',
+            album: 'İdman Devam Ediyor',
+            artwork: [
+                { src: 'icon.png', sizes: '512x512', type: 'image/png' }
+            ]
+        });
+        
+        // Kilit ekranındaki başlat/durdur butonlarına basılınca tepki vermesi için sahte dinleyiciler
+        navigator.mediaSession.setActionHandler('play', function() {});
+        navigator.mediaSession.setActionHandler('pause', function() {});
+    }
+}
+
+function stopWorkoutBackgroundEngine() {
+    const audio = document.getElementById('workout-bg-audio');
+    if(audio) {
+        audio.pause();
+        audio.currentTime = 0;
+    }
+    if ('mediaSession' in navigator) navigator.mediaSession.metadata = null;
+}
+
+// ==========================================
+// 🏋️‍♂️ GERÇEK ZAMANLI İDMAN BAŞLATMA (Ekran kapansa bile durmaz)
+// ==========================================
 window.startActiveWorkout = function (dayData) {
     activeWorkout = dayData.ex;
     currentExIndex = 0;
@@ -608,16 +643,24 @@ window.startActiveWorkout = function (dayData) {
     if (fab) fab.style.display = 'none';
     if (oly) oly.style.display = 'none';
 
+    // Medya Oynatıcıyı (Kilit Ekranı) Başlat
+    startWorkoutBackgroundEngine(dayData.title || "Aktif İdman");
+
+    // ++ Sayacı yerine GERÇEK ZAMAN DAMGASI (Date.now) kullanıyoruz!
+    let workoutStartTime = Date.now();
     totalWorkoutSeconds = 0;
+    
     if (totalWorkoutInterval) clearInterval(totalWorkoutInterval);
-    document.getElementById('workout-total-time').innerText = "00:00"; // Emojisiz Apple stili
+    document.getElementById('workout-total-time').innerText = "00:00"; 
 
     totalWorkoutInterval = setInterval(() => {
-        totalWorkoutSeconds++;
+        // Ekran kapalıyken tarayıcı uyusa bile, açıldığı an aradaki farkı otomatik hesaplar!
+        let now = Date.now();
+        totalWorkoutSeconds = Math.floor((now - workoutStartTime) / 1000);
+        
         let timeFormatted = formatWorkoutTime(totalWorkoutSeconds);
         document.getElementById('workout-total-time').innerText = timeFormatted;
 
-        // Dinamik Ada formatı güncellendi
         if (isWorkoutMinimized && !isResting && activeWorkout[currentExIndex]) {
             updateWorkoutIsland(activeWorkout[currentExIndex].name, `Set ${currentSetIndex}/${totalSetsForEx}`, timeFormatted);
         }
@@ -625,8 +668,6 @@ window.startActiveWorkout = function (dayData) {
 
     document.getElementById('workout-modal').style.display = 'none';
     document.getElementById('active-workout-screen').classList.remove('hidden');
-    const player = document.getElementById('spotify-floating-player');
-    if (player) player.classList.remove('hidden');
 
     if (typeof showDynamicIsland === 'function') showDynamicIsland("⚡ İdman Başlatıldı!");
 
@@ -673,6 +714,9 @@ function renderActiveExercise() {
     document.getElementById('player-save-btn').classList.remove('hidden');
 }
 
+// ==========================================
+// ⏱️ DİNLENME SAYACI (Arka Planda Durmaz)
+// ==========================================
 window.saveSetAndRest = function () {
     let currentWeight = document.getElementById('player-weight').value;
     let currentReps = document.getElementById('player-reps').value;
@@ -702,26 +746,30 @@ window.saveSetAndRest = function () {
         document.getElementById('player-next-btn').innerText = `Sonraki Sete Geç (${currentSetIndex + 1}/${totalSetsForEx}) ⏩`;
     }
 
-    let sec = isExpressMode ? 45 : 90;
-    document.getElementById('timer-seconds').innerText = sec;
-
     isResting = true;
-
-    // YENİ DİNAMİK ADA: "Hareket | Set X Dinlenme | Süre"
+    let sec = isExpressMode ? 45 : 90;
+    
+    // Geri sayım için hedef bitiş zamanı belirliyoruz (Ekran kapansa bile şaşmaz)
+    let restEndTime = Date.now() + (sec * 1000);
+    document.getElementById('timer-seconds').innerText = sec;
     updateWorkoutIsland(currentExName, `Dinlenme (${currentSetIndex})`, sec);
 
     clearInterval(timerInterval);
     timerInterval = setInterval(() => {
-        sec--;
-        document.getElementById('timer-seconds').innerText = sec;
+        let now = Date.now();
+        let remaining = Math.ceil((restEndTime - now) / 1000);
 
-        if (isWorkoutMinimized) updateWorkoutIsland(currentExName, `Dinlenme (${currentSetIndex})`, sec);
-
-        if (sec <= 0) {
+        if (remaining <= 0) {
             clearInterval(timerInterval);
+            document.getElementById('timer-seconds').innerText = 0;
             isResting = false;
+            
+            // Titreşim ve Bildirim Gönder! (Cihaz uyanıksa titrer)
             if (navigator.vibrate) navigator.vibrate([400, 200, 400]);
             if (typeof showDynamicIsland === 'function') showDynamicIsland("⏰ Dinlenme Bitti! Sete Başla!");
+        } else {
+            document.getElementById('timer-seconds').innerText = remaining;
+            if (isWorkoutMinimized) updateWorkoutIsland(currentExName, `Dinlenme (${currentSetIndex})`, remaining);
         }
     }, 1000);
 }
@@ -781,8 +829,8 @@ function updateWorkoutIsland(exName, setInfo, timeVal) {
 window.finishWorkout = function () {
     clearInterval(timerInterval);
     clearInterval(totalWorkoutInterval);
+    stopWorkoutBackgroundEngine(); // Arka plan müzik çaları kapat!
 
-    // FAB ve OLY'yi Geri Getir
     const fab = document.querySelector('.fab-container');
     const oly = document.getElementById('oly-avatar');
     if (fab) fab.style.display = 'flex';
@@ -795,7 +843,6 @@ window.finishWorkout = function () {
     const activeProg = document.body.classList.contains('dilala-mode') ? dilalaProgramData['p1'] : programData[currentPhase];
     const activeDayData = activeProg.find(x => x.day == calculatedDay);
 
-    // 🏆 YENİ: İDMANI GEÇMİŞE KAYDET
     let pastWorkouts = JSON.parse(localStorage.getItem('olympus_past_workouts')) || [];
     pastWorkouts.push({
         id: Date.now(),
@@ -806,7 +853,6 @@ window.finishWorkout = function () {
     });
     localStorage.setItem('olympus_past_workouts', JSON.stringify(pastWorkouts));
 
-    // Kasları Kaydetme
     if (activeDayData && activeDayData.muscles) {
         let worked = JSON.parse(localStorage.getItem('olympus_worked_muscles')) || [];
         activeDayData.muscles.forEach(m => { if (!worked.includes(m)) worked.push(m); });
@@ -820,15 +866,7 @@ window.finishWorkout = function () {
 
     if (window.addOlympusPoints) window.addOlympusPoints(150, "İdman Tamamlandı");
 
-    let supps = JSON.parse(localStorage.getItem('olympus_supp_stock'));
-    if (supps) {
-        if (supps.whey > 0) supps.whey--;
-        if (supps.creatine > 0) supps.creatine--;
-        if (supps.carnitine > 0) supps.carnitine--;
-        localStorage.setItem('olympus_supp_stock', JSON.stringify(supps));
-    }
-
-    alert(`🔥 İDMAN TAMAMLANDI!\n⏱️ Toplam Süre: ${formatWorkoutTime(totalWorkoutSeconds)}\n🏆 Kas haritan güncellendi ve 150 Olympus kazandın!`);
+    alert(`🔥 İDMAN TAMAMLANDI!\n⏱️ Toplam Süre: ${formatWorkoutTime(totalWorkoutSeconds)}\n🏆 150 Olympus Puanı Kazandın!`);
     toggleAct(3, true);
 }
 
@@ -836,8 +874,8 @@ window.exitWorkoutPlayer = function () {
     if (confirm("🛑 DİKKAT!\nİdmanı yarıda kesip çıkmak istediğine emin misin? Bu işlem idmanı sonlandırır.")) {
         clearInterval(timerInterval);
         clearInterval(totalWorkoutInterval);
+        stopWorkoutBackgroundEngine(); // Arka plan müzik çaları kapat!
 
-        // FAB ve OLY'yi Geri Getir
         const fab = document.querySelector('.fab-container');
         const oly = document.getElementById('oly-avatar');
         if (fab) fab.style.display = 'flex';
