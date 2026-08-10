@@ -7833,11 +7833,16 @@ window.saveCardioSession = function () {
 
 // Kendi resimlerini eklemek için 'img' kısmına 'resim1.jpg' gibi dosya yolları verebilirsin
 const dilalaMemories = [
-    { img: 'https://picsum.photos/400/400?random=1', note: 'Sakarya\'nın o gri günlerini bile güneş gibi aydınlattığın an...' },
-    { img: 'https://picsum.photos/400/400?random=2', note: 'Tarsus sıcağından daha çok içimi ısıtan o efsane gülüşün.' },
-    { img: 'https://picsum.photos/400/400?random=3', note: 'Aramızdaki kilometrelerin sadece haritada olduğunu anladığım gün.' },
-    { img: 'https://picsum.photos/400/400?random=4', note: 'Beraber kurduğumuz o devasa hayallerin küçük bir karesi.' },
-    { img: 'https://picsum.photos/400/400?random=5', note: 'Zaman dursa ve bu anın içinde sonsuza dek kalsak...' }
+    { img: 'memories/adana.jpeg', note: 'Kavuşacağımız o günün hayali bile, tüm bu bekleyişlere fazlasıyla değiyor.' },
+    { img: 'memories/sahil.jpeg', note: 'Aynı gökyüzüne baktığımız sürece, aramızdaki o yolların hiçbir hükmü yok.' },
+    { img: 'memories/eymir.jpeg', note: 'Sıradan bir günü bayrama çeviren tek şey, telefonun ucundaki o tanıdık sesin ve gülüşün.' },
+    { img: 'memories/ankara.jpeg', note: 'Seninle içilen sıradan bir kahve bile, dünyanın en pahalı manzarasına bedelmiş.' },
+    { img: 'memories/mangal.jpeg', note: 'Zaman dursa ve bu anın içinde sonsuza dek kalsak...' },
+    { img: 'memories/kayseri.jpeg', note: 'Ellerini tuttuğum o an anladım; mesafeler sadece yolları uzatırmış, kalpleri değil.' },
+    { img: 'memories/dugun.jpeg', note: 'Zamanın durması için saatleri kırmak gerekmezmiş, yanımda gülümsemen yetermiş.' },
+    { img: 'memories/sinema.jpeg', note: 'Dünyanın neresinde olursam olayım, ait olduğum ve huzur bulduğum tek evim senin yanın.' },
+    { img: 'memories/mersin.jpeg', note: 'Gözlerine her baktığımda, içinde kaybolmaktan korkmadığım o tek evreni buluyorum.' },
+    { img: 'memories/park.jpeg', note: 'Bu karedeki mutluluk, omuz omuza kuracağımız o devasa geleceğin sadece küçücük bir fragmanı.' }
 ];
 
 window.openPolaroidWall = function () {
@@ -7862,24 +7867,29 @@ function renderPolaroids() {
     const scrollArea = document.createElement('div');
     scrollArea.style.position = 'relative';
     scrollArea.style.width = '100%';
-    // Duvarın boyunu 850px'den 1600px'e çıkardık (Kaydırdıkça devam eder)
-    scrollArea.style.height = '1600px';
+    
+    // Duvarın boyunu 1600px'den 2600px'e çıkardık (Daha fazla fotoğraf sığsın diye)
+    scrollArea.style.height = '2600px'; 
     container.appendChild(scrollArea);
 
     // İp sayısını 3'ten 6'ya çıkardık
-    const wires = [
+   const wires = [
         { top: 80 },    // 1. İp
         { top: 320 },   // 2. İp
         { top: 560 },   // 3. İp
         { top: 800 },   // 4. İp
         { top: 1040 },  // 5. İp
-        { top: 1280 }   // 6. İp
+        { top: 1280 },  // 6. İp
+        { top: 1520 },  // 7. İp
+        { top: 1760 },  // 8. İp
+        { top: 2000 },  // 9. İp
+        { top: 2240 }   // 10. İp
     ];
 
     function getWireSag(xPercent) {
         const ellipseX = xPercent + 10;
         const dx = (ellipseX - 60) / 60;
-        return 40 * (1 + Math.sqrt(1 - (dx * dx)));
+        return 40 * (1 + Math.sqrt(1 - dx * dx)); 
     }
 
     // 1. İpleri ve Minik Ampulleri Gerelim
