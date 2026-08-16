@@ -4811,3 +4811,301 @@ body.dilala-mode .panic-btn {
 .x-action.liked { color: #f91880 !important; }
 .x-action.rt { color: #00ba7c !important; }
 .x-action.replied { color: #1d9bf0 !important; }
+/* ==========================================
+   🦁 GALATASARAY MAÇ MERKEZİ STİLLERİ
+   ========================================== */
+.gs-match-center {
+    padding: 15px;
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+    border-bottom: 1px solid #2f3336;
+    background: #000;
+}
+
+/* Canlı Maç Skorbordu */
+.gs-live-card {
+    background: linear-gradient(135deg, #7a0018 0%, #a90432 50%, #f39c12 100%);
+    border-radius: 16px;
+    padding: 15px;
+    color: #fff;
+    box-shadow: 0 8px 20px rgba(169, 4, 50, 0.4);
+    position: relative;
+    overflow: hidden;
+}
+.gs-live-card::before {
+    content: '🦁';
+    position: absolute;
+    font-size: 150px;
+    right: -30px;
+    bottom: -40px;
+    opacity: 0.1;
+    pointer-events: none;
+}
+.gs-live-header {
+    display: flex;
+    justify-content: space-between;
+    font-size: 11px;
+    font-weight: bold;
+    margin-bottom: 15px;
+    color: rgba(255,255,255,0.8);
+    text-transform: uppercase;
+    letter-spacing: 1px;
+}
+.gs-live-teams {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    position: relative;
+    z-index: 2;
+}
+.gs-team {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 8px;
+    width: 30%;
+}
+.gs-team img {
+    width: 55px;
+    height: 55px;
+    object-fit: contain;
+    filter: drop-shadow(0 4px 6px rgba(0,0,0,0.6));
+}
+.gs-team-name {
+    font-size: 13px;
+    font-weight: 900;
+    text-align: center;
+    text-shadow: 1px 1px 3px rgba(0,0,0,0.8);
+}
+.gs-score-wrap {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    width: 40%;
+}
+.gs-score {
+    font-size: 42px;
+    font-weight: 900;
+    letter-spacing: 2px;
+    line-height: 1;
+    text-shadow: 0 4px 10px rgba(0,0,0,0.6);
+}
+.gs-time {
+    font-size: 12px;
+    font-weight: bold;
+    background: #000;
+    padding: 3px 10px;
+    border-radius: 12px;
+    margin-top: 5px;
+    color: #f39c12;
+    animation: pulse 2s infinite;
+    border: 1px solid #f39c12;
+}
+.gs-scorers {
+    margin-top: 15px;
+    font-size: 11px;
+    display: flex;
+    justify-content: space-between;
+    border-top: 1px solid rgba(255,255,255,0.2);
+    padding-top: 10px;
+    position: relative;
+    z-index: 2;
+    font-weight: bold;
+    color: rgba(255,255,255,0.9);
+}
+
+/* Fikstür ve Kadro */
+.gs-section-title {
+    color: #fff;
+    font-size: 14px;
+    font-weight: 900;
+    margin-bottom: 12px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    text-transform: uppercase;
+}
+.gs-fixture-list {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+.gs-fixture-item {
+    display: flex;
+    align-items: center;
+    background: #111;
+    padding: 12px;
+    border-radius: 10px;
+    border: 1px solid #222;
+}
+.gs-fixture-date {
+    width: 50px;
+    text-align: center;
+    font-size: 11px;
+    color: #888;
+    border-right: 1px solid #333;
+    padding-right: 12px;
+    margin-right: 12px;
+    font-weight: bold;
+}
+.gs-fixture-match {
+    flex: 1;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-size: 14px;
+    font-weight: bold;
+    color: #fff;
+}
+.gs-vs-badge {
+    background: #222;
+    padding: 3px 8px;
+    border-radius: 8px;
+    font-size: 10px;
+    color: #f39c12;
+}
+
+.gs-squad-list {
+    display: flex;
+    gap: 12px;
+    overflow-x: auto;
+    padding-bottom: 10px;
+    scrollbar-width: none;
+}
+.gs-squad-list::-webkit-scrollbar { display: none; }
+.gs-player {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    min-width: 65px;
+    background: #111;
+    padding: 10px 5px;
+    border-radius: 10px;
+    border: 1px solid #222;
+}
+.gs-player img {
+    width: 45px;
+    height: 45px;
+    border-radius: 50%;
+    border: 2px solid #a90432;
+    object-fit: cover;
+    margin-bottom: 6px;
+    background: #fff;
+}
+.gs-player-name {
+    color: #fff;
+    font-size: 11px;
+    font-weight: bold;
+    white-space: nowrap;
+}
+.gs-player-no {
+    color: #f39c12;
+    font-size: 10px;
+    font-weight: 900;
+}
+/* ==========================================
+   🦁 GALATASARAY YÜKLEME EKRANI & GOOGLE WIDGET
+   ========================================== */
+#gs-loading-overlay {
+    position: absolute;
+    top: 0; left: 0; width: 100%; height: 100%;
+    background: #000;
+    z-index: 50;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    transition: opacity 0.5s ease;
+}
+
+.gs-pulse-logo {
+    width: 100px;
+    height: 100px;
+    object-fit: contain;
+    animation: gsPulse 1s infinite alternate cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+@keyframes gsPulse {
+    0% { transform: scale(0.85); filter: drop-shadow(0 0 10px #f1c40f); opacity: 0.7; }
+    100% { transform: scale(1.15); filter: drop-shadow(0 0 35px #c0392b); opacity: 1; }
+}
+
+/* Google Arama Sonucu (Dark Mode) Widget Stilleri */
+.google-widget-container {
+    background: #000;
+    padding: 15px;
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+    font-family: -apple-system, Roboto, Arial, sans-serif;
+    border-bottom: 1px solid #2f3336;
+}
+
+.google-card {
+    background: #202124; /* Google Koyu Gri */
+    border: 1px solid #3c4043;
+    border-radius: 16px;
+    padding: 15px;
+    color: #e8eaed;
+}
+
+.google-card-title {
+    font-size: 14px;
+    color: #9aa0a6;
+    margin-bottom: 15px;
+    display: flex;
+    justify-content: space-between;
+}
+
+.google-match-score {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+    padding-bottom: 20px;
+    border-bottom: 1px solid #3c4043;
+}
+
+.google-team {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 8px;
+    width: 30%;
+}
+
+.google-team img { width: 48px; height: 48px; object-fit: contain; }
+.google-team span { font-size: 14px; font-weight: 500; text-align: center; }
+
+.google-score-center {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    gap: 15px;
+}
+
+.google-score-num { font-size: 36px; font-weight: 400; color: #e8eaed; }
+.google-match-status { font-size: 12px; color: #9aa0a6; text-align: center; display: flex; flex-direction: column; }
+
+.google-upcoming {
+    display: flex;
+    justify-content: space-between;
+    font-size: 12px;
+}
+
+.google-upcoming-item {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+.google-upcoming-item img { width: 24px; height: 24px; }
+
+/* Puan Durumu Tablosu */
+.google-table { width: 100%; border-collapse: collapse; font-size: 13px; }
+.google-table th { color: #9aa0a6; font-weight: normal; text-align: center; padding-bottom: 10px; border-bottom: 1px solid #3c4043; }
+.google-table th:first-child { text-align: left; }
+.google-table td { padding: 10px 0; border-bottom: 1px solid #3c4043; text-align: center; }
+.google-table td:first-child { text-align: left; display: flex; align-items: center; gap: 8px; }
+.google-table tr:last-child td { border-bottom: none; }
+.google-table img { width: 18px; height: 18px; }

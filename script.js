@@ -162,17 +162,52 @@ const dietData = {
     7: { title: "Paz: Cheat Meal", meals: [{ t: "1. Ana Öğün (12:00)", d: "Menemen (4 Yumurta), 2 Dilim Ekmek, 50g Peynir", alt: "Değişim: Standart Türk Kahvaltısı", i: "🍳" }, { t: "Ara Öğün (16:00)", d: "1 Kase Yoğurt veya Sade Kahve", alt: "Değişim: Yeşil Çay", i: "☕" }, { t: "2. Ana Öğün (19:00)", d: "SERBEST ÖĞÜN: Pizza, Burger vb.", alt: "Değişim: İstenilen herhangi bir menü", i: "🍔" }] }
 };
 // ==========================================
-// 🌸 DİLALAM ÖZEL PROGRAMI (PDF'TEN AKTARILDI)
+// 🌸 DİLALAM ÖZEL PROGRAMI (V4 SÜRÜMÜ)
 // ==========================================
 const dilalaProgramData = {
     p1: [
-        { day: 1, title: "Pazartesi: Kardiyo", muscles: ["core", "legs-l", "legs-r"], rest: false, ex: [{ name: "Tempolu Yürüyüş", scheme: "45 Dk", tempo: "Sabit", rpe: 6 }] },
-        { day: 2, title: "Salı: Alt Vücut", muscles: ["legs-l", "legs-r", "core"], rest: false, ex: [{ name: "Spor Öncesi Isınma", scheme: "5-10 Dk", tempo: "Dinamik", rpe: "-" }, { name: "Squat", scheme: "4 x 12", tempo: "2-0-1-0", rpe: 7 }, { name: "Glute Bridge", scheme: "3 x 15", tempo: "2-1-1-0", rpe: 7 }, { name: "Reverse Lunge", scheme: "3 x 10", tempo: "2-0-1-0", rpe: 7.5 }, { name: "Mekik (Crunch)", scheme: "3 x 15", tempo: "1-0-1-1", rpe: 7 }, { name: "Spor Sonrası Esneme", scheme: "5 Dk", tempo: "Statik", rpe: "-" }] },
-        { day: 3, title: "Çarşamba: Alt Vücut 2", muscles: ["legs-l", "legs-r", "core"], rest: false, ex: [{ name: "Spor Öncesi Isınma", scheme: "5 Dk", tempo: "Dinamik", rpe: "-" }, { name: "Sumo Squat", scheme: "3 x 12", tempo: "2-0-1-0", rpe: 7 }, { name: "Step Back Lunge", scheme: "3 x 10", tempo: "2-0-1-0", rpe: 7.5 }, { name: "Side Leg Raise", scheme: "3 x 15", tempo: "1-0-1-0", rpe: 7 }, { name: "Glute Bridge Hold", scheme: "3 x 30 sn", tempo: "Statik", rpe: 8 }, { name: "Leg Raise", scheme: "3 x 12", tempo: "2-0-1-0", rpe: 7 }, { name: "Dead Bug", scheme: "3 x 12", tempo: "2-0-1-0", rpe: 7 }, { name: "Russian Twist", scheme: "3 x 10-12", tempo: "1-0-1-0", rpe: 7 }, { name: "Spor Sonrası Esneme", scheme: "5 Dk", tempo: "Statik", rpe: "-" }] },
-        { day: 4, title: "Perşembe: Kardiyo", muscles: ["core", "legs-l", "legs-r"], rest: false, ex: [{ name: "Tempolu Yürüyüş", scheme: "45 Dk", tempo: "Sabit", rpe: 6 }] },
-        { day: 5, title: "Cuma: Glute Odaklı", muscles: ["legs-l", "legs-r", "core"], rest: false, ex: [{ name: "Spor Öncesi Isınma", scheme: "5 Dk", tempo: "Dinamik", rpe: "-" }, { name: "Squat Pulse", scheme: "3 x 15", tempo: "Dinamik", rpe: 7.5 }, { name: "Glute Bridge", scheme: "4 x 15", tempo: "2-1-1-0", rpe: 7.5 }, { name: "Donkey Kick", scheme: "3 x 15", tempo: "2-0-1-0", rpe: 7 }, { name: "Side Leg Raise", scheme: "3 x 15", tempo: "1-0-1-0", rpe: 7 }, { name: "Mountain Climber (Yavaş)", scheme: "3 x 20", tempo: "2-0-2-0", rpe: 7.5 }, { name: "Spor Sonrası Esneme", scheme: "5 Dk", tempo: "Statik", rpe: "-" }] },
-        { day: 6, title: "Cumartesi: Uzun Kardiyo", muscles: ["core", "legs-l", "legs-r"], rest: false, ex: [{ name: "Uzun Yürüyüş", scheme: "75-90 Dk", tempo: "Sabit", rpe: 6 }, { name: "Ekstra Yoga", scheme: "İsteğe Bağlı", tempo: "Rahatlatıcı", rpe: "-" }] },
-        { day: 7, title: "Pazar: Aktif Dinlenme", muscles: [], rest: true, ex: [{ name: "Hafif Yürüyüş", scheme: "30 Dk", tempo: "Yavaş", rpe: 4 }] }
+        { day: 1, title: "Pzt: Bacak & Kuğu Kolları", muscles: ["legs-l", "legs-r", "arms-l", "arms-r"], rest: false, ex: [
+            { name: "Spor Öncesi Isınma", scheme: "5-10 Dk", tempo: "Dinamik", rpe: "-" },
+            { name: "Squat", scheme: "4 x 15", tempo: "2-0-1-0", rpe: 7 },
+            { name: "Arm Pulses (Kollar Yanda)", scheme: "3 x 45 sn", tempo: "Yaylanarak", rpe: 7 },
+            { name: "Reverse Lunge", scheme: "3 x 10", tempo: "2-0-1-0", rpe: 7.5 },
+            { name: "Glute Bridge", scheme: "4 x 15", tempo: "2-1-1-0", rpe: 7.5 },
+            { name: "Kol Çevirme (Arm Circles)", scheme: "3 x 30 sn", tempo: "Sabit", rpe: 7 },
+            { name: "Side Leg Raise", scheme: "3 x 15", tempo: "1-0-1-0", rpe: 7 },
+            { name: "Spor Sonrası Esneme", scheme: "5 Dk", tempo: "Statik", rpe: "-" }
+        ]},
+        { day: 2, title: "Salı: Kardiyo", muscles: ["core", "legs-l", "legs-r"], rest: false, ex: [
+            { name: "Tempolu Yürüyüş", scheme: "45 Dk", tempo: "Sabit", rpe: 6 }
+        ]},
+        { day: 3, title: "Çar: Karın & Postür", muscles: ["core", "shoulders", "legs-l", "legs-r"], rest: false, ex: [
+            { name: "Spor Öncesi Isınma", scheme: "5 Dk", tempo: "Dinamik", rpe: "-" },
+            { name: "Sumo Squat", scheme: "3 x 15", tempo: "2-0-1-0", rpe: 7 },
+            { name: "Wall Angels (Melek Kanadı)", scheme: "3 x 12", tempo: "Yavaş", rpe: 6 },
+            { name: "Yarım Mekik (Crunch)", scheme: "3 x 20", tempo: "1-0-1-1", rpe: 7 },
+            { name: "Y-W-T Kollar", scheme: "3 x 10", tempo: "2-0-1-2", rpe: 7 },
+            { name: "Russian Twist", scheme: "3 x 15", tempo: "1-0-1-0", rpe: 7 },
+            { name: "Bicycle Crunch", scheme: "3 x 20", tempo: "1-0-1-0", rpe: 7 },
+            { name: "Spor Sonrası Esneme", scheme: "5 Dk", tempo: "Statik", rpe: "-" }
+        ]},
+        { day: 4, title: "Perşembe: Kardiyo", muscles: ["core", "legs-l", "legs-r"], rest: false, ex: [
+            { name: "Tempolu Yürüyüş", scheme: "45 Dk", tempo: "Sabit", rpe: 6 }
+        ]},
+        { day: 5, title: "Cuma: Dinamik Yağ Yakım", muscles: ["legs-l", "legs-r", "arms-l", "arms-r", "core"], rest: false, ex: [
+            { name: "Spor Öncesi Isınma", scheme: "5 Dk", tempo: "Dinamik", rpe: "-" },
+            { name: "Squat Pulse", scheme: "3 x 15", tempo: "Yaylanarak", rpe: 7.5 },
+            { name: "Donkey Kick", scheme: "3 x 15", tempo: "2-0-1-0", rpe: 7 },
+            { name: "Ağırlıksız Kickback", scheme: "3 x 20", tempo: "1-0-1-1", rpe: 7 },
+            { name: "Wall Sit", scheme: "3 x 30 sn", tempo: "Statik", rpe: 8 },
+            { name: "Dead Bug", scheme: "3 x 12", tempo: "2-0-1-0", rpe: 7 },
+            { name: "Ayakta Diz Çekme", scheme: "3 x 30 sn", tempo: "Tempolu", rpe: 7.5 },
+            { name: "Spor Sonrası Esneme", scheme: "5 Dk", tempo: "Statik", rpe: "-" }
+        ]},
+        { day: 6, title: "Cmt: Uzun Kardiyo", muscles: ["core", "legs-l", "legs-r"], rest: false, ex: [
+            { name: "Uzun Yürüyüş", scheme: "75-90 Dk", tempo: "Sabit", rpe: 6 }
+        ]},
+        { day: 7, title: "Pazar: Aktif Dinlenme", muscles: [], rest: true, ex: [
+            { name: "Hafif Yürüyüş veya Yoga", scheme: "30 Dk", tempo: "Yavaş", rpe: 4 }
+        ]}
     ]
 };
 
@@ -7980,128 +8015,204 @@ window.togglePolaroidFlip = function (cardElement) {
 }
 
 // ==========================================
-// 🔍 ÜST SEKMELER VE OTOMATİK İÇERİK MOTORU
+// 🔍 ÜST SEKMELER, TEMA DEĞİŞİMİ VE YÜKLEME MOTORU
 // ==========================================
-// ==========================================
-// 🔍 ÜST SEKMELER VE OTOMATİK İÇERİK MOTORU
-// ==========================================
-window.switchDashboardTab = function (tabName, clickedElement = null) {
+window.switchDashboardTab = function(tabName, clickedElement = null) {
     const feedView = document.getElementById('dashboard-feed-view');
     const marketView = document.getElementById('dashboard-market-view');
     const fab = document.getElementById('x-fab');
+    const gsLoading = document.getElementById('gs-loading-overlay');
 
     if (tabName === 'feed') {
-        if (feedView) feedView.style.display = 'flex';
-        if (marketView) marketView.style.display = 'none';
-        if (fab) fab.style.display = 'flex';
-
-        let tabText = 'Sana özel'; // İlk açılış varsayılanı
-
-        // Eğer kullanıcı üst sekmelerden birine bastıysa onu aktif yap
-        if (clickedElement && clickedElement.classList.contains('x-tab')) {
+        if(feedView) feedView.style.display = 'flex';
+        if(marketView) marketView.style.display = 'none';
+        if(fab) fab.style.display = 'flex';
+        
+        let tabText = 'Sana özel';
+        
+        if(clickedElement && clickedElement.classList.contains('x-tab')) {
             document.querySelectorAll('.x-tab').forEach(t => t.classList.remove('active'));
             clickedElement.classList.add('active');
             tabText = clickedElement.innerText.trim();
-        } else {
-            // İlk kez açılıyorsa (kullanıcı basmadıysa) ilk sekmeyi otomatik seç
-            const firstTab = document.querySelector('.x-tab');
-            if (firstTab) {
-                document.querySelectorAll('.x-tab').forEach(t => t.classList.remove('active'));
-                firstTab.classList.add('active');
-            }
         }
 
-        // Sekme ismine göre doğru içeriği bas
-        if (tabText === 'Galatasaray') {
-            if (typeof renderAutomatedFeed === 'function') renderAutomatedFeed('galatasaray');
-        } else if (tabText === 'Vatan') {
-            if (typeof renderAutomatedFeed === 'function') renderAutomatedFeed('vatan');
-        } else {
-            if (typeof renderXFeed === 'function') renderXFeed(); // Orijinal akış
+        // Temizlik: Önceki içerikleri sil
+        Array.from(feedView.children).forEach(child => {
+            if (child.id !== 'gs-loading-overlay') child.remove();
+        });
+        
+        if(tabText === 'Galatasaray') {
+            // 🦁 TEMA DEĞİŞİMİ: GALATASARAY MODU (Koyu Kırmızı Arka Plan, Sarı Vurgular)
+            document.documentElement.style.setProperty('--goldnova', '#fdb912'); // GS Sarısı
+            document.documentElement.style.setProperty('--bg-dark', '#1a0003'); // Derin Kırmızı
+            
+            // YÜKLEME EKRANINI TETİKLE (Pulse)
+            if(gsLoading) {
+                gsLoading.style.display = 'flex';
+                gsLoading.style.opacity = '1';
+            }
+            if(fab) fab.style.display = 'none'; 
+            
+            // 1.5 Saniye sonra Google Verilerini Bas
+            setTimeout(() => {
+                if(gsLoading) {
+                    gsLoading.style.opacity = '0';
+                    setTimeout(() => gsLoading.style.display = 'none', 500);
+                }
+                renderAutomatedFeed('galatasaray');
+                if(fab) fab.style.display = 'flex';
+            }, 1500);
 
-            // Eğer "Takip ediliyor" ise reklamları gizle
+        } else if (tabText === 'Vatan') {
+            // 🇹🇷 TEMA SIFIRLAMA: ESKİ TEMAYA DÖN
+            let appliedTheme = localStorage.getItem('olympus_applied_theme') || 'theme_default';
+            if(typeof applyTheme === 'function') applyTheme(appliedTheme);
+
+            if(gsLoading) gsLoading.style.display = 'none';
+            renderAutomatedFeed('vatan');
+        } else {
+            // TEMA SIFIRLAMA: ESKİ TEMAYA DÖN
+            let appliedTheme = localStorage.getItem('olympus_applied_theme') || 'theme_default';
+            if(typeof applyTheme === 'function') applyTheme(appliedTheme);
+
+            if(gsLoading) gsLoading.style.display = 'none';
+            renderXFeed(); 
+            
             setTimeout(() => {
                 if (tabText === 'Takip ediliyor') {
                     document.querySelectorAll('.x-post').forEach(post => {
-                        if (post.innerHTML.includes('Reklam')) post.style.display = 'none';
+                        if(post.innerHTML.includes('Reklam')) post.style.display = 'none';
                     });
                 }
             }, 50);
         }
     } else if (tabName === 'market') {
-        if (feedView) feedView.style.display = 'none';
-        if (marketView) marketView.style.display = 'flex';
-        if (fab) fab.style.display = 'none';
-        if (typeof renderMarket === 'function') renderMarket();
+        if(feedView) feedView.style.display = 'none';
+        if(marketView) marketView.style.display = 'flex';
+        if(fab) fab.style.display = 'none';
+        renderMarket();
     }
 };
 
-// 🇹🇷 OTOMATİK İÇERİK ÜRETİCİ (Vatan & Galatasaray) - KESİN ÇÖZÜM
-// 🇹🇷 OTOMATİK İÇERİK ÜRETİCİ (Vatan & Galatasaray - Görsel Şölen Modu)
+// 🇹🇷 OTOMATİK İÇERİK ÜRETİCİ (Güvenli Resim Linkleri ile)
 window.renderAutomatedFeed = function(type) {
     const container = document.getElementById('dashboard-feed-view');
     if(!container) return;
-    container.innerHTML = ''; 
 
-    let fakePosts = [];
+    if (type === 'galatasaray') {
+        // Asla kırılmayan Football-Data API logoları
+        const gsLogo = "https://crests.football-data.org/610.svg";
+        const manuLogo = "https://crests.football-data.org/66.svg";
+        const bjkLogo = "https://crests.football-data.org/611.svg";
 
-    if (type === 'vatan') {
-        fakePosts = [
+        const matchCenterHTML = `
+            <div class="google-widget-container" style="background: transparent;">
+                <!-- Google Maç Kartı -->
+                <div class="google-card" style="background: rgba(0,0,0,0.6); border: 1px solid rgba(253, 185, 18, 0.3);">
+                    <div class="google-card-title" style="color: #fdb912;">
+                        <span>🏆 Şampiyonlar Ligi</span>
+                        <span>Maçlar ➔</span>
+                    </div>
+                    
+                    <div class="google-match-score">
+                        <div class="google-team">
+                            <img src="${gsLogo}">
+                            <span>Galatasaray<br><span style="color:#8ab4f8; font-size:12px;">1.</span></span>
+                        </div>
+                        <div class="google-score-center">
+                            <span class="google-score-num">3</span>
+                            <span class="google-match-status" style="color:#fdb912; font-weight:bold;">88' Canlı<br><span style="color:#e8eaed; font-size:14px; margin-top:4px;">RAMS Park</span></span>
+                            <span class="google-score-num">1</span>
+                        </div>
+                        <div class="google-team">
+                            <img src="${manuLogo}">
+                            <span>Man. United<br><span style="color:#8ab4f8; font-size:12px;">4.</span></span>
+                        </div>
+                    </div>
+
+                    <div class="google-upcoming">
+                        <div class="google-upcoming-item">
+                            <img src="${bjkLogo}">
+                            <span style="color:#9aa0a6;">Beşiktaş</span>
+                        </div>
+                        <div style="text-align:right;">
+                            <span style="color:#e8eaed;">21/8 Cum</span><br>
+                            <span style="color:#fdb912; font-weight:bold;">21:30</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Google Puan Durumu Kartı -->
+                <div class="google-card" style="background: rgba(0,0,0,0.6); border: 1px solid rgba(253, 185, 18, 0.3);">
+                    <div class="google-card-title" style="color: #fdb912;">
+                        <span>Süper Lig Puan Durumu</span>
+                        <span>➔</span>
+                    </div>
+                    <table class="google-table">
+                        <tr>
+                            <th>Takım</th>
+                            <th>OM</th><th>G</th><th>B</th><th>M</th><th>A</th><th>P</th>
+                        </tr>
+                        <tr style="background: rgba(253, 185, 18, 0.1);">
+                            <td><span style="color:#8ab4f8;">1</span> <img src="${gsLogo}"> Galatasaray</td>
+                            <td>1</td><td>1</td><td>0</td><td>0</td><td>2</td><td>3</td>
+                        </tr>
+                        <tr>
+                            <td><span style="color:#8ab4f8;">2</span> <img src="${bjkLogo}"> Beşiktaş</td>
+                            <td>0</td><td>0</td><td>0</td><td>0</td><td>0</td><td>0</td>
+                        </tr>
+                    </table>
+                </div>
+            </div>
+        `;
+        container.insertAdjacentHTML('beforeend', matchCenterHTML);
+
+        // Kırılmayan rastgele resim linkleri (Picsum)
+        let fakePosts = [
+            {
+                name: "Galatasaray Ruhu", username: "@gshistory", verified: true, time: "45 dk",
+                text: "“Galatasaray bir his takımıdır. Rengiyle, tarihiyle, taraftarıyla bir bütündür.” — Taçsız Kral Metin Oktay 👑💛❤️",
+                icon: gsLogo,
+                image: "https://picsum.photos/800/400?random=11",
+                likes: "1.2M", rts: "400B", replies: "15B"
+            },
+            {
+                name: "Aslanın Kükreyişi", username: "@lionofist", verified: true, time: "2 sa",
+                text: "Ormanın kralı sahaya indiğinde, diğerleri sadece izler! Mayıslar bizimdir, kükre aslanım! 🦁🔥",
+                icon: gsLogo,
+                image: "https://picsum.photos/800/400?random=12",
+                likes: "850B", rts: "125B", replies: "9B"
+            }
+        ];
+        renderPostsToContainer(fakePosts, container);
+
+    } else if (type === 'vatan') {
+        let fakePosts = [
             {
                 name: "Tarih ve Vatan", username: "@vatansevdasi", verified: true, time: "1 sa",
-                text: "“Söz konusu vatansa, gerisi teferruattır.” — Mustafa Kemal Atatürk 🇹🇷<br><br>Göklerde dalgalanan şanlı bayrağımızın gölgesinde, bu topraklar için can veren tüm kahramanlarımıza minnetle...",
+                text: "“Söz konusu vatansa, gerisi teferruattır.” — Mustafa Kemal Atatürk 🇹🇷",
                 icon: "https://ui-avatars.com/api/?name=TR&background=e74c3c&color=fff&bold=true",
-                image: "https://productimages.hepsiburada.net/s/3/375-375/9606283460658.jpg", // Bayrak ve Dağlar
+                image: "https://picsum.photos/800/400?random=21", 
                 likes: "345B", rts: "112B", replies: "8B"
             },
             {
                 name: "Gök Vatan", username: "@istikbalgoklerde", verified: true, time: "4 sa",
                 text: "Çelik kanatlarımız gökyüzünü yırtarken, yeryüzünde sadece gurur var. Gök vatanın çelik kartalları daima göreve hazır! ✈️🇹🇷",
                 icon: "https://ui-avatars.com/api/?name=GV&background=2980b9&color=fff&bold=true",
-                image: "https://images.unsplash.com/photo-1596727362302-b8d891c42ab8?q=80&w=800&auto=format&fit=crop", // Askeri jetler / Gökyüzü
+                image: "https://picsum.photos/800/400?random=22",
                 likes: "189B", rts: "45B", replies: "2B"
-            },
-            {
-                name: "Anadolu'nun Ruhu", username: "@anadolu", verified: true, time: "6 sa",
-                text: "Dağların aslanları, vatanın yılmaz bekçileri. Her karış toprağında bir destan yatan bu güzel ülke, sarsılmaz bir iradeyle korunuyor. 🐺🇹🇷",
-                icon: "https://ui-avatars.com/api/?name=AR&background=27ae60&color=fff&bold=true",
-                image: "https://images.unsplash.com/photo-1533668383344-933df9119c4d?q=80&w=800&auto=format&fit=crop", // Asker / Doğa kamuflaj
-                likes: "210B", rts: "65B", replies: "4B"
             }
         ];
-    } else if (type === 'galatasaray') {
-        fakePosts = [
-            {
-                name: "Galatasaray Ruhu", username: "@gshistory", verified: true, time: "45 dk",
-                text: "“Galatasaray bir his takımıdır. Rengiyle, tarihiyle, taraftarıyla bir bütündür.” — Taçsız Kral Metin Oktay 👑💛❤️",
-                icon: "https://ui-avatars.com/api/?name=GS&background=f1c40f&color=c0392b&bold=true",
-                image: "https://images.unsplash.com/photo-1518605368461-1eb2a1d261db?q=80&w=800&auto=format&fit=crop", // Stadyum ve meşaleler
-                likes: "1.2M", rts: "400B", replies: "15B"
-            },
-            {
-                name: "Aslanın Kükreyişi", username: "@lionofist", verified: true, time: "2 sa",
-                text: "Ormanın kralı sahaya indiğinde, diğerleri sadece izler! Mayıslar bizimdir, kükre aslanım! 🦁🔥",
-                icon: "https://ui-avatars.com/api/?name=GS&background=000&color=f1c40f&bold=true",
-                image: "https://images.unsplash.com/photo-1574629810360-7efbb1925536?q=80&w=800&auto=format&fit=crop", // Görkemli bir aslan
-                likes: "850B", rts: "125B", replies: "9B"
-            },
-            {
-                name: "Avrupa Fatihi", username: "@avrupafatihi", verified: true, time: "5 sa",
-                text: "Biz tarihi yazarken, onlar sadece okumakla yetindiler. Kıtaları aşan armanın peşinde sonsuza dek! 🏆💛❤️",
-                icon: "https://ui-avatars.com/api/?name=AF&background=c0392b&color=f1c40f&bold=true",
-                image: "https://images.unsplash.com/photo-1508344928928-7165b67de128?q=80&w=800&auto=format&fit=crop", // Kupa / Zafer atmosferi
-                likes: "450B", rts: "90B", replies: "6B"
-            }
-        ];
+        renderPostsToContainer(fakePosts, container);
     }
+};
 
-    // Gönderileri Ekrana Bas
-    fakePosts.forEach(post => {
+// Kod tekrarını önlemek için yardımcı fonksiyon
+function renderPostsToContainer(postsArray, container) {
+    postsArray.forEach(post => {
         const div = document.createElement('div');
         div.className = 'x-post';
-        
         let imageHTML = post.image ? `<div style="margin-top:12px; border-radius:16px; overflow:hidden; border:1px solid #2f3336;"><img src="${post.image}" style="width:100%; display:block;"></div>` : '';
-
         div.innerHTML = `
             <div class="x-avatar" style="overflow:hidden; display:flex; justify-content:center; align-items:center; background:#fff;">
                 <img src="${post.icon}" style="width:100%; height:100%; object-fit:contain; border-radius:50%;">
@@ -8109,7 +8220,7 @@ window.renderAutomatedFeed = function(type) {
             <div class="x-content">
                 <div class="x-header">
                     <span class="x-name">${post.name}</span>
-                    <span class="x-verified"><svg viewBox="0 0 24 24" aria-label="Onaylı hesap" style="width:1.25em;height:1.25em;fill:currentColor;"><g><path d="M22.5 12.5c0-1.58-.875-2.95-2.148-3.6.154-.435.238-.905.238-1.4 0-2.21-1.71-3.998-3.918-3.998-.47 0-.92.084-1.336.25C14.818 2.415 13.51 1.5 12 1.5s-2.816.917-3.337 2.25c-.416-.165-.866-.25-1.336-.25-2.21 0-3.918 1.79-3.918 4 0 .495.084.965.238 1.4-1.273.65-2.148 2.02-2.148 3.6 0 1.46.74 2.746 1.846 3.45-.065.318-.1.646-.1 1.03 0 2.227 1.734 4.025 3.937 4.025.56 0 1.094-.127 1.587-.354C9.356 21.65 10.61 22.5 12 22.5c1.39 0 2.645-.85 3.25-2.096.494.227 1.028.354 1.587.354 2.203 0 3.937-1.798 3.937-4.025 0-.384-.035-.712-.1-1.03 1.107-.704 1.846-1.99 1.846-3.45zM10.7 16.5l-3.3-3.3 1.4-1.4 1.9 1.9 5.6-5.6 1.4 1.4-7 7z"></path></g></svg></span>
+                    <span class="x-verified"><svg viewBox="0 0 24 24" style="width:1.25em;height:1.25em;fill:#1d9bf0;"><g><path d="M22.5 12.5c0-1.58-.875-2.95-2.148-3.6.154-.435.238-.905.238-1.4 0-2.21-1.71-3.998-3.918-3.998-.47 0-.92.084-1.336.25C14.818 2.415 13.51 1.5 12 1.5s-2.816.917-3.337 2.25c-.416-.165-.866-.25-1.336-.25-2.21 0-3.918 1.79-3.918 4 0 .495.084.965.238 1.4-1.273.65-2.148 2.02-2.148 3.6 0 1.46.74 2.746 1.846 3.45-.065.318-.1.646-.1 1.03 0 2.227 1.734 4.025 3.937 4.025.56 0 1.094-.127 1.587-.354C9.356 21.65 10.61 22.5 12 22.5c1.39 0 2.645-.85 3.25-2.096.494.227 1.028.354 1.587.354 2.203 0 3.937-1.798 3.937-4.025 0-.384-.035-.712-.1-1.03 1.107-.704 1.846-1.99 1.846-3.45zM10.7 16.5l-3.3-3.3 1.4-1.4 1.9 1.9 5.6-5.6 1.4 1.4-7 7z"></path></g></svg></span>
                     <span class="x-username">${post.username}</span>
                     <span class="x-time">· ${post.time}</span>
                 </div>
@@ -8124,7 +8235,7 @@ window.renderAutomatedFeed = function(type) {
         `;
         container.appendChild(div);
     });
-};
+}
 
 window.renderXFeed = function () {
     const container = document.getElementById('dashboard-feed-view');
