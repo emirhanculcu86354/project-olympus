@@ -5109,3 +5109,86 @@ body.dilala-mode .panic-btn {
 .google-table td:first-child { text-align: left; display: flex; align-items: center; gap: 8px; }
 .google-table tr:last-child td { border-bottom: none; }
 .google-table img { width: 18px; height: 18px; }
+/* ==========================================
+   📚 KPSS AKADEMİ STİLLERİ (PROFESYONEL)
+   ========================================== */
+.kpss-subject-card {
+    background-color: var(--card-bg);
+    padding: 15px;
+    border-radius: 12px;
+    border-left: 4px solid var(--goldnova);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+.kpss-youtube-btn {
+    background: rgba(255, 255, 255, 0.1);
+    color: #fff;
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    padding: 6px 12px;
+    border-radius: 8px;
+    font-size: 11px;
+    font-weight: bold;
+    cursor: pointer;
+    transition: 0.2s;
+}
+.kpss-youtube-btn:active {
+    background: rgba(255, 255, 255, 0.2);
+    transform: scale(0.95);
+}
+/* KPSS Tamamlandı Efektleri */
+.kpss-subject-card.done {
+    opacity: 0.5;
+    border-left-color: #555 !important;
+}
+.kpss-subject-card.done h4 {
+    text-decoration: line-through;
+    color: #888 !important;
+}
+/* ==========================================
+   📚 KPSS KAYDIRMA (SWIPE) STİLLERİ
+   ========================================== */
+.kpss-card {
+    background: #151515;
+    border: 1px solid #333;
+    border-radius: 12px;
+    padding: 15px;
+    position: relative;
+    border-left: 4px solid var(--goldnova);
+    touch-action: pan-y;
+    will-change: transform;
+    transition: transform 0.3s ease, background 0.3s ease;
+    overflow: hidden;
+    cursor: pointer;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+.kpss-card.completed {
+    background: rgba(39, 174, 96, 0.15) !important;
+    border-left-color: #27ae60 !important;
+}
+.kpss-card.completed .kpss-card-title {
+    text-decoration: line-through;
+    color: #888;
+}
+.kpss-card-title {
+    color: #fff;
+    font-size: 15px;
+    font-weight: 900;
+    margin: 0 0 4px 0;
+    transition: 0.2s;
+}
+.kpss-card-subtitle {
+    color: var(--text-muted);
+    font-size: 11px;
+}
+.kpss-card-bg-icon {
+    position: absolute;
+    right: -10px;
+    top: 50%;
+    transform: translateY(-50%);
+    font-size: 60px;
+    opacity: 0.05;
+    pointer-events: none;
+}

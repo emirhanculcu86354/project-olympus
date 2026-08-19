@@ -195,12 +195,12 @@
                     <div class="hub-card-icon">💼</div>
                 </div>
 
-                <!-- HUB EKRANI: GELİŞİM PANOSU BUTONU -->
-                <div class="hub-card hub-card-life" onclick="openOlympusDashboard('feed')">
-                    <span class="hub-card-kicker">LİFE</span>
-                    <h3>Life Dashboard</h3>
-                    <p>Gelişim</p>
-                    <div class="hub-card-icon">📊</div>
+                <!-- HUB EKRANI: KPSS AKADEMİ BUTONU -->
+                <div class="hub-card hub-card-kpss" onclick="openKPSSCenter()">
+                    <span class="hub-card-kicker">STUDY</span>
+                    <h3>KPSS Akademi</h3>
+                    <p>Ders & Deneme Takibi</p>
+                    <div class="hub-card-icon">📚</div>
                 </div>
             </div>
 
@@ -2686,214 +2686,222 @@
             <!-- JS ile buraya fotoğraflar eklenecek -->
         </div>
     </div>
-    <!-- 𝕏lympus DASHBOARD (X-CLONE) EKRANI -->
-    <div id="unified-dashboard-screen" class="full-screen-overlay"
-        style="display: none; background-color: #000; z-index: 6000; flex-direction: column; position: fixed; top: 0; left: 0; width: 100vw; height: 100vh;">
 
-        <!-- 📱 SOL KAYDIRMALI PROFİL MENÜSÜ (SIDEBAR) -->
-        <div id="profile-sidebar-overlay" onclick="closeProfileSidebar()"
-            style="display: none; position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: rgba(0,0,0,0.6); z-index: 6001; backdrop-filter: blur(3px);">
-        </div>
-
-        <div id="profile-sidebar"
-            style="position: fixed; top: 0; left: -300px; width: 280px; height: 100vh; background: #0a0a0a; border-right: 1px solid #222; z-index: 6002; transition: left 0.3s cubic-bezier(0.4, 0, 0.2, 1); display: flex; flex-direction: column; padding-top: env(safe-area-inset-top);">
-
-            <!-- Profil Bilgileri (Google'dan Çekilecek) -->
-            <div
-                style="padding: 20px; border-bottom: 1px solid #222; display: flex; flex-direction: column; gap: 10px;">
-                <img id="sidebar-avatar" src="icon.png"
-                    style="width: 60px; height: 60px; border-radius: 50%; border: 2px solid #00d2ff; object-fit: cover; box-shadow: 0 0 15px rgba(0, 210, 255, 0.3);">
-                <div>
-                    <h3 id="sidebar-name" style="color: #fff; margin: 0; font-size: 18px; font-weight: 900;">
-                        Yükleniyor...</h3>
-                    <div style="display:flex; align-items:center; gap:8px; margin-top:2px;">
-                        <span id="sidebar-username" style="color: #888; font-size: 14px;">@kullaniciadi</span>
-                        <button onclick="editOlyUsername()"
-                            style="background:transparent; border:1px solid #333; border-radius:4px; color:#fff; font-size:10px; padding:2px 6px; cursor:pointer;">Düzenle</button>
-                    </div>
-                </div>
-                <!-- Takipçi İstatistikleri -->
-                <div style="display:flex; gap:15px; margin-top:10px;">
-                    <div style="color:#fff; font-size:14px;"><strong id="sidebar-following">0</strong> <span
-                            style="color:#888; font-size:12px;">Takip Edilen</span></div>
-                    <div style="color:#fff; font-size:14px;"><strong id="sidebar-followers">0</strong> <span
-                            style="color:#888; font-size:12px;">Takipçi</span></div>
-                </div>
-            </div>
-            <!-- Çıkış Butonu -->
-            <div style="padding: 20px; border-top: 1px solid #222; background: #050505;">
-                <button onclick="closeOlympusDashboardAndSidebar()"
-                    style="background: rgba(255, 68, 68, 0.1); border: 1px solid #ff4444; color: #ff4444; padding: 15px; border-radius: 12px; font-weight: bold; width: 100%; font-size: 15px; transition: all 0.2s; cursor: pointer;">
-                    X Ekranı Kapat
-                </button>
-            </div>
-
-            <!-- Menü Seçenekleri ve Envanter -->
-            <div style="flex: 1; overflow-y: auto; padding: 20px; display:flex; flex-direction:column; gap:15px;">
-                <!-- PROFIL BUTONU AKTİF EDİLDİ -->
-                <button onclick="openOlySocialProfile()" style="background:transparent; border:none; color:#fff; font-size:16px; font-weight:bold; text-align:left; cursor:pointer;">👤 Profil</button>
-                
-                <button style="background:transparent; border:none; color:#fff; font-size:16px; font-weight:bold; text-align:left; cursor:default;">🎒 Envanter (Kasa)</button>
-                <div id="inventory-list" style="display: flex; flex-direction: column; gap: 10px; padding-left: 10px;"></div>
-                
-                <!-- AYARLAR BUTONU AKTİF EDİLDİ -->
-                <button onclick="openSocialSettings()" style="background:transparent; border:none; color:#fff; font-size:16px; font-weight:bold; text-align:left; cursor:pointer; margin-top:10px;">⚙️ Ayarlar ve Gizlilik</button>
-            </div>
-
-        </div>
-
-        <!-- ÜST BAR (GÜNCELLENDİ - KESİN ÇÖZÜM) -->
-        <div style="display: flex; align-items: center; justify-content: space-between; padding: calc(env(safe-area-inset-top) + 15px) 15px 10px 15px; background: rgba(0,0,0,0.85); backdrop-filter: blur(10px); z-index: 10; position: relative;">
-            
-            <!-- SOL BÖLÜM (Profil İkonu) -->
-            <div style="flex: 1; display: flex; justify-content: flex-start;">
-                <img id="oly-social-top-avatar" src="icon.png" onclick="openProfileSidebar()" style="width: 36px; height: 36px; border-radius: 50%; border: 1px solid #444; object-fit: cover; cursor: pointer; display: block; background: #111;">
-            </div>
-
-            <!-- ORTA BÖLÜM (Logo) -->
-            <div style="flex: 2; text-align: center; font-size: 18px; font-weight: 900; color: #fff; font-family: sans-serif; letter-spacing: 2px;">
-                OLYSOCIAL
-            </div>
-
-            <!-- SAĞ BÖLÜM (Hizalama İçin Boşluk) -->
-            <div style="flex: 1;"></div>
-            
-        </div>
-
-        <!-- SEKMELER (Sana Özel vb.) -->
-        <div class="x-tabs-container">
-            <div class="x-tab active" onclick="switchDashboardTab('feed', this)">Sana özel<div class="x-tab-indicator">
-                </div>
-            </div>
-            <div class="x-tab" onclick="switchDashboardTab('feed', this)">Takip ediliyor<div class="x-tab-indicator">
-                </div>
-            </div>
-            <div class="x-tab" onclick="switchDashboardTab('feed', this)">Galatasaray<div class="x-tab-indicator"></div>
-            </div>
-            <div class="x-tab" onclick="switchDashboardTab('feed', this)">Vatan<div class="x-tab-indicator"></div>
-            </div>
-        </div>
-
-        <!-- 1. AKIŞ (FEED) GÖRÜNÜMÜ -->
-        <div id="dashboard-feed-view"
-            style="flex: 1; overflow-y: auto; display: flex; flex-direction: column; padding-bottom: 80px;">
-            <!-- YENİ: GALATASARAY YÜKLEME EKRANI -->
-            <div id="gs-loading-overlay" style="display: none;">
-                <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/f/f6/Galatasaray_Sports_Club_Logo.png/800px-Galatasaray_Sports_Club_Logo.png" class="gs-pulse-logo">
-                <span style="color: #f1c40f; margin-top: 20px; font-family: monospace; font-size: 12px; letter-spacing: 2px;">VERİLER ÇEKİLİYOR...</span>
-            </div>
-            <!-- JS ile postlar buraya dolacak -->
-        </div>
-
-        <!-- 2. MARKET (KASA) GÖRÜNÜMÜ -->
-        <div id="dashboard-market-view"
-            style="display: none; flex: 1; overflow-y: auto; padding-bottom: 80px; flex-direction: column;">
-            <div style="padding: 15px 20px; border-bottom: 1px solid #2f3336;">
-                <h2 style="color: #fff; margin: 0; font-size: 18px;">Kara Borsa</h2>
-                <div style="color: #71767b; font-size: 13px; margin-top: 2px;">Kasa Bakiyesi: <span
-                        id="dashboard-total-coins" style="color: #1d9bf0; font-weight: bold;">0</span> OC</div>
-            </div>
-            <div id="dashboard-market-items-container" class="premium-market-container" style="padding-top: 15px;">
-                <!-- JS ile market ürünleri dolacak -->
-            </div>
-        </div>
-
-        <!-- YENİ PAYLAŞIM BUTONU (Mavi FAB) -->
-        <div id="x-fab" class="x-fab" onclick="openNewPostModal()">
-            <svg viewBox="0 0 24 24" aria-hidden="true" style="width: 24px; height: 24px; fill: #fff;">
-                <g>
-                    <path
-                        d="M23 3c-2.02.81-4.22 1.36-6.52 1.61 2.36-1.42 4.17-3.66 5.02-6.3-2.18 1.29-4.59 2.23-7.15 2.73C12.28 1.01 9.49 0 6.42 0 2.87 0 0 2.87 0 6.42c0 .5.06.99.16 1.46C2.93 7.6 7.78 4.96 11.02.73c-.55.95-.87 2.05-.87 3.23 0 2.23 1.13 4.19 2.85 5.34-1.84-.06-3.57-.56-5.08-1.4v.08c0 5.43 3.86 9.96 8.98 10.99-.9.25-1.85.38-2.84.38-.69 0-1.36-.07-2.01-.19 1.43 4.45 5.56 7.69 10.46 7.78C10.74 20.89 5.86 23 0 23c-.5 0-.99-.03-1.48-.09C4.94 25.4 10.79 27 17.07 27c20.48 0 31.68-16.97 31.68-31.68 0-.48-.01-.96-.03-1.44 2.17-1.57 4.06-3.53 5.56-5.75-.4.18-.84.34-1.28.48z"
-                        opacity="0" />
-                </g>
-                <path d="M11 11V4h2v7h7v2h-7v7h-2v-7H4v-2h7z" />
-            </svg>
-        </div>
-
-        <!-- OLYSOCIAL ALT NAVİGASYON BARI (GÜNCELLENDİ) -->
-        <div class="x-bottom-nav">
-            <div class="nav-item active" onclick="switchDashboardTab('feed', document.querySelector('.x-tab.active'))">🏠</div>
-            <div class="nav-item" onclick="openArenaFromSocial()">🔍</div>
-            <div class="nav-item" onclick="switchDashboardTab('market', null)">🛒</div>
-            <!-- BİLDİRİM VE DM DÜZELTİLDİ -->
-            <div class="nav-item" onclick="openNotifications()">🔔</div>
-            <div class="nav-item" onclick="openChatListModal()">✉️</div>
-        </div>
-    </div>
-    <!-- 📝 OLYSOCIAL YENİ GÖNDERİ MODALI (DÜZELTİLDİ) -->
-    <div id="oly-new-post-modal" class="full-screen-overlay" style="display: none; background: #000; z-index: 9000; flex-direction: column; position: fixed; top: 0; left: 0; width: 100vw; height: 100vh;">
-        <!-- Butonlar en üste sağa sola yaslandı -->
-        <div style="display: flex; justify-content: space-between; align-items: center; padding: calc(env(safe-area-inset-top) + 15px) 15px 10px 15px; border-bottom: 1px solid #2f3336;">
-            <button onclick="closeNewPostModal()" style="background: transparent; color: #fff; border: none; font-size: 16px; cursor: pointer;">İptal</button>
-            <button onclick="submitNewPost()" style="background: #1d9bf0; color: #fff; border: none; border-radius: 20px; padding: 6px 16px; font-size: 14px; font-weight: bold; cursor: pointer;">Gönder</button>
-        </div>
-        <div style="display: flex; padding: 15px; gap: 12px; flex: 1;">
-            <img id="new-post-avatar" src="icon.png" style="width: 40px; height: 40px; border-radius: 50%; object-fit: cover;">
-            <textarea id="new-post-text" placeholder="Neler oluyor?" style="flex: 1; background: transparent; border: none; color: #fff; font-size: 18px; outline: none; resize: none; font-family: sans-serif; padding-top: 8px;"></textarea>
-        </div>
-    </div>
-
-    <!-- 👤 OLYSOCIAL ÖZEL PROFİL EKRANI -->
-    <div id="oly-social-profile-screen" class="full-screen-overlay" style="display: none; background: #000; z-index: 8500; flex-direction: column; position: fixed; top: 0; left: 0; width: 100vw; height: 100vh;">
-        
-        <!-- Profil Üst Bar -->
-        <div style="display: flex; align-items: center; gap: 20px; padding: calc(env(safe-area-inset-top) + 10px) 15px 10px 15px; background: rgba(0,0,0,0.85); backdrop-filter: blur(10px); z-index: 10; position: sticky; top: 0;">
-            <button onclick="closeOlySocialProfile()" style="background: transparent; color: #fff; border: none; font-size: 20px; cursor: pointer;">←</button>
-            <div>
-                <h2 id="osp-header-name" style="margin: 0; color: #fff; font-size: 18px; font-weight: 900;">Yükleniyor...</h2>
-                <span style="color: #71767b; font-size: 13px;">OlySocial Hesabı</span>
-            </div>
-        </div>
-
-        <!-- Kaydırılabilir İçerik -->
-        <div style="flex: 1; overflow-y: auto; display: flex; flex-direction: column;">
-            <!-- Arka Plan (Banner) ve Avatar -->
-            <div style="height: 120px; background: #2f3336; position: relative;">
-                <img src="https://images.unsplash.com/photo-1550684848-fac1c5b4e853?q=80&w=800&auto=format&fit=crop" style="width: 100%; height: 100%; object-fit: cover; opacity: 0.5;">
-                <img id="osp-avatar" src="icon.png" style="width: 75px; height: 75px; border-radius: 50%; border: 4px solid #000; position: absolute; bottom: -35px; left: 15px; object-fit: cover;">
-            </div>
-            
-            <!-- Profil Bilgileri -->
-            <div style="padding: 45px 15px 15px 15px;">
-                <h3 id="osp-name" style="margin: 0; color: #fff; font-size: 20px; font-weight: 900;">Yükleniyor...</h3>
-                <span id="osp-username" style="color: #71767b; font-size: 15px;">@kullanici</span>
-                <p style="color: #fff; font-size: 15px; margin: 10px 0; line-height: 1.4;">Makineleşme süreci devam ediyor. Disiplin, kodlama ve spor tek bir alanda. 🚀</p>
-                <div style="display: flex; gap: 15px; margin-top: 10px;">
-                    <div style="color: #fff; font-size: 14px;"><strong id="osp-following">0</strong> <span style="color: #71767b;">Takip edilen</span></div>
-                    <div style="color: #fff; font-size: 14px;"><strong id="osp-followers">0</strong> <span style="color: #71767b;">Takipçi</span></div>
-                </div>
-            </div>
-
-            <!-- Profil Sekmeleri -->
-            <div class="x-tabs-container" style="border-bottom: 1px solid #2f3336;">
-                <div class="x-tab active" onclick="switchOlyProfileTab('posts', this)">Gönderiler<div class="x-tab-indicator"></div></div>
-                <div class="x-tab" onclick="switchOlyProfileTab('replies', this)">Yanıtlar<div class="x-tab-indicator"></div></div>
-                <div class="x-tab" onclick="switchOlyProfileTab('reposts', this)">Yeniden...<div class="x-tab-indicator"></div></div>
-                <div class="x-tab" onclick="switchOlyProfileTab('likes', this)">Beğeni...<div class="x-tab-indicator"></div></div>
-            </div>
-
-            <!-- Profil Akışı -->
-            <div id="osp-feed-view" style="display: flex; flex-direction: column; padding-bottom: 50px;">
-                <!-- JS ile tıklanan sekmeye göre postlar dolacak -->
-            </div>
-        </div>
-    </div>
-
-    <!-- ⚙️ OLYSOCIAL AYARLAR MODALI -->
-    <div id="oly-social-settings-modal" class="full-screen-overlay" style="display: none; background: #000; z-index: 9000; flex-direction: column; position: fixed; top: 0; left: 0; width: 100vw; height: 100vh;">
-        <div style="display: flex; align-items: center; padding: calc(env(safe-area-inset-top) + 15px) 15px 15px 15px; border-bottom: 1px solid #2f3336; gap: 15px;">
-            <button onclick="document.getElementById('oly-social-settings-modal').style.display='none'" style="background: transparent; color: #fff; border: none; font-size: 22px; cursor: pointer;">←</button>
-            <h2 style="color: #fff; margin: 0; font-size: 18px; font-weight: 900;">Ayarlar ve Gizlilik</h2>
-        </div>
-        <div style="padding: 20px; display: flex; flex-direction: column; gap: 15px;">
-            <button onclick="editOlyUsername()" style="background: #111; border: 1px solid #333; color: #fff; padding: 15px; border-radius: 10px; text-align: left; font-size: 15px; font-weight: bold; cursor: pointer;">@ Kullanıcı Adını Değiştir</button>
-            <button onclick="alert('Hesap gizliliği şu an: HERKESE AÇIK');" style="background: #111; border: 1px solid #333; color: #fff; padding: 15px; border-radius: 10px; text-align: left; font-size: 15px; font-weight: bold; cursor: pointer;">Gizlilik (Hesap Türü)</button>
-            <button onclick="alert('Sessize alınan kelimeler ve hesaplar paneli eklenecek.');" style="background: #111; border: 1px solid #333; color: #fff; padding: 15px; border-radius: 10px; text-align: left; font-size: 15px; font-weight: bold; cursor: pointer;">Sessize Alınanlar</button>
-        </div>
-    </div>
     <!-- 🎵 İDMAN ARKA PLAN MOTORU (Kilit Ekranında Medya Oynatıcı İçin) -->
-    <audio id="workout-bg-audio" loop playsinline src="data:audio/mp3;base64,//OExAAAAANIAAAAAExBTUUzLjEwMKqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqq"></audio>
-    <script src="script.js"></script>
+    <audio id="workout-bg-audio" loop playsinline
+        src="data:audio/mp3;base64,//OExAAAAANIAAAAAExBTUUzLjEwMKqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqq"></audio>
+
+    <!-- ==========================================
+         📚 KPSS AKADEMİ (ÇALIŞMA MERKEZİ) - V3.0 PRO
+         ========================================== -->
+    <div id="kpss-screen" class="full-screen-overlay hidden"
+        style="z-index: 10000; background: var(--bg-dark); flex-direction: column; justify-content: flex-start; overflow-y: auto; padding-bottom: 80px;">
+
+        <!-- ÜST BAR: SINAV SEÇİCİ -->
+        <div class="header-top"
+            style="width:100%; padding: calc(env(safe-area-inset-top) + 15px) 20px 15px 20px; background:var(--bg-dark); border-bottom: 1px solid #222; display: flex; justify-content: space-between; align-items: center; position: sticky; top: 0; z-index: 10;">
+            <div onclick="openKPSSExamSelector()" style="display:flex; align-items:center; gap:5px; cursor:pointer;">
+                <h2 id="kpss-header-title"
+                    style="color:var(--text-light); font-weight:900; font-size: 18px; margin:0; letter-spacing: 0.5px;">
+                    KPSS Ön Lisans</h2>
+                <span style="color:var(--goldnova); font-size:12px;">▼</span>
+            </div>
+            <button onclick="closeKPSSCenter()" class="edit-btn"
+                style="border-color:#ff4444; color:#ff4444; font-size:11px;">Kapat</button>
+        </div>
+
+        <div style="padding: 15px; display: flex; flex-direction: column; gap: 20px;">
+
+            <!-- GERİ SAYIM & POMODORO (Kompakt Grid) -->
+            <div class="grid-container" style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px;">
+                <div class="card" style="text-align: center; border-left-color: #00d2ff; padding: 15px;">
+                    <h4
+                        style="color: var(--text-muted); margin: 0 0 5px 0; font-size: 10px; text-transform: uppercase;">
+                        Ana Sınav</h4>
+                    <strong id="kpss-main-countdown" style="color: #fff; font-size: 16px;">Hesaplanıyor...</strong>
+                </div>
+                <!-- YENİ POMODORO KARTI (Hayalet Tıklama Korumalı) -->
+                <div class="card" id="kpss-pomodoro-card" onpointerdown="startPomodoroPress()"
+                    onpointerup="endPomodoroPress()" onpointerleave="cancelPomodoroPress()"
+                    style="text-align: center; border-left-color: #27ae60; padding: 15px; cursor:pointer; user-select: none; touch-action: none;">
+                    <h4
+                        style="color: var(--text-muted); margin: 0 0 5px 0; font-size: 10px; text-transform: uppercase;">
+                        Odaklanma Modu</h4>
+                    <strong id="kpss-pomodoro-time" style="color: #27ae60; font-size: 16px;">45:00 ▶</strong>
+                    <p style="color:#888; font-size:8px; margin:4px 0 0 0;">(Başlat/Duraklat: Tıkla | Sıfırla: Basılı
+                        Tut)</p>
+                </div>
+            </div>
+
+            <!-- GÖRÜNÜM SEKMELERİ (GÜNCELLENDİ) -->
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 5px;">
+                <div class="toggle-container" style="width: 270px;">
+                    <button id="btn-kpss-today" class="day-toggle active" style="flex:1; font-size:10px;"
+                        onclick="switchKPSSView('today')">Bugün</button>
+                    <button id="btn-kpss-week" class="day-toggle" style="flex:1; font-size:10px;"
+                        onclick="switchKPSSView('week')">Program</button>
+                    <button id="btn-kpss-overview" class="day-toggle" style="flex:1; font-size:10px;"
+                        onclick="switchKPSSView('overview')">Panoroma</button>
+                </div>
+                <button class="save-btn" onclick="openKPSSCreatorSelector()"
+                    style="margin: 0; width: auto; padding: 8px 12px; font-size: 11px; background: var(--goldnova); color:#000;">+
+                    Oluştur</button>
+            </div>
+
+            <p id="kpss-swipe-hint" style="color: #888; font-size: 11px; text-align: center; margin: 0;">Dersi
+                bitirdiğinde sağa kaydır, konuları görmek için tıkla.</p>
+            <!-- YENİ: TARİH VE HAFTA SEÇİCİ PANELİ -->
+            <div id="kpss-date-week-info"
+                style="background: #111; border: 1px solid #333; border-left: 3px solid var(--goldnova); padding: 10px 15px; border-radius: 8px; display: flex; justify-content: space-between; align-items: center;">
+                <span id="kpss-current-date" style="color: #fff; font-size: 13px; font-weight: bold;">Tarih
+                    Hesaplanıyor...</span>
+
+                <!-- HAFTA SEÇİCİ DROPDOWN -->
+                <select id="kpss-week-selector" onchange="changeKpssWeek()"
+                    style="background: rgba(255, 215, 0, 0.1); color: var(--goldnova); border: none; font-size: 11px; font-weight: bold; padding: 4px 8px; border-radius: 4px; outline: none; cursor: pointer; text-align: center;">
+                    <option value="1">1. Hafta </option>
+                    <option value="2">2. Hafta </option>
+                    <option value="3">3. Hafta </option>
+                    <option value="4">4. Hafta </option>
+                    <option value="5">5. Hafta </option>
+                    <option value="6">6. Hafta </option>
+                    <option value="7">7. Hafta </option>
+                    <option value="8">8. Hafta </option>
+                    <option value="9">9. Hafta </option>
+                </select>
+            </div>
+            <!-- DERS LİSTESİ ALANI -->
+            <div id="kpss-schedule-container" class="grid-container"
+                style="display: flex; flex-direction: column; gap: 10px;">
+                <!-- JS ile dolacak -->
+            </div>
+        </div>
+    </div>
+
+    <!-- 🎯 SINAV SEÇİCİ MODALI -->
+    <div id="kpss-exam-selector-modal" class="modal" style="z-index: 10005;">
+        <div class="modal-content" style="max-width: 300px;">
+            <h2 style="color:var(--text-light); margin-bottom:15px; font-size: 16px; text-align:center;">Hedef Sınavı
+                Seç</h2>
+            <button class="edit-btn" onclick="selectKPSSExam('onlisans')"
+                style="width:100%; padding:15px; margin-bottom:10px; font-size:14px; color:#00d2ff; border-color:#00d2ff;">🏛️
+                KPSS Ön Lisans (4 Ekim 2026)</button>
+            <button class="edit-btn" onclick="selectKPSSExam('ortaogretim')"
+                style="width:100%; padding:15px; margin-bottom:15px; font-size:14px; color:#f6c000; border-color:#f6c000;">🏛️
+                KPSS Ortaöğretim (25 Ekim 2026)</button>
+            <button class="save-btn" onclick="document.getElementById('kpss-exam-selector-modal').style.display='none'"
+                style="margin-top:0;">İptal</button>
+        </div>
+    </div>
+
+    <!-- 🛠️ PROGRAM OLUŞTURMA YÖNTEMİ SEÇİCİ -->
+    <div id="kpss-creator-selector-modal" class="modal" style="z-index: 10005;">
+        <div class="modal-content" style="max-width: 320px; text-align: center;">
+            <h2 style="color:var(--goldnova); margin-bottom:15px; font-size: 16px;">Program Nasıl Oluşturulsun?</h2>
+            <div style="display: flex; gap: 10px;">
+                <div onclick="startKpssAiChat()"
+                    style="flex:1; background:#111; border:1px solid #00d2ff; border-radius:10px; padding:20px 10px; cursor:pointer;">
+                    <span style="font-size:30px; display:block; margin-bottom:10px;">🤖</span>
+                    <strong style="color:#00d2ff; font-size:12px;">Oly-AI Asistan</strong>
+                    <p style="color:#888; font-size:9px; margin-top:5px;">Seninle konuşarak özel bir program çizer.</p>
+                </div>
+                <div onclick="openKPSSManualBuilder()"
+                    style="flex:1; background:#111; border:1px solid #27ae60; border-radius:10px; padding:20px 10px; cursor:pointer;">
+                    <span style="font-size:30px; display:block; margin-bottom:10px;">✏️</span>
+                    <strong style="color:#27ae60; font-size:12px;">Manuel İnşa</strong>
+                    <p style="color:#888; font-size:9px; margin-top:5px;">Günleri ve dersleri kendin belirlersin.</p>
+                </div>
+            </div>
+            <button class="edit-btn"
+                onclick="document.getElementById('kpss-creator-selector-modal').style.display='none'"
+                style="width:100%; margin-top:15px; border-color:#ff4444; color:#ff4444;">İptal</button>
+        </div>
+    </div>
+
+    <!-- 🤖 YZ SOHBET VE ONAY EKRANI -->
+    <div id="kpss-ai-chat-modal" class="modal" style="z-index: 10006;">
+        <div class="modal-content" style="max-width: 400px; height: 80vh; display: flex; flex-direction: column;">
+
+            <!-- YENİ BAŞLIK VE X BUTONU -->
+            <div
+                style="display:flex; justify-content:space-between; align-items:center; border-bottom:1px solid #333; padding-bottom:10px; margin-bottom:10px;">
+                <h2 style="color:#00d2ff; margin:0; font-size: 16px;">🤖 Oly-AI Akademi</h2>
+                <button onclick="document.getElementById('kpss-ai-chat-modal').style.display='none'"
+                    style="background:transparent; border:none; color:#ff4444; font-size:18px; font-weight:bold; cursor:pointer;">X</button>
+            </div>
+
+            <div id="kpss-ai-messages"
+                style="flex:1; overflow-y:auto; display:flex; flex-direction:column; gap:10px; padding-right:5px; margin-bottom:10px;">
+                <!-- Mesajlar buraya akacak -->
+            </div>
+
+            <div id="kpss-ai-input-area" style="display:flex; gap:5px;">
+                <input type="text" id="kpss-ai-input" placeholder="Cevabını yaz..."
+                    style="flex:1; padding:10px; background:#111; border:1px solid #333; color:#fff; border-radius:8px; outline:none; font-size:13px;">
+                <button onclick="handleKpssAiResponse()"
+                    style="background:#00d2ff; color:#000; border:none; padding:0 15px; border-radius:8px; font-weight:bold;">Gönder</button>
+            </div>
+            <div id="kpss-ai-approve-area" style="display:none; gap:10px; margin-top:10px;">
+                <button class="save-btn" onclick="approveKpssAiProgram()"
+                    style="flex:2; margin:0; background:#27ae60;">Sistemi Onayla</button>
+                <button class="edit-btn" onclick="document.getElementById('kpss-ai-chat-modal').style.display='none'"
+                    style="flex:1; margin:0; border-color:#ff4444; color:#ff4444;">Vazgeç</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- 📚 KONU İLERLEME AĞACI (SYLLABUS) MODALI -->
+    <div id="kpss-syllabus-modal" class="modal" style="z-index: 10007;">
+        <div class="modal-content" style="max-height: 85vh;">
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px;">
+                <h2 id="syllabus-title" style="color:var(--goldnova); margin:0; font-size: 16px;">Ders Adı</h2>
+                <span id="syllabus-pct-text" style="color:#fff; font-size:12px; font-weight:bold;">%0</span>
+            </div>
+            <div
+                style="width: 100%; background: #222; height: 6px; border-radius: 3px; margin-bottom: 15px; overflow: hidden;">
+                <div id="syllabus-progress-bar"
+                    style="width: 0%; background: var(--goldnova); height: 100%; transition: 0.3s;"></div>
+            </div>
+            <div id="syllabus-topics-list"
+                style="overflow-y: auto; flex: 1; display: flex; flex-direction: column; gap: 8px; padding-right: 5px;">
+                <!-- Konular buraya dolacak -->
+            </div>
+            <button class="save-btn" onclick="document.getElementById('kpss-syllabus-modal').style.display='none'"
+                style="margin-top: 15px;">Kapat</button>
+        </div>
+    </div>
+    <!-- ✏️ DERS PROGRAMI DÜZENLEME MODALI (EKSİK OLAN KISIM) -->
+    <div id="kpss-edit-modal" class="modal" style="z-index: 10008;">
+        <div class="modal-content">
+            <h2 style="color:var(--text-light); margin-bottom:15px; font-size: 18px;">Program Düzenle</h2>
+            <select id="kpss-edit-day" onchange="renderKPSSEditList()"
+                style="width:100%; padding:12px; background:#151515; border:1px solid #333; color:#fff; border-radius:8px; outline:none; margin-bottom: 15px;">
+                <option value="1">Pazartesi</option>
+                <option value="2">Salı</option>
+                <option value="3">Çarşamba</option>
+                <option value="4">Perşembe</option>
+                <option value="5">Cuma</option>
+                <option value="6">Cumartesi</option>
+                <option value="0">Pazar</option>
+            </select>
+            <div id="kpss-edit-list"
+                style="max-height: 150px; overflow-y: auto; margin-bottom: 15px; display: flex; flex-direction: column; gap: 8px;">
+            </div>
+            <div
+                style="background: #111; padding: 15px; border-radius: 8px; border: 1px dashed #444; margin-bottom: 15px;">
+                <input type="text" id="kpss-new-sub" placeholder="Ders (Örn: Matematik)"
+                    style="width: 100%; padding: 10px; background: #000; border: 1px solid #333; color: #fff; border-radius: 4px; margin-bottom: 8px;">
+                <input type="text" id="kpss-new-topic" placeholder="Hedef Konu"
+                    style="width: 100%; padding: 10px; background: #000; border: 1px solid #333; color: #fff; border-radius: 4px; margin-bottom: 8px;">
+                <button onclick="addKPSSLesson()" class="edit-btn" style="width: 100%; background: #222;">Ekle</button>
+            </div>
+            <button class="edit-btn" onclick="resetKPSSScheduleToDefault()"
+                style="flex: 1; margin: 0; border-color: #ff4444; color: #ff4444; font-size: 12px;">🔄 Sıfırla</button>
+            <button class="save-btn"
+                onclick="document.getElementById('kpss-edit-modal').style.display='none'; renderKPSSTodayOrWeek();"
+                style="flex: 2; margin: 0; font-size: 12px;">Kaydet & Kapat</button>
+        </div>
+        <script src="script.js"></script>
 </body>
 
 </html>

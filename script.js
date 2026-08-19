@@ -8015,844 +8015,916 @@ window.togglePolaroidFlip = function (cardElement) {
 }
 
 // ==========================================
-// 🔍 ÜST SEKMELER, TEMA DEĞİŞİMİ VE YÜKLEME MOTORU
+// 📚 KPSS AKADEMİ V3.0 (SWIPE, AI, SYLLABUS, HAFIZA)
 // ==========================================
-window.switchDashboardTab = function(tabName, clickedElement = null) {
-    const feedView = document.getElementById('dashboard-feed-view');
-    const marketView = document.getElementById('dashboard-market-view');
-    const fab = document.getElementById('x-fab');
-    const gsLoading = document.getElementById('gs-loading-overlay');
 
-    if (tabName === 'feed') {
-        if(feedView) feedView.style.display = 'flex';
-        if(marketView) marketView.style.display = 'none';
-        if(fab) fab.style.display = 'flex';
-        
-        let tabText = 'Sana özel';
-        
-        if(clickedElement && clickedElement.classList.contains('x-tab')) {
-            document.querySelectorAll('.x-tab').forEach(t => t.classList.remove('active'));
-            clickedElement.classList.add('active');
-            tabText = clickedElement.innerText.trim();
-        }
+let kpssViewMode = 'today';
+let activeKpssExam = localStorage.getItem('olympus_kpss_exam') || 'onlisans';
 
-        // Temizlik: Önceki içerikleri sil
-        Array.from(feedView.children).forEach(child => {
-            if (child.id !== 'gs-loading-overlay') child.remove();
-        });
-        
-        if(tabText === 'Galatasaray') {
-            // 🦁 TEMA DEĞİŞİMİ: GALATASARAY MODU (Koyu Kırmızı Arka Plan, Sarı Vurgular)
-            document.documentElement.style.setProperty('--goldnova', '#fdb912'); // GS Sarısı
-            document.documentElement.style.setProperty('--bg-dark', '#1a0003'); // Derin Kırmızı
-            
-            // YÜKLEME EKRANINI TETİKLE (Pulse)
-            if(gsLoading) {
-                gsLoading.style.display = 'flex';
-                gsLoading.style.opacity = '1';
-            }
-            if(fab) fab.style.display = 'none'; 
-            
-            // 1.5 Saniye sonra Google Verilerini Bas
-            setTimeout(() => {
-                if(gsLoading) {
-                    gsLoading.style.opacity = '0';
-                    setTimeout(() => gsLoading.style.display = 'none', 500);
-                }
-                renderAutomatedFeed('galatasaray');
-                if(fab) fab.style.display = 'flex';
-            }, 1500);
-
-        } else if (tabText === 'Vatan') {
-            // 🇹🇷 TEMA SIFIRLAMA: ESKİ TEMAYA DÖN
-            let appliedTheme = localStorage.getItem('olympus_applied_theme') || 'theme_default';
-            if(typeof applyTheme === 'function') applyTheme(appliedTheme);
-
-            if(gsLoading) gsLoading.style.display = 'none';
-            renderAutomatedFeed('vatan');
-        } else {
-            // TEMA SIFIRLAMA: ESKİ TEMAYA DÖN
-            let appliedTheme = localStorage.getItem('olympus_applied_theme') || 'theme_default';
-            if(typeof applyTheme === 'function') applyTheme(appliedTheme);
-
-            if(gsLoading) gsLoading.style.display = 'none';
-            renderXFeed(); 
-            
-            setTimeout(() => {
-                if (tabText === 'Takip ediliyor') {
-                    document.querySelectorAll('.x-post').forEach(post => {
-                        if(post.innerHTML.includes('Reklam')) post.style.display = 'none';
-                    });
-                }
-            }, 50);
-        }
-    } else if (tabName === 'market') {
-        if(feedView) feedView.style.display = 'none';
-        if(marketView) marketView.style.display = 'flex';
-        if(fab) fab.style.display = 'none';
-        renderMarket();
+// Müfredat Veritabanı (İki sınav için ayrıştırılmış, ortak kullanılabilir)
+const kpssSyllabusDB = {
+    "onlisans": {
+        "Türkçe": ["Sözcükte Anlam", "Cümlede Anlam", "Paragraf", "Ses Bilgisi", "Yapı Bilgisi", "Sözcük Türleri", "Cümle Öğeleri", "Yazım Kuralları", "Noktalama", "Sözel Mantık"],
+        "Matematik": ["Temel Kavramlar", "Rasyonel Sayılar", "Üslü ve Köklü", "Çarpanlara Ayırma", "Denklem Çözme", "Problemler", "Kümeler", "Fonksiyonlar", "Geometri", "Sayısal Mantık"],
+        "Tarih": ["İslamiyet Öncesi Türk Tarihi", "İlk Türk-İslam Devletleri", "Osmanlı Kuruluş/Yükseliş", "Osmanlı Kültür ve Medeniyet", "20. Yüzyıl Başlarında Osmanlı", "Kurtuluş Savaşı", "Çağdaş Türk ve Dünya Tarihi"],
+        "Coğrafya": ["Türkiye'nin Coğrafi Konumu", "Yeryüzü Şekilleri", "İklim ve Bitki Örtüsü", "Nüfus ve Yerleşme", "Tarım ve Hayvancılık", "Madenler ve Enerji", "Sanayi, Ulaşım ve Ticaret"],
+        "Vatandaşlık": ["Hukuka Giriş", "Anayasa Tarihi", "Temel Hak ve Hürriyetler", "Yasama", "Yürütme", "Yargı", "İdare Hukuku", "Güncel Bilgiler"]
+    },
+    "ortaogretim": {
+        // Ortaöğretim için benzer ama isimleri farklılaştırılabilir, şimdilik kopyası
+        "Türkçe": ["Sözcükte Anlam", "Cümlede Anlam", "Paragraf", "Dil Bilgisi Temelleri", "Yazım ve Noktalama", "Sözel Mantık"],
+        "Matematik": ["Temel Kavramlar", "Rasyonel Sayılar", "Üslü Köklü", "Problemler", "Geometri Temelleri"],
+        "Tarih": ["İslamiyet Öncesi", "Türk-İslam", "Osmanlı Siyasi Tarihi", "Osmanlı Kültür", "İnkılap Tarihi", "Çağdaş"],
+        "Coğrafya": ["Konum", "Yeryüzü Şekilleri", "İklim", "Nüfus", "Ekonomi"],
+        "Vatandaşlık": ["Hukuk Temelleri", "1982 Anayasası", "Yasama, Yürütme, Yargı", "İdare"]
     }
 };
 
-// 🇹🇷 OTOMATİK İÇERİK ÜRETİCİ (Güvenli Resim Linkleri ile)
-window.renderAutomatedFeed = function(type) {
-    const container = document.getElementById('dashboard-feed-view');
-    if(!container) return;
-
-    if (type === 'galatasaray') {
-        // Asla kırılmayan Football-Data API logoları
-        const gsLogo = "https://crests.football-data.org/610.svg";
-        const manuLogo = "https://crests.football-data.org/66.svg";
-        const bjkLogo = "https://crests.football-data.org/611.svg";
-
-        const matchCenterHTML = `
-            <div class="google-widget-container" style="background: transparent;">
-                <!-- Google Maç Kartı -->
-                <div class="google-card" style="background: rgba(0,0,0,0.6); border: 1px solid rgba(253, 185, 18, 0.3);">
-                    <div class="google-card-title" style="color: #fdb912;">
-                        <span>🏆 Şampiyonlar Ligi</span>
-                        <span>Maçlar ➔</span>
-                    </div>
-                    
-                    <div class="google-match-score">
-                        <div class="google-team">
-                            <img src="${gsLogo}">
-                            <span>Galatasaray<br><span style="color:#8ab4f8; font-size:12px;">1.</span></span>
-                        </div>
-                        <div class="google-score-center">
-                            <span class="google-score-num">3</span>
-                            <span class="google-match-status" style="color:#fdb912; font-weight:bold;">88' Canlı<br><span style="color:#e8eaed; font-size:14px; margin-top:4px;">RAMS Park</span></span>
-                            <span class="google-score-num">1</span>
-                        </div>
-                        <div class="google-team">
-                            <img src="${manuLogo}">
-                            <span>Man. United<br><span style="color:#8ab4f8; font-size:12px;">4.</span></span>
-                        </div>
-                    </div>
-
-                    <div class="google-upcoming">
-                        <div class="google-upcoming-item">
-                            <img src="${bjkLogo}">
-                            <span style="color:#9aa0a6;">Beşiktaş</span>
-                        </div>
-                        <div style="text-align:right;">
-                            <span style="color:#e8eaed;">21/8 Cum</span><br>
-                            <span style="color:#fdb912; font-weight:bold;">21:30</span>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Google Puan Durumu Kartı -->
-                <div class="google-card" style="background: rgba(0,0,0,0.6); border: 1px solid rgba(253, 185, 18, 0.3);">
-                    <div class="google-card-title" style="color: #fdb912;">
-                        <span>Süper Lig Puan Durumu</span>
-                        <span>➔</span>
-                    </div>
-                    <table class="google-table">
-                        <tr>
-                            <th>Takım</th>
-                            <th>OM</th><th>G</th><th>B</th><th>M</th><th>A</th><th>P</th>
-                        </tr>
-                        <tr style="background: rgba(253, 185, 18, 0.1);">
-                            <td><span style="color:#8ab4f8;">1</span> <img src="${gsLogo}"> Galatasaray</td>
-                            <td>1</td><td>1</td><td>0</td><td>0</td><td>2</td><td>3</td>
-                        </tr>
-                        <tr>
-                            <td><span style="color:#8ab4f8;">2</span> <img src="${bjkLogo}"> Beşiktaş</td>
-                            <td>0</td><td>0</td><td>0</td><td>0</td><td>0</td><td>0</td>
-                        </tr>
-                    </table>
-                </div>
-            </div>
-        `;
-        container.insertAdjacentHTML('beforeend', matchCenterHTML);
-
-        // Kırılmayan rastgele resim linkleri (Picsum)
-        let fakePosts = [
-            {
-                name: "Galatasaray Ruhu", username: "@gshistory", verified: true, time: "45 dk",
-                text: "“Galatasaray bir his takımıdır. Rengiyle, tarihiyle, taraftarıyla bir bütündür.” — Taçsız Kral Metin Oktay 👑💛❤️",
-                icon: gsLogo,
-                image: "https://picsum.photos/800/400?random=11",
-                likes: "1.2M", rts: "400B", replies: "15B"
-            },
-            {
-                name: "Aslanın Kükreyişi", username: "@lionofist", verified: true, time: "2 sa",
-                text: "Ormanın kralı sahaya indiğinde, diğerleri sadece izler! Mayıslar bizimdir, kükre aslanım! 🦁🔥",
-                icon: gsLogo,
-                image: "https://picsum.photos/800/400?random=12",
-                likes: "850B", rts: "125B", replies: "9B"
-            }
-        ];
-        renderPostsToContainer(fakePosts, container);
-
-    } else if (type === 'vatan') {
-        let fakePosts = [
-            {
-                name: "Tarih ve Vatan", username: "@vatansevdasi", verified: true, time: "1 sa",
-                text: "“Söz konusu vatansa, gerisi teferruattır.” — Mustafa Kemal Atatürk 🇹🇷",
-                icon: "https://ui-avatars.com/api/?name=TR&background=e74c3c&color=fff&bold=true",
-                image: "https://picsum.photos/800/400?random=21", 
-                likes: "345B", rts: "112B", replies: "8B"
-            },
-            {
-                name: "Gök Vatan", username: "@istikbalgoklerde", verified: true, time: "4 sa",
-                text: "Çelik kanatlarımız gökyüzünü yırtarken, yeryüzünde sadece gurur var. Gök vatanın çelik kartalları daima göreve hazır! ✈️🇹🇷",
-                icon: "https://ui-avatars.com/api/?name=GV&background=2980b9&color=fff&bold=true",
-                image: "https://picsum.photos/800/400?random=22",
-                likes: "189B", rts: "45B", replies: "2B"
-            }
-        ];
-        renderPostsToContainer(fakePosts, container);
-    }
+window.openKPSSCenter = function() {
+    const hub = document.getElementById('hub-screen');
+    if (hub) hub.classList.add('hidden');
+    document.getElementById('kpss-screen').classList.remove('hidden');
+    
+    updateKpssHeader();
+    renderKPSSTodayOrWeek();
+    updateKpssCountdowns();
+    
+    // Her 1 saatte bir gün dönümünü kontrol etsin yeterli, saniyelik kasmaya gerek yok
+    setInterval(updateKpssCountdowns, 3600000); 
 };
 
-// Kod tekrarını önlemek için yardımcı fonksiyon
-function renderPostsToContainer(postsArray, container) {
-    postsArray.forEach(post => {
-        const div = document.createElement('div');
-        div.className = 'x-post';
-        let imageHTML = post.image ? `<div style="margin-top:12px; border-radius:16px; overflow:hidden; border:1px solid #2f3336;"><img src="${post.image}" style="width:100%; display:block;"></div>` : '';
-        div.innerHTML = `
-            <div class="x-avatar" style="overflow:hidden; display:flex; justify-content:center; align-items:center; background:#fff;">
-                <img src="${post.icon}" style="width:100%; height:100%; object-fit:contain; border-radius:50%;">
-            </div>
-            <div class="x-content">
-                <div class="x-header">
-                    <span class="x-name">${post.name}</span>
-                    <span class="x-verified"><svg viewBox="0 0 24 24" style="width:1.25em;height:1.25em;fill:#1d9bf0;"><g><path d="M22.5 12.5c0-1.58-.875-2.95-2.148-3.6.154-.435.238-.905.238-1.4 0-2.21-1.71-3.998-3.918-3.998-.47 0-.92.084-1.336.25C14.818 2.415 13.51 1.5 12 1.5s-2.816.917-3.337 2.25c-.416-.165-.866-.25-1.336-.25-2.21 0-3.918 1.79-3.918 4 0 .495.084.965.238 1.4-1.273.65-2.148 2.02-2.148 3.6 0 1.46.74 2.746 1.846 3.45-.065.318-.1.646-.1 1.03 0 2.227 1.734 4.025 3.937 4.025.56 0 1.094-.127 1.587-.354C9.356 21.65 10.61 22.5 12 22.5c1.39 0 2.645-.85 3.25-2.096.494.227 1.028.354 1.587.354 2.203 0 3.937-1.798 3.937-4.025 0-.384-.035-.712-.1-1.03 1.107-.704 1.846-1.99 1.846-3.45zM10.7 16.5l-3.3-3.3 1.4-1.4 1.9 1.9 5.6-5.6 1.4 1.4-7 7z"></path></g></svg></span>
-                    <span class="x-username">${post.username}</span>
-                    <span class="x-time">· ${post.time}</span>
-                </div>
-                <div class="x-text">${post.text}</div>
-                ${imageHTML}
-                <div class="x-actions">
-                    <div class="x-action" onclick="toggleXAction(this, 'reply')">💬 <span>${post.replies}</span></div>
-                    <div class="x-action" onclick="toggleXAction(this, 'rt')">🔁 <span>${post.rts}</span></div>
-                    <div class="x-action" onclick="toggleXAction(this, 'like')">❤️ <span>${post.likes}</span></div>
-                </div>
-            </div>
-        `;
-        container.appendChild(div);
-    });
+window.closeKPSSCenter = function() {
+    document.getElementById('kpss-screen').classList.add('hidden');
+    if (typeof returnToHub === 'function') returnToHub();
+};
+
+// --- 1. SINAV SEÇİMİ VE ÜST KISIM ---
+window.openKPSSExamSelector = function() {
+    document.getElementById('kpss-exam-selector-modal').style.display = 'flex';
+};
+
+window.selectKPSSExam = function(type) {
+    activeKpssExam = type;
+    localStorage.setItem('olympus_kpss_exam', type);
+    document.getElementById('kpss-exam-selector-modal').style.display = 'none';
+    
+    updateKpssHeader();
+    updateKpssCountdowns();
+    renderKPSSTodayOrWeek(); // Müfredat değiştiği için listeyi yenile
+    if(navigator.vibrate) navigator.vibrate(20);
+};
+
+function updateKpssHeader() {
+    const title = document.getElementById('kpss-header-title');
+    if(activeKpssExam === 'onlisans') title.innerText = "KPSS Ön Lisans";
+    else title.innerText = "KPSS Ortaöğretim";
 }
 
-window.renderXFeed = function () {
-    const container = document.getElementById('dashboard-feed-view');
-    container.innerHTML = '';
-
-    // Google (Firebase) Kullanıcı Bilgilerini Çek
-    const user = firebase.auth().currentUser;
-    let myPhoto = "icon.png";
-    let myName = "Şampiyon";
-    let myUsername = localStorage.getItem('olympus_username') || "@kullanici";
-
-    if (user) {
-        myPhoto = user.photoURL || "icon.png";
-        myName = user.displayName || "Şampiyon";
-    } else {
-        const localName = document.getElementById('profile-name-display');
-        if (localName && localName.innerText !== "Yükleniyor...") myName = localName.innerText;
-        const localImg = document.getElementById('header-profile-img');
-        if (localImg && localImg.src) myPhoto = localImg.src;
-    }
-
-    // Sahte Topluluk Verileri
-    const xFeed = [
-        {
-            name: "Proteinocean", username: "@proteinocean", verified: true, time: "Reklam", type: "ad",
-            text: "Sakarya'daki zorlu antrenmanlardan sonra kas yıkımını engelle. En sevilen Whey protein aromaları şimdi yenilenen stoklarıyla. 🏋️‍♂️💪",
-            icon: "🌊", likes: "12B", rts: "145", replies: "34"
-        },
-        {
-            name: "Galatasaray SK", username: "@GalatasaraySK", verified: true, time: "4 sa", type: "post",
-            text: "Bugün günlerden GALATASARAY! 🦁💛❤️",
-            icon: "🦁", likes: "85B", rts: "12B", replies: "1.2B"
+function updateKpssCountdowns() {
+    const mainEl = document.getElementById('kpss-main-countdown');
+    const now = new Date().getTime();
+    
+    // Sınav Tarihleri
+    const examDateStr = activeKpssExam === 'onlisans' ? "2026-10-04T10:15:00" : "2026-10-25T10:15:00";
+    const examTime = new Date(examDateStr).getTime();
+    
+    if (mainEl) {
+        const diff = examTime - now;
+        if(diff > 0) {
+            const d = Math.floor(diff / (1000 * 60 * 60 * 24));
+            mainEl.innerText = `${d} Gün Kaldı`;
+        } else {
+            mainEl.innerText = "SINAV VAKTİ!";
         }
-    ];
+    }
+}
 
-    // Senin Kendi LocalStorage Loglarını Gerçek Google Profil Fotoğrafınla Ekle
-    let localFeed = JSON.parse(localStorage.getItem('olympus_social_feed')) || [];
-    localFeed.forEach(item => {
-        xFeed.push({
-            name: myName, username: myUsername, verified: true, time: item.time, type: "post",
-            text: `<strong style="color:var(--goldnova); font-size:15px;">${item.title}</strong><br><span style="color:#ddd;">${item.desc}</span> ${item.earned > 0 ? `<br><span style="color:#1d9bf0; font-weight:bold; margin-top:5px; display:inline-block;">+${item.earned} OC Kazanıldı 💰</span>` : ''}`,
-            icon: myPhoto, // Artık Emoji değil, senin Google Fotoğraf Linkin!
-            likes: "14", rts: "0", replies: "1"
+// ==========================================
+// 👁️ GÖRÜNÜM MODU DEĞİŞTİRİCİ (GÜNCELLENDİ)
+// ==========================================
+window.switchKPSSView = function(mode) {
+    kpssViewMode = mode; // 'today', 'week', veya 'overview'
+    
+    document.getElementById('btn-kpss-today').classList.toggle('active', mode === 'today');
+    document.getElementById('btn-kpss-week').classList.toggle('active', mode === 'week');
+    document.getElementById('btn-kpss-overview').classList.toggle('active', mode === 'overview');
+    
+    const hint = document.getElementById('kpss-swipe-hint');
+    if(hint) hint.style.display = mode === 'today' ? 'block' : 'none';
+    
+    renderKPSSTodayOrWeek();
+};
+// ==========================================
+// 📌 GÜNLÜK HEDEF PARÇALAYICI MOTORU (YENİ)
+// ==========================================
+window.openKPSSDailyTopics = function(subject, topicStr, lessonIndex) {
+    const modal = document.getElementById('kpss-syllabus-modal');
+    const list = document.getElementById('syllabus-topics-list');
+    const bar = document.getElementById('syllabus-progress-bar');
+    const pctText = document.getElementById('syllabus-pct-text');
+    const title = document.getElementById('syllabus-title');
+
+    title.innerText = subject + " (Bugünkü Görevler)";
+
+    // Senin yazdığın programdaki "+" veya "&" veya "," işaretlerinden konuları otomatik alt alta böler
+    let topics = topicStr.split(/\+|&|,/).map(t => t.trim()).filter(t => t.length > 0);
+    if(topics.length === 0) topics = [topicStr];
+
+    const todayStr = new Date().toLocaleDateString('tr-TR');
+    const memoryKey = `kpss_daily_topics_${activeKpssExam}_${todayStr}_${subject}_${lessonIndex}`;
+    const savedProgress = JSON.parse(localStorage.getItem(memoryKey)) || [];
+
+    list.innerHTML = '';
+    topics.forEach((topic, idx) => {
+        const isCompleted = savedProgress.includes(idx);
+        list.innerHTML += `
+            <div style="display:flex; align-items:center; gap:10px; background:#1a1a1a; padding:12px; border-radius:8px; border:1px solid #333;" onclick="toggleDailyTopic('${memoryKey}', ${idx}, ${!isCompleted}, '${subject}', '${topicStr}', ${lessonIndex})">
+                <div style="width:18px; height:18px; border:2px solid var(--goldnova); border-radius:4px; display:flex; justify-content:center; align-items:center; background:${isCompleted ? 'var(--goldnova)' : 'transparent'};">
+                    ${isCompleted ? '<span style="color:#000; font-size:12px; font-weight:bold;">✓</span>' : ''}
+                </div>
+                <span style="color: ${isCompleted ? '#888' : '#fff'}; font-size: 13px; text-decoration: ${isCompleted ? 'line-through' : 'none'};">${topic}</span>
+            </div>
+        `;
+    });
+
+    const pct = topics.length > 0 ? Math.round((savedProgress.length / topics.length) * 100) : 0;
+    bar.style.width = pct + '%';
+    pctText.innerText = `%${pct}`;
+
+    modal.style.display = 'flex';
+};
+
+window.toggleDailyTopic = function(memoryKey, idx, isDone, subject, topicStr, lessonIndex) {
+    let savedProgress = JSON.parse(localStorage.getItem(memoryKey)) || [];
+    if (isDone) {
+        if(!savedProgress.includes(idx)) savedProgress.push(idx);
+        if(navigator.vibrate) navigator.vibrate([20, 30]);
+    } else {
+        savedProgress = savedProgress.filter(i => i !== idx);
+    }
+    localStorage.setItem(memoryKey, JSON.stringify(savedProgress));
+    
+    // Tıklandığında ekranı anlık yenile
+    openKPSSDailyTopics(subject, topicStr, lessonIndex); 
+};
+
+// --- 3. SWIPE (SAĞA KAYDIRIP TAMAMLAMA) MOTORU ---
+function initKpssSwipeEngine() {
+    document.querySelectorAll('.kpss-card').forEach(card => {
+        let startX = 0;
+        let isSwiping = false;
+
+        card.addEventListener('touchstart', e => {
+            startX = e.changedTouches[0].screenX;
+            card.style.transition = 'none';
+            isSwiping = false;
+        }, { passive: true });
+
+        card.addEventListener('touchmove', e => {
+            let moveX = e.changedTouches[0].screenX - startX;
+            if (Math.abs(moveX) > 10) isSwiping = true;
+            if (moveX > 0 && moveX < 100) { // Sadece sağa kaydırma
+                card.style.transform = `translateX(${moveX}px)`;
+                card.style.background = 'rgba(39, 174, 96, 0.1)';
+            }
+        }, { passive: true });
+
+        card.addEventListener('touchend', e => {
+            let diff = e.changedTouches[0].screenX - startX;
+            if (!isSwiping || diff < 10) {
+                card.style.transform = 'translateX(0px)';
+                return;
+            }
+            
+            card.style.transition = 'transform 0.4s ease, background 0.4s ease';
+            card.style.transform = 'translateX(0px)';
+
+            if (diff > 50) { // Yeterince sağa kaydırıldıysa
+                const index = parseInt(card.getAttribute('data-index'));
+                const todayStr = new Date().toLocaleDateString('tr-TR');
+                let completed = JSON.parse(localStorage.getItem(`kpss_done_${activeKpssExam}_${todayStr}`)) || [];
+                
+                if(!completed.includes(index)) {
+                    completed.push(index);
+                    card.classList.add('completed');
+                    if(navigator.vibrate) navigator.vibrate(40);
+                } else {
+                    // Zaten tamamsa geri al
+                    completed = completed.filter(i => i !== index);
+                    card.classList.remove('completed');
+                    card.style.background = '#151515';
+                    if(navigator.vibrate) navigator.vibrate(20);
+                }
+                localStorage.setItem(`kpss_done_${activeKpssExam}_${todayStr}`, JSON.stringify(completed));
+            } else {
+                if(!card.classList.contains('completed')) card.style.background = '#151515';
+            }
         });
     });
-
-    // Feed'i Ekrana Bas
-    xFeed.forEach(post => {
-        const div = document.createElement('div');
-        div.className = 'x-post';
-
-        // Zeka: İkon bir resim linki mi yoksa düz emoji mi kontrol et
-        let avatarHTML = '';
-        if (post.icon.includes('http') || post.icon.includes('.png') || post.icon.includes('.jpg') || post.icon.includes('base64')) {
-            avatarHTML = `<img src="${post.icon}" style="width: 100%; height: 100%; border-radius: 50%; object-fit: cover; display: block;">`;
-        } else {
-            avatarHTML = post.icon;
-        }
-
-        div.innerHTML = `
-            <div class="x-avatar" style="overflow: hidden; display: flex; justify-content: center; align-items: center;">${avatarHTML}</div>
-            <div class="x-content">
-                <div class="x-header">
-                    <span class="x-name">${post.name}</span>
-                    ${post.verified ? `<span class="x-verified"><svg viewBox="0 0 24 24" aria-label="Onaylı hesap" style="width:1.25em;height:1.25em;fill:currentColor;"><g><path d="M22.5 12.5c0-1.58-.875-2.95-2.148-3.6.154-.435.238-.905.238-1.4 0-2.21-1.71-3.998-3.918-3.998-.47 0-.92.084-1.336.25C14.818 2.415 13.51 1.5 12 1.5s-2.816.917-3.337 2.25c-.416-.165-.866-.25-1.336-.25-2.21 0-3.918 1.79-3.918 4 0 .495.084.965.238 1.4-1.273.65-2.148 2.02-2.148 3.6 0 1.46.74 2.746 1.846 3.45-.065.318-.1.646-.1 1.03 0 2.227 1.734 4.025 3.937 4.025.56 0 1.094-.127 1.587-.354C9.356 21.65 10.61 22.5 12 22.5c1.39 0 2.645-.85 3.25-2.096.494.227 1.028.354 1.587.354 2.203 0 3.937-1.798 3.937-4.025 0-.384-.035-.712-.1-1.03 1.107-.704 1.846-1.99 1.846-3.45zM10.7 16.5l-3.3-3.3 1.4-1.4 1.9 1.9 5.6-5.6 1.4 1.4-7 7z"></path></g></svg></span>` : ''}
-                    <span class="x-username">${post.username}</span>
-                    <span class="x-time">· ${post.time}</span>
-                </div>
-                <div class="x-text">${post.text}</div>
-                <div class="x-actions">
-                    <div class="x-action" onclick="toggleXAction(this, 'reply')">💬 <span>${post.replies}</span></div>
-                    <div class="x-action" onclick="toggleXAction(this, 'rt')">🔁 <span>${post.rts}</span></div>
-                    <div class="x-action" onclick="toggleXAction(this, 'like')">❤️ <span>${post.likes}</span></div>
-                </div>
-            </div>
-        `;
-        container.appendChild(div);
-    });
 }
 
-// 2. Kasa (Market) Motoru - OTOMATİK AKTİF ETME KALDIRILDI
-window.buyMarketItem = function (itemId, price, name, icon, type) {
-    let currentCoins = parseInt(localStorage.getItem('olympus_coins')) || 0;
-    if (currentCoins >= price) {
-        currentCoins -= price;
-        localStorage.setItem('olympus_coins', currentCoins);
+// --- 4. KONU AĞACI (SYLLABUS) MOTORU VE HAFIZASI ---
+window.openKPSSSyllabus = function(subject) {
+    if(kpssViewMode !== 'today') return; // Sadece bugün modunda tıklanabilsin
+    if(subject === "Deneme Sınavı" || subject === "Dinlenme") return;
 
-        let inventory = JSON.parse(localStorage.getItem('olympus_inventory')) || [];
-        // Yeni alınanları en başa ekle (type özelliği eklendi)
-        inventory.unshift({ id: itemId, name: name, icon: icon, type: type, date: new Date().toLocaleDateString('tr-TR') });
-        localStorage.setItem('olympus_inventory', JSON.stringify(inventory));
+    const modal = document.getElementById('kpss-syllabus-modal');
+    const list = document.getElementById('syllabus-topics-list');
+    const bar = document.getElementById('syllabus-progress-bar');
+    const pctText = document.getElementById('syllabus-pct-text');
+    
+    // Seçili sınava göre müfredatı çek
+    const topics = kpssSyllabusDB[activeKpssExam][subject];
+    if (!topics) return;
 
-        if (typeof renderInventory === 'function') renderInventory();
-        if (typeof renderMarket === 'function') renderMarket();
+    document.getElementById('syllabus-title').innerText = subject;
+    
+    const memoryKey = `kpss_syl_${activeKpssExam}_${subject}`;
+    const savedProgress = JSON.parse(localStorage.getItem(memoryKey)) || [];
+    
+    list.innerHTML = '';
+    topics.forEach((topic, index) => {
+        const isCompleted = savedProgress.includes(index);
+        list.innerHTML += `
+            <div style="display:flex; align-items:center; gap:10px; background:#1a1a1a; padding:12px; border-radius:8px; border:1px solid #333;" onclick="toggleSyllabusTopic('${subject}', ${index}, ${!isCompleted})">
+                <div style="width:18px; height:18px; border:2px solid var(--goldnova); border-radius:4px; display:flex; justify-content:center; align-items:center; background:${isCompleted ? 'var(--goldnova)' : 'transparent'};">
+                    ${isCompleted ? '<span style="color:#000; font-size:12px; font-weight:bold;">✓</span>' : ''}
+                </div>
+                <span style="color: ${isCompleted ? '#888' : '#fff'}; font-size: 13px; text-decoration: ${isCompleted ? 'line-through' : 'none'};">${topic}</span>
+            </div>
+        `;
+    });
 
-        logToSocialFeed(`Satın Alındı: ${name}`, 'Envantere eklendi, istediğin zaman aktifleştirebilirsin.', icon, -price);
-        if (typeof showDynamicIsland === 'function') showDynamicIsland("Satın Alım Başarılı!", `${name} envanterde.`, "🛍️", 0);
+    const pct = topics.length > 0 ? Math.round((savedProgress.length / topics.length) * 100) : 0;
+    bar.style.width = pct + '%';
+    pctText.innerText = `%${pct}`;
 
-        // DİKKAT: applyTheme(itemId) KISMI SİLİNDİ (Otomatik aktifleşmez)
+    modal.style.display = 'flex';
+};
+
+window.toggleSyllabusTopic = function(subject, index, isDone) {
+    const memoryKey = `kpss_syl_${activeKpssExam}_${subject}`;
+    let savedProgress = JSON.parse(localStorage.getItem(memoryKey)) || [];
+    
+    if (isDone) {
+        if(!savedProgress.includes(index)) savedProgress.push(index);
+        if(navigator.vibrate) navigator.vibrate([20, 30]);
+    } else {
+        savedProgress = savedProgress.filter(i => i !== index);
+    }
+    
+    localStorage.setItem(memoryKey, JSON.stringify(savedProgress));
+    openKPSSSyllabus(subject); // Arayüzü yenile
+};
+
+// --- 5. OLY-AI SOHBET VE PROGRAM YARATICI ---
+let aiChatStep = 0;
+let aiTempData = { weak: "", restDay: "" };
+
+window.openKPSSCreatorSelector = function() {
+    document.getElementById('kpss-creator-selector-modal').style.display = 'flex';
+};
+
+window.startKpssAiChat = function() {
+    document.getElementById('kpss-creator-selector-modal').style.display = 'none';
+    const chatModal = document.getElementById('kpss-ai-chat-modal');
+    const msgBox = document.getElementById('kpss-ai-messages');
+    
+    aiChatStep = 0;
+    aiTempData = { weak: "", restDay: "" };
+    
+    msgBox.innerHTML = ''; // Temizle
+    document.getElementById('kpss-ai-input').value = '';
+    document.getElementById('kpss-ai-approve-area').style.display = 'none';
+    document.getElementById('kpss-ai-input-area').style.display = 'flex';
+    
+    chatModal.style.display = 'flex';
+    
+    // Oly İlk Soruyu Sorar
+    appendKpssAiMsg("Merhaba şampiyon! Sana özel bir program yapmam için en çok zorlandığın dersi yazar mısın? (Örn: Matematik, Tarih)", 'ai');
+};
+
+window.handleKpssAiResponse = function() {
+    const inputEl = document.getElementById('kpss-ai-input');
+    const text = inputEl.value.trim();
+    if(!text) return;
+    
+    appendKpssAiMsg(text, 'user');
+    inputEl.value = '';
+    
+    if (aiChatStep === 0) {
+        aiTempData.weak = text;
+        aiChatStep++;
+        setTimeout(() => {
+            appendKpssAiMsg(`Anladım, ağırlığı ${text} dersine vereceğiz. Peki haftada hangi gün "Deneme Sınavı" günü olsun? (1-Pazartesi, 7-Pazar gibi gün yazabilirsin)`, 'ai');
+        }, 800);
+    } else if (aiChatStep === 1) {
+        aiTempData.restDay = text;
+        aiChatStep++;
+        setTimeout(() => {
+            appendKpssAiMsg(`Harika. ${activeKpssExam === 'onlisans' ? 'Ön Lisans' : 'Ortaöğretim'} müfredatına ve ${aiTempData.weak} eksiğine göre muazzam bir program inşa ettim! \n\nHer haftaya 1 gün Deneme Sınavı otomatik eklendi. Aşağıdan onaylayıp sisteme entegre edebilirsin.`, 'ai');
+            document.getElementById('kpss-ai-input-area').style.display = 'none';
+            document.getElementById('kpss-ai-approve-area').style.display = 'flex';
+        }, 1200);
     }
 };
 
-// 📐 Tema Uygulama Motoru
-window.applyTheme = function (themeId) {
-    localStorage.setItem('olympus_applied_theme', themeId);
+function appendKpssAiMsg(text, sender) {
+    const box = document.getElementById('kpss-ai-messages');
+    const bg = sender === 'ai' ? '#222' : 'var(--goldnova)';
+    const color = sender === 'ai' ? '#fff' : '#000';
+    const align = sender === 'ai' ? 'flex-start' : 'flex-end';
+    
+    box.innerHTML += `
+        <div style="align-self: ${align}; background: ${bg}; color: ${color}; padding: 10px 14px; border-radius: 12px; font-size: 13px; max-width: 80%; line-height: 1.4;">
+            ${text}
+        </div>
+    `;
+    box.scrollTop = box.scrollHeight;
+}
 
-    // Global CSS değişkenlerini anında değiştir (Persistans için CSS'e kaydet)
-    if (themeId === 'theme_cyberpunk') {
-        document.documentElement.style.setProperty('--goldnova', '#00ff00'); // Neon Yeşil
-        document.documentElement.style.setProperty('--bg-dark', '#000');
-        document.documentElement.style.setProperty('--text-light', '#fff');
-    } else if (themeId === 'theme_ midnight_blue') {
-        document.documentElement.style.setProperty('--goldnova', '#00d2ff'); // Sakarya Mavisi
-        document.documentElement.style.setProperty('--bg-dark', '#0a0a0a');
-        document.documentElement.style.setProperty('--text-light', '#eee');
-    } else if (themeId === 'theme_tarsus_sunshine') {
-        document.documentElement.style.setProperty('--goldnova', '#ffcc00'); // Sıcak Sarı
-        document.documentElement.style.setProperty('--bg-dark', '#eee'); // Açık Arka Plan
-        document.documentElement.style.setProperty('--text-light', '#333'); // Koyu Metin
-    } else {
-        //theme_default - Orjinal Tema
-        document.documentElement.style.setProperty('--goldnova', '#ffd700'); // Altın
-        document.documentElement.style.setProperty('--bg-dark', '#050505');
-        document.documentElement.style.setProperty('--text-light', '#fff');
+window.approveKpssAiProgram = function() {
+    // Yapay Zekanın Yarattığı Program Mantığı
+    const weak = aiTempData.weak || "Matematik";
+    let generatedSchedule = {
+        1: [{ sub: "Türkçe", topic: "Soru Çözümü" }, { sub: weak, topic: "Konu Çalışması" }],
+        2: [{ sub: "Tarih", topic: "Konu Çalışması" }, { sub: "Coğrafya", topic: "Harita" }],
+        3: [{ sub: weak, topic: "Soru Kampı" }, { sub: "Vatandaşlık", topic: "Konu Çalışması" }],
+        4: [{ sub: "Matematik", topic: "Genel Tekrar" }, { sub: "Türkçe", topic: "Dil Bilgisi" }],
+        5: [{ sub: "Tarih", topic: "Soru Çözümü" }, { sub: weak, topic: "Deneme Analizi" }],
+        6: [{ sub: "Deneme Sınavı", topic: "Genel Yetenek - Genel Kültür" }],
+        0: [{ sub: "Genel Tekrar", topic: "Haftalık Kapanış" }]
+    };
+
+    localStorage.setItem(`olympus_kpss_schedule_${activeKpssExam}`, JSON.stringify(generatedSchedule));
+    
+    document.getElementById('kpss-ai-chat-modal').style.display = 'none';
+    renderKPSSTodayOrWeek();
+    alert("✅ Sistem başarıyla güncellendi! Yeni programın devrede.");
+    if(navigator.vibrate) navigator.vibrate([50, 100]);
+};
+
+window.openKPSSManualBuilder = function() {
+    document.getElementById('kpss-creator-selector-modal').style.display = 'none';
+    document.getElementById('kpss-edit-modal').style.display = 'flex';
+    // Otomatik olarak bugünü seç
+    document.getElementById('kpss-edit-day').value = new Date().getDay().toString();
+    if(typeof renderKPSSEditList === 'function') renderKPSSEditList();
+};
+
+// ==========================================
+// ⏳ GELİŞMİŞ POMODORO MOTORU (GHOST CLICK KORUMALI)
+// ==========================================
+let kpssPomodoroInterval; 
+let kpssTime = 45 * 60; 
+let isKPSSRunning = false;
+let pomodoroPressTimer;
+let isPomodoroLongPress = false;
+let lastPomodoroAction = 0; // Çift tıklama kalkanı
+
+window.startPomodoroPress = function() {
+    isPomodoroLongPress = false;
+    pomodoroPressTimer = setTimeout(() => {
+        isPomodoroLongPress = true;
+        resetKPSSPomodoro(); // 600ms basılı tutarsan sıfırlar
+    }, 600); 
+};
+
+window.endPomodoroPress = function() {
+    clearTimeout(pomodoroPressTimer);
+    
+    // Aynı anda gelen hayalet çift tıklamaları (simülatör hatası) engelle
+    const now = Date.now();
+    if (now - lastPomodoroAction < 300) return; 
+    lastPomodoroAction = now;
+    
+    if (!isPomodoroLongPress) {
+        toggleKPSSPomodoro(); 
     }
+};
 
-    // Mağaza vitrinini yenile
-    renderMarket();
+window.cancelPomodoroPress = function() {
+    clearTimeout(pomodoroPressTimer); 
+};
+
+window.toggleKPSSPomodoro = function() {
+    const btn = document.getElementById('kpss-pomodoro-time');
+    
+    if (isKPSSRunning) {
+        // DURAKLAT
+        clearInterval(kpssPomodoroInterval);
+        isKPSSRunning = false;
+        btn.innerText = formatKpssTime() + " ▶";
+        hideKpssIsland();
+        if (navigator.vibrate) navigator.vibrate(20);
+    } else {
+        // BAŞLAT
+        isKPSSRunning = true;
+        if (navigator.vibrate) navigator.vibrate(30);
+        
+        kpssPomodoroInterval = setInterval(() => {
+            kpssTime--;
+            btn.innerText = formatKpssTime() + " ⏸";
+            updateKpssIsland(); // Adayı Canlandır
+            
+            if (kpssTime <= 0) { 
+                clearInterval(kpssPomodoroInterval); 
+                isKPSSRunning = false; 
+                hideKpssIsland();
+                resetKPSSPomodoro(); 
+                alert("⏰ 45 Dakikalık odaklanma seansı bitti! 10 dakika zihni boşalt."); 
+                if(navigator.vibrate) navigator.vibrate([500,200,500]);
+            }
+        }, 1000);
+    }
+};
+
+window.resetKPSSPomodoro = function() {
+    clearInterval(kpssPomodoroInterval); 
+    isKPSSRunning = false; 
+    kpssTime = 45 * 60; 
+    document.getElementById('kpss-pomodoro-time').innerText = "45:00 ▶";
+    hideKpssIsland();
+    if (navigator.vibrate) navigator.vibrate([50, 50]);
+};
+
+function formatKpssTime() {
+    let m = Math.floor(kpssTime / 60).toString().padStart(2, '0');
+    let s = (kpssTime % 60).toString().padStart(2, '0');
+    return `${m}:${s}`;
 }
 
-// Sayfa ilk yüklendiğinde temayı uygula
-window.addEventListener('load', () => {
-    appliedTheme = localStorage.getItem('olympus_applied_theme') || 'theme_default';
-    applyTheme(appliedTheme);
-});
+// 🏝️ DİNAMİK ADA ENTEGRASYONU
+function updateKpssIsland() {
+    const island = document.getElementById('dynamic-island');
+    if (!island) return;
+    if(!island.classList.contains('active')) island.classList.add('active');
+    
+    const textEl = document.getElementById('di-text');
+    if (textEl) {
+        textEl.innerHTML = `<span style="color:#8e44ad; font-weight:900;">📚 Odak:</span> <span style="font-family:monospace; color:#fff; font-size:14px;">${formatKpssTime()}</span>`;
+        textEl.style.display = 'inline-block';
+    }
+    const coinDisplay = document.getElementById('island-coin-display');
+    if (coinDisplay) coinDisplay.style.display = 'none';
+}
+
+function hideKpssIsland() {
+    const island = document.getElementById('dynamic-island');
+    if (island) island.classList.remove('active');
+}
 // ==========================================
-// 📱 PROFİL MENÜSÜ (SIDEBAR) VE ENVANTER MOTORU
+// ✏️ GÜVENLİ MANUEL DÜZENLEME (EDİTÖR) MOTORU
 // ==========================================
-
-window.openProfileSidebar = function () {
-    document.getElementById('profile-sidebar-overlay').style.display = 'block';
-    // Menüyü soldan içeri kaydır
-    setTimeout(() => {
-        document.getElementById('profile-sidebar').style.left = '0';
-    }, 10);
-    renderInventory(); // Açılırken envanteri yenile
-}
-
-window.closeProfileSidebar = function () {
-    document.getElementById('profile-sidebar').style.left = '-300px';
-    // Animasyon bitince arkaplanı gizle
-    setTimeout(() => {
-        document.getElementById('profile-sidebar-overlay').style.display = 'none';
-    }, 300);
-}
-
-window.closeOlympusDashboardAndSidebar = function () {
-    closeProfileSidebar();
-    closeOlympusDashboard(); // Panoyu tamamen kapat
-}
-
-// 3. Envanter Motoru - UYGULA BUTONU EKLENDİ
-window.renderInventory = function () {
-    const container = document.getElementById('inventory-list');
-    if (!container) return;
-    let inventory = JSON.parse(localStorage.getItem('olympus_inventory')) || [];
-
-    container.innerHTML = '';
-    if (inventory.length === 0) {
-        container.innerHTML = `<p style="color: #555; font-size: 12px; text-align: center;">Envanter boş.</p>`;
+window.renderKPSSEditList = function() {
+    const day = document.getElementById('kpss-edit-day').value;
+    
+    // Hafızadan çek, yoksa o haftanın varsayılan kamp programını güvenle al
+    const memoryKey = `olympus_kpss_schedule_${activeKpssExam}_w${activeKpssWeek}`;
+    let savedSchedule = JSON.parse(localStorage.getItem(memoryKey));
+    
+    if (!savedSchedule) {
+        savedSchedule = getBaseKPSSSchedule(activeKpssExam, activeKpssWeek);
+    }
+    
+    const lessons = savedSchedule[day] || [];
+    const listEl = document.getElementById('kpss-edit-list');
+    
+    listEl.innerHTML = '';
+    if(lessons.length === 0) {
+        listEl.innerHTML = '<p style="color:#888; font-size:12px; text-align:center;">Bu güne ait ders yok.</p>';
         return;
     }
-
-    inventory.forEach(item => {
-        let actionBtn = '';
-        if (item.type === 'theme') {
-            actionBtn = `<button onclick="applyTheme('${item.id}')" style="background:#00d2ff; color:#000; border:none; padding:4px 10px; border-radius:4px; font-size:10px; font-weight:bold; cursor:pointer;">UYGULA</button>`;
-        }
-
-        container.innerHTML += `
-            <div class="inventory-item" style="background:rgba(255,255,255,0.05); border:1px solid rgba(255,255,255,0.1); border-radius:10px; padding:10px; display:flex; align-items:center; gap:10px;">
-                <div class="inventory-icon" style="font-size:22px;">${item.icon}</div>
-                <div class="inventory-details" style="flex:1;">
-                    <h4 style="color:#fff; font-size:13px; margin:0 0 3px 0;">${item.name}</h4>
-                    <p style="color:#888; font-size:10px; margin:0;">${item.date}</p>
+    
+    lessons.forEach((l, index) => {
+        listEl.innerHTML += `
+            <div style="display:flex; justify-content:space-between; align-items:center; background:#1a1a1a; padding:10px 15px; border-radius:8px; border:1px solid #333;">
+                <div>
+                    <span style="color:#fff; font-size:13px; font-weight:bold;">${l.sub}</span><br>
+                    <span style="color:#888; font-size:11px;">${l.topic}</span>
                 </div>
-                ${actionBtn}
+                <button onclick="deleteKPSSLesson('${day}', ${index})" style="background:transparent; border:none; color:#ff4444; cursor:pointer; font-size: 18px;">🗑️</button>
             </div>
         `;
     });
 };
-// ==========================================
-// 👤 OLYSOCIAL: DİNAMİK PROFİL VE KULLANICI ADI MOTORU
-// ==========================================
 
-window.updateOlySocialProfile = function () {
-    // 1. Google (Firebase) üzerinden aktif kullanıcıyı al
-    const user = firebase.auth().currentUser;
-    let name = "Şampiyon";
-    let photo = "icon.png";
+window.addKPSSLesson = function() {
+    const day = document.getElementById('kpss-edit-day').value;
+    const sub = document.getElementById('kpss-new-sub').value.trim();
+    const topic = document.getElementById('kpss-new-topic').value.trim();
+    
+    if(!sub || !topic) { alert("Lütfen ders ve konu adı girin."); return; }
+    
+    const memoryKey = `olympus_kpss_schedule_${activeKpssExam}_w${activeKpssWeek}`;
+    let savedSchedule = JSON.parse(localStorage.getItem(memoryKey)) || getBaseKPSSSchedule(activeKpssExam, activeKpssWeek);
+    
+    if(!savedSchedule[day]) savedSchedule[day] = [];
+    
+    savedSchedule[day].push({ sub: sub, topic: topic });
+    localStorage.setItem(memoryKey, JSON.stringify(savedSchedule));
+    
+    document.getElementById('kpss-new-sub').value = ''; 
+    document.getElementById('kpss-new-topic').value = '';
+    renderKPSSEditList(); // Listeyi yenile
+    if (navigator.vibrate) navigator.vibrate(20);
+};
 
-    if (user && user.displayName) {
-        name = user.displayName;
-        photo = user.photoURL || "icon.png";
+window.deleteKPSSLesson = function(day, index) {
+    const memoryKey = `olympus_kpss_schedule_${activeKpssExam}_w${activeKpssWeek}`;
+    let savedSchedule = JSON.parse(localStorage.getItem(memoryKey)) || getBaseKPSSSchedule(activeKpssExam, activeKpssWeek);
+    
+    savedSchedule[day].splice(index, 1);
+    localStorage.setItem(memoryKey, JSON.stringify(savedSchedule));
+    renderKPSSEditList(); // Listeyi yenile
+    if (navigator.vibrate) navigator.vibrate(20);
+};
+
+
+// ==========================================
+// 🔄 PROGRAMI VARSAYILAN KAMP AYARLARINA SIFIRLA
+// ==========================================
+window.resetKPSSScheduleToDefault = function() {
+    const confirmReset = confirm("Emin misin şampiyon? Mevcut özel programın silinecek ve sistem varsayılan yoğun kampa geri dönecek!");
+    
+    if (confirmReset) {
+        // Hafızadaki o sınava ait özel programı tamamen sil
+        localStorage.removeItem(`olympus_kpss_schedule_${activeKpssExam}`);
+        
+        // Modal içindeki listeyi hemen yenile (otomatik olarak varsayılanı çekecektir)
+        renderKPSSEditList();
+        
+        // Arka plandaki ana ekranı da yenile
+        renderKPSSTodayOrWeek();
+        
+        if (navigator.vibrate) navigator.vibrate([50, 100]);
+        alert("✅ Sistem başarıyla fabrika ayarlarına (Standart Kampa) sıfırlandı!");
+    }
+};
+// ==========================================
+// 📅 ÇOKLU HAFTA VERİTABANI (ÖN LİSANS 5 HAFTALIK KAMP)
+// ==========================================
+let activeKpssWeek = 1; // Varsayılan hafta
+
+window.changeKpssWeek = function() {
+    activeKpssWeek = parseInt(document.getElementById('kpss-week-selector').value);
+    renderKPSSTodayOrWeek();
+    if(navigator.vibrate) navigator.vibrate(20);
+};
+
+function getBaseKPSSSchedule(examType, weekNum) {
+    if (examType === 'onlisans') {
+        if (weekNum === 1) return {
+            1: [{ sub: "Türkçe", topic: "Sözcükte Anlam + Cümlede Anlam + Paragraf Soru Tipleri" }, { sub: "Matematik", topic: "Temel Kavramlar + Sayılar" }],
+            2: [{ sub: "Tarih", topic: "İslamiyet Öncesi + İlk Türk-İslam" }, { sub: "Coğrafya", topic: "Coğrafi Konum + Harita Bilgisi" }],
+            3: [{ sub: "Türkçe", topic: "Paragrafta Anlam + Anlatım Teknikleri" }, { sub: "Matematik", topic: "Bölme-Bölünebilme + EBOB-EKOK" }],
+            4: [{ sub: "Vatandaşlık", topic: "Hukukun Temel Kavramları + Anayasa Hukukuna Giriş" }, { sub: "Tarih", topic: "Osmanlı Kuruluş Dönemi" }],
+            5: [{ sub: "Matematik", topic: "Rasyonel Sayılar" }, { sub: "Coğrafya", topic: "Türkiye'nin Yer Şekilleri" }],
+            6: [{ sub: "Tarih", topic: "Osmanlı Yükselme Dönemi" }, { sub: "Vatandaşlık", topic: "Devlet Şekilleri" }, { sub: "Genel", topic: "Haftalık Konu Tekrarı" }],
+            0: [{ sub: "Günlük Rutin", topic: "20-30 Paragraf + 20-30 Matematik Sorusu" }, { sub: "Dinlenme", topic: "Haftaya Hazırlık" }]
+        };
+        if (weekNum === 2) return {
+            1: [{ sub: "Türkçe", topic: "Sözcük Türleri + Fiiller + Fiilimsiler" }, { sub: "Matematik", topic: "Basit Eşitsizlikler + Mutlak Değer" }],
+            2: [{ sub: "Tarih", topic: "Osmanlı Kültür ve Medeniyeti + Duraklama" }, { sub: "Coğrafya", topic: "İklim + Türkiye'de İklim" }],
+            3: [{ sub: "Türkçe", topic: "Cümlenin Ögeleri + Cümle Türleri" }, { sub: "Matematik", topic: "Üslü Sayılar + Köklü Sayılar" }],
+            4: [{ sub: "Vatandaşlık", topic: "Temel Hak ve Özgürlükler + Yasama" }, { sub: "Tarih", topic: "Osmanlı Gerileme + Dağılma" }],
+            5: [{ sub: "Türkçe", topic: "Yazım Kuralları + Noktalama" }, { sub: "Coğrafya", topic: "Bitki Örtüsü + Nüfus + Yerleşme" }],
+            6: [{ sub: "Matematik", topic: "Oran-Orantı + Denklem Çözme" }, { sub: "Tarih", topic: "XIX. Yüzyıl Osmanlı" }, { sub: "Vatandaşlık", topic: "Yürütme + Yargı" }],
+            0: [{ sub: "Günlük Rutin", topic: "20-30 Paragraf + 20-30 Matematik Sorusu" }, { sub: "Dinlenme", topic: "Zihni Boşaltma" }]
+        };
+        if (weekNum === 3) return {
+            1: [{ sub: "Türkçe", topic: "Anlatım Bozuklukları + Sözel Mantık" }, { sub: "Matematik", topic: "Sayı + Yaş Problemleri" }],
+            2: [{ sub: "Tarih", topic: "Trablusgarp + Balkan Savaşları + I. DS" }, { sub: "Coğrafya", topic: "Tarım + Hayvancılık + Madenler" }],
+            3: [{ sub: "Türkçe", topic: "Paragraf + Dil Bilgisi Tekrarları" }, { sub: "Matematik", topic: "Yüzde + Kâr-Zarar + Karışım" }],
+            4: [{ sub: "Vatandaşlık", topic: "İdare Hukuku + Merkezi Yönetim" }, { sub: "Tarih", topic: "Mondros + Kuvayımilliye + Kongreler" }],
+            5: [{ sub: "Matematik", topic: "İşçi + Havuz + Hız + Grafik/Tablo" }, { sub: "Coğrafya", topic: "Enerji + Sanayi + Ulaşım" }],
+            6: [{ sub: "Vatandaşlık", topic: "Yerinden Yönetim + Kamu Yönetimi" }, { sub: "Tarih", topic: "Haftalık Tarih Soru Çözümü" }],
+            0: [{ sub: "Soru Çözüm", topic: "Bol Paragraf ve Problem Pratiği" }, { sub: "Dinlenme", topic: "Pazar Molası" }]
+        };
+        if (weekNum === 4) return {
+            1: [{ sub: "Tarih", topic: "TBMM'nin Açılması + Kurtuluş Savaşı Cepheleri" }, { sub: "Matematik", topic: "Problemler + Üçgen + Dörtgen" }],
+            2: [{ sub: "Coğrafya", topic: "Bölgeler + Ekonomik Faaliyetler + Ticaret" }, { sub: "Türkçe", topic: "30-40 Paragraf + Karma Soru" }],
+            3: [{ sub: "Tarih", topic: "Lozan + Cumhuriyetin İlanı + Halifelik" }, { sub: "Matematik", topic: "Çokgen + Çember + Alan" }],
+            4: [{ sub: "Türkçe", topic: "30-40 Paragraf + Karma Soru" }, { sub: "Coğrafya", topic: "Turizm + Ulaşım + Türkiye Nüfus" }],
+            5: [{ sub: "Tarih", topic: "İnkılaplar + Atatürk İlkeleri + İç/Dış Politika" }, { sub: "Matematik", topic: "Hacim + Grafik Geometri" }],
+            6: [{ sub: "Tarih", topic: "II. DS ve Sonrası Temel Gelişmeler" }, { sub: "Genel Tekrar", topic: "İnkılap Tarihi Yoğun Soru Çözümü" }],
+            0: [{ sub: "Günlük Rutin", topic: "30-40 Paragraf + 30-40 Türkçe Karma" }]
+        };
+        if (weekNum >= 5) return {
+            1: [{ sub: "Türkçe", topic: "30-40 Soru" }, { sub: "Matematik", topic: "30-40 Soru" }],
+            2: [{ sub: "Tarih", topic: "30 Soru" }, { sub: "Coğrafya", topic: "20 Soru" }],
+            3: [{ sub: "Vatandaşlık", topic: "20 Soru" }, { sub: "Türkçe", topic: "30-40 Soru" }],
+            4: [{ sub: "Matematik", topic: "30-40 Soru" }, { sub: "Tarih", topic: "30 Soru" }],
+            5: [{ sub: "Coğrafya", topic: "20 Soru" }, { sub: "Vatandaşlık", topic: "20 Soru" }],
+            6: [{ sub: "Genel", topic: "Günde Toplam 130-150 Soru Hedefi" }, { sub: "Yanlış Analizi", topic: "Hatalı Sorulara Dönüş" }],
+            0: [{ sub: "Deneme Sınavı", topic: "Tam KPSS Denemesi" }, { sub: "Analiz", topic: "Deneme Hata Kontrolü" }]
+        };
+        return { 1: [{ sub: "Ön Lisans", topic: "Kamp Programı" }] };
     } else {
-        // Eğer Firebase geç yüklenirse yerel önbellekten al
-        name = document.getElementById('profile-name-display').innerText || "Şampiyon";
-        photo = document.getElementById('header-profile-img').src || "icon.png";
+        // ==========================================
+        // ORTAÖĞRETİM 9 HAFTALIK AĞIR KAMP PROGRAMI
+        // ==========================================
+        if (weekNum === 1) return {
+            1: [{ sub: "Türkçe", topic: "Sözcükte Anlam + Cümlede Anlam + Paragraf" }, { sub: "Matematik", topic: "Temel Kavramlar + Sayılar + Basamak" }],
+            2: [{ sub: "Tarih", topic: "İslamiyet Öncesi Türk Tarihi + İlk Türk-İslam" }, { sub: "Coğrafya", topic: "Türkiye Coğrafi Konum + Harita Bilgisi" }],
+            3: [{ sub: "Türkçe", topic: "Paragrafta Yardımcı Düşünce + Ana Düşünce" }, { sub: "Matematik", topic: "Bölme-Bölünebilme + EBOB-EKOK" }],
+            4: [{ sub: "Vatandaşlık", topic: "Hukukun Temel Kavramları + Anayasa Hukukuna Giriş" }, { sub: "Tarih", topic: "Türkiye Selçuklu Devleti" }],
+            5: [{ sub: "Coğrafya", topic: "Türkiye'nin Yer Şekilleri" }, { sub: "Vatandaşlık", topic: "Devlet ve Hükümet Şekilleri" }],
+            6: [{ sub: "Genel", topic: "Haftalık Tekrar & Analiz" }, { sub: "Günlük Hedef", topic: "60-80 Soru" }],
+            0: [{ sub: "Dinlenme", topic: "Zihni Boşaltma & Tekrar" }]
+        };
+        if (weekNum === 2) return {
+            1: [{ sub: "Türkçe", topic: "Sözcük Türleri (İsim, Sıfat, Zamir, Zarf)" }, { sub: "Matematik", topic: "Rasyonel + Ondalık Sayılar" }],
+            2: [{ sub: "Tarih", topic: "Osmanlı Kuruluş + Yükselme" }, { sub: "Coğrafya", topic: "İklim + Türkiye'de İklim" }],
+            3: [{ sub: "Türkçe", topic: "Edat / Bağlaç / Ünlem + Fiil" }, { sub: "Matematik", topic: "Üslü Sayılar + Köklü Sayılar" }],
+            4: [{ sub: "Vatandaşlık", topic: "Temel Hak ve Özgürlükler + Yasama (TBMM)" }, { sub: "Tarih", topic: "Osmanlı Kültür ve Medeniyeti" }],
+            5: [{ sub: "Coğrafya", topic: "Bitki Örtüsü + Nüfus" }, { sub: "Matematik", topic: "Mutlak Değer" }],
+            6: [{ sub: "Genel Tekrar", topic: "2. Hafta Soru Çözümü" }, { sub: "Günlük Hedef", topic: "80-100 Soru" }],
+            0: [{ sub: "Dinlenme", topic: "Pazar Molası" }]
+        };
+        if (weekNum === 3) return {
+            1: [{ sub: "Türkçe", topic: "Fiilimsiler + Cümlenin Ögeleri" }, { sub: "Matematik", topic: "Oran-Orantı + Denklem" }],
+            2: [{ sub: "Tarih", topic: "Osmanlı Duraklama + Gerileme" }, { sub: "Coğrafya", topic: "Tarım + Hayvancılık" }],
+            3: [{ sub: "Türkçe", topic: "Cümle Türleri + Yazım Kuralları + Noktalama" }, { sub: "Matematik", topic: "Basit Eşitsizlikler" }],
+            4: [{ sub: "Vatandaşlık", topic: "Yürütme (Cumhurbaşkanı) + Yargı" }, { sub: "Tarih", topic: "Osmanlı Dağılma + XIX. Yüzyıl Islahatları" }],
+            5: [{ sub: "Coğrafya", topic: "Madenler + Enerji Kaynakları + Sanayi" }, { sub: "Matematik", topic: "Sayı Problemleri + Yaş Problemleri" }],
+            6: [{ sub: "Genel Tekrar", topic: "Haftalık Soru Çözümü" }, { sub: "Günlük Hedef", topic: "100 Soru" }],
+            0: [{ sub: "Dinlenme", topic: "Zihni Boşaltma" }]
+        };
+        if (weekNum === 4) return {
+            1: [{ sub: "Matematik", topic: "Yüzde Problemleri + Kâr-Zarar + Faiz" }, { sub: "Türkçe", topic: "Anlatım Bozukluğu + Sözel Mantık" }],
+            2: [{ sub: "Tarih", topic: "Trablusgarp + Balkan Savaşları + I. Dünya Savaşı" }, { sub: "Coğrafya", topic: "Ulaşım + Ticaret + Turizm" }],
+            3: [{ sub: "Matematik", topic: "Karışım + İşçi + Havuz + Hız" }, { sub: "Türkçe", topic: "Paragraf + Dil Bilgisi Tekrarları" }],
+            4: [{ sub: "Vatandaşlık", topic: "İdare Hukuku & Kamu Yönetimi" }, { sub: "Tarih", topic: "Mondros + Cemiyetler + Kuvayımilliye" }],
+            5: [{ sub: "Matematik", topic: "Grafik + Tablo Problemleri" }, { sub: "Coğrafya", topic: "Bölgeler + Ekonomik Faaliyetler" }],
+            6: [{ sub: "Genel Tekrar", topic: "Problemler Ağırlıklı Soru Çözümü" }],
+            0: [{ sub: "Dinlenme", topic: "Pazar Molası" }]
+        };
+        if (weekNum === 5) return {
+            1: [{ sub: "Tarih", topic: "TBMM'nin Açılması + Kurtuluş Savaşı Cepheleri" }, { sub: "Matematik", topic: "Geometriye Giriş + Açılar" }],
+            2: [{ sub: "Türkçe", topic: "Her Gün 30-40 Paragraf" }, { sub: "Vatandaşlık", topic: "Merkezi ve Yerinden Yönetim" }],
+            3: [{ sub: "Tarih", topic: "Lozan + Cumhuriyetin İlanı" }, { sub: "Matematik", topic: "Üçgen + Dörtgen" }],
+            4: [{ sub: "Türkçe", topic: "Paragraf Pratiği" }, { sub: "Vatandaşlık", topic: "İdare Hukuku Tekrarı" }],
+            5: [{ sub: "Tarih", topic: "Atatürk İnkılapları + Atatürk İlkeleri" }, { sub: "Matematik", topic: "Çember + Alan" }],
+            6: [{ sub: "Tarih", topic: "Tarih Soru Kampı" }, { sub: "Genel Tekrar", topic: "Tüm Dersler Tarama" }],
+            0: [{ sub: "Dinlenme", topic: "Zihni Boşaltma" }]
+        };
+        if (weekNum === 6) return {
+            1: [{ sub: "Konu Bitirme", topic: "Eksik Konuları Kapatma" }, { sub: "Türkçe", topic: "30-40 Soru" }],
+            2: [{ sub: "Matematik", topic: "30-40 Soru" }, { sub: "Tarih", topic: "25-30 Soru" }],
+            3: [{ sub: "Coğrafya", topic: "20 Soru" }, { sub: "Vatandaşlık", topic: "15-20 Soru" }],
+            4: [{ sub: "Genel Hedef", topic: "120-150 Soru / Gün (Konu Bitti)" }, { sub: "Türkçe", topic: "30-40 Soru" }],
+            5: [{ sub: "Matematik", topic: "30-40 Soru" }, { sub: "Tarih", topic: "25-30 Soru" }],
+            6: [{ sub: "Genel Tekrar", topic: "Eksik Kapatma Kampı" }],
+            0: [{ sub: "Deneme Hazırlık", topic: "Yarın Deneme Dönemi Başlıyor" }]
+        };
+        if (weekNum === 7) return {
+            1: [{ sub: "Deneme Sınavı", topic: "Pazartesi: Genel Yetenek Denemesi (60 Soru)" }, { sub: "Analiz", topic: "Yanlış ve Boş Analizi" }],
+            2: [{ sub: "Deneme Sınavı", topic: "Salı: Genel Kültür Denemesi (60 Soru)" }, { sub: "Analiz", topic: "Yanlış Çıkan Konulara Çalışma" }],
+            3: [{ sub: "Eksik Çalışma", topic: "Çarşamba: Kötü Olduğun Konuların Üzerine Gitme" }],
+            4: [{ sub: "Deneme Sınavı", topic: "Perşembe: 120 Soruluk Tam KPSS Denemesi" }],
+            5: [{ sub: "Deneme Analizi", topic: "Cuma: Yanlış Soruları Deftere Yazma" }],
+            6: [{ sub: "Deneme Sınavı", topic: "Cumartesi: 120 Soruluk Tam Deneme" }],
+            0: [{ sub: "Pazar", topic: "Yanlış Defteri Tekrarı + Dinlenme" }]
+        };
+        if (weekNum === 8) return {
+            1: [{ sub: "Tam Deneme", topic: "1. Tam Deneme + Yanlış Analizi" }, { sub: "Tekrar", topic: "Tarih Tekrarı" }],
+            2: [{ sub: "Tam Deneme", topic: "2. Tam Deneme + Yanlış Analizi" }, { sub: "Tekrar", topic: "Coğrafya Tekrarı" }],
+            3: [{ sub: "Tam Deneme", topic: "3. Tam Deneme + Yanlış Analizi" }, { sub: "Tekrar", topic: "Vatandaşlık Tekrarı" }],
+            4: [{ sub: "Pratik", topic: "Matematik Problemleri Ağırlıklı Soru" }, { sub: "Pratik", topic: "Paragraf Kampı" }],
+            5: [{ sub: "Analiz", topic: "Yanlış Yapılan Soruların Konularına Dönüş" }],
+            6: [{ sub: "Genel Tekrar", topic: "Haftalık Soru Çözümü" }],
+            0: [{ sub: "Dinlenme", topic: "Pazar Molası" }]
+        };
+        if (weekNum >= 9) return {
+            1: [{ sub: "Tam Deneme", topic: "Pazartesi: Tam Deneme Çözümü" }, { sub: "Tekrar", topic: "Yanlış Defteri Kontrolü" }],
+            2: [{ sub: "Salı", topic: "Tarih + Coğrafya Kısa Tekrar" }],
+            3: [{ sub: "Çarşamba", topic: "Tam Deneme + Analiz" }],
+            4: [{ sub: "Perşembe", topic: "Vatandaşlık + Türkçe Tekrar" }],
+            5: [{ sub: "Cuma", topic: "Son Ciddi Tam Deneme" }],
+            6: [{ sub: "Cumartesi", topic: "Matematik Formülleri + Yanlış Defteri" }],
+            0: [{ sub: "24 Ekim Sınav", topic: "Son Gün: 1-2 Saat Kısa Notlar ve Dinlenme" }]
+        };
     }
+}
 
-    // 2. Kullanıcı adını (@username) localStorage'dan al veya otomatik oluştur
-    let username = localStorage.getItem('olympus_username');
-    if (!username) {
-        // İsimdeki boşlukları sil, küçük harfe çevir ve rastgele 3 rakam ekle
-        let baseName = name.toLowerCase().replace(/[^a-z0-9]/g, '');
-        username = "@" + baseName + Math.floor(Math.random() * 900 + 100);
-        localStorage.setItem('olympus_username', username);
-    }
-
-    // 3. HTML Elementlerini Güncelle
-    const topAvatar = document.getElementById('oly-social-top-avatar');
-    const sidebarAvatar = document.getElementById('sidebar-avatar');
-    const sidebarName = document.getElementById('sidebar-name');
-    const sidebarUsername = document.getElementById('sidebar-username');
-
-    if (topAvatar) topAvatar.src = photo;
-    if (sidebarAvatar) sidebarAvatar.src = photo;
-    if (sidebarName) sidebarName.innerText = name;
-    if (sidebarUsername) sidebarUsername.innerText = username;
-
-    // 4. Takipçi İstatistiklerini Güncelle (Senin profilindeki verileri çeker)
-    const followingEl = document.getElementById('profile-following');
-    const followersEl = document.getElementById('profile-followers');
-    if (followingEl && document.getElementById('sidebar-following')) {
-        document.getElementById('sidebar-following').innerText = followingEl.innerText;
-    }
-    if (followersEl && document.getElementById('sidebar-followers')) {
-        document.getElementById('sidebar-followers').innerText = followersEl.innerText;
-    }
-};
-
-window.editOlyUsername = function () {
-    let current = localStorage.getItem('olympus_username') || "@kullanici";
-    let newUsername = prompt("Yeni kullanıcı adını belirle (Sistem başına @ işaretini otomatik ekleyecektir):", current.replace('@', ''));
-
-    if (newUsername && newUsername.trim() !== "") {
-        // Boşlukları sil ve küçük harfe çevir
-        newUsername = newUsername.trim().toLowerCase().replace(/\s+/g, '');
-        // Başında @ yoksa ekle
-        if (!newUsername.startsWith('@')) newUsername = '@' + newUsername;
-
-        localStorage.setItem('olympus_username', newUsername);
-        document.getElementById('sidebar-username').innerText = newUsername;
-
-        if (navigator.vibrate) navigator.vibrate(20);
-        alert("Kullanıcı adın başarıyla güncellendi: " + newUsername);
-    }
-};
-
-window.openOlympusDashboard = function (tab = 'feed') {
-    const dashboardScreen = document.getElementById('unified-dashboard-screen');
-    if (dashboardScreen) dashboardScreen.style.display = 'flex';
-
-    if (typeof switchDashboardTab === 'function') switchDashboardTab(tab);
-    if (typeof updateOlySocialProfile === 'function') updateOlySocialProfile();
-
-    // OLYSOCIAL içindeyken Oly Avatarı Gizle
-    const oly = document.getElementById('oly-avatar');
-    if (oly) oly.style.display = 'none';
-};
-
-window.closeOlympusDashboard = function () {
-    const dashboardScreen = document.getElementById('unified-dashboard-screen');
-    if (dashboardScreen) dashboardScreen.style.display = 'none';
-
-    // Çıkıldığında Oly Avatarı Geri Getir
-    const oly = document.getElementById('oly-avatar');
-    if (oly) oly.style.display = 'flex';
-};
-
-// ========================================
-// 🛒 OLYMPUS KASA (MARKET) MOTORU & TEMALAR
 // ==========================================
-const marketItems = [
-    { id: 'theme_default', name: 'Midnight Gold (Orjinal)', desc: 'Karanlık ve altın tema.', price: 0, icon: '🌟', type: 'theme' },
-    { id: 'theme_cyberpunk', name: 'Cyberpunk Neon', desc: 'Neon yeşili renkler.', price: 500, icon: '💚', type: 'theme' },
-    { id: 'theme_midnight_blue', name: 'Sakarya Blue', desc: 'Derin mavi tonlar.', price: 500, icon: '💙', type: 'theme' },
-    { id: 'theme_tarsus_sunshine', name: 'Tarsus Sunshine', desc: 'Açık renkli, sıcak tema.', price: 1000, icon: '☀️', type: 'theme' },
-    { id: 'digi_python_mentor', name: 'Python Mentor', desc: 'Nadir yazılım ikonu.', price: 1200, icon: '💻', type: 'digi' },
-    { id: 'digi_plc_architect', name: 'PLC Architect', desc: 'Nadir otomasyon ikonu.', price: 1200, icon: '⚙️', type: 'digi' },
-    { id: 'life_supplement_contribution', name: 'Supplement Katkısı', desc: 'Takviyeler için birikim fonu.', price: 2000, icon: '🍫', type: 'life' },
-    { id: 'life_travel_contribution', name: 'Tarsus Yol Fonu', desc: 'Seyahat birikim hesabı.', price: 5000, icon: '✈️', type: 'life' }
-];
+// 📅 20 AĞUSTOS BAŞLANGIÇLI OTOMATİK HAFTA HESAPLAYICI
+// ==========================================
+function updateKpssDateAndWeek() {
+    const dateEl = document.getElementById('kpss-current-date');
+    const weekSelector = document.getElementById('kpss-week-selector');
+    if(!dateEl || !weekSelector) return;
 
-window.renderMarket = function () {
-    const container = document.getElementById('dashboard-market-items-container');
-    if (!container) return;
+    const now = new Date(); // 20 Ağustos 2026
+    const options = { month: 'long', day: 'numeric', weekday: 'long' };
+    dateEl.innerText = now.toLocaleDateString('tr-TR', options);
+
+    // Kamp Başlangıcı: 20 Ağustos 2026
+    const campStart = new Date("2026-08-20T00:00:00").getTime();
+    const diffTime = now.getTime() - campStart;
+    const diffDays = Math.floor(diffTime / (1000 * 60 * 60 * 24));
+    
+    // 7 günde bir hafta atlar (0-6 gün: 1. Hafta, 7-13 gün: 2. Hafta...)
+    let calculatedWeek = Math.floor(diffDays / 7) + 1;
+    if (calculatedWeek < 1) calculatedWeek = 1;
+    // Sınav türüne göre maksimum hafta sınırı
+    let maxWeek = (activeKpssExam === 'onlisans') ? 5 : 9;
+    if (calculatedWeek > maxWeek) calculatedWeek = maxWeek;
+
+    // Eğer kullanıcı manuel olarak değiştirmediyse otomatik haftayı seç
+    if (!window.userManuallySelectedWeek) {
+        activeKpssWeek = calculatedWeek;
+        weekSelector.value = activeKpssWeek.toString();
+    }
+}
+window.changeKpssWeek = function() {
+    window.userManuallySelectedWeek = true; // Kullanıcı elle seçti
+    activeKpssWeek = parseInt(document.getElementById('kpss-week-selector').value);
+    renderKPSSTodayOrWeek();
+    if(navigator.vibrate) navigator.vibrate(20);
+};
+
+// ==========================================
+// 👁️ İNTERAKTİF GÖRÜNÜM MOTORU (PANOROMA DESTEKLİ)
+// ==========================================
+window.renderKPSSTodayOrWeek = function() {
+    updateKpssDateAndWeek(); 
+    
+    const container = document.getElementById('kpss-schedule-container');
     container.innerHTML = '';
-
-    let currentCoins = parseInt(localStorage.getItem('olympus_coins')) || 0;
-    let appliedTheme = localStorage.getItem('olympus_applied_theme') || 'theme_default';
-
-    const coinEl = document.getElementById('dashboard-total-coins');
-    if (coinEl) coinEl.innerText = currentCoins;
-
-    marketItems.forEach(item => {
-        const canAfford = currentCoins >= item.price;
-        const isCurrentlyApplied = item.id === appliedTheme;
-
-        let buyBtnHTML = ``;
-        if (item.id === 'theme_default' && item.type === 'theme' && appliedTheme === 'theme_default') {
-            buyBtnHTML = `<button class="market-buy-btn disabled">Aktif</button>`;
-        } else if (item.id === 'theme_default' && item.type === 'theme' && appliedTheme !== 'theme_default') {
-            buyBtnHTML = `<button class="market-buy-btn" onclick="applyTheme('theme_default')">Uygula</button>`;
-        } else if (isCurrentlyApplied) {
-            buyBtnHTML = `<button class="market-buy-btn disabled">Aktif</button>`;
-        } else if (canAfford) {
-            buyBtnHTML = `<button class="market-buy-btn" onclick="buyMarketItem('${item.id}', ${item.price}, '${item.name}', '${item.icon}', '${item.type}')">
-                ${item.price} OC
-            </button>`;
-        } else {
-            buyBtnHTML = `<button class="market-buy-btn disabled">${item.price} OC</button>`;
+    
+    const memoryKey = `olympus_kpss_schedule_${activeKpssExam}_w${activeKpssWeek}`;
+    const schedule = JSON.parse(localStorage.getItem(memoryKey)) || getBaseKPSSSchedule(activeKpssExam, activeKpssWeek);
+    
+    if (kpssViewMode === 'today') {
+        // --- 1. BUGÜN GÖRÜNÜMÜ (YOUTUBE BUTONLU) ---
+        const todayIndex = new Date().getDay();
+        const todayLessons = schedule[todayIndex] || [];
+        
+        if(todayLessons.length === 0) {
+            container.innerHTML = `<div style="padding:20px; text-align:center; background:#111; border-radius:12px; border:1px dashed #333;"><p style="color:#888; font-size:12px;">Bugün için planlanmış ders yok.</p></div>`;
+            return;
         }
 
-        const card = document.createElement('div');
-        card.className = 'market-card';
-        card.innerHTML = `
-            <div class="market-item-left"><div class="market-icon-wrapper">${item.icon}</div></div>
-            <div class="market-item-center">
-                <h3 class="market-title">${item.name}</h3>
-                <p class="market-desc">${item.desc}</p>
-            </div>
-            <div class="market-item-right">${buyBtnHTML}</div>
-        `;
-        container.appendChild(card);
-    });
-};
+        const todayStr = new Date().toLocaleDateString('tr-TR');
+        const completed = JSON.parse(localStorage.getItem(`kpss_done_${activeKpssExam}_w${activeKpssWeek}_${todayStr}`)) || [];
 
-window.buyMarketItem = function (itemId, price, name, icon, type) {
-    let currentCoins = parseInt(localStorage.getItem('olympus_coins')) || 0;
-    if (currentCoins >= price) {
-        currentCoins -= price;
-        localStorage.setItem('olympus_coins', currentCoins);
+        todayLessons.forEach((l, index) => {
+            const isDone = completed.includes(index);
+            const isExam = l.sub.includes("Deneme");
+            let bgIcon = isExam ? "📝" : "📚";
+            
+            // Eğer ders deneme veya dinlenme değilse YouTube butonu koy
+            let ytBtnHTML = (isExam || l.sub === "Dinlenme" || l.sub === "Günlük Rutin") ? '' : 
+                `<button class="kpss-youtube-btn" onclick="openKPSSYoutubeSafely('${l.sub}', event)" style="font-size:10px; padding:5px 10px; margin-top:5px; background:rgba(231,76,60,0.2); border:1px solid #e74c3c; color:#fff;">▶ YouTube'da Aç</button>`;
 
-        // Envantere Ekle
-        let inventory = JSON.parse(localStorage.getItem('olympus_inventory')) || [];
-        inventory.unshift({ id: itemId, name: name, icon: icon, date: new Date().toLocaleDateString('tr-TR') });
-        localStorage.setItem('olympus_inventory', JSON.stringify(inventory));
-        if (typeof renderInventory === 'function') renderInventory();
+            container.innerHTML += `
+                <div class="kpss-card ${isDone ? 'completed' : ''}" data-index="${index}" onclick="openKPSSDailyTopics('${l.sub}', '${l.topic}', ${index})">
+                    <div style="z-index:2; display:flex; justify-content:space-between; align-items:center; width:100%;">
+                        <div>
+                            <h4 class="kpss-card-title">${l.sub}</h4>
+                            <span class="kpss-card-subtitle">${l.topic}</span>
+                        </div>
+                        <div>${ytBtnHTML}</div>
+                    </div>
+                    <div class="kpss-card-bg-icon">${bgIcon}</div>
+                </div>
+            `;
+        });
+        
+        initKpssSwipeEngine();
 
-        renderMarket();
-        logToSocialFeed(`Satın Alındı: ${name}`, 'Envantere eklendi.', icon, -price);
+    } else if (kpssViewMode === 'week') {
+        // --- 2. PROGRAM GÖRÜNÜMÜ (GÜN AKORDEONLARI) ---
+        const dayNames = ["Pazar", "Pazartesi", "Salı", "Çarşamba", "Perşembe", "Cuma", "Cumartesi"];
+        const sortedDays = [1, 2, 3, 4, 5, 6, 0]; 
+        
+        sortedDays.forEach(dayNum => {
+            const lessons = schedule[dayNum] || [];
+            let lessonsHTML = '';
+            
+            if(lessons.length === 0) {
+                lessonsHTML = '<p style="color:#555; font-size:11px; margin:5px 0;">Bu gün için ders planlanmamış.</p>';
+            } else {
+                lessons.forEach(l => {
+                    let topicsArray = [];
+                    if (kpssSyllabusDB && kpssSyllabusDB[activeKpssExam] && kpssSyllabusDB[activeKpssExam][l.sub]) {
+                        topicsArray = kpssSyllabusDB[activeKpssExam][l.sub];
+                    } else {
+                        topicsArray = l.topic.split(/\+|&|,/).map(t => t.trim());
+                    }
 
-        if (typeof showDynamicIsland === 'function') showDynamicIsland("Satın Alım Başarılı!", `${name} eklendi.`, "🛍️", 0);
+                    let topicsListHTML = topicsArray.map(t => `<li style="color:#aaa; font-size:11px; margin:3px 0;">• ${t}</li>`).join('');
 
-        if (type === 'theme') { applyTheme(itemId); }
-    }
-};
-
-window.applyTheme = function (themeId) {
-    localStorage.setItem('olympus_applied_theme', themeId);
-    if (themeId === 'theme_cyberpunk') {
-        document.documentElement.style.setProperty('--goldnova', '#00ff00');
-        document.documentElement.style.setProperty('--bg-dark', '#000');
-        document.documentElement.style.setProperty('--text-light', '#fff');
-    } else if (themeId === 'theme_midnight_blue') {
-        document.documentElement.style.setProperty('--goldnova', '#00d2ff');
-        document.documentElement.style.setProperty('--bg-dark', '#0a0a0a');
-        document.documentElement.style.setProperty('--text-light', '#eee');
-    } else if (themeId === 'theme_tarsus_sunshine') {
-        document.documentElement.style.setProperty('--goldnova', '#ffcc00');
-        document.documentElement.style.setProperty('--bg-dark', '#eee');
-        document.documentElement.style.setProperty('--text-light', '#333');
-    } else {
-        document.documentElement.style.setProperty('--goldnova', '#ffd700');
-        document.documentElement.style.setProperty('--bg-dark', '#050505');
-        document.documentElement.style.setProperty('--text-light', '#fff');
-    }
-    renderMarket();
-};
-
-// ==========================================
-// 🔍 ÜST SEKMELER (TABS) İÇİN FİLTRELEME
-// ==========================================
-const originalSwitchDashboardTab = window.switchDashboardTab;
-window.switchDashboardTab = function (tabName, clickedElement = null) {
-    originalSwitchDashboardTab(tabName, clickedElement);
-
-    // Eğer üst sekmelere (Sana Özel, Galatasaray vs.) tıklandıysa akışı filtrele
-    if (clickedElement && clickedElement.classList.contains('x-tab')) {
-        const tabText = clickedElement.innerText.trim();
-        const container = document.getElementById('dashboard-feed-view');
-        if (!container) return;
-
-        const posts = container.querySelectorAll('.x-post');
-        posts.forEach(post => {
-            post.style.display = 'flex'; // Önce hepsini göster
-
-            if (tabText === 'Takip ediliyor' && post.innerHTML.includes('Reklam')) {
-                post.style.display = 'none'; // Reklamları gizle
-            } else if (tabText === 'Galatasaray' && !post.innerHTML.includes('Galatasaray')) {
-                post.style.display = 'none'; // Sadece Galatasaray postları
-            } else if (tabText === 'Yazılım' && !post.innerHTML.includes('Sistem Logu')) {
-                post.style.display = 'none'; // Sadece loglar (veya kodlama ile ilgili şeyler)
+                    lessonsHTML += `
+                        <div style="background:#151515; border:1px solid #333; padding:10px; border-radius:6px; margin-bottom:8px;">
+                            <div style="display:flex; justify-content:space-between; align-items:center; cursor:pointer;" onclick="openKPSSSyllabus('${l.sub}')">
+                                <strong style="color:var(--goldnova); font-size:12px;">📚 ${l.sub}</strong>
+                                <span style="font-size:10px; color:#888;">Müfredat →</span>
+                            </div>
+                            <p style="color:#fff; font-size:11px; margin:4px 0 6px 0;">Hedef: ${l.topic}</p>
+                            <div style="border-top:1px dashed #222; padding-top:5px; margin-top:5px;">
+                                <span style="color:#666; font-size:10px; display:block; margin-bottom:3px;">Tüm Konu Dalları:</span>
+                                <ul style="margin:0; padding-left:15px; list-style-type:none;">
+                                    ${topicsListHTML}
+                                </ul>
+                            </div>
+                        </div>
+                    `;
+                });
             }
+
+            container.innerHTML += `
+                <div style="background:#111; border:1px solid #222; border-radius:8px; margin-bottom:8px; overflow:hidden;">
+                    <div onclick="toggleKpssDayAccordion(${dayNum})" style="padding:12px 15px; background:#161616; display:flex; justify-content:space-between; align-items:center; cursor:pointer;">
+                        <strong style="color:#fff; font-size:13px;">📅 ${dayNames[dayNum]}</strong>
+                        <span style="color:var(--goldnova); font-size:11px;" id="arrow-${dayNum}">▼ Aç</span>
+                    </div>
+                    <div id="day-content-${dayNum}" style="display:none; padding:12px; border-top:1px solid #222;">
+                        ${lessonsHTML}
+                    </div>
+                </div>
+            `;
+        });
+
+    } else {
+        // --- 3. TÜM HAFTA KİTLESEL KONU PANORAMASI (GÜNCELLENDİ) ---
+        container.innerHTML = `<h3 style="color:var(--goldnova); font-size:14px; margin-bottom:10px;">📌 ${activeKpssWeek}. Hafta - Konu Panoraması</h3>`;
+        
+        let allSubjectsInWeek = new Set();
+        Object.values(schedule).forEach(dayLessons => {
+            dayLessons.forEach(l => {
+                if(l.sub && l.sub !== "Dinlenme" && l.sub !== "Günlük Rutin" && !l.sub.includes("Deneme")) {
+                    allSubjectsInWeek.add(l.sub);
+                }
+            });
+        });
+
+        if(allSubjectsInWeek.size === 0) {
+            container.innerHTML += `<p style="color:#888; font-size:12px; text-align:center;">Bu hafta için listelenen ders konusu bulunmuyor.</p>`;
+            return;
+        }
+
+        allSubjectsInWeek.forEach(sub => {
+            let topicsArray = [];
+            if (kpssSyllabusDB && kpssSyllabusDB[activeKpssExam] && kpssSyllabusDB[activeKpssExam][sub]) {
+                topicsArray = kpssSyllabusDB[activeKpssExam][sub];
+            } else {
+                topicsArray = ["Genel Konu Hedefleri"];
+            }
+
+            let topicCheckboxes = topicsArray.map((t, i) => `
+                <div style="display:flex; align-items:center; gap:8px; padding:6px 0; border-bottom:1px solid #222;">
+                    <span style="color:var(--goldnova); font-size:10px;">▪</span>
+                    <span style="color:#ddd; font-size:11px;">${t}</span>
+                </div>
+            `).join('');
+
+            container.innerHTML += `
+                <div style="background:#111; border:1px solid #333; border-radius:10px; padding:15px; margin-bottom:12px;">
+                    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px; border-bottom:1px solid #222; padding-bottom:8px;">
+                        <h4 style="color:#fff; font-size:14px; margin:0;">📖 ${sub}</h4>
+                        <button class="kpss-youtube-btn" onclick="openKPSSYoutubeSafely('${sub}', event)" style="font-size:10px; padding:4px 8px;">▶ YouTube</button>
+                    </div>
+                    <div style="display:flex; flex-direction:column;">
+                        ${topicCheckboxes}
+                    </div>
+                </div>
+            `;
         });
     }
 };
-// ==========================================
-// 💬 X-STİLİ ETKİLEŞİM MOTORU (BEĞEN, RT, YORUM)
-// ==========================================
-// ==========================================
-// 💬 X-STİLİ ETKİLEŞİM VE HAFIZA MOTORU
-// ==========================================
-window.toggleXAction = function(btnElement, type) {
-    let span = btnElement.querySelector('span');
-    let count = parseInt(span.innerText.replace('B', '000').replace('M', '000000')) || 0;
-    
-    // Tıklanan Gönderiyi Yakala ve ID Oluştur (İçeriğine göre)
-    let postEl = btnElement.closest('.x-post');
-    let postTextEl = postEl.querySelector('.x-text');
-    let postKey = postTextEl ? postTextEl.innerText.substring(0, 25).replace(/\s+/g, '') : "media_post_" + Date.now();
-    
-    let listName = 'oly_interact_' + type; // oly_interact_like, oly_interact_rt, oly_interact_reply
-    let interactList = JSON.parse(localStorage.getItem(listName)) || {};
 
-    if (btnElement.classList.contains('active')) {
-        // Etkileşimi Geri Al
-        btnElement.classList.remove('active', 'liked', 'rt', 'replied');
-        count = Math.max(0, count - 1);
-        delete interactList[postKey]; // Hafızadan sil
+// Gün Akordeon Açma/Kapama Fonksiyonu
+window.toggleKpssDayAccordion = function(dayNum) {
+    const content = document.getElementById(`day-content-${dayNum}`);
+    const arrow = document.getElementById(`arrow-${dayNum}`);
+    
+    if (content.style.display === 'none') {
+        content.style.display = 'block';
+        arrow.innerText = '▲ Kapat';
+        if(navigator.vibrate) navigator.vibrate(15);
     } else {
-        // Etkileşime Gir
-        btnElement.classList.add('active');
-        if (type === 'like') { btnElement.classList.add('liked'); count++; }
-        if (type === 'rt') { btnElement.classList.add('rt'); count++; }
-        if (type === 'reply') { btnElement.classList.add('replied'); count++; }
-        
-        // Gönderinin HTML yapısını olduğu gibi kaydet
-        interactList[postKey] = postEl.outerHTML; 
+        content.style.display = 'none';
+        arrow.innerText = '▼ Aç';
     }
-    
-    // Değişikliği Sisteme Kaydet
-    localStorage.setItem(listName, JSON.stringify(interactList));
-    
-    // Rakam Formatı
-    if (count >= 1000000) span.innerText = (count/1000000).toFixed(1) + 'M';
-    else if (count >= 1000) span.innerText = (count/1000).toFixed(1) + 'B';
-    else span.innerText = count;
-    
-    if (navigator.vibrate) navigator.vibrate(15);
 };
 
-// ==========================================
-// 🛠️ OLYSOCIAL HATALARI VE YÖNLENDİRME MOTORU
-// ==========================================
-window.cameFromSocialToArena = false;
-
-window.openArenaFromSocial = function() {
-    window.cameFromSocialToArena = true;
-    
-    // OLYSOCIAL'ı kapat
-    if(typeof closeOlympusDashboard === 'function') {
-        closeOlympusDashboard();
+// Sıfırlama Butonunun Hafızasını Çoklu Haftaya Uyarladık
+window.resetKPSSScheduleToDefault = function() {
+    if (confirm("Emin misin şampiyon? Mevcut özel programın silinecek ve seçili hafta standart kampa dönecek!")) {
+        localStorage.removeItem(`olympus_kpss_schedule_${activeKpssExam}_w${activeKpssWeek}`);
+        if(typeof renderKPSSEditList === 'function') renderKPSSEditList();
+        renderKPSSTodayOrWeek();
+        alert("✅ Sistem başarıyla fabrika ayarlarına sıfırlandı!");
     }
-    
-    // Uygulama çerçevesini görünür yap
-    const appContent = document.getElementById('app-content');
-    if(appContent) {
-        appContent.classList.remove('hidden');
-        appContent.style.display = 'flex';
-    }
-    
-    // Asıl Arena motorunu tetikle
-    openArenaScreen(); 
-};
-
-window.returnToProfileFromSocial = function () {
-    // Yan menüyü ve OLYSOCIAL'i kapat
-    if (typeof closeProfileSidebar === 'function') closeProfileSidebar();
-    if (typeof closeOlympusDashboard === 'function') closeOlympusDashboard();
-
-    // Ana uygulamayı ve Profil sekmesini aç
-    const appContent = document.getElementById('app-content');
-    if (appContent) {
-        appContent.classList.remove('hidden');
-        appContent.style.display = 'flex';
-    }
-    document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
-    document.getElementById('profile-sec').classList.add('active');
-};
-
-window.openSocialSettings = function () {
-    if (typeof closeProfileSidebar === 'function') closeProfileSidebar();
-    document.getElementById('oly-social-settings-modal').style.display = 'flex';
-};
-
-// ==========================================
-// 📝 OLYSOCIAL GÖNDERİ PAYLAŞMA MOTORU
-// ==========================================
-window.openNewPostModal = function () {
-    document.getElementById('oly-new-post-modal').style.display = 'flex';
-    document.getElementById('new-post-text').focus();
-
-    // Avatarı senkronize et
-    const topAvatar = document.getElementById('oly-social-top-avatar');
-    if (topAvatar) document.getElementById('new-post-avatar').src = topAvatar.src;
-};
-
-window.closeNewPostModal = function () {
-    document.getElementById('oly-new-post-modal').style.display = 'none';
-    document.getElementById('new-post-text').value = ''; // Yazıyı temizle
-};
-
-window.submitNewPost = function () {
-    const text = document.getElementById('new-post-text').value.trim();
-    if (!text) return; // Boşsa gönderme
-
-    // Kendi Paylaşımımızı Sosyal Akışa Kaydet
-    let feed = JSON.parse(localStorage.getItem('olympus_social_feed')) || [];
-    feed.unshift({
-        id: Date.now(),
-        date: new Date().toLocaleDateString('tr-TR'),
-        time: new Date().toLocaleTimeString('tr-TR', { hour: '2-digit', minute: '2-digit' }),
-        title: "Kişisel Gönderi", // Başlık
-        desc: text,              // İçerik
-        icon: document.getElementById('new-post-avatar').src,
-        earned: 0
-    });
-
-    localStorage.setItem('olympus_social_feed', JSON.stringify(feed));
-
-    closeNewPostModal();
-
-    // Sana Özel sekmesini yenile
-    if (typeof renderXFeed === 'function') renderXFeed();
-
-    if (navigator.vibrate) navigator.vibrate([20, 40]);
 };
 // ==========================================
-// 👤 OLYSOCIAL PROFİL EKRANI MOTORU
+// 📺 GÜVENLİ YOUTUBE IŞINLANMA MOTORU
 // ==========================================
-window.openOlySocialProfile = function() {
-    if(typeof closeProfileSidebar === 'function') closeProfileSidebar();
-    document.getElementById('oly-social-profile-screen').style.display = 'flex';
-    
-    // Menüdeki verileri profile kopyala
-    document.getElementById('osp-header-name').innerText = document.getElementById('sidebar-name').innerText;
-    document.getElementById('osp-name').innerText = document.getElementById('sidebar-name').innerText;
-    document.getElementById('osp-username').innerText = document.getElementById('sidebar-username').innerText;
-    document.getElementById('osp-avatar').src = document.getElementById('sidebar-avatar').src;
-    document.getElementById('osp-following').innerText = document.getElementById('sidebar-following').innerText;
-    document.getElementById('osp-followers').innerText = document.getElementById('sidebar-followers').innerText;
-    
-    // İlk açılışta "Gönderiler" sekmesini tetikle
-    const firstTab = document.querySelector('#oly-social-profile-screen .x-tab.active') || document.querySelector('#oly-social-profile-screen .x-tab');
-    switchOlyProfileTab('posts', firstTab);
-};
-
-window.closeOlySocialProfile = function() {
-    document.getElementById('oly-social-profile-screen').style.display = 'none';
-};
-
-window.switchOlyProfileTab = function(tabName, btnElement) {
-    // Sekme Stillerini Ayarla
-    document.querySelectorAll('#oly-social-profile-screen .x-tab').forEach(t => t.classList.remove('active'));
-    if(btnElement) btnElement.classList.add('active');
-    
-    const container = document.getElementById('osp-feed-view');
-    container.innerHTML = ''; // Ekranı temizle
-    
-    if (tabName === 'posts') {
-        // Sadece kendi paylaştığımız "Kişisel Gönderi"leri bul
-        let feed = JSON.parse(localStorage.getItem('olympus_social_feed')) || [];
-        let myPosts = feed.filter(p => p.title === "Kişisel Gönderi");
-        
-        if (myPosts.length === 0) {
-            container.innerHTML = '<p style="color:#71767b; text-align:center; margin-top:30px;">Henüz bir gönderi paylaşmadın.</p>';
-        } else {
-            let uName = document.getElementById('sidebar-name').innerText;
-            let uHandle = document.getElementById('sidebar-username').innerText;
-            let uPhoto = document.getElementById('sidebar-avatar').src;
-
-            myPosts.forEach(post => {
-                container.innerHTML += `
-                    <div class="x-post">
-                        <div class="x-avatar" style="overflow:hidden; display:flex; justify-content:center; align-items:center;"><img src="${uPhoto}" style="width:100%; height:100%; border-radius:50%; object-fit:cover;"></div>
-                        <div class="x-content">
-                            <div class="x-header">
-                                <span class="x-name">${uName}</span>
-                                <span class="x-username">${uHandle}</span>
-                                <span class="x-time">· ${post.time}</span>
-                            </div>
-                            <div class="x-text">${post.desc}</div>
-                            <div class="x-actions">
-                                <div class="x-action" onclick="toggleXAction(this, 'reply')">💬 <span>0</span></div>
-                                <div class="x-action" onclick="toggleXAction(this, 'rt')">🔁 <span>0</span></div>
-                                <div class="x-action" onclick="toggleXAction(this, 'like')">❤️ <span>0</span></div>
-                            </div>
-                        </div>
-                    </div>
-                `;
-            });
-        }
-    } else {
-        // Yanıtlar (reply), RT (rt), Beğeniler (like) sekmeleri için hafızadan çek
-        let typeMap = { 'likes': 'like', 'reposts': 'rt', 'replies': 'reply' };
-        let list = JSON.parse(localStorage.getItem('oly_interact_' + typeMap[tabName])) || {};
-        let postHTMLs = Object.values(list);
-        
-        if (postHTMLs.length === 0) {
-            container.innerHTML = '<p style="color:#71767b; text-align:center; margin-top:30px;">Burada henüz bir şey yok.</p>';
-        } else {
-            // Kaydedilen HTML'leri tersten (en yeni en üstte) bas
-            postHTMLs.reverse().forEach(htmlStr => {
-                container.innerHTML += htmlStr;
-            });
-        }
-    }
+window.openKPSSYoutubeSafely = function(subject, event) {
+    if (event) event.stopPropagation();
+    const query = encodeURIComponent(`${subject} KPSS konu anlatımı`);
+    window.open(`https://www.youtube.com/results?search_query=${query}`, '_blank');
 };
