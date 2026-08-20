@@ -8574,136 +8574,166 @@ window.changeKpssWeek = function() {
 
 function getBaseKPSSSchedule(examType, weekNum) {
     if (examType === 'onlisans') {
+        // ==========================================
+        // 🔥 ÖN LİSANS 7 HAFTALIK NOKTA ATIŞI KAMP
+        // ==========================================
         if (weekNum === 1) return {
-            1: [{ sub: "Türkçe", topic: "Sözcükte Anlam + Cümlede Anlam + Paragraf Soru Tipleri" }, { sub: "Matematik", topic: "Temel Kavramlar + Sayılar" }],
-            2: [{ sub: "Tarih", topic: "İslamiyet Öncesi + İlk Türk-İslam" }, { sub: "Coğrafya", topic: "Coğrafi Konum + Harita Bilgisi" }],
-            3: [{ sub: "Türkçe", topic: "Paragrafta Anlam + Anlatım Teknikleri" }, { sub: "Matematik", topic: "Bölme-Bölünebilme + EBOB-EKOK" }],
-            4: [{ sub: "Vatandaşlık", topic: "Hukukun Temel Kavramları + Anayasa Hukukuna Giriş" }, { sub: "Tarih", topic: "Osmanlı Kuruluş Dönemi" }],
-            5: [{ sub: "Matematik", topic: "Rasyonel Sayılar" }, { sub: "Coğrafya", topic: "Türkiye'nin Yer Şekilleri" }],
-            6: [{ sub: "Tarih", topic: "Osmanlı Yükselme Dönemi" }, { sub: "Vatandaşlık", topic: "Devlet Şekilleri" }, { sub: "Genel", topic: "Haftalık Konu Tekrarı" }],
-            0: [{ sub: "Günlük Rutin", topic: "20-30 Paragraf + 20-30 Matematik Sorusu" }, { sub: "Dinlenme", topic: "Haftaya Hazırlık" }]
+            4: [{ sub: "Türkçe", topic: "Sözcükte Anlam + Gerçek/Mecaz/Terim + Anlam İlişkileri" }, { sub: "Matematik", topic: "Temel Kavramlar + Sayı Kümeleri + Tek/Çift + Poz/Neg" }, { sub: "Tarih", topic: "İslamiyet Öncesi + İlk Türk Devletleri" }],
+            5: [{ sub: "Türkçe", topic: "Cümlede Anlam + Kesinlik/Olasılık/Varsayım + Neden/Amaç-Sonuç" }, { sub: "Matematik", topic: "Basamak Kavramı + Çözümleme + Sayı Sistemleri" }, { sub: "Tarih", topic: "İlk Türk-İslam + Karahanlılar + Gazneliler + Büyük Selçuklu" }],
+            6: [{ sub: "Türkçe", topic: "Paragraf + Ana/Yardımcı Düşünce" }, { sub: "Matematik", topic: "Bölme-Bölünebilme + Asal Sayılar/Çarpanlar" }, { sub: "Coğrafya", topic: "Coğrafi Konum + Matematik/Özel Konum" }],
+            0: [{ sub: "Türkçe", topic: "30 Paragraf" }, { sub: "Matematik", topic: "EBOB + EKOK" }, { sub: "Tarih", topic: "TR Selçuklu + Beylikler" }, { sub: "Genel Tekrar", topic: "İlk 3 Gün Yanlışları" }],
+            1: [{ sub: "Türkçe", topic: "Paragrafta Yapı + Giriş-Gelişme-Sonuç + Akış Bozan" }, { sub: "Matematik", topic: "Rasyonel Sayılar" }, { sub: "Tarih", topic: "Osmanlı Kuruluş (Osman/Orhan/I.Murat)" }],
+            2: [{ sub: "Türkçe", topic: "Paragraf (30-40 Soru)" }, { sub: "Matematik", topic: "Ondalık Sayılar + Basit Denklemler" }, { sub: "Tarih", topic: "Osmanlı Yükselme (Fatih/Yavuz/Kanuni)" }],
+            3: [{ sub: "Hafta Tekrarı", topic: "Türkçe: 30 Paragraf + Mat: 30-40 Karma + Tarih: Kuruluş/Yükselme + Coğrafya: Konum" }]
         };
         if (weekNum === 2) return {
-            1: [{ sub: "Türkçe", topic: "Sözcük Türleri + Fiiller + Fiilimsiler" }, { sub: "Matematik", topic: "Basit Eşitsizlikler + Mutlak Değer" }],
-            2: [{ sub: "Tarih", topic: "Osmanlı Kültür ve Medeniyeti + Duraklama" }, { sub: "Coğrafya", topic: "İklim + Türkiye'de İklim" }],
-            3: [{ sub: "Türkçe", topic: "Cümlenin Ögeleri + Cümle Türleri" }, { sub: "Matematik", topic: "Üslü Sayılar + Köklü Sayılar" }],
-            4: [{ sub: "Vatandaşlık", topic: "Temel Hak ve Özgürlükler + Yasama" }, { sub: "Tarih", topic: "Osmanlı Gerileme + Dağılma" }],
-            5: [{ sub: "Türkçe", topic: "Yazım Kuralları + Noktalama" }, { sub: "Coğrafya", topic: "Bitki Örtüsü + Nüfus + Yerleşme" }],
-            6: [{ sub: "Matematik", topic: "Oran-Orantı + Denklem Çözme" }, { sub: "Tarih", topic: "XIX. Yüzyıl Osmanlı" }, { sub: "Vatandaşlık", topic: "Yürütme + Yargı" }],
-            0: [{ sub: "Günlük Rutin", topic: "20-30 Paragraf + 20-30 Matematik Sorusu" }, { sub: "Dinlenme", topic: "Zihni Boşaltma" }]
+            4: [{ sub: "Türkçe", topic: "Sözcük Türleri + İsim + Sıfat" }, { sub: "Matematik", topic: "Üslü Sayılar" }, { sub: "Tarih", topic: "Osmanlı Kültür ve Medeniyeti" }],
+            5: [{ sub: "Türkçe", topic: "Zamir + Zarf + Edat + Bağlaç + Ünlem" }, { sub: "Matematik", topic: "Köklü Sayılar" }, { sub: "Coğrafya", topic: "Yer Şekilleri + Dağlar/Ovalar/Platolar" }],
+            6: [{ sub: "Türkçe", topic: "Fiiller" }, { sub: "Matematik", topic: "Mutlak Değer" }, { sub: "Tarih", topic: "Osmanlı Duraklama + 17.yy Islahatları" }],
+            0: [{ sub: "Türkçe", topic: "Fiil Çekimleri + Fiilimsiye Giriş" }, { sub: "Matematik", topic: "Oran-Orantı" }, { sub: "Coğrafya", topic: "İklim Tipleri + Sıcaklık/Yağış" }],
+            1: [{ sub: "Türkçe", topic: "Fiilimsiler" }, { sub: "Matematik", topic: "Birinci Derece Denklemler" }, { sub: "Tarih", topic: "Osmanlı Gerileme + 18.yy Islahatları" }],
+            2: [{ sub: "Türkçe", topic: "Cümlenin Ögeleri" }, { sub: "Matematik", topic: "Basit Eşitsizlik" }, { sub: "Coğrafya", topic: "Bitki Örtüsü + Toprak Tipleri" }],
+            3: [{ sub: "2. Hafta Tekrarı", topic: "30 Paragraf + 40 Mat + 30 Tarih + 20 Coğrafya + Yanlış Analizi" }]
         };
         if (weekNum === 3) return {
-            1: [{ sub: "Türkçe", topic: "Anlatım Bozuklukları + Sözel Mantık" }, { sub: "Matematik", topic: "Sayı + Yaş Problemleri" }],
-            2: [{ sub: "Tarih", topic: "Trablusgarp + Balkan Savaşları + I. DS" }, { sub: "Coğrafya", topic: "Tarım + Hayvancılık + Madenler" }],
-            3: [{ sub: "Türkçe", topic: "Paragraf + Dil Bilgisi Tekrarları" }, { sub: "Matematik", topic: "Yüzde + Kâr-Zarar + Karışım" }],
-            4: [{ sub: "Vatandaşlık", topic: "İdare Hukuku + Merkezi Yönetim" }, { sub: "Tarih", topic: "Mondros + Kuvayımilliye + Kongreler" }],
-            5: [{ sub: "Matematik", topic: "İşçi + Havuz + Hız + Grafik/Tablo" }, { sub: "Coğrafya", topic: "Enerji + Sanayi + Ulaşım" }],
-            6: [{ sub: "Vatandaşlık", topic: "Yerinden Yönetim + Kamu Yönetimi" }, { sub: "Tarih", topic: "Haftalık Tarih Soru Çözümü" }],
-            0: [{ sub: "Soru Çözüm", topic: "Bol Paragraf ve Problem Pratiği" }, { sub: "Dinlenme", topic: "Pazar Molası" }]
+            4: [{ sub: "Türkçe", topic: "Cümle Türleri" }, { sub: "Matematik", topic: "Sayı Problemleri" }, { sub: "Tarih", topic: "Osmanlı Dağılma Dönemi" }],
+            5: [{ sub: "Türkçe", topic: "Yazım Kuralları" }, { sub: "Matematik", topic: "Yaş Problemleri" }, { sub: "Coğrafya", topic: "Nüfus" }],
+            6: [{ sub: "Türkçe", topic: "Noktalama İşaretleri" }, { sub: "Matematik", topic: "Yüzde Problemleri" }, { sub: "Tarih", topic: "19.yy Osmanlı + Tanzimat/Islahat/Meşrutiyet" }],
+            0: [{ sub: "Türkçe", topic: "40 Paragraf" }, { sub: "Matematik", topic: "Kâr-Zarar Problemleri" }, { sub: "Coğrafya", topic: "Göç + Yerleşme" }],
+            1: [{ sub: "Türkçe", topic: "Anlatım Bozukluğu" }, { sub: "Matematik", topic: "Karışım Problemleri" }, { sub: "Tarih", topic: "Trablusgarp + Balkan Savaşları" }],
+            2: [{ sub: "Türkçe", topic: "Sözel Mantığa Giriş" }, { sub: "Matematik", topic: "İşçi Problemleri" }, { sub: "Coğrafya", topic: "Tarım + Tarım Ürünleri" }],
+            3: [{ sub: "Hafta Tekrarı", topic: "40 Paragraf + 40 Mat + 30 Tarih + 20 Coğrafya" }]
         };
         if (weekNum === 4) return {
-            1: [{ sub: "Tarih", topic: "TBMM'nin Açılması + Kurtuluş Savaşı Cepheleri" }, { sub: "Matematik", topic: "Problemler + Üçgen + Dörtgen" }],
-            2: [{ sub: "Coğrafya", topic: "Bölgeler + Ekonomik Faaliyetler + Ticaret" }, { sub: "Türkçe", topic: "30-40 Paragraf + Karma Soru" }],
-            3: [{ sub: "Tarih", topic: "Lozan + Cumhuriyetin İlanı + Halifelik" }, { sub: "Matematik", topic: "Çokgen + Çember + Alan" }],
-            4: [{ sub: "Türkçe", topic: "30-40 Paragraf + Karma Soru" }, { sub: "Coğrafya", topic: "Turizm + Ulaşım + Türkiye Nüfus" }],
-            5: [{ sub: "Tarih", topic: "İnkılaplar + Atatürk İlkeleri + İç/Dış Politika" }, { sub: "Matematik", topic: "Hacim + Grafik Geometri" }],
-            6: [{ sub: "Tarih", topic: "II. DS ve Sonrası Temel Gelişmeler" }, { sub: "Genel Tekrar", topic: "İnkılap Tarihi Yoğun Soru Çözümü" }],
-            0: [{ sub: "Günlük Rutin", topic: "30-40 Paragraf + 30-40 Türkçe Karma" }]
+            4: [{ sub: "Türkçe", topic: "Sözel Mantık" }, { sub: "Matematik", topic: "Havuz Problemleri" }, { sub: "Tarih", topic: "I. Dünya Savaşı" }],
+            5: [{ sub: "Türkçe", topic: "Paragraf" }, { sub: "Matematik", topic: "Hız Problemleri" }, { sub: "Tarih", topic: "Mondros Ateşkesi" }],
+            6: [{ sub: "Türkçe", topic: "Dil Bilgisi Tekrar" }, { sub: "Matematik", topic: "Grafik ve Tablo" }, { sub: "Coğrafya", topic: "Hayvancılık" }],
+            0: [{ sub: "Türkçe", topic: "40 Paragraf" }, { sub: "Matematik", topic: "Problemler Karma" }, { sub: "Tarih", topic: "Kuvayımilliye" }],
+            1: [{ sub: "Türkçe", topic: "Anlatım Bozukluğu" }, { sub: "Matematik", topic: "Karışık Problemler" }, { sub: "Tarih", topic: "Amasya Genelgesi" }],
+            2: [{ sub: "Türkçe", topic: "Sözel Mantık" }, { sub: "Matematik", topic: "Geometriye Giriş" }, { sub: "Tarih", topic: "Erzurum ve Sivas Kongreleri" }],
+            3: [{ sub: "Mini Deneme", topic: "100 Soru (30 Tür + 30 Mat + 20 Tar + 10 Coğ + 10 Vat) - Süreli" }]
         };
-        if (weekNum >= 5) return {
-            1: [{ sub: "Türkçe", topic: "30-40 Soru" }, { sub: "Matematik", topic: "30-40 Soru" }],
-            2: [{ sub: "Tarih", topic: "30 Soru" }, { sub: "Coğrafya", topic: "20 Soru" }],
-            3: [{ sub: "Vatandaşlık", topic: "20 Soru" }, { sub: "Türkçe", topic: "30-40 Soru" }],
-            4: [{ sub: "Matematik", topic: "30-40 Soru" }, { sub: "Tarih", topic: "30 Soru" }],
-            5: [{ sub: "Coğrafya", topic: "20 Soru" }, { sub: "Vatandaşlık", topic: "20 Soru" }],
-            6: [{ sub: "Genel", topic: "Günde Toplam 130-150 Soru Hedefi" }, { sub: "Yanlış Analizi", topic: "Hatalı Sorulara Dönüş" }],
-            0: [{ sub: "Deneme Sınavı", topic: "Tam KPSS Denemesi" }, { sub: "Analiz", topic: "Deneme Hata Kontrolü" }]
+        if (weekNum === 5) return {
+            4: [{ sub: "Tarih", topic: "TBMM'nin Açılması + I. TBMM" }, { sub: "Matematik", topic: "Açılar" }, { sub: "Türkçe", topic: "30 Paragraf" }],
+            5: [{ sub: "Tarih", topic: "Kurtuluş Savaşı Cepheleri" }, { sub: "Matematik", topic: "Üçgenler" }, { sub: "Coğrafya", topic: "Madenler + Enerji Kaynakları" }],
+            6: [{ sub: "Tarih", topic: "Sakarya Savaşı + Büyük Taarruz" }, { sub: "Matematik", topic: "Dörtgenler" }, { sub: "Türkçe", topic: "Sözel Mantık" }],
+            0: [{ sub: "Tarih", topic: "Mudanya + Lozan" }, { sub: "Matematik", topic: "Alan" }, { sub: "Vatandaşlık", topic: "Hukukun Temel Kavramları" }],
+            1: [{ sub: "Tarih", topic: "Cumhuriyet'in İlanı + Halifeliğin Kaldırılması" }, { sub: "Matematik", topic: "Çember" }, { sub: "Coğrafya", topic: "Sanayi" }],
+            2: [{ sub: "Tarih", topic: "Atatürk İlkeleri" }, { sub: "Matematik", topic: "Geometri Karma" }, { sub: "Vatandaşlık", topic: "Anayasa" }],
+            3: [{ sub: "1. TAM DENEME", topic: "120 Soru - Gerçek Sınav Düzeni + Detaylı Analiz" }]
+        };
+        if (weekNum === 6) return {
+            4: [{ sub: "Tarih", topic: "Atatürk İnkılapları" }, { sub: "Matematik", topic: "Problemler Karma" }, { sub: "Türkçe", topic: "Paragraf" }],
+            5: [{ sub: "Tarih", topic: "Atatürk Dönemi İç Politika" }, { sub: "Coğrafya", topic: "Ulaşım + Ticaret" }, { sub: "Vatandaşlık", topic: "Temel Haklar" }],
+            6: [{ sub: "Tarih", topic: "Atatürk Dönemi Dış Politika" }, { sub: "Matematik", topic: "Sayılar + Problemler" }, { sub: "Türkçe", topic: "Dil Bilgisi Karma" }],
+            0: [{ sub: "2. TAM DENEME", topic: "120 Soru (Min. 2.5 Saat) + Yanlış Analizi" }],
+            1: [{ sub: "Eksik Kapatma", topic: "Sadece Kötü Yapılan Konulara Odaklanma" }],
+            2: [{ sub: "3. TAM DENEME", topic: "120 Soru + Kapsamlı Yanlış Analizi" }],
+            3: [{ sub: "GENEL TEKRAR", topic: "Tarih Kronoloji + Coğrafya Bilgileri + Vatandaşlık + Mat Formüller + Türk Kuralları" }]
+        };
+        if (weekNum >= 7) return {
+            4: [{ sub: "SON TAM DENEME", topic: "Sınav Stratejisi Oturtma + Boş/Yanlış ve Süre İncelemesi" }],
+            5: [{ sub: "Tarih", topic: "Osmanlı Kronoloji + Kurtuluş + İnkılap/İlkeler" }, { sub: "Coğrafya", topic: "İklim + Nüfus + Tarım + Maden + Sanayi + Bölgeler" }, { sub: "Vatandaşlık", topic: "Anayasa + Yasama + Yürütme + Yargı" }],
+            6: [{ sub: "Son Tekrar", topic: "30 Paragraf + 20-30 Mat + Kısa Tarih Tekrarı + Yanlış Defteri (Maks 2-3 Saat)" }],
+            0: [{ sub: "SINAV GÜNÜ", topic: "Zihni Boşaltma + Sadece Formül/Kronoloji Gözden Geçirme" }],
+            1: [{ sub: "ŞAMPİYONLUK", topic: "Sınav Bitti, Zafer Senin!" }],
+            2: [{ sub: "ŞAMPİYONLUK", topic: "Sınav Bitti, Zafer Senin!" }],
+            3: [{ sub: "ŞAMPİYONLUK", topic: "Sınav Bitti, Zafer Senin!" }]
         };
         return { 1: [{ sub: "Ön Lisans", topic: "Kamp Programı" }] };
     } else {
         // ==========================================
-        // ORTAÖĞRETİM 9 HAFTALIK AĞIR KAMP PROGRAMI
+        // 🔥 ORTAÖĞRETİM 10 HAFTALIK NOKTA ATIŞI KAMP
         // ==========================================
         if (weekNum === 1) return {
-            1: [{ sub: "Türkçe", topic: "Sözcükte Anlam + Cümlede Anlam + Paragraf" }, { sub: "Matematik", topic: "Temel Kavramlar + Sayılar + Basamak" }],
-            2: [{ sub: "Tarih", topic: "İslamiyet Öncesi Türk Tarihi + İlk Türk-İslam" }, { sub: "Coğrafya", topic: "Türkiye Coğrafi Konum + Harita Bilgisi" }],
-            3: [{ sub: "Türkçe", topic: "Paragrafta Yardımcı Düşünce + Ana Düşünce" }, { sub: "Matematik", topic: "Bölme-Bölünebilme + EBOB-EKOK" }],
-            4: [{ sub: "Vatandaşlık", topic: "Hukukun Temel Kavramları + Anayasa Hukukuna Giriş" }, { sub: "Tarih", topic: "Türkiye Selçuklu Devleti" }],
-            5: [{ sub: "Coğrafya", topic: "Türkiye'nin Yer Şekilleri" }, { sub: "Vatandaşlık", topic: "Devlet ve Hükümet Şekilleri" }],
-            6: [{ sub: "Genel", topic: "Haftalık Tekrar & Analiz" }, { sub: "Günlük Hedef", topic: "60-80 Soru" }],
-            0: [{ sub: "Dinlenme", topic: "Zihni Boşaltma & Tekrar" }]
+            4: [{ sub: "Türkçe", topic: "Sözcükte Anlam + Gerçek/Mecaz/Terim + Eş/Zıt/Eş Sesli" }, { sub: "Matematik", topic: "Temel Kavramlar + Sayı Kümeleri + Tek-Çift" }, { sub: "Tarih", topic: "İslamiyet Öncesi + İlk Türk Devletleri" }],
+            5: [{ sub: "Türkçe", topic: "Cümlede Anlam + Neden-Sonuç/Amaç-Sonuç/Koşul/Varsayım" }, { sub: "Matematik", topic: "Basamak Kavramı + Sayı Çözümleme" }, { sub: "Tarih", topic: "İlk Türk-İslam + Karahanlılar + Gazneliler + B.Selçuklu" }],
+            6: [{ sub: "Türkçe", topic: "Paragrafta Ana Düşünce + Yardımcı Düşünce" }, { sub: "Matematik", topic: "Bölme-Bölünebilme + Asal Sayılar" }, { sub: "Coğrafya", topic: "Coğrafi Konum + Matematik/Özel Konum" }],
+            0: [{ sub: "Türkçe", topic: "30 Paragraf" }, { sub: "Matematik", topic: "EBOB-EKOK" }, { sub: "Tarih", topic: "Türkiye Selçuklu + Anadolu Beylikleri" }, { sub: "Tekrar", topic: "İlk 3 Günün Yanlışları" }],
+            1: [{ sub: "Türkçe", topic: "Paragrafta Yapı + Akış Bozan + Tamamlama" }, { sub: "Matematik", topic: "Rasyonel Sayılar" }, { sub: "Tarih", topic: "Osmanlı Kuruluş Dönemi" }],
+            2: [{ sub: "Türkçe", topic: "30-40 Paragraf" }, { sub: "Matematik", topic: "Ondalık Sayılar + Basit Denklemler" }, { sub: "Tarih", topic: "Osmanlı Yükselme (Fatih/Yavuz/Kanuni)" }],
+            3: [{ sub: "Hafta Tekrarı", topic: "30 Paragraf + 30 Mat + 30 Tarih + 20 Coğ + Yanlış Defteri" }]
         };
         if (weekNum === 2) return {
-            1: [{ sub: "Türkçe", topic: "Sözcük Türleri (İsim, Sıfat, Zamir, Zarf)" }, { sub: "Matematik", topic: "Rasyonel + Ondalık Sayılar" }],
-            2: [{ sub: "Tarih", topic: "Osmanlı Kuruluş + Yükselme" }, { sub: "Coğrafya", topic: "İklim + Türkiye'de İklim" }],
-            3: [{ sub: "Türkçe", topic: "Edat / Bağlaç / Ünlem + Fiil" }, { sub: "Matematik", topic: "Üslü Sayılar + Köklü Sayılar" }],
-            4: [{ sub: "Vatandaşlık", topic: "Temel Hak ve Özgürlükler + Yasama (TBMM)" }, { sub: "Tarih", topic: "Osmanlı Kültür ve Medeniyeti" }],
-            5: [{ sub: "Coğrafya", topic: "Bitki Örtüsü + Nüfus" }, { sub: "Matematik", topic: "Mutlak Değer" }],
-            6: [{ sub: "Genel Tekrar", topic: "2. Hafta Soru Çözümü" }, { sub: "Günlük Hedef", topic: "80-100 Soru" }],
-            0: [{ sub: "Dinlenme", topic: "Pazar Molası" }]
+            4: [{ sub: "Türkçe", topic: "Sözcük Türleri (İsim, Sıfat)" }, { sub: "Matematik", topic: "Üslü Sayılar" }, { sub: "Tarih", topic: "Osmanlı Kültür ve Medeniyeti" }],
+            5: [{ sub: "Türkçe", topic: "Zamir + Zarf + Edat + Bağlaç + Ünlem" }, { sub: "Matematik", topic: "Köklü Sayılar" }, { sub: "Coğrafya", topic: "Türkiye'nin Yer Şekilleri" }],
+            6: [{ sub: "Türkçe", topic: "Fiiller" }, { sub: "Matematik", topic: "Mutlak Değer" }, { sub: "Tarih", topic: "Osmanlı Duraklama Dönemi" }],
+            0: [{ sub: "Türkçe", topic: "Fiil Çekimleri" }, { sub: "Matematik", topic: "Oran-Orantı" }, { sub: "Coğrafya", topic: "Türkiye'de İklim" }],
+            1: [{ sub: "Türkçe", topic: "Fiilimsiler" }, { sub: "Matematik", topic: "Birinci Derece Denklemler" }, { sub: "Tarih", topic: "XVII. Yüzyıl Islahatları" }],
+            2: [{ sub: "Türkçe", topic: "Cümlenin Ögeleri" }, { sub: "Matematik", topic: "Basit Eşitsizlik" }, { sub: "Coğrafya", topic: "Bitki Örtüsü + Toprak" }],
+            3: [{ sub: "Hafta Tekrarı", topic: "40 Türkçe + 40 Mat + 30 Tarih + 20 Coğrafya" }]
         };
         if (weekNum === 3) return {
-            1: [{ sub: "Türkçe", topic: "Fiilimsiler + Cümlenin Ögeleri" }, { sub: "Matematik", topic: "Oran-Orantı + Denklem" }],
-            2: [{ sub: "Tarih", topic: "Osmanlı Duraklama + Gerileme" }, { sub: "Coğrafya", topic: "Tarım + Hayvancılık" }],
-            3: [{ sub: "Türkçe", topic: "Cümle Türleri + Yazım Kuralları + Noktalama" }, { sub: "Matematik", topic: "Basit Eşitsizlikler" }],
-            4: [{ sub: "Vatandaşlık", topic: "Yürütme (Cumhurbaşkanı) + Yargı" }, { sub: "Tarih", topic: "Osmanlı Dağılma + XIX. Yüzyıl Islahatları" }],
-            5: [{ sub: "Coğrafya", topic: "Madenler + Enerji Kaynakları + Sanayi" }, { sub: "Matematik", topic: "Sayı Problemleri + Yaş Problemleri" }],
-            6: [{ sub: "Genel Tekrar", topic: "Haftalık Soru Çözümü" }, { sub: "Günlük Hedef", topic: "100 Soru" }],
-            0: [{ sub: "Dinlenme", topic: "Zihni Boşaltma" }]
+            4: [{ sub: "Türkçe", topic: "Cümle Türleri" }, { sub: "Matematik", topic: "Sayı Problemleri" }, { sub: "Tarih", topic: "Osmanlı Gerileme Dönemi" }],
+            5: [{ sub: "Türkçe", topic: "Yazım Kuralları" }, { sub: "Matematik", topic: "Yaş Problemleri" }, { sub: "Coğrafya", topic: "Nüfus" }],
+            6: [{ sub: "Türkçe", topic: "Noktalama İşaretleri" }, { sub: "Matematik", topic: "Yüzde Problemleri" }, { sub: "Tarih", topic: "XVIII-XIX. Yüzyıl Islahatları" }],
+            0: [{ sub: "Türkçe", topic: "40 Paragraf" }, { sub: "Matematik", topic: "Kâr-Zarar Problemleri" }, { sub: "Coğrafya", topic: "Göç ve Yerleşme" }],
+            1: [{ sub: "Türkçe", topic: "Anlatım Bozukluğu" }, { sub: "Matematik", topic: "Karışım Problemleri" }, { sub: "Tarih", topic: "Trablusgarp + Balkan Savaşları" }],
+            2: [{ sub: "Türkçe", topic: "Sözel Mantığa Giriş" }, { sub: "Matematik", topic: "İşçi Problemleri" }, { sub: "Coğrafya", topic: "Tarım" }],
+            3: [{ sub: "Hafta Tekrarı", topic: "40 Paragraf + 40 Mat + 30 Tarih + 20 Coğrafya" }]
         };
         if (weekNum === 4) return {
-            1: [{ sub: "Matematik", topic: "Yüzde Problemleri + Kâr-Zarar + Faiz" }, { sub: "Türkçe", topic: "Anlatım Bozukluğu + Sözel Mantık" }],
-            2: [{ sub: "Tarih", topic: "Trablusgarp + Balkan Savaşları + I. Dünya Savaşı" }, { sub: "Coğrafya", topic: "Ulaşım + Ticaret + Turizm" }],
-            3: [{ sub: "Matematik", topic: "Karışım + İşçi + Havuz + Hız" }, { sub: "Türkçe", topic: "Paragraf + Dil Bilgisi Tekrarları" }],
-            4: [{ sub: "Vatandaşlık", topic: "İdare Hukuku & Kamu Yönetimi" }, { sub: "Tarih", topic: "Mondros + Cemiyetler + Kuvayımilliye" }],
-            5: [{ sub: "Matematik", topic: "Grafik + Tablo Problemleri" }, { sub: "Coğrafya", topic: "Bölgeler + Ekonomik Faaliyetler" }],
-            6: [{ sub: "Genel Tekrar", topic: "Problemler Ağırlıklı Soru Çözümü" }],
-            0: [{ sub: "Dinlenme", topic: "Pazar Molası" }]
+            4: [{ sub: "Türkçe", topic: "Sözel Mantık" }, { sub: "Matematik", topic: "Havuz Problemleri" }, { sub: "Tarih", topic: "I. Dünya Savaşı" }],
+            5: [{ sub: "Türkçe", topic: "Paragraf" }, { sub: "Matematik", topic: "Hız Problemleri" }, { sub: "Tarih", topic: "Mondros Ateşkesi" }],
+            6: [{ sub: "Türkçe", topic: "Dil Bilgisi Karma" }, { sub: "Matematik", topic: "Grafik ve Tablo" }, { sub: "Coğrafya", topic: "Hayvancılık" }],
+            0: [{ sub: "Türkçe", topic: "40 Paragraf" }, { sub: "Matematik", topic: "Karma Problemler" }, { sub: "Tarih", topic: "Kuvayımilliye" }],
+            1: [{ sub: "Türkçe", topic: "Anlatım Bozukluğu" }, { sub: "Matematik", topic: "Karma Problemler" }, { sub: "Tarih", topic: "Amasya Genelgesi" }],
+            2: [{ sub: "Türkçe", topic: "Sözel Mantık" }, { sub: "Matematik", topic: "Geometriye Giriş" }, { sub: "Tarih", topic: "Erzurum + Sivas Kongreleri" }],
+            3: [{ sub: "İLK MİNİ DENEME", topic: "100 Soru (30 Tür + 30 Mat + 20 Tar + 10 Coğ + 10 Vat) Süreli + Analiz" }]
         };
         if (weekNum === 5) return {
-            1: [{ sub: "Tarih", topic: "TBMM'nin Açılması + Kurtuluş Savaşı Cepheleri" }, { sub: "Matematik", topic: "Geometriye Giriş + Açılar" }],
-            2: [{ sub: "Türkçe", topic: "Her Gün 30-40 Paragraf" }, { sub: "Vatandaşlık", topic: "Merkezi ve Yerinden Yönetim" }],
-            3: [{ sub: "Tarih", topic: "Lozan + Cumhuriyetin İlanı" }, { sub: "Matematik", topic: "Üçgen + Dörtgen" }],
-            4: [{ sub: "Türkçe", topic: "Paragraf Pratiği" }, { sub: "Vatandaşlık", topic: "İdare Hukuku Tekrarı" }],
-            5: [{ sub: "Tarih", topic: "Atatürk İnkılapları + Atatürk İlkeleri" }, { sub: "Matematik", topic: "Çember + Alan" }],
-            6: [{ sub: "Tarih", topic: "Tarih Soru Kampı" }, { sub: "Genel Tekrar", topic: "Tüm Dersler Tarama" }],
-            0: [{ sub: "Dinlenme", topic: "Zihni Boşaltma" }]
+            4: [{ sub: "Tarih", topic: "TBMM'nin Açılması" }, { sub: "Matematik", topic: "Açılar" }, { sub: "Türkçe", topic: "30 Paragraf" }],
+            5: [{ sub: "Tarih", topic: "Kurtuluş Savaşı Cepheleri" }, { sub: "Matematik", topic: "Üçgenler" }, { sub: "Coğrafya", topic: "Madenler + Enerji" }],
+            6: [{ sub: "Tarih", topic: "Sakarya + Büyük Taarruz" }, { sub: "Matematik", topic: "Dörtgenler" }, { sub: "Türkçe", topic: "Sözel Mantık" }],
+            0: [{ sub: "Tarih", topic: "Mudanya + Lozan" }, { sub: "Matematik", topic: "Alan" }, { sub: "Vatandaşlık", topic: "Hukukun Temel Kavramları" }],
+            1: [{ sub: "Tarih", topic: "Cumhuriyet'in İlanı + Halifeliğin Kaldırılması" }, { sub: "Matematik", topic: "Çember" }, { sub: "Coğrafya", topic: "Sanayi" }],
+            2: [{ sub: "Tarih", topic: "Atatürk İlkeleri" }, { sub: "Matematik", topic: "Geometri Karma" }, { sub: "Vatandaşlık", topic: "Anayasa" }],
+            3: [{ sub: "1. TAM DENEME", topic: "120 Soru - Gerçek Sınav Ortamı + Konu Bazlı Hata Analizi" }]
         };
         if (weekNum === 6) return {
-            1: [{ sub: "Konu Bitirme", topic: "Eksik Konuları Kapatma" }, { sub: "Türkçe", topic: "30-40 Soru" }],
-            2: [{ sub: "Matematik", topic: "30-40 Soru" }, { sub: "Tarih", topic: "25-30 Soru" }],
-            3: [{ sub: "Coğrafya", topic: "20 Soru" }, { sub: "Vatandaşlık", topic: "15-20 Soru" }],
-            4: [{ sub: "Genel Hedef", topic: "120-150 Soru / Gün (Konu Bitti)" }, { sub: "Türkçe", topic: "30-40 Soru" }],
-            5: [{ sub: "Matematik", topic: "30-40 Soru" }, { sub: "Tarih", topic: "25-30 Soru" }],
-            6: [{ sub: "Genel Tekrar", topic: "Eksik Kapatma Kampı" }],
-            0: [{ sub: "Deneme Hazırlık", topic: "Yarın Deneme Dönemi Başlıyor" }]
+            4: [{ sub: "Tarih", topic: "Atatürk İnkılapları" }, { sub: "Matematik", topic: "Problemler Karma" }, { sub: "Türkçe", topic: "Paragraf" }],
+            5: [{ sub: "Tarih", topic: "Atatürk Dönemi İç Politika" }, { sub: "Coğrafya", topic: "Ulaşım + Ticaret" }, { sub: "Vatandaşlık", topic: "Temel Haklar" }],
+            6: [{ sub: "Tarih", topic: "Atatürk Dönemi Dış Politika" }, { sub: "Matematik", topic: "Sayılar + Problemler" }, { sub: "Türkçe", topic: "Dil Bilgisi Karma" }],
+            0: [{ sub: "2. TAM DENEME", topic: "120 Soru + Zorunlu Yanlış Analizi" }],
+            1: [{ sub: "🎯 EKSİK KAPATMA", topic: "Denemede En Çok Yanlış Yapılan 3 Konuyu Çalış" }],
+            2: [{ sub: "3. TAM DENEME", topic: "120 Soru Çözümü" }],
+            3: [{ sub: "GENEL TEKRAR", topic: "Tarih Kronoloji + Coğrafya Bilgileri + Vatandaşlık + Mat Formüller + Türk Kuralları" }]
         };
         if (weekNum === 7) return {
-            1: [{ sub: "Deneme Sınavı", topic: "Pazartesi: Genel Yetenek Denemesi (60 Soru)" }, { sub: "Analiz", topic: "Yanlış ve Boş Analizi" }],
-            2: [{ sub: "Deneme Sınavı", topic: "Salı: Genel Kültür Denemesi (60 Soru)" }, { sub: "Analiz", topic: "Yanlış Çıkan Konulara Çalışma" }],
-            3: [{ sub: "Eksik Çalışma", topic: "Çarşamba: Kötü Olduğun Konuların Üzerine Gitme" }],
-            4: [{ sub: "Deneme Sınavı", topic: "Perşembe: 120 Soruluk Tam KPSS Denemesi" }],
-            5: [{ sub: "Deneme Analizi", topic: "Cuma: Yanlış Soruları Deftere Yazma" }],
-            6: [{ sub: "Deneme Sınavı", topic: "Cumartesi: 120 Soruluk Tam Deneme" }],
-            0: [{ sub: "Pazar", topic: "Yanlış Defteri Tekrarı + Dinlenme" }]
+            4: [{ sub: "TAM DENEME", topic: "120 Soru Çözümü" }],
+            5: [{ sub: "Tarih", topic: "Osmanlı + Kurtuluş Savaşı + Atatürk" }, { sub: "Coğrafya", topic: "İklim + Nüfus + Tarım + Sanayi" }],
+            6: [{ sub: "Matematik", topic: "Problemler + Geometri + Sayılar" }, { sub: "Türkçe", topic: "40 Paragraf + Dil Bilgisi" }],
+            0: [{ sub: "TAM DENEME", topic: "120 Soru Çözümü" }],
+            1: [{ sub: "Deneme Analizi", topic: "Sadece Yanlış Çıkan Konular" }],
+            2: [{ sub: "Vatandaşlık", topic: "Anayasa + Yasama + Yürütme + Yargı" }, { sub: "Tarih", topic: "30 Soru Pratiği" }],
+            3: [{ sub: "TAM DENEME", topic: "120 Soru Çözümü" }]
         };
         if (weekNum === 8) return {
-            1: [{ sub: "Tam Deneme", topic: "1. Tam Deneme + Yanlış Analizi" }, { sub: "Tekrar", topic: "Tarih Tekrarı" }],
-            2: [{ sub: "Tam Deneme", topic: "2. Tam Deneme + Yanlış Analizi" }, { sub: "Tekrar", topic: "Coğrafya Tekrarı" }],
-            3: [{ sub: "Tam Deneme", topic: "3. Tam Deneme + Yanlış Analizi" }, { sub: "Tekrar", topic: "Vatandaşlık Tekrarı" }],
-            4: [{ sub: "Pratik", topic: "Matematik Problemleri Ağırlıklı Soru" }, { sub: "Pratik", topic: "Paragraf Kampı" }],
-            5: [{ sub: "Analiz", topic: "Yanlış Yapılan Soruların Konularına Dönüş" }],
-            6: [{ sub: "Genel Tekrar", topic: "Haftalık Soru Çözümü" }],
-            0: [{ sub: "Dinlenme", topic: "Pazar Molası" }]
+            4: [{ sub: "Tarih", topic: "Genel Tekrar + 50 Soru" }],
+            5: [{ sub: "Coğrafya", topic: "Genel Tekrar + 40 Soru" }],
+            6: [{ sub: "Matematik", topic: "Problemler + Geometri + Grafik + 60 Soru" }],
+            0: [{ sub: "TAM DENEME", topic: "120 Soru Çözümü" }],
+            1: [{ sub: "Analiz", topic: "Deneme Analizi + Yanlış Defteri Güncelleme" }],
+            2: [{ sub: "Türkçe", topic: "40 Paragraf + Sözel Mantık + Dil Bilgisi" }],
+            3: [{ sub: "TAM DENEME", topic: "120 Soru Çözümü" }]
         };
-        if (weekNum >= 9) return {
-            1: [{ sub: "Tam Deneme", topic: "Pazartesi: Tam Deneme Çözümü" }, { sub: "Tekrar", topic: "Yanlış Defteri Kontrolü" }],
-            2: [{ sub: "Salı", topic: "Tarih + Coğrafya Kısa Tekrar" }],
-            3: [{ sub: "Çarşamba", topic: "Tam Deneme + Analiz" }],
-            4: [{ sub: "Perşembe", topic: "Vatandaşlık + Türkçe Tekrar" }],
-            5: [{ sub: "Cuma", topic: "Son Ciddi Tam Deneme" }],
-            6: [{ sub: "Cumartesi", topic: "Matematik Formülleri + Yanlış Defteri" }],
-            0: [{ sub: "24 Ekim Sınav", topic: "Son Gün: 1-2 Saat Kısa Notlar ve Dinlenme" }]
+        if (weekNum === 9) return {
+            4: [{ sub: "Tarih", topic: "Osmanlı Kronolojisi + Milli Mücadele + Atatürk" }],
+            5: [{ sub: "Coğrafya", topic: "Türkiye Fiziki + Nüfus + Tarım + Ekonomi + Bölgeler" }],
+            6: [{ sub: "Vatandaşlık", topic: "Anayasa + Temel Haklar + Yasama + Yürütme + Yargı" }],
+            0: [{ sub: "TAM DENEME", topic: "120 Soru - Gerçek Sınav Süresi ve Ortamı" }],
+            1: [{ sub: "Analiz", topic: "Deneme Analizi - Sadece Eksiklere Bakış (Yeni Konu Yok)" }],
+            2: [{ sub: "SON CİDDİ DENEME", topic: "120 Soru Çözümü" }],
+            3: [{ sub: "SON BÜYÜK TEKRAR", topic: "Yanlış Defteri + Kronoloji + Kısa Notlar + Formüller" }]
+        };
+        if (weekNum >= 10) return {
+            4: [{ sub: "Tarih", topic: "İlk Türk + Osmanlı + Milli Müc + Atatürk" }, { sub: "Coğrafya", topic: "İklim/Nüfus/Tarım/Maden/Sanayi/Bölgeler" }],
+            5: [{ sub: "Türkçe", topic: "Paragraf/Yazım/Noktalama/Dil Bilgisi" }, { sub: "Matematik", topic: "Problemler + Geometri + Formüller" }, { sub: "Vatandaşlık", topic: "Anayasa/Yasama/Yürütme/Yargı" }],
+            6: [{ sub: "🛑 ARTIK DERSİ BIRAKIYORUZ", topic: "Deneme Yok / Sadece 1-2 Saat Yanlış Defteri ve Kısa Notlar" }, { sub: "Dinlenme", topic: "Akşam Erkenden Dinlen" }],
+            0: [{ sub: "🏆 SINAV GÜNÜ", topic: "10 Paragraf + Mat Formüllerine Göz At ve Bırak." }, { sub: "ZAFER!", topic: "Şampiyonluk Seni Bekliyor!" }],
+            1: [{ sub: "ŞAMPİYONLUK", topic: "Sınav Bitti, Zafer Senin!" }],
+            2: [{ sub: "ŞAMPİYONLUK", topic: "Sınav Bitti, Zafer Senin!" }],
+            3: [{ sub: "ŞAMPİYONLUK", topic: "Sınav Bitti, Zafer Senin!" }]
         };
     }
 }
@@ -8728,8 +8758,8 @@ function updateKpssDateAndWeek() {
     // 7 günde bir hafta atlar (0-6 gün: 1. Hafta, 7-13 gün: 2. Hafta...)
     let calculatedWeek = Math.floor(diffDays / 7) + 1;
     if (calculatedWeek < 1) calculatedWeek = 1;
-    // Sınav türüne göre maksimum hafta sınırı
-    let maxWeek = (activeKpssExam === 'onlisans') ? 5 : 9;
+
+    let maxWeek = (activeKpssExam === 'onlisans') ? 7 : 10;
     if (calculatedWeek > maxWeek) calculatedWeek = maxWeek;
 
     // Eğer kullanıcı manuel olarak değiştirmediyse otomatik haftayı seç
@@ -8746,7 +8776,7 @@ window.changeKpssWeek = function() {
 };
 
 // ==========================================
-// 👁️ İNTERAKTİF GÖRÜNÜM MOTORU (PANOROMA DESTEKLİ)
+// 👁️ İNTERAKTİF GÖRÜNÜM MOTORU (MÜFREDAT VE HAFTA DESTEKLİ)
 // ==========================================
 window.renderKPSSTodayOrWeek = function() {
     updateKpssDateAndWeek(); 
@@ -8758,7 +8788,7 @@ window.renderKPSSTodayOrWeek = function() {
     const schedule = JSON.parse(localStorage.getItem(memoryKey)) || getBaseKPSSSchedule(activeKpssExam, activeKpssWeek);
     
     if (kpssViewMode === 'today') {
-        // --- 1. BUGÜN GÖRÜNÜMÜ (YOUTUBE BUTONLU) ---
+        // --- 1. BUGÜN GÖRÜNÜMÜ ---
         const todayIndex = new Date().getDay();
         const todayLessons = schedule[todayIndex] || [];
         
@@ -8775,8 +8805,7 @@ window.renderKPSSTodayOrWeek = function() {
             const isExam = l.sub.includes("Deneme");
             let bgIcon = isExam ? "📝" : "📚";
             
-            // Eğer ders deneme veya dinlenme değilse YouTube butonu koy
-            let ytBtnHTML = (isExam || l.sub === "Dinlenme" || l.sub === "Günlük Rutin") ? '' : 
+            let ytBtnHTML = (isExam || l.sub === "Dinlenme" || l.sub.includes("Günlük") || l.sub.includes("Tekrar")) ? '' : 
                 `<button class="kpss-youtube-btn" onclick="openKPSSYoutubeSafely('${l.sub}', event)" style="font-size:10px; padding:5px 10px; margin-top:5px; background:rgba(231,76,60,0.2); border:1px solid #e74c3c; color:#fff;">▶ YouTube'da Aç</button>`;
 
             container.innerHTML += `
@@ -8793,10 +8822,12 @@ window.renderKPSSTodayOrWeek = function() {
             `;
         });
         
-        initKpssSwipeEngine();
+        initKpssSwipeEngine(); 
 
     } else if (kpssViewMode === 'week') {
-        // --- 2. PROGRAM GÖRÜNÜMÜ (GÜN AKORDEONLARI) ---
+        // --- 2. PROGRAM GÖRÜNÜMÜ (HAFTANIN KONULARI AÇIKÇA LİSTELENİR) ---
+        container.innerHTML = `<h3 style="color:var(--goldnova); font-size:14px; margin-bottom:10px; text-align:center;">📅 ${activeKpssWeek}. Hafta Planı</h3>`;
+        
         const dayNames = ["Pazar", "Pazartesi", "Salı", "Çarşamba", "Perşembe", "Cuma", "Cumartesi"];
         const sortedDays = [1, 2, 3, 4, 5, 6, 0]; 
         
@@ -8808,83 +8839,58 @@ window.renderKPSSTodayOrWeek = function() {
                 lessonsHTML = '<p style="color:#555; font-size:11px; margin:5px 0;">Bu gün için ders planlanmamış.</p>';
             } else {
                 lessons.forEach(l => {
-                    let topicsArray = [];
-                    if (kpssSyllabusDB && kpssSyllabusDB[activeKpssExam] && kpssSyllabusDB[activeKpssExam][l.sub]) {
-                        topicsArray = kpssSyllabusDB[activeKpssExam][l.sub];
-                    } else {
-                        topicsArray = l.topic.split(/\+|&|,/).map(t => t.trim());
-                    }
-
-                    let topicsListHTML = topicsArray.map(t => `<li style="color:#aaa; font-size:11px; margin:3px 0;">• ${t}</li>`).join('');
-
                     lessonsHTML += `
-                        <div style="background:#151515; border:1px solid #333; padding:10px; border-radius:6px; margin-bottom:8px;">
-                            <div style="display:flex; justify-content:space-between; align-items:center; cursor:pointer;" onclick="openKPSSSyllabus('${l.sub}')">
-                                <strong style="color:var(--goldnova); font-size:12px;">📚 ${l.sub}</strong>
-                                <span style="font-size:10px; color:#888;">Müfredat →</span>
-                            </div>
-                            <p style="color:#fff; font-size:11px; margin:4px 0 6px 0;">Hedef: ${l.topic}</p>
-                            <div style="border-top:1px dashed #222; padding-top:5px; margin-top:5px;">
-                                <span style="color:#666; font-size:10px; display:block; margin-bottom:3px;">Tüm Konu Dalları:</span>
-                                <ul style="margin:0; padding-left:15px; list-style-type:none;">
-                                    ${topicsListHTML}
-                                </ul>
-                            </div>
+                        <div style="background:#151515; border:1px solid #333; padding:8px 10px; border-radius:6px; margin-bottom:6px;">
+                            <strong style="color:var(--goldnova); font-size:12px;">📚 ${l.sub}</strong>
+                            <p style="color:#ddd; font-size:11px; margin:4px 0 0 0;">Hedef: <span style="color:#fff;">${l.topic}</span></p>
                         </div>
                     `;
                 });
             }
 
             container.innerHTML += `
-                <div style="background:#111; border:1px solid #222; border-radius:8px; margin-bottom:8px; overflow:hidden;">
-                    <div onclick="toggleKpssDayAccordion(${dayNum})" style="padding:12px 15px; background:#161616; display:flex; justify-content:space-between; align-items:center; cursor:pointer;">
-                        <strong style="color:#fff; font-size:13px;">📅 ${dayNames[dayNum]}</strong>
-                        <span style="color:var(--goldnova); font-size:11px;" id="arrow-${dayNum}">▼ Aç</span>
-                    </div>
-                    <div id="day-content-${dayNum}" style="display:none; padding:12px; border-top:1px solid #222;">
-                        ${lessonsHTML}
-                    </div>
+                <div style="background:#111; border:1px solid #222; border-left:3px solid var(--goldnova); border-radius:8px; margin-bottom:10px; padding:12px;">
+                    <strong style="color:#fff; font-size:13px; display:block; margin-bottom:10px; border-bottom:1px solid #333; padding-bottom:5px;">🗓️ ${dayNames[dayNum]}</strong>
+                    <div>${lessonsHTML}</div>
                 </div>
             `;
         });
 
     } else {
-        // --- 3. TÜM HAFTA KİTLESEL KONU PANORAMASI (GÜNCELLENDİ) ---
-        container.innerHTML = `<h3 style="color:var(--goldnova); font-size:14px; margin-bottom:10px;">📌 ${activeKpssWeek}. Hafta - Konu Panoraması</h3>`;
+        // --- 3. TÜM MÜFREDAT PANORAMASI (TÜM KONULAR + TİKLENEBİLİR) ---
+        container.innerHTML = `<h3 style="color:var(--goldnova); font-size:14px; margin-bottom:10px; text-align:center;">📌 Tüm Müfredat Panoraması</h3>`;
         
-        let allSubjectsInWeek = new Set();
-        Object.values(schedule).forEach(dayLessons => {
-            dayLessons.forEach(l => {
-                if(l.sub && l.sub !== "Dinlenme" && l.sub !== "Günlük Rutin" && !l.sub.includes("Deneme")) {
-                    allSubjectsInWeek.add(l.sub);
-                }
-            });
-        });
-
-        if(allSubjectsInWeek.size === 0) {
-            container.innerHTML += `<p style="color:#888; font-size:12px; text-align:center;">Bu hafta için listelenen ders konusu bulunmuyor.</p>`;
+        // Aktif sınava göre (Ön Lisans veya Ortaöğretim) tüm müfredatı çekiyoruz
+        const syllabus = kpssSyllabusDB[activeKpssExam];
+        
+        if (!syllabus) {
+            container.innerHTML += `<p style="color:#888; font-size:12px; text-align:center;">Bu sınav için müfredat bulunamadı.</p>`;
             return;
         }
 
-        allSubjectsInWeek.forEach(sub => {
-            let topicsArray = [];
-            if (kpssSyllabusDB && kpssSyllabusDB[activeKpssExam] && kpssSyllabusDB[activeKpssExam][sub]) {
-                topicsArray = kpssSyllabusDB[activeKpssExam][sub];
-            } else {
-                topicsArray = ["Genel Konu Hedefleri"];
-            }
-
-            let topicCheckboxes = topicsArray.map((t, i) => `
-                <div style="display:flex; align-items:center; gap:8px; padding:6px 0; border-bottom:1px solid #222;">
-                    <span style="color:var(--goldnova); font-size:10px;">▪</span>
-                    <span style="color:#ddd; font-size:11px;">${t}</span>
+        Object.keys(syllabus).forEach(sub => {
+            let topicsArray = syllabus[sub];
+            
+            // Konuları tiklenebilir listeye çevir
+            let topicCheckboxes = topicsArray.map((t, index) => {
+                const sylMemoryKey = `kpss_syl_${activeKpssExam}_${sub}`;
+                const savedProgress = JSON.parse(localStorage.getItem(sylMemoryKey)) || [];
+                const isCompleted = savedProgress.includes(index);
+                
+                return `
+                <div style="display:flex; align-items:center; gap:10px; padding:8px 0; border-bottom:1px solid #222; cursor:pointer;" onclick="toggleSyllabusTopicGlobal('${sub}', ${index}, ${!isCompleted})">
+                    <div style="width:16px; height:16px; border:1px solid var(--goldnova); border-radius:4px; display:flex; justify-content:center; align-items:center; background:${isCompleted ? 'var(--goldnova)' : 'transparent'};">
+                        ${isCompleted ? '<span style="color:#000; font-size:12px; font-weight:bold;">✓</span>' : ''}
+                    </div>
+                    <span style="color:${isCompleted ? '#888' : '#ddd'}; font-size:12px; text-decoration:${isCompleted ? 'line-through' : 'none'};">${t}</span>
                 </div>
-            `).join('');
+                `;
+            }).join('');
 
             container.innerHTML += `
-                <div style="background:#111; border:1px solid #333; border-radius:10px; padding:15px; margin-bottom:12px;">
-                    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px; border-bottom:1px solid #222; padding-bottom:8px;">
-                        <h4 style="color:#fff; font-size:14px; margin:0;">📖 ${sub}</h4>
+                <div style="background:#111; border:1px solid #333; border-radius:10px; padding:15px; margin-bottom:15px;">
+                    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px; border-bottom:1px solid #222; padding-bottom:8px;">
+                        <h4 style="color:#fff; font-size:15px; margin:0;">📖 ${sub}</h4>
                         <button class="kpss-youtube-btn" onclick="openKPSSYoutubeSafely('${sub}', event)" style="font-size:10px; padding:4px 8px;">▶ YouTube</button>
                     </div>
                     <div style="display:flex; flex-direction:column;">
@@ -8927,4 +8933,21 @@ window.openKPSSYoutubeSafely = function(subject, event) {
     if (event) event.stopPropagation();
     const query = encodeURIComponent(`${subject} KPSS konu anlatımı`);
     window.open(`https://www.youtube.com/results?search_query=${query}`, '_blank');
+};
+// ==========================================
+// 📌 PANOROMA (TÜM MÜFREDAT) TİKLEME MOTORU
+// ==========================================
+window.toggleSyllabusTopicGlobal = function(subject, index, isDone) {
+    const memoryKey = `kpss_syl_${activeKpssExam}_${subject}`;
+    let savedProgress = JSON.parse(localStorage.getItem(memoryKey)) || [];
+    
+    if (isDone) {
+        if(!savedProgress.includes(index)) savedProgress.push(index);
+        if(navigator.vibrate) navigator.vibrate([20, 30]);
+    } else {
+        savedProgress = savedProgress.filter(i => i !== index);
+    }
+    
+    localStorage.setItem(memoryKey, JSON.stringify(savedProgress));
+    renderKPSSTodayOrWeek(); // Ekranı hemen yenileyip tiki göster
 };
