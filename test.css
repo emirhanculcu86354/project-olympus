@@ -1,0 +1,89 @@
+/* ==========================================
+   🧪 SAFARI "SİYAH BLOK" VE ALT BAR TEST CSS'İ
+   ========================================== */
+
+/* 1. SIFIRLAMA */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+/* 2. ANA İSKELET (SİYAH BLOĞU ENGELLEYEN KISIM) */
+html, body {
+    /* Safari'nin ekranı yarım kesip alta siyah blok atmasını engeller */
+    min-height: 100dvh;
+    height: -webkit-fill-available;
+    width: 100vw;
+    
+    background-color: #050505; /* Eğer altta bir boşluk kalırsa bu renk görünür */
+    color: #fff;
+    overflow: hidden;
+    font-family: -apple-system, sans-serif;
+    
+    display: flex;
+    flex-direction: column;
+}
+
+/* 3. İÇERİK ALANI (KAYDIRILABİLİR BÖLGE) */
+.content {
+    flex: 1;
+    overflow-y: auto;
+    background-color: #121212;
+    padding: 20px;
+    
+    /* İçeriğin alt barın altında ezilmemesi için: Bar boyu + iPhone alt çizgisi */
+    padding-bottom: calc(75px + env(safe-area-inset-bottom, 0px));
+    -webkit-overflow-scrolling: touch;
+}
+
+/* Sırf ekranın kaydığını test etmek için devasa bir kutu */
+.test-box {
+    height: 1500px;
+    background: linear-gradient(to bottom, #1a1a1a, #050505);
+    border: 2px dashed #f6c000;
+    border-radius: 12px;
+    padding: 20px;
+    text-align: center;
+    color: #888;
+}
+
+/* 4. İPHONE UYUMLU ŞEFFAF ALT BAR */
+.bottom-nav {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    
+    /* MUCİZE BURADA: Barın kendi boyu (65px) + iPhone alt çizgi boşluğu */
+    height: calc(65px + env(safe-area-inset-bottom, 0px));
+    
+    /* Tamamen test edebilmen için belirgin bir kırmızı/siyah şeffaf renk verdik */
+    background: rgba(255, 0, 0, 0.2); 
+    backdrop-filter: blur(15px);
+    -webkit-backdrop-filter: blur(15px);
+    border-top: 1px solid rgba(255, 255, 255, 0.3);
+    
+    display: flex;
+    justify-content: space-around;
+    
+    /* İkonları barın üst tarafına yapıştırır ki alta (Home Indicator'a) kaymasınlar */
+    align-items: flex-start;
+    padding-top: 15px; 
+    
+    z-index: 9999;
+    transition: transform 0.4s ease;
+}
+
+.nav-btn {
+    color: #fff;
+    font-weight: bold;
+    font-size: 14px;
+    text-transform: uppercase;
+}
+
+/* 5. GİZLEME ANİMASYONU TESTİ */
+.bottom-nav.hidden-nav {
+    /* Eksi değer yerine %100 kullanıyoruz. Bu, barı tam olarak kendi yüksekliği kadar aşağı iter. */
+    transform: translateY(100%); 
+}
