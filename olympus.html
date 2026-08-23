@@ -448,6 +448,12 @@
                             <h4 style="color: #d1a3ff;">Arcade Terminal</h4>
                             <p>Retro E-Spor Klasikleri</p>
                         </div>
+                        <div class="track-card" onclick="openCardioHub()"
+                            style="background: linear-gradient(145deg, #3d1a00, #151515); border-color: #ff4a00;">
+                            <div class="track-icon">🏃‍♂️</div>
+                            <h4 style="color: #ff6a00;">Kardiyo Merkezi</h4>
+                            <p>Koşu, Bisiklet & Rota</p>
+                        </div>
                     </div>
                 </div>
 
@@ -620,6 +626,22 @@
                     <div style="text-align: center; cursor: pointer;" onclick="openFollowList('followers')">
                         <strong id="profile-followers" style="color:var(--goldnova); font-size:20px;">0</strong><br>
                         <span style="font-size:11px; color:#888;">Takipçi</span>
+                    </div>
+                </div>
+                <!-- 🦅 GÜVENLİK GÜÇLERİ MODLARI (Tıkla Aç, Basılı Tut Çık) -->
+                <div id="security-modes-container"
+                    style="display: flex; justify-content: center; align-items: center; gap: 30px; margin-top: 20px; margin-bottom: 10px;">
+                    <div class="sec-logo-wrapper" onclick="toggleSecurityMode('polis')">
+                        <img id="logo-polis"
+                            src="https://upload.wikimedia.org/wikipedia/commons/thumb/a/ac/Logo_of_General_Directorate_of_Security_%28Turkey%29.svg/500px-Logo_of_General_Directorate_of_Security_%28Turkey%29.svg.png?utm_source=tr.wikipedia.org&utm_campaign=index&utm_content=thumbnail"
+                            class="sec-logo sec-logo-passive" alt="Polis">
+                        <span class="sec-logo-label">POMEM</span>
+                    </div>
+                    <div class="sec-logo-wrapper" onclick="toggleSecurityMode('jandarma')">
+                        <img id="logo-jandarma"
+                            src="https://upload.wikimedia.org/wikipedia/tr/6/6e/Jandarma_Genel_Komutanl%C4%B1%C4%9F%C4%B1_logo.png?utm_source=tr.wikipedia.org&utm_campaign=index&utm_content=thumbnail_unscaled&_=20231215194509"
+                            class="sec-logo sec-logo-passive" alt="Jandarma">
+                        <span class="sec-logo-label">JASEM</span>
                     </div>
                 </div>
                 <!-- YENİ: APPLE WATCH TARZI GÜNLÜK HALKALAR -->
@@ -2407,7 +2429,7 @@
         <button id="fab-main" class="fab-main" onclick="toggleFAB()">+</button>
     </div>
 
-    <!-- 🏝️ DİNAMİK ADA (HİBRİT VERSİYON) -->
+    <!-- 🏝️ DİNAMİK ADA (SADE VE ŞIK VERSİYON) -->
     <div id="dynamic-island" class="dynamic-island" onclick="closeDynamicIsland()">
 
         <!-- KOMPAKT GÖRÜNÜM -->
@@ -2415,13 +2437,9 @@
             style="display: flex; align-items: center; justify-content: space-between; width: 100%; opacity: 1; transition: opacity 0.2s; padding: 0 5px;">
             <div style="display: flex; align-items: center; gap: 10px;">
                 <span id="di-icon" class="di-icon">⚡</span>
-                <span id="di-text" class="di-text" style="display: none;">Aktif Antrenman</span>
-                <!-- Eski sistemin metni -->
-                <span id="island-coin-display"
-                    style="color: var(--goldnova, #ffd700); font-weight: bold; font-family: monospace; font-size: 14px;">0
-                    OC</span>
+                <span id="di-text" class="di-text"
+                    style="display: none; color: #fff; font-size: 13px; font-weight: bold; letter-spacing: 0.5px;">Bildirim</span>
             </div>
-            <!-- Senin dalga animasyonun -->
             <div id="di-wave-container" class="di-wave" style="display: none;"><span></span><span></span><span></span>
             </div>
         </div>
@@ -2430,12 +2448,11 @@
         <div id="island-expanded"
             style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; display: flex; flex-direction: column; justify-content: center; padding: 15px; opacity: 0; pointer-events: none; transition: opacity 0.3s; box-sizing: border-box;">
             <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 5px;">
-                <span id="island-title" style="color: #fff; font-weight: bold; font-size: 14px;">Hedef Tamamlandı</span>
-                <span id="island-icon-large" style="font-size: 18px;">🎯</span>
+                <span id="island-title" style="color: #fff; font-weight: bold; font-size: 14px;">Bildirim</span>
+                <span id="island-icon-large" style="font-size: 18px;">🔔</span>
             </div>
-            <div style="display: flex; justify-content: space-between; align-items: center;">
-                <span id="island-desc" style="color: #aaa; font-size: 12px;">Harika iş!</span>
-                <span id="island-reward" style="color: #27ae60; font-weight: bold; font-size: 14px;">+0 💰</span>
+            <div style="display: flex; justify-content: flex-start; align-items: center;">
+                <span id="island-desc" style="color: #aaa; font-size: 12px;">Açıklama</span>
             </div>
         </div>
     </div>
@@ -2902,7 +2919,485 @@
                 onclick="document.getElementById('kpss-edit-modal').style.display='none'; renderKPSSTodayOrWeek();"
                 style="flex: 2; margin: 0; font-size: 12px;">Kaydet & Kapat</button>
         </div>
-        <script src="script.js"></script>
+    </div>
+
+
+    <!-- 🦅 GÜVENLİK GÜÇLERİ MÜLAKAT EKRANI -->
+    <div id="security-screen" class="full-screen-overlay hidden"
+        style="z-index: 10000; background: var(--bg-dark); flex-direction: column; justify-content: flex-start; overflow-y: auto;">
+
+        <!-- ÜST BAR -->
+        <div class="header-top"
+            style="width:100%; padding: calc(env(safe-area-inset-top) + 15px) 20px 15px 20px; background:var(--bg-dark); border-bottom: 2px solid var(--sec-accent); display: flex; justify-content: space-between; align-items: center; position: sticky; top: 0; z-index: 10;">
+            <div style="display:flex; align-items:center; gap:10px;">
+                <img id="sec-header-logo" src="" style="width:25px; height:25px; object-fit:contain;">
+                <h2 id="sec-header-title"
+                    style="color:#fff; font-weight:900; font-size: 18px; margin:0; letter-spacing: 1px; text-transform:uppercase;">
+                    Akademi</h2>
+            </div>
+            <button onclick="closeSecurityMode()" class="edit-btn"
+                style="border-color:#fff; color:#fff; font-size:11px;">Geri Dön</button>
+        </div>
+
+        <div style="padding: 15px; display: flex; flex-direction: column; gap: 15px; padding-bottom: 80px;">
+
+            <div class="grid-container" style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px;">
+                <div class="card" onclick="openSecModal('interview')"
+                    style="text-align: center; border-left-color: var(--sec-accent); padding: 15px; background: rgba(0, 0, 0, 0.4); cursor: pointer; transition: transform 0.2s;">
+                    <!-- BAŞLIK ARTIK DİNAMİK -->
+                    <h3 style="color: #fff; margin: 0 0 5px 0; font-size: 11px; text-transform: uppercase;">Bir Sonraki
+                        Aşama</h3>
+                    <h4 id="sec-interview-title-display"
+                        style="color: #fff; margin: 0 0 5px 0; font-size: 8px; text-transform: uppercase;">BİR SONRAKİ
+                        AŞAMA</h4>
+                    <strong id="sec-interview-display" style="color: var(--sec-accent); font-size: 16px;">Tarih Gir
+                        ✏️</strong>
+                    <div id="sec-interview-countdown"
+                        style="color:#aaa; font-size:11px; margin-top:5px; font-weight:bold;"></div>
+                </div>
+                <div class="card" onclick="openSecModal('parkour')"
+                    style="text-align: center; border-left-color: #00d2ff; padding: 15px; background: rgba(0, 0, 0, 0.4); cursor: pointer; transition: transform 0.2s;">
+                    <h4 style="color: #fff; margin: 0 0 5px 0; font-size: 11px; text-transform: uppercase;">Fiziki
+                        Parkur</h4>
+                    <strong id="sec-parkour-display" style="color: #00d2ff; font-size: 16px;">Hedef Gir ✏️</strong>
+                    <div id="sec-parkour-score-display" style="color:#aaa; font-size:11px; margin-top:5px;"></div>
+                </div>
+            </div>
+
+            <!-- MÜLAKAT HAZIRLIK LİSTESİ (Hafızalı Kutucuklar) -->
+            <div
+                style="background: rgba(0,0,0,0.3); border: 1px solid var(--sec-accent); border-radius: 12px; padding: 15px;">
+                <h3
+                    style="color: #fff; font-size: 14px; margin: 0 0 10px 0; border-bottom: 1px solid var(--sec-accent); padding-bottom: 5px;">
+                    Mülakat & Kurum Bilgisi</h3>
+                <div style="display:flex; flex-direction:column; gap:8px;">
+                    <div
+                        style="display:flex; justify-content:space-between; padding:10px; background:rgba(255,255,255,0.05); border-radius:6px; border-left: 2px solid var(--sec-accent);">
+                        <span style="color:#fff; font-size:12px;">Kendini Tanıtma (Özgeçmiş)</span>
+                        <input type="checkbox" id="sec-task-1" onchange="toggleSecTask('task-1', this.checked)"
+                            style="width:16px; height:16px;">
+                    </div>
+                    <div
+                        style="display:flex; justify-content:space-between; padding:10px; background:rgba(255,255,255,0.05); border-radius:6px; border-left: 2px solid var(--sec-accent);">
+                        <span style="color:#fff; font-size:12px;">Tarih / İnkılap Soruları</span>
+                        <input type="checkbox" id="sec-task-2" onchange="toggleSecTask('task-2', this.checked)"
+                            style="width:16px; height:16px;">
+                    </div>
+                    <div
+                        style="display:flex; justify-content:space-between; padding:10px; background:rgba(255,255,255,0.05); border-radius:6px; border-left: 2px solid var(--sec-accent);">
+                        <span id="sec-kurum-text" style="color:#fff; font-size:12px;">Kurum Tarihi ve Mevzuatı</span>
+                        <input type="checkbox" id="sec-task-3" onchange="toggleSecTask('task-3', this.checked)"
+                            style="width:16px; height:16px;">
+                    </div>
+                </div>
+            </div>
+            <!-- RESMİ SAYFA & PARKUR GÖRSELİ -->
+            <div
+                style="background: rgba(0,0,0,0.3); border: 1px solid var(--sec-accent); border-radius: 12px; padding: 15px;">
+                <h3
+                    style="color: #fff; font-size: 14px; margin: 0 0 10px 0; border-bottom: 1px solid var(--sec-accent); padding-bottom: 5px;">
+                    Parkur & Resmi Kurum Sayfası</h3>
+
+                <!-- Parkur Görseli (Buraya src kısmına parkur resminin linkini/dosyasını koyabilirsin) -->
+                <img id="sec-parkur-img"
+                    src="https://cdn2.pa.edu.tr/Upload/editor/files/33_D%C3%96NEM%20POMEM%20ERKEK%20PARKURU1.jpg"
+                    onclick="openImageViewer(this.src)"
+                    style="width: 100%; border-radius: 8px; margin-bottom: 10px; border: 1px solid #333; object-fit: contain; background: #fff; cursor: pointer;"
+                    alt="Parkur Görseli">
+
+                <button id="sec-official-link-btn" onclick="openAcademyLink()"
+                    style="width: 100%; padding: 10px; background: transparent; border: 1px solid var(--sec-accent); color: var(--sec-accent); border-radius: 6px; font-weight:bold;">🔗
+                    Kurum Sayfasına Git</button>
+            </div>
+
+            <!-- FİZİKİ ANTRENMAN KRONOMETRESİ -->
+            <div
+                style="background: rgba(0,0,0,0.3); border: 1px solid var(--sec-accent); border-radius: 12px; padding: 15px;">
+                <h3
+                    style="color: #fff; font-size: 14px; margin: 0 0 10px 0; border-bottom: 1px solid var(--sec-accent); padding-bottom: 5px;">
+                    Fiziki Yeterlilik (FYT) Kronometresi</h3>
+                <h1 id="sec-stopwatch-display"
+                    style="font-size:40px; color:#fff; text-align:center; font-family:monospace; margin:15px 0;">
+                    00:00:00</h1>
+                <div style="display:flex; gap:10px;">
+                    <button id="sec-stopwatch-btn" class="save-btn" onclick="toggleSecStopwatch()"
+                        style="flex:2; margin: 0; background: var(--sec-accent); color: #000;">▶ Başlat</button>
+                    <button class="edit-btn" onclick="resetSecStopwatch()"
+                        style="flex:1; margin: 0; border-color: #ff4444; color: #ff4444;">Sıfırla</button>
+                </div>
+            </div>
+            <!-- ⚖️ VÜCUT KİTLE İNDEKSİ (VKİ) RADARI -->
+            <div
+                style="background: rgba(0,0,0,0.3); border: 1px solid var(--sec-accent); border-radius: 12px; padding: 15px;">
+                <h3
+                    style="color: #fff; font-size: 14px; margin: 0 0 10px 0; border-bottom: 1px solid var(--sec-accent); padding-bottom: 5px;">
+                    ⚖️ Boy / Kilo (VKİ) Radarı</h3>
+                <div style="display: flex; gap: 10px; margin-bottom: 10px;">
+                    <input type="number" id="sec-vki-height" placeholder="Boy (Örn: 180 cm)"
+                        style="flex:1; padding:10px; border-radius:6px; border:1px solid #333; background:rgba(255,255,255,0.05); color:#fff; font-size:12px;">
+                    <input type="number" id="sec-vki-weight" placeholder="Kilo (Örn: 75 kg)"
+                        style="flex:1; padding:10px; border-radius:6px; border:1px solid #333; background:rgba(255,255,255,0.05); color:#fff; font-size:12px;">
+                </div>
+                <button onclick="calculateSecVKI()"
+                    style="width: 100%; padding: 10px; background: transparent; border: 1px solid var(--sec-accent); color: var(--sec-accent); border-radius: 6px; font-weight:bold;">Analiz
+                    Et</button>
+                <div id="sec-vki-result"
+                    style="margin-top: 10px; text-align: center; font-size: 13px; font-weight: bold; padding: 8px; border-radius: 6px; display: none;">
+                </div>
+            </div>
+            <!-- 🎙️ YAPAY ZEKA KOMİSYON SİMÜLATÖRÜ (AYNA MODU) -->
+            <div
+                style="background: rgba(0,0,0,0.4); border: 1px solid var(--sec-accent); border-radius: 12px; padding: 15px; margin-top: 15px;">
+                <h3
+                    style="color: #fff; font-size: 14px; margin: 0 0 10px 0; border-bottom: 1px solid var(--sec-accent); padding-bottom: 5px;">
+                    🎙️ Komisyon Simülatörü (Ayna Modu)</h3>
+                <p style="color: #aaa; font-size: 11px; margin-bottom: 12px;">Kameranı aç, komisyonun karşısına geç ve
+                    sesli mülakat provası yap.</p>
+
+                <button onclick="openInterviewSimulator()"
+                    style="width: 100%; padding: 12px; background: var(--sec-accent); color: #fff; border: none; border-radius: 6px; font-weight: bold; font-size: 13px; box-shadow: 0 4px 15px rgba(0,0,0,0.5);">🎥
+                    Simülasyonu Başlat</button>
+            </div>
+
+            <!-- 🧠 KOMİSYON ÇIKMIŞ SORULAR KARTLARI -->
+            <div
+                style="background: rgba(0,0,0,0.3); border: 1px solid var(--sec-accent); border-radius: 12px; padding: 15px;">
+                <h3
+                    style="color: #fff; font-size: 14px; margin: 0 0 10px 0; border-bottom: 1px solid var(--sec-accent); padding-bottom: 5px;">
+                    🧠 Komisyon Soru Bankası</h3>
+
+                <!-- Soru Kartı (Tıklanınca Cevap Döner) -->
+                <div id="sec-flashcard" onclick="toggleFlashcardAnswer()"
+                    style="background: #00152a; padding: 25px 15px; border-radius: 8px; text-align: center; cursor: pointer; min-height: 120px; display: flex; flex-direction: column; justify-content: center; align-items: center; border: 1px dashed var(--sec-accent); transition: all 0.3s;">
+                    <div id="sec-flashcard-q" style="color: #fff; font-size: 14px; font-weight: bold;">Sorular
+                        Yükleniyor...</div>
+                    <div id="sec-flashcard-a"
+                        style="color: var(--sec-accent); font-size: 13px; margin-top: 15px; display: none; font-style: italic;">
+                        Cevap Yükleniyor...</div>
+                    <div id="sec-flashcard-hint" style="color: #555; font-size: 9px; margin-top: 15px;">Cevabı görmek
+                        için karta dokun</div>
+                </div>
+
+                <!-- Kontrol Butonları -->
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 15px;">
+                    <button onclick="prevFlashcard()"
+                        style="background: transparent; border: 1px solid #666; color: #aaa; padding: 6px 12px; border-radius: 4px; font-size: 11px;">◀
+                        Önceki</button>
+                    <span id="sec-flashcard-counter"
+                        style="color: var(--sec-accent); font-size: 12px; font-weight: bold;">1/50</span>
+                    <button onclick="nextFlashcard()"
+                        style="background: var(--sec-accent); border: none; color: #000; padding: 6px 12px; border-radius: 4px; font-size: 11px; font-weight: bold;">Sonraki
+                        ▶</button>
+                </div>
+                <!-- 🧠 MEVZUAT & TARİH FLASHCARD (ARALIKLI TEKRAR) -->
+                <div
+                    style="background: rgba(0,0,0,0.4); border: 1px solid var(--sec-accent); border-radius: 12px; padding: 15px; margin-top: 15px;">
+                    <div
+                        style="display:flex; justify-content:space-between; align-items:center; border-bottom: 1px solid var(--sec-accent); padding-bottom: 5px; margin-bottom: 10px;">
+                        <h3 style="color: #fff; font-size: 14px; margin: 0;">🧠 Akıllı Flashcard (Tekrar)</h3>
+                        <span id="fc-stats-badge"
+                            style="color: var(--sec-accent); font-size: 11px; font-weight: bold;">Kart 1 / 100+</span>
+                    </div>
+                    <p style="color: #aaa; font-size: 11px; margin-bottom: 12px;">Soruya dokunarak cevabı gör, hafıza
+                        durumunu oyla.</p>
+
+                    <!-- KART KUTUSU -->
+                    <div id="flashcard-box" onclick="flipFlashcard()"
+                        style="background: #00152a; border: 1px dashed var(--sec-accent); border-radius: 10px; padding: 25px 15px; text-align: center; cursor: pointer; min-height: 110px; display: flex; flex-direction: column; justify-content: center; align-items: center; transition: all 0.3s;">
+                        <div id="fc-question-text" style="color: #fff; font-size: 14px; font-weight: bold;">Kartlar
+                            yükleniyor...</div>
+                        <div id="fc-answer-text"
+                            style="color: var(--sec-accent); font-size: 13px; margin-top: 12px; display: none; font-style: italic;">
+                            Cevap yükleniyor...</div>
+                    </div>
+
+                    <!-- OYLAMA BUTONLARI (CEVABI GÖRDÜKTEN SONRA AKTİF OLUR) -->
+                    <div id="fc-action-buttons" style="display: none; gap: 8px; margin-top: 12px;">
+                        <button onclick="rateFlashcard('hard')"
+                            style="flex:1; background: rgba(255,68,68,0.2); border: 1px solid #ff4444; color: #ff4444; padding: 8px; border-radius: 6px; font-size: 11px; font-weight: bold; cursor: pointer;">🔴
+                            Zorlandım</button>
+                        <button onclick="rateFlashcard('good')"
+                            style="flex:1; background: rgba(246,192,0,0.2); border: 1px solid #f6c000; color: #f6c000; padding: 8px; border-radius: 6px; font-size: 11px; font-weight: bold; cursor: pointer;">🟡
+                            İdare Eder</button>
+                        <button onclick="rateFlashcard('easy')"
+                            style="flex:1; background: rgba(39,174,96,0.2); border: 1px solid #27ae60; color: #27ae60; padding: 8px; border-radius: 6px; font-size: 11px; font-weight: bold; cursor: pointer;">🟢
+                            Ezberledim</button>
+                    </div>
+                </div>
+
+            </div>
+            <!-- 🪖 JASEM & POMEM HİYERARŞİ VE PROTOKOL AĞACI -->
+            <div
+                style="background: rgba(0,0,0,0.4); border: 1px solid var(--sec-accent); border-radius: 12px; padding: 15px; margin-top: 15px;">
+                <div
+                    style="display:flex; justify-content:space-between; align-items:center; border-bottom: 1px solid var(--sec-accent); padding-bottom: 5px; margin-bottom: 10px;">
+                    <h3 style="color: #fff; font-size: 14px; margin: 0;">🪖 Hiyerarşi & Komuta Ağacı</h3>
+                    <button onclick="openHierarchyGuide()"
+                        style="background: transparent; border: 1px solid var(--sec-accent); color: var(--sec-accent); padding: 3px 8px; border-radius: 4px; font-size: 10px; font-weight: bold; cursor: pointer;">📖
+                        Şemayı İncele</button>
+                </div>
+                <p style="color: #aaa; font-size: 11px; margin-bottom: 12px;">Teşkilat komuta kademesini ve mülki
+                    amirleri test et.</p>
+
+                <!-- TEST KUTUSU -->
+                <div
+                    style="background: #00152a; border: 1px dashed var(--sec-accent); border-radius: 10px; padding: 20px 15px; text-align: center;">
+                    <div id="hier-question-text"
+                        style="color: #fff; font-size: 13px; font-weight: bold; margin-bottom: 12px;">Hiyerarşi
+                        testi yükleniyor...</div>
+                    <div id="hier-options-container" style="display: flex; flex-direction: column; gap: 8px;">
+                        <!-- Şıklar dinamik eklenecek -->
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!-- 🦅 GÜVENLİK GÜÇLERİ YÜKLEME ANİMASYONU -->
+    <div id="sec-loading-overlay" class="hidden"
+        style="position:fixed; top:0; left:0; width:100%; height:100%; background:#020202; z-index:99999; flex-direction:column; justify-content:center; align-items:center;">
+        <img id="sec-loading-img" src="" style="width: 150px; height: 150px; object-fit: contain;">
+    </div>
+    <!-- 🦅 TAM EKRAN FOTOĞRAF İNCELEYİCİ (Güvenli Versiyon) -->
+    <div id="image-viewer-modal" class="hidden"
+        style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.95); z-index:9999999; flex-direction:column; justify-content:center; align-items:center; overflow: auto; touch-action: pan-x pan-y pinch-zoom;">
+        <button onclick="closeImageViewer()"
+            style="position:absolute; top:20px; right:20px; background:var(--sec-accent, #d32f2f); color:#fff; border:none; padding:10px 20px; border-radius:8px; font-weight:bold; font-size: 14px; z-index:10000000; box-shadow: 0 4px 10px rgba(0,0,0,0.5);">Kapat
+            ✖</button>
+        <div
+            style="width: 100%; height: 100%; display: flex; justify-content: center; align-items: center; overflow: auto;">
+            <img id="image-viewer-img" src=""
+                style="max-width: 200%; max-height: 200%; object-fit: contain; transition: transform 0.3s; transform-origin: center;"
+                alt="Parkur İnceleme">
+        </div>
+    </div>
+    <!-- 🦅 AKADEMİ BİLGİ GİRİŞİ MODALI (EKSİKSİZ VE DÜZELTİLMİŞ) -->
+    <div id="sec-input-modal" class="hidden"
+        style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.85); z-index:100000; flex-direction:column; justify-content:center; align-items:center;">
+        <div
+            style="background:#00152a; padding:20px; border-radius:12px; border:1px solid var(--sec-accent); width:80%; max-width:300px; box-shadow: 0 5px 25px rgba(0,0,0,0.8);">
+            <h3 id="sec-modal-title"
+                style="color:#fff; margin-top:0; font-size:16px; border-bottom:1px solid #333; padding-bottom:10px;">
+                Bilgi Girişi</h3>
+
+            <!-- Mülakat Girişleri -->
+            <div id="sec-modal-interview-inputs"
+                style="display:none; flex-direction:column; gap:10px; margin-top:15px;">
+                <label style="color:#aaa; font-size:12px;">Aşama Adı (Örn: Ön Sağlık, Parkur):</label>
+                <input type="text" id="sec-interview-title" placeholder="Örn: Fiziki Parkur"
+                    style="padding:10px; border-radius:6px; border:1px solid #333; background:#000; color:#fff; font-family:inherit;">
+
+                <label style="color:#aaa; font-size:12px;">Tarih:</label>
+                <input type="date" id="sec-interview-date"
+                    style="padding:10px; border-radius:6px; border:1px solid #333; background:#000; color:#fff; font-family:inherit;">
+            </div>
+
+            <!-- Parkur Girişleri -->
+            <div id="sec-modal-parkour-inputs" style="display:none; flex-direction:column; gap:10px; margin-top:15px;">
+                <label style="color:#aaa; font-size:12px;">Hedef Süre (Örn: 42 sn):</label>
+                <input type="text" id="sec-parkour-time" placeholder="Örn: 42 sn"
+                    style="padding:10px; border-radius:6px; border:1px solid #333; background:#000; color:#fff; font-family:inherit;">
+
+                <label style="color:#aaa; font-size:12px;">Hedef Puan (Örn: 100):</label>
+                <input type="text" id="sec-parkour-score" placeholder="Örn: 100 Puan"
+                    style="padding:10px; border-radius:6px; border:1px solid #333; background:#000; color:#fff; font-family:inherit;">
+            </div>
+
+            <div style="display:flex; justify-content:space-between; margin-top:25px;">
+                <button onclick="closeSecModal()"
+                    style="background:transparent; color:#ff4444; border:1px solid #ff4444; padding:8px 15px; border-radius:6px; font-weight:bold;">İptal</button>
+                <button onclick="saveSecModalData()"
+                    style="background:var(--sec-accent); color:#fff; border:none; padding:8px 15px; border-radius:6px; font-weight:bold;">Kaydet</button>
+            </div>
+        </div>
+    </div>
+    <!-- 🏃‍♂️ STRAVA TARZI AKTİVİTE ÖZET (STORY) EKRANI -->
+    <div id="cardio-story-modal" class="full-screen-overlay hidden"
+        style="z-index: 99999; background: rgba(0,0,0,0.95); justify-content: center; align-items: center; flex-direction: column; padding: 20px;">
+        <div
+            style="width: 100%; max-width: 380px; background: linear-gradient(145deg, #151515, #050505); border: 2px solid #ff4a00; border-radius: 20px; padding: 25px; box-shadow: 0 10px 40px rgba(255,74,0,0.3); text-align: center; position: relative; overflow: hidden;">
+
+            <!-- Başlık -->
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:15px;">
+                <span
+                    style="color:#ff4a00; font-weight:900; font-family:'Courier New', monospace; font-size:16px;">PROJECT
+                    OLYMPUS // STRAVA</span>
+                <span id="story-date" style="color:#888; font-size:11px;">23.08.2026</span>
+            </div>
+
+            <!-- Küçük Harita Önizlemesi -->
+            <div id="story-map-preview"
+                style="width: 100%; height: 160px; background: #222; border-radius: 12px; margin-bottom: 20px; border: 1px solid #333; position: relative; overflow: hidden;">
+            </div>
+
+            <!-- Büyük Veriler (Mesafe ve Süre) -->
+            <div
+                style="display:flex; justify-content:space-around; margin-bottom:20px; background:rgba(255,255,255,0.03); padding:15px; border-radius:12px;">
+                <div>
+                    <span style="color:#888; font-size:10px; display:block;">MESAFE</span>
+                    <strong id="story-dist" style="color:#fff; font-size:26px;">0.00</strong> <small
+                        style="color:#ff4a00;">km</small>
+                </div>
+                <div style="border-left:1px solid #333; padding-left:15px;">
+                    <span style="color:#888; font-size:10px; display:block;">SÜRE</span>
+                    <strong id="story-time" style="color:#fff; font-size:26px;">00:00</strong>
+                </div>
+            </div>
+
+            <!-- Tempo ve Kalori -->
+            <div
+                style="display:flex; justify-content:space-between; margin-bottom:25px; font-size:12px; color:#aaa; padding:0 10px;">
+                <span>Ortalama Tempo: <strong id="story-pace" style="color:#fff;">--:--</strong></span>
+                <span>Tahmini Kalori: <strong id="story-kcal" style="color:#fff;">0 kcal</strong></span>
+            </div>
+
+            <!-- Butonlar -->
+            <button onclick="closeCardioStory()" class="save-btn"
+                style="background:#ff4a00; color:#fff; width:100%; margin-bottom:10px; font-weight:bold;">KAYDET VE
+                KAPAT</button>
+            <button onclick="openStravaApp()"
+                style="background:transparent; border:1px solid #ff4a00; color:#ff4a00; width:100%; padding:12px; border-radius:8px; font-weight:bold; cursor:pointer; font-size:12px;">🔗
+                Strava Uygulamasını Aç</button>
+        </div>
+    </div>
+    <!-- 🏃‍♂️ KARDİYO MERKEZİ (KATEGORİ VE ANTRENMAN SEÇİM SAYFASI) -->
+    <div id="cardio-hub-screen" class="full-screen-overlay hidden"
+        style="z-index: 99999; background: var(--bg-dark); flex-direction: column; justify-content: flex-start; overflow-y: auto;">
+
+        <!-- ÜST BAR -->
+        <div class="header-top"
+            style="width:100%; padding: calc(env(safe-area-inset-top) + 15px) 20px 15px 20px; background:#000; border-bottom: 2px solid #ff4a00; display: flex; justify-content: space-between; align-items: center; position: sticky; top: 0; z-index: 10;">
+            <h2
+                style="color:#ff4a00; font-weight:900; font-size: 18px; margin:0; letter-spacing: 1px; text-transform:uppercase;">
+                Kardiyo Merkezi</h2>
+            <button onclick="closeCardioHub()" class="edit-btn"
+                style="border-color:#ff4444; color:#ff4444; font-size:11px;">Geri Dön</button>
+        </div>
+
+        <div style="padding: 20px; display: flex; flex-direction: column; gap: 20px; padding-bottom: 80px;">
+
+            <!-- 1. STRAVA BAĞLANTI KARTI (EN ÜSTTE BOYDAN BOYAL) -->
+            <div
+                style="background: rgba(255,74,0,0.08); border: 1px solid #ff4a00; border-radius: 12px; padding: 20px; text-align: center; width: 100%; box-sizing: border-box; box-shadow: 0 4px 15px rgba(255,74,0,0.15);">
+                <h4
+                    style="color: #ff4a00; margin: 0 0 5px 0; font-size: 14px; text-transform: uppercase; letter-spacing: 1px;">
+                    Strava Ekosistemi</h4>
+                <p style="color: #aaa; font-size: 11px; margin-bottom: 15px;">Antrenman verilerini doğrudan Strava ile
+                    senkronize et.</p>
+                <button onclick="openStravaApp()" class="save-btn"
+                    style="background: #ff4a00; color: #fff; width: 100%; margin: 0; font-weight: bold; padding: 14px; font-size: 14px; box-shadow: 0 4px 12px rgba(255,74,0,0.4);">🔗
+                    Strava Uygulamasını Aç</button>
+            </div>
+
+            <p style="color: #888; font-size: 12px; text-align: center; margin: 0;">Hedefine uygun kardiyo antrenmanını
+                seç ve hemen başlat.</p>
+
+            <!-- 2. KARDİYO BUTONLARI (YAN YANA 4'LÜ IZGARA DÜZENİ) -->
+            <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px;">
+
+                <div class="track-card" onclick="startCardioFromHub('run', 'Serbest Koşu')"
+                    style="background: linear-gradient(145deg, #2c1205, #151515); border-color: #ff4a00; padding: 15px; text-align: center; cursor: pointer;">
+                    <div style="font-size: 28px; margin-bottom: 5px;">🏃‍♂️</div>
+                    <h4 style="color: #fff; margin: 0; font-size: 13px;">Koşu</h4>
+                    <p style="color: #888; font-size: 9px; margin: 2px 0 0 0;">GPS Rota</p>
+                </div>
+
+                <div class="track-card" onclick="startCardioFromHub('cycle', 'Açık Hava Bisiklet')"
+                    style="background: linear-gradient(145deg, #051a2c, #151515); border-color: #00d2ff; padding: 15px; text-align: center; cursor: pointer;">
+                    <div style="font-size: 28px; margin-bottom: 5px;">🚴‍♂️</div>
+                    <h4 style="color: #fff; margin: 0; font-size: 13px;">Bisiklet</h4>
+                    <p style="color: #888; font-size: 9px; margin: 2px 0 0 0;">Sürüş & Mesafe</p>
+                </div>
+
+                <div class="track-card" onclick="startCardioFromHub('jump', 'İp Atlama')"
+                    style="background: linear-gradient(145deg, #2c2505, #151515); border-color: #f1c40f; padding: 15px; text-align: center; cursor: pointer;">
+                    <div style="font-size: 28px; margin-bottom: 5px;">⚡</div>
+                    <h4 style="color: #fff; margin: 0; font-size: 13px;">İp Atlama</h4>
+                    <p style="color: #888; font-size: 9px; margin: 2px 0 0 0;">Patlayıcı Güç</p>
+                </div>
+
+                <div class="track-card" onclick="startCardioFromHub('row', 'Kürek / Ergo')"
+                    style="background: linear-gradient(145deg, #052c1a, #151515); border-color: #27ae60; padding: 15px; text-align: center; cursor: pointer;">
+                    <div style="font-size: 28px; margin-bottom: 5px;">🚣‍♂️</div>
+                    <h4 style="color: #fff; margin: 0; font-size: 13px;">Kürek</h4>
+                    <p style="color: #888; font-size: 9px; margin: 2px 0 0 0;">Kondisyon</p>
+                </div>
+
+            </div>
+
+        </div>
+    </div>
+    <!-- 🎥 MÜKEMMEL MÜLAKAT SİTÜASYON ODASI (MODAL) -->
+    <div id="interview-sim-modal" class="hidden"
+        style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.95); z-index:9999999; flex-direction:column; justify-content:space-between; align-items:center; padding: 20px; box-sizing: border-box;">
+
+        <!-- ÜST BAR -->
+        <div
+            style="width: 100%; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #333; padding-bottom: 10px;">
+            <h3 style="color: var(--sec-accent, #fbc531); margin: 0; font-size: 15px; letter-spacing: 1px;">KOMİSYON
+                MÜLAKAT PROVASI</h3>
+            <button onclick="closeInterviewSimulator()"
+                style="background: transparent; border: none; color: #ff4444; font-size: 20px; font-weight: bold; cursor: pointer;">✕
+                Kapat</button>
+        </div>
+
+        <div
+            style="position: relative; width: 100%; max-width: 350px; flex: 1; display: flex; flex-direction: column; justify-content: center; align-items: center; margin: 10px 0;">
+            <!-- Ön Kamera Görüntüsü -->
+            <video id="sim-camera-feed" autoplay playsinline muted
+                style="width: 100%; height: 50vh; object-fit: cover; border-radius: 16px; border: 2px solid var(--sec-accent, #fbc531); background: #000; transform: scaleX(-1);"></video>
+
+            <!-- Üzerinde Beliren Komisyon Sorusu Kartı -->
+            <div
+                style="width: 100%; background: rgba(0,0,0,0.85); border: 1px solid rgba(255,255,255,0.2); padding: 10px; border-radius: 8px; text-align: center; margin-top: 8px; backdrop-filter: blur(5px);">
+                <span style="color: #888; font-size: 9px; display: block; margin-bottom: 2px;">KOMİSYON ÜYESİ:</span>
+                <p id="sim-current-question" style="color: #fff; font-size: 12px; font-weight: bold; margin: 0;">
+                    "Kendinizi tanıtır mısınız?"</p>
+            </div>
+
+            <!-- YENİ: SENİN KONUŞMALARINI CANLI YAZAN ALAN -->
+            <div
+                style="width: 100%; height: 60px; background: rgba(0,210,255,0.1); border: 1px dashed #00d2ff; padding: 8px; border-radius: 8px; margin-top: 8px; overflow-y: auto; text-align: center;">
+                <span style="color: #00d2ff; font-size: 9px; display: block;">CANLI SESLİ YANITIN:</span>
+                <p id="sim-user-speech" style="color: #fff; font-size: 11px; margin: 2px 0 0 0; font-style: italic;">
+                    Dinleniyor... Konuşmaya başlayabilirsin.</p>
+            </div>
+        </div>
+
+        <!-- ALT: KONTROL VE ANALİZ BUTONLARI -->
+        <div style="width: 100%; max-width: 350px; display: flex; flex-direction: column; gap: 10px;">
+            <button id="sim-next-q-btn" onclick="askRandomSimulationQuestion()"
+                style="background: #222; color: #fff; border: 1px solid #555; padding: 12px; border-radius: 8px; font-weight: bold; font-size: 13px; cursor: pointer;">🔄
+                Başka Soru Sor</button>
+            <button onclick="finishInterviewSimulation()"
+                style="background: var(--sec-accent, #fbc531); color: #000; border: none; padding: 14px; border-radius: 8px; font-weight: bold; font-size: 14px; cursor: pointer; box-shadow: 0 4px 15px rgba(0,0,0,0.5);">🏁
+                Mülakatı Bitir & Rapor Al</button>
+        </div>
+    </div>
+    <!-- 📖 HİYERARŞİ VE TEŞKİLAT ŞEMASI REHBERİ (MODAL) -->
+    <div id="hierarchy-guide-modal" class="hidden" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.95); z-index:9999999; flex-direction:column; justify-content:space-between; align-items:center; padding: 20px; box-sizing: border-box;">
+        <div style="width: 100%; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #333; padding-bottom: 10px;">
+            <h3 style="color: var(--sec-accent); margin: 0; font-size: 15px;">TEŞKİLAT HİYERARŞİ REHBERİ</h3>
+            <button onclick="closeHierarchyGuide()" style="background: transparent; border: none; color: #ff4444; font-size: 20px; font-weight: bold; cursor: pointer;">✕ Kapat</button>
+        </div>
+        
+        <div style="width: 100%; max-width: 400px; flex: 1; overflow-y: auto; padding: 15px 0; color: #ddd; font-size: 12px; line-height: 1.6;">
+            <h4 style="color: #00d2ff; margin-top: 0;">1. İçişleri Bakanlığı Bağlantısı</h4>
+            <p>Emniyet Genel Müdürlüğü ve Jandarma Genel Komutanlığı doğrudan <b>İçişleri Bakanlığı</b>'na bağlıdır.</p>
+            
+            <h4 style="color: #00d2ff;">2. Jandarma Komuta Kademesi</h4>
+            <p>Jandarma Genel Komutanı -> Bölge Komutanları -> İl Jandarma Komutanları -> İlçe Jandarma Komutanları.</p>
+            
+            <h4 style="color: #00d2ff;">3. Emniyet Komuta Kademesi</h4>
+            <p>Emniyet Genel Müdürü -> Daire Başkanları / İl Emniyet Müdürleri -> İlçe Emniyet Müdürleri / Amirleri.</p>
+
+            <h4 style="color: #00d2ff;">4. Mülki İdare Amiri Yetkileri</h4>
+            <p>İlde <b>Vali</b>, ilçede <b>Kaymakam</b> genel kolluk kuvvetlerinin (polis ve jandarma) mülki amiridir. Gerekli durumlarda her iki kuvvete de emir verebilir.</p>
+        </div>
+
+        <button onclick="closeHierarchyGuide()" style="background: var(--sec-accent); color: #000; border: none; padding: 12px; border-radius: 8px; font-weight: bold; width: 100%; max-width: 400px; cursor: pointer;">Anladım, Kapat</button>
+    </div>
+
+    <script src="script.js"></script>
 </body>
 
 </html>

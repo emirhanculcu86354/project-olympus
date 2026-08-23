@@ -117,6 +117,30 @@ window.syncDataToCloud = function () {
         .then(() => console.log("Veri Firestore'a eklendi!"))
         .catch((error) => console.error("Kayıt başarısız:", error));
 }
+// ==========================================
+// 🧠 AKILLI AÇILIŞ HAFIZASI (Rastgele Hub / Son Ekran)
+// ==========================================
+document.addEventListener("DOMContentLoaded", () => {
+    const lastScreen = localStorage.getItem('olympus_last_active_screen');
+
+    // %60 ihtimalle son kaldığı ekranı açar, %40 ihtimalle Hub ekranına düşer
+    const shouldOpenLastScreen = Math.random() < 0.6;
+
+    if (lastScreen && shouldOpenLastScreen) {
+        if (lastScreen === 'kpss') {
+            if (typeof openKPSSCenter === 'function') openKPSSCenter();
+        } else if (lastScreen === 'jandarma') {
+            if (typeof openJandarmaModu === 'function') openJandarmaModu(true); // true = animasyonsuz aç
+        } else {
+            // Hub'da kalsın
+        }
+    }
+});
+
+// Her ekran açılışına hafıza kaydı ekleyen yardımcı fonksiyon
+function saveLastScreen(screenName) {
+    localStorage.setItem('olympus_last_active_screen', screenName);
+}
 
 // 2. ANTRENMAN VE DİYET VERİLERİ (TAMAMI GERİ EKLENDİ)
 // 2. ANTRENMAN VE DİYET VERİLERİ
@@ -166,48 +190,62 @@ const dietData = {
 // ==========================================
 const dilalaProgramData = {
     p1: [
-        { day: 1, title: "Pzt: Bacak & Kuğu Kolları", muscles: ["legs-l", "legs-r", "arms-l", "arms-r"], rest: false, ex: [
-            { name: "Spor Öncesi Isınma", scheme: "5-10 Dk", tempo: "Dinamik", rpe: "-" },
-            { name: "Squat", scheme: "4 x 15", tempo: "2-0-1-0", rpe: 7 },
-            { name: "Arm Pulses (Kollar Yanda)", scheme: "3 x 45 sn", tempo: "Yaylanarak", rpe: 7 },
-            { name: "Reverse Lunge", scheme: "3 x 10", tempo: "2-0-1-0", rpe: 7.5 },
-            { name: "Glute Bridge", scheme: "4 x 15", tempo: "2-1-1-0", rpe: 7.5 },
-            { name: "Kol Çevirme (Arm Circles)", scheme: "3 x 30 sn", tempo: "Sabit", rpe: 7 },
-            { name: "Side Leg Raise", scheme: "3 x 15", tempo: "1-0-1-0", rpe: 7 },
-            { name: "Spor Sonrası Esneme", scheme: "5 Dk", tempo: "Statik", rpe: "-" }
-        ]},
-        { day: 2, title: "Salı: Kardiyo", muscles: ["core", "legs-l", "legs-r"], rest: false, ex: [
-            { name: "Tempolu Yürüyüş", scheme: "45 Dk", tempo: "Sabit", rpe: 6 }
-        ]},
-        { day: 3, title: "Çar: Karın & Postür", muscles: ["core", "shoulders", "legs-l", "legs-r"], rest: false, ex: [
-            { name: "Spor Öncesi Isınma", scheme: "5 Dk", tempo: "Dinamik", rpe: "-" },
-            { name: "Sumo Squat", scheme: "3 x 15", tempo: "2-0-1-0", rpe: 7 },
-            { name: "Wall Angels (Melek Kanadı)", scheme: "3 x 12", tempo: "Yavaş", rpe: 6 },
-            { name: "Yarım Mekik (Crunch)", scheme: "3 x 20", tempo: "1-0-1-1", rpe: 7 },
-            { name: "Y-W-T Kollar", scheme: "3 x 10", tempo: "2-0-1-2", rpe: 7 },
-            { name: "Russian Twist", scheme: "3 x 15", tempo: "1-0-1-0", rpe: 7 },
-            { name: "Bicycle Crunch", scheme: "3 x 20", tempo: "1-0-1-0", rpe: 7 },
-            { name: "Spor Sonrası Esneme", scheme: "5 Dk", tempo: "Statik", rpe: "-" }
-        ]},
-        { day: 4, title: "Perşembe: Kardiyo", muscles: ["core", "legs-l", "legs-r"], rest: false, ex: [
-            { name: "Tempolu Yürüyüş", scheme: "45 Dk", tempo: "Sabit", rpe: 6 }
-        ]},
-        { day: 5, title: "Cuma: Dinamik Yağ Yakım", muscles: ["legs-l", "legs-r", "arms-l", "arms-r", "core"], rest: false, ex: [
-            { name: "Spor Öncesi Isınma", scheme: "5 Dk", tempo: "Dinamik", rpe: "-" },
-            { name: "Squat Pulse", scheme: "3 x 15", tempo: "Yaylanarak", rpe: 7.5 },
-            { name: "Donkey Kick", scheme: "3 x 15", tempo: "2-0-1-0", rpe: 7 },
-            { name: "Ağırlıksız Kickback", scheme: "3 x 20", tempo: "1-0-1-1", rpe: 7 },
-            { name: "Wall Sit", scheme: "3 x 30 sn", tempo: "Statik", rpe: 8 },
-            { name: "Dead Bug", scheme: "3 x 12", tempo: "2-0-1-0", rpe: 7 },
-            { name: "Ayakta Diz Çekme", scheme: "3 x 30 sn", tempo: "Tempolu", rpe: 7.5 },
-            { name: "Spor Sonrası Esneme", scheme: "5 Dk", tempo: "Statik", rpe: "-" }
-        ]},
-        { day: 6, title: "Cmt: Uzun Kardiyo", muscles: ["core", "legs-l", "legs-r"], rest: false, ex: [
-            { name: "Uzun Yürüyüş", scheme: "75-90 Dk", tempo: "Sabit", rpe: 6 }
-        ]},
-        { day: 7, title: "Pazar: Aktif Dinlenme", muscles: [], rest: true, ex: [
-            { name: "Hafif Yürüyüş veya Yoga", scheme: "30 Dk", tempo: "Yavaş", rpe: 4 }
-        ]}
+        {
+            day: 1, title: "Pzt: Bacak & Kuğu Kolları", muscles: ["legs-l", "legs-r", "arms-l", "arms-r"], rest: false, ex: [
+                { name: "Spor Öncesi Isınma", scheme: "5-10 Dk", tempo: "Dinamik", rpe: "-" },
+                { name: "Squat", scheme: "4 x 15", tempo: "2-0-1-0", rpe: 7 },
+                { name: "Arm Pulses (Kollar Yanda)", scheme: "3 x 45 sn", tempo: "Yaylanarak", rpe: 7 },
+                { name: "Reverse Lunge", scheme: "3 x 10", tempo: "2-0-1-0", rpe: 7.5 },
+                { name: "Glute Bridge", scheme: "4 x 15", tempo: "2-1-1-0", rpe: 7.5 },
+                { name: "Kol Çevirme (Arm Circles)", scheme: "3 x 30 sn", tempo: "Sabit", rpe: 7 },
+                { name: "Side Leg Raise", scheme: "3 x 15", tempo: "1-0-1-0", rpe: 7 },
+                { name: "Spor Sonrası Esneme", scheme: "5 Dk", tempo: "Statik", rpe: "-" }
+            ]
+        },
+        {
+            day: 2, title: "Salı: Kardiyo", muscles: ["core", "legs-l", "legs-r"], rest: false, ex: [
+                { name: "Tempolu Yürüyüş", scheme: "45 Dk", tempo: "Sabit", rpe: 6 }
+            ]
+        },
+        {
+            day: 3, title: "Çar: Karın & Postür", muscles: ["core", "shoulders", "legs-l", "legs-r"], rest: false, ex: [
+                { name: "Spor Öncesi Isınma", scheme: "5 Dk", tempo: "Dinamik", rpe: "-" },
+                { name: "Sumo Squat", scheme: "3 x 15", tempo: "2-0-1-0", rpe: 7 },
+                { name: "Wall Angels (Melek Kanadı)", scheme: "3 x 12", tempo: "Yavaş", rpe: 6 },
+                { name: "Yarım Mekik (Crunch)", scheme: "3 x 20", tempo: "1-0-1-1", rpe: 7 },
+                { name: "Y-W-T Kollar", scheme: "3 x 10", tempo: "2-0-1-2", rpe: 7 },
+                { name: "Russian Twist", scheme: "3 x 15", tempo: "1-0-1-0", rpe: 7 },
+                { name: "Bicycle Crunch", scheme: "3 x 20", tempo: "1-0-1-0", rpe: 7 },
+                { name: "Spor Sonrası Esneme", scheme: "5 Dk", tempo: "Statik", rpe: "-" }
+            ]
+        },
+        {
+            day: 4, title: "Perşembe: Kardiyo", muscles: ["core", "legs-l", "legs-r"], rest: false, ex: [
+                { name: "Tempolu Yürüyüş", scheme: "45 Dk", tempo: "Sabit", rpe: 6 }
+            ]
+        },
+        {
+            day: 5, title: "Cuma: Dinamik Yağ Yakım", muscles: ["legs-l", "legs-r", "arms-l", "arms-r", "core"], rest: false, ex: [
+                { name: "Spor Öncesi Isınma", scheme: "5 Dk", tempo: "Dinamik", rpe: "-" },
+                { name: "Squat Pulse", scheme: "3 x 15", tempo: "Yaylanarak", rpe: 7.5 },
+                { name: "Donkey Kick", scheme: "3 x 15", tempo: "2-0-1-0", rpe: 7 },
+                { name: "Ağırlıksız Kickback", scheme: "3 x 20", tempo: "1-0-1-1", rpe: 7 },
+                { name: "Wall Sit", scheme: "3 x 30 sn", tempo: "Statik", rpe: 8 },
+                { name: "Dead Bug", scheme: "3 x 12", tempo: "2-0-1-0", rpe: 7 },
+                { name: "Ayakta Diz Çekme", scheme: "3 x 30 sn", tempo: "Tempolu", rpe: 7.5 },
+                { name: "Spor Sonrası Esneme", scheme: "5 Dk", tempo: "Statik", rpe: "-" }
+            ]
+        },
+        {
+            day: 6, title: "Cmt: Uzun Kardiyo", muscles: ["core", "legs-l", "legs-r"], rest: false, ex: [
+                { name: "Uzun Yürüyüş", scheme: "75-90 Dk", tempo: "Sabit", rpe: 6 }
+            ]
+        },
+        {
+            day: 7, title: "Pazar: Aktif Dinlenme", muscles: [], rest: true, ex: [
+                { name: "Hafif Yürüyüş veya Yoga", scheme: "30 Dk", tempo: "Yavaş", rpe: 4 }
+            ]
+        }
     ]
 };
 
@@ -636,7 +674,7 @@ function formatWorkoutTime(totalSeconds) {
 // ==========================================
 function startWorkoutBackgroundEngine(workoutTitle) {
     const audio = document.getElementById('workout-bg-audio');
-    if(audio) audio.play().catch(e => console.log("Ses motoru başlatılamadı."));
+    if (audio) audio.play().catch(e => console.log("Ses motoru başlatılamadı."));
 
     if ('mediaSession' in navigator) {
         navigator.mediaSession.metadata = new MediaMetadata({
@@ -647,16 +685,16 @@ function startWorkoutBackgroundEngine(workoutTitle) {
                 { src: 'icon.png', sizes: '512x512', type: 'image/png' }
             ]
         });
-        
+
         // Kilit ekranındaki başlat/durdur butonlarına basılınca tepki vermesi için sahte dinleyiciler
-        navigator.mediaSession.setActionHandler('play', function() {});
-        navigator.mediaSession.setActionHandler('pause', function() {});
+        navigator.mediaSession.setActionHandler('play', function () { });
+        navigator.mediaSession.setActionHandler('pause', function () { });
     }
 }
 
 function stopWorkoutBackgroundEngine() {
     const audio = document.getElementById('workout-bg-audio');
-    if(audio) {
+    if (audio) {
         audio.pause();
         audio.currentTime = 0;
     }
@@ -684,15 +722,15 @@ window.startActiveWorkout = function (dayData) {
     // ++ Sayacı yerine GERÇEK ZAMAN DAMGASI (Date.now) kullanıyoruz!
     let workoutStartTime = Date.now();
     totalWorkoutSeconds = 0;
-    
+
     if (totalWorkoutInterval) clearInterval(totalWorkoutInterval);
-    document.getElementById('workout-total-time').innerText = "00:00"; 
+    document.getElementById('workout-total-time').innerText = "00:00";
 
     totalWorkoutInterval = setInterval(() => {
         // Ekran kapalıyken tarayıcı uyusa bile, açıldığı an aradaki farkı otomatik hesaplar!
         let now = Date.now();
         totalWorkoutSeconds = Math.floor((now - workoutStartTime) / 1000);
-        
+
         let timeFormatted = formatWorkoutTime(totalWorkoutSeconds);
         document.getElementById('workout-total-time').innerText = timeFormatted;
 
@@ -783,7 +821,7 @@ window.saveSetAndRest = function () {
 
     isResting = true;
     let sec = isExpressMode ? 45 : 90;
-    
+
     // Geri sayım için hedef bitiş zamanı belirliyoruz (Ekran kapansa bile şaşmaz)
     let restEndTime = Date.now() + (sec * 1000);
     document.getElementById('timer-seconds').innerText = sec;
@@ -798,7 +836,7 @@ window.saveSetAndRest = function () {
             clearInterval(timerInterval);
             document.getElementById('timer-seconds').innerText = 0;
             isResting = false;
-            
+
             // Titreşim ve Bildirim Gönder! (Cihaz uyanıksa titrer)
             if (navigator.vibrate) navigator.vibrate([400, 200, 400]);
             if (typeof showDynamicIsland === 'function') showDynamicIsland("⏰ Dinlenme Bitti! Sete Başla!");
@@ -1205,10 +1243,16 @@ window.openTrackingModal = function (type) {
         title.innerText = "Öğün Takibi";
         let calHistory = JSON.parse(localStorage.getItem('olympus_cal_history')) || [];
         body.innerHTML = `
-            <div class="input-group"><label>Bugün Alınan Kalori (kcal)</label><input type="number" id="m-cal" placeholder="2500"></div>
+            <div class="input-group"><label>Bugün Alınan Kalori (kcal)</label><input type="number" id="m-cal" placeholder="Örn: 2500"></div>
             <button class="save-btn" onclick="saveMacros()">Kaydet</button>
-            <div style="background:#151515; padding:5px; border-radius:10px; margin-top:10px;"><canvas id="modalChart"></canvas></div>
+            <div style="background:#151515; padding:5px; border-radius:10px; margin-top:10px; margin-bottom:15px;"><canvas id="modalChart"></canvas></div>
+            
+            <!-- YENİ: FATSECRET AKILLI BUTONU -->
+            <button onclick="openFatSecretApp()" style="background: #27ae60; color: #fff; border: none; padding: 12px; border-radius: 8px; font-size: 13px; width: 100%; font-weight: bold; cursor: pointer; display: flex; justify-content: center; align-items: center; gap: 8px; box-shadow: 0 4px 10px rgba(39, 174, 96, 0.3);">
+                🍏 FatSecret Uygulamasını Aç
+            </button>
         `;
+        // Hatanın olduğu satır burasıydı, "setTimeout" olarak düzeltildi:
         setTimeout(() => drawModalChart(calHistory, 'Kalori (kcal)', '#44ff44'), 100);
     }
     else if (type === 'sleep') {
@@ -1595,6 +1639,36 @@ window.saveMacros = function () {
     }
     if (typeof showDynamicIsland === 'function') showDynamicIsland("✅ Ölçüler Kaydedildi!");
 }
+// ==========================================
+// 🍏 FATSECRET DEEP LINK (UYGULAMA AÇICI) MOTORU
+// ==========================================
+window.openFatSecretApp = function() {
+    if(navigator.vibrate) navigator.vibrate(20);
+
+    // Android için doğrudan uygulamayı tetikleyen, yoksa Google Play'e atan kod
+    const androidIntent = "intent://#Intent;package=com.fatsecret.android;scheme=fatsecret;end";
+    // iOS için özel şema
+    const iosScheme = "fatsecret://";
+    // Uygulama yoksa veya bilgisayardaysan gidilecek yedek web linki
+    const webLink = "https://www.fatsecret.com.tr/";
+
+    // Kullanıcının hangi cihazda olduğunu tespit et
+    const userAgent = navigator.userAgent || navigator.vendor || window.opera;
+
+    if (/android/i.test(userAgent)) {
+        // Android cihazsa Intent ile uygulamaya fırlat
+        window.location.href = androidIntent;
+    } else if (/iPad|iPhone|iPod/.test(userAgent) && !window.MSStream) {
+        // iOS cihazsa uygulamayı açmayı dene, 1.5 saniye içinde açılmazsa App Store/Web'e at
+        setTimeout(() => {
+            window.location.href = webLink;
+        }, 1500);
+        window.location.href = iosScheme;
+    } else {
+        // Bilgisayardaysa (veya tablet web görünümündeyse) direkt yeni sekmede web sitesini aç
+        window.open(webLink, '_blank');
+    }
+};
 
 // GÜNCELLENMİŞ: Akıllı Ölçüler ve Trend Okları
 window.loadProfileData = function () {
@@ -2209,7 +2283,7 @@ window.openArenaScreen = function () {
 
     // Tüm sekmeleri gizle ve sadece Arena'yı aktif et
     document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
-    
+
     const arenaSec = document.getElementById('arena-sec');
     if (arenaSec) arenaSec.classList.add('active');
 
@@ -2218,8 +2292,8 @@ window.openArenaScreen = function () {
     if (dayTracker) dayTracker.style.display = 'none';
 
     // Verileri yükle
-    if(typeof loadGlobalFeed === 'function') loadGlobalFeed();
-    if(typeof loadLeaderboard === 'function') loadLeaderboard();
+    if (typeof loadGlobalFeed === 'function') loadGlobalFeed();
+    if (typeof loadLeaderboard === 'function') loadLeaderboard();
 
     if (navigator.vibrate) navigator.vibrate(50);
 };
@@ -4646,7 +4720,6 @@ window.showKeyConfig = function () {
 // ==========================================
 let hubSlideIndex = 0;
 let hubCarouselInterval;
-let widgetMode = 0; // 0: Günün Sözü/Hedefi, 1: Su Durumu, 2: Streak
 
 function initHubCarousel() {
     updateHubGreeting();
@@ -4683,25 +4756,63 @@ function initHubTouchSwipe() {
         hubSlideIndex = Math.round(track.scrollLeft / track.clientWidth);
     }, { passive: true });
 }
+// ==========================================
+// 🌟 PROFESYONEL KARARGAH WIDGET MOTORU (6'LI MODÜL)
+// ==========================================
+let widgetMode = 0; 
+// 0: Hedef / Motivasyon
+// 1: Su Takibi
+// 2: Haftalık Streak (Seri)
+// 3: KPSS Geri Sayımı
+// 4: FYT (Parkur) Hedef Süresi
+// 5: Mülakat / Sözlü Sınav Durumu
+
 window.rotateHubWidget = function () {
-    widgetMode = (widgetMode + 1) % 3;
+    widgetMode = (widgetMode + 1) % 6; // 6 farklı mod arasında döner
     updateHubWidget();
     if (navigator.vibrate) navigator.vibrate(20);
 };
+
 function updateHubWidget() {
     const titleEl = document.getElementById('hub-widget-title');
     if (!titleEl) return;
 
     if (widgetMode === 0) {
-        titleEl.innerText = "🚀 Limitlerini Zorla, Asla Durma!";
-    } else if (widgetMode === 1) {
+        titleEl.innerText = "🚀 Hedef POMEM / JASEM / KPSS - Asla Durma!";
+    } 
+    else if (widgetMode === 1) {
         let wData = JSON.parse(localStorage.getItem('olympus_water_obj')) || { amount: 0 };
         let goal = parseInt(localStorage.getItem('olympus_water_goal') || 3000);
-        titleEl.innerText = `💧 Su Durumu: ${wData.amount} / ${goal} ml`;
-    } else if (widgetMode === 2) {
-        let streak = JSON.parse(localStorage.getItem('olympus_streak_data')) || [false];
+        titleEl.innerText = `💧 Su Takibi: ${wData.amount} / ${goal} ml`;
+    } 
+    else if (widgetMode === 2) {
+        let streak = JSON.parse(localStorage.getItem('olympus_streak_data')) || [false, false, false, false, false, false, false];
         let activeCount = streak.filter(Boolean).length;
-        titleEl.innerText = `🔥 Bu Hafta ${activeCount} Gün Aktif`;
+        titleEl.innerText = `🔥 Haftalık Seri: ${activeCount} / 7 Gün Aktif`;
+    } 
+    else if (widgetMode === 3) {
+        // KPSS Ön Lisans Sınav Tarihi: 4 Ekim 2026
+        const kpssDate = new Date('2026-10-04T00:00:00');
+        const now = new Date();
+        const diffDays = Math.ceil((kpssDate - now) / (1000 * 60 * 60 * 24));
+        
+        if (diffDays > 0) {
+            titleEl.innerText = `⏳ KPSS Ön Lisans'a Kalan: ${diffDays} Gün`;
+        } else {
+            titleEl.innerText = `📚 Sınav Vakti Geldi! Başarılar!`;
+        }
+    }
+    else if (widgetMode === 4) {
+        // FYT (Parkur) Hedef Bilgisi
+        let secData = JSON.parse(localStorage.getItem('olympus_sec_data_polis')) || {};
+        let targetTime = secData.parkourTime || "40 sn";
+        titleEl.innerText = `🏃‍♂️ FYT Parkur Hedefi: ${targetTime} (Sıkı Çalış!)`;
+    }
+    else if (widgetMode === 5) {
+        // Mülakat / Sözlü Sınav Hatırlatması
+        let secData = JSON.parse(localStorage.getItem('olympus_sec_data_polis')) || {};
+        let interviewName = secData.interviewTitle || "Komisyon Mülakatı";
+        titleEl.innerText = `🎯 Sonraki Aşama: ${interviewName}`;
     }
 }
 window.addHubPhoto = function (event) {
@@ -7346,82 +7457,74 @@ window.toggleFAB = function () {
 };
 
 // ==========================================
-// 💰 HABIT ECONOMY & DİNAMİK ADA MOTORU (HİBRİT)
+// 🏝️ SADELEŞTİRİLMİŞ DİNAMİK ADA MOTORU (GÖRÜNÜRLÜK FİX)
 // ==========================================
-
-let olympusCoins = parseInt(localStorage.getItem('olympus_coins')) || 0;
-const coinDisplay = document.getElementById('island-coin-display');
-if (coinDisplay) coinDisplay.innerText = `${olympusCoins} OC`;
-
 window.closeDynamicIsland = function () {
     const island = document.getElementById('dynamic-island');
-    if (island) island.classList.remove('active');
-}
+    if (island) {
+        island.classList.remove('active');
+        island.classList.remove('expanded');
+    }
+};
 
-// 🏝️ Senin Orijinal Fonksiyonunun Gelişmiş Hali
-window.showDynamicIsland = function (titleOrText, description = "", icon = "⚡", coinReward = 0, showWave = false) {
+window.showDynamicIsland = function (titleOrText, description = "", icon = "⚡", showWave = false) {
     const island = document.getElementById('dynamic-island');
     if (!island) return;
 
-    // 1. DURUM: ESKİ SİSTEM ÇAĞRISI (Eğer sadece metin gönderilmişse)
-    // Örn: showDynamicIsland("Aktif Antrenman");
-    if (description === "" && coinReward === 0) {
-        const textEl = document.getElementById('di-text');
+    const compactView = document.getElementById('island-compact');
+    const expandedView = document.getElementById('island-expanded');
+    const textEl = document.getElementById('di-text');
+    const waveEl = document.getElementById('di-wave-container');
+
+    // 1. DURUM: SADECE KISA METİN (Kompakt Mod)
+    if (description === "") {
+        // Kompaktı göster, Geniş olanı gizle
+        if (compactView) compactView.style.opacity = '1';
+        if (expandedView) expandedView.style.opacity = '0';
+        
         if (textEl) {
             textEl.innerText = titleOrText;
-            textEl.style.display = 'inline-block'; // Eski metni göster
+            textEl.style.display = 'inline-block';
         }
-        if (coinDisplay) coinDisplay.style.display = 'none'; // Coin'i gizle
-
-        const waveEl = document.getElementById('di-wave-container');
-        if (waveEl) waveEl.style.display = 'flex'; // Dalgaları aç
+        document.getElementById('di-icon').innerText = icon;
+        if (waveEl) waveEl.style.display = showWave ? 'flex' : 'none';
 
         island.classList.add('active');
+        island.classList.remove('expanded');
         if (navigator.vibrate) navigator.vibrate([10, 30, 10]);
 
-        // 5 Saniye sonra adayı otomatik gizle
-        setTimeout(() => { island.classList.remove('active'); }, 5000);
-        return; // Motoru burada durdur, aşağıya geçmesin
+        // 4 Saniye sonra gizle
+        setTimeout(() => { 
+            island.classList.remove('active'); 
+            if (waveEl) waveEl.style.display = 'none';
+        }, 4000);
+        return;
     }
 
-    // 2. DURUM: YENİ COIN (HABIT ECONOMY) ÇAĞRISI
-    // Örn: showDynamicIsland("Koşu Tamamlandı", "5km koşuldu", "🏃‍♂️", 50);
-    const textEl = document.getElementById('di-text');
-    if (textEl) textEl.style.display = 'none'; // Eski metni gizle
-    if (coinDisplay) coinDisplay.style.display = 'inline-block'; // Coin'i göster
+    // 2. DURUM: BAŞLIK VE AÇIKLAMA (Genişletilmiş Mod - Akademi vs.)
+    // Kompaktı gizle, Geniş olanı zorla görünür yap!
+    if (compactView) compactView.style.opacity = '0';
+    if (expandedView) expandedView.style.opacity = '1';
 
     document.getElementById('island-title').innerText = titleOrText;
     document.getElementById('island-desc').innerText = description;
     document.getElementById('island-icon-large').innerText = icon;
 
-    const waveEl = document.getElementById('di-wave-container');
-    if (waveEl) waveEl.style.display = showWave ? 'flex' : 'none';
-
-    // Coin kazanımı varsa bakiyeye ekle
-    if (coinReward > 0) {
-        olympusCoins += coinReward;
-        localStorage.setItem('olympus_coins', olympusCoins);
-        document.getElementById('island-reward').innerText = `+${coinReward} 💰`;
-        document.getElementById('island-reward').style.display = 'block';
-        if (coinDisplay) coinDisplay.innerText = `${olympusCoins} OC`;
-    } else {
-        document.getElementById('island-reward').style.display = 'none';
-    }
-
     island.classList.add('active');
     island.classList.add('expanded'); // Adayı aşağı doğru büyüt
     if (navigator.vibrate) navigator.vibrate([50, 100, 50]);
 
-    // 5 Saniye sonra adayı otomatik gizle ve küçült
-    if (!showWave) {
+    // 4 Saniye sonra gizle ve küçült
+    setTimeout(() => {
+        island.classList.remove('active');
+        island.classList.remove('expanded');
+        
+        // Kapanırken bir sonraki sefere bozuk çıkmasın diye opacity'leri sıfırla
         setTimeout(() => {
-            island.classList.remove('active');
-            island.classList.remove('expanded');
-        }, 5000);
-    }
-
-    // Kazanımı Sosyal/Gelişim Panosuna Kaydet
-    logToSocialFeed(titleOrText, description, icon, coinReward);
+            if (compactView) compactView.style.opacity = '1';
+            if (expandedView) expandedView.style.opacity = '0';
+        }, 300);
+    }, 4000);
 };
 
 // 📈 Gelişim Panosu (Social Feed) Kaydedici
@@ -7670,7 +7773,7 @@ window.closeDilalaScreen = function () {
     }
 }
 // ==========================================
-// 🗺️ CANLI GPS VE KARDİYO MOTORU (GELİŞMİŞ)
+// 🏃‍♂️ HATASIZ KARDİYO VE GÜVENLİ GEÇİŞ MOTORU
 // ==========================================
 let cardioInterval;
 let cardioSeconds = 0;
@@ -7681,67 +7784,166 @@ let cardioPolyline = null;
 let cardioPath = [];
 let cardioDistanceKm = 0;
 let geoWatchId = null;
-
-// YENİ HARİTA DEĞİŞKENLERİ
 let cardioUserMarker = null;
-let lastKnownLocation = null;
-let isFirstLocation = true;
+
+window.openCardioHub = function () {
+    const sportsHome = document.getElementById('sports-home');
+    const footballMgr = document.getElementById('football-manager');
+    const cardioHub = document.getElementById('cardio-hub-screen');
+
+    if (sportsHome) sportsHome.classList.add('hidden');
+    if (footballMgr) footballMgr.classList.add('hidden');
+    if (cardioHub) {
+        cardioHub.classList.remove('hidden');
+        cardioHub.style.display = 'flex';
+    }
+    if (navigator.vibrate) navigator.vibrate(20);
+};
+
+window.closeCardioHub = function () {
+    const cardioHub = document.getElementById('cardio-hub-screen');
+    if (cardioHub) {
+        cardioHub.classList.add('hidden');
+        cardioHub.style.display = 'none';
+    }
+
+    const sportsHome = document.getElementById('sports-home');
+    if (sportsHome) sportsHome.classList.remove('hidden');
+    if (navigator.vibrate) navigator.vibrate(20);
+};
+
+window.startCardioFromHub = function (type, titleName) {
+    const cardioHub = document.getElementById('cardio-hub-screen');
+    if (cardioHub) {
+        cardioHub.classList.add('hidden');
+        cardioHub.style.display = 'none';
+    }
+
+    if (typeof openCardioScreen === 'function') {
+        openCardioScreen(type);
+        const titleEl = document.getElementById('cardio-title');
+        if (titleEl) titleEl.innerText = `🔥 ${titleName}`;
+    }
+};
 
 window.openCardioScreen = function (type) {
-    if (typeof toggleFAB === 'function') toggleFAB();
+    cardioType = type;
+    const screen = document.getElementById('cardio-screen');
+    if (screen) {
+        screen.style.display = 'flex';
+        screen.classList.remove('hidden');
+    }
 
-    // Alttaki menüleri tamamen gizle ki butonları ezmesin
+    const titleEl = document.getElementById('cardio-title');
+    if (titleEl) titleEl.innerText = type === 'run' ? "🏃‍♂️ Serbest Koşu" : "🚴‍♂️ Açık Hava Bisiklet";
+
+    // FAB butonunu kardiyo ekranındayken tamamen gizle ki ortalık karışmasın
     const fabContainer = document.querySelector('.fab-container');
     if (fabContainer) fabContainer.style.display = 'none';
 
-    cardioType = type;
-    document.getElementById('cardio-screen').style.display = 'flex';
-    document.getElementById('cardio-title').innerText = type === 'run' ? "🏃‍♂️ Serbest Koşu" : "🚴‍♂️ Açık Hava Bisiklet";
-
     clearInterval(cardioInterval);
     if (geoWatchId) navigator.geolocation.clearWatch(geoWatchId);
+    
     cardioSeconds = 0;
     cardioDistanceKm = 0;
     cardioPath = [];
-    isFirstLocation = true;
-    lastKnownLocation = null;
 
     updateCardioDisplay();
-    document.getElementById('cardio-distance-display').innerText = "0.00";
-    document.getElementById('cardio-pace-display').innerText = "--:--";
+    
+    const distDisp = document.getElementById('cardio-distance-display');
+    const paceDisp = document.getElementById('cardio-pace-display');
+    if (distDisp) distDisp.innerText = "0.00";
+    if (paceDisp) paceDisp.innerText = "--:--";
 
-    document.getElementById('cardio-start-btn').style.display = 'block';
-    document.getElementById('cardio-action-btns').style.display = 'none';
-    document.getElementById('cardio-live-dashboard').style.display = 'none';
-}
+    const startBtn = document.getElementById('cardio-start-btn');
+    const actionBtns = document.getElementById('cardio-action-btns');
+    const liveDash = document.getElementById('cardio-live-dashboard');
+    
+    if (startBtn) startBtn.style.display = 'block';
+    if (actionBtns) actionBtns.style.display = 'none';
+    if (liveDash) liveDash.style.display = 'none';
+};
 
 window.closeCardioScreen = function () {
     clearInterval(cardioInterval);
     if (geoWatchId) navigator.geolocation.clearWatch(geoWatchId);
-    document.getElementById('cardio-screen').style.display = 'none';
+    
+    const cardioScreen = document.getElementById('cardio-screen');
+    if (cardioScreen) {
+        cardioScreen.style.display = 'none';
+        cardioScreen.classList.add('hidden');
+    }
 
-    // Alt menüleri geri getir
+    // FAB butonunu güvenli şekilde eski haline (gizli/kapalı) getir
     const fabContainer = document.querySelector('.fab-container');
-    if (fabContainer) fabContainer.style.display = 'flex';
-}
+    if (fabContainer) {
+        fabContainer.style.display = 'flex';
+        const menu = document.getElementById('fab-menu');
+        const cardioMenu = document.getElementById('fab-cardio-menu');
+        const mainBtn = document.getElementById('fab-main');
+        if (menu) menu.classList.remove('active');
+        if (cardioMenu) cardioMenu.classList.remove('active');
+        if (mainBtn) mainBtn.classList.remove('active');
+        fabContainer.classList.remove('active');
+    }
+
+    // Kullanıcıyı güvenli bir şekilde Cardio ekranına döndür
+    if (typeof openCardioHub === 'function') {
+        openCardioHub();
+    }
+};
 
 window.startCardioTimer = function () {
-    document.getElementById('cardio-start-btn').style.display = 'none';
-    document.getElementById('cardio-action-btns').style.display = 'flex';
-    document.getElementById('cardio-live-dashboard').style.display = 'flex';
+    const startBtn = document.getElementById('cardio-start-btn');
+    const actionBtns = document.getElementById('cardio-action-btns');
+    const liveDash = document.getElementById('cardio-live-dashboard');
 
-    initCardioMap();
-    startGPSTracking();
+    if (startBtn) startBtn.style.display = 'none';
+    if (actionBtns) actionBtns.style.display = 'flex';
+    if (liveDash) liveDash.style.display = 'flex';
+
+    // Harita kütüphanesi yüklüyse güvenli başlat
+    try {
+        if (typeof L !== 'undefined') {
+            if (!cardioMap) {
+                cardioMap = L.map('cardio-map', { zoomControl: false }).setView([40.77, 30.39], 15);
+                L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', { attribution: '© OS' }).addTo(cardioMap);
+                cardioPolyline = L.polyline([], { color: '#ff4a00', weight: 5, opacity: 0.8 }).addTo(cardioMap);
+            }
+            setTimeout(() => { if (cardioMap) cardioMap.invalidateSize(); }, 300);
+        }
+    } catch(e) { console.log("Harita yüklenirken hata:", e); }
 
     if (navigator.vibrate) navigator.vibrate([100, 100, 100]);
-    if (typeof showDynamicIsland === 'function') showDynamicIsland(cardioType === 'run' ? "🛰️ Koşu Takip Ediliyor!" : "🛰️ Sürüş Takip Ediliyor!");
+    if (typeof showDynamicIsland === 'function') {
+        showDynamicIsland(cardioType === 'run' ? "Koşu Başlatıldı" : "Bisiklet Başlatıldı", "GPS Takibi Aktif", "🛰️");
+    }
 
     cardioInterval = setInterval(() => {
         cardioSeconds++;
         updateCardioDisplay();
-        calculateLivePace();
     }, 1000);
+};
+
+function updateCardioDisplay() {
+    const h = Math.floor(cardioSeconds / 3600);
+    const m = Math.floor((cardioSeconds % 3600) / 60);
+    const s = cardioSeconds % 60;
+    const timeFormatted = `${h > 0 ? h + ':' : ''}${m.toString().padStart(2, '0')}:${s.toString().padStart(2, '0')}`;
+    
+    const timerEl = document.getElementById('cardio-timer-display');
+    if (timerEl) timerEl.innerText = timeFormatted;
 }
+
+window.stopCardioTimer = function () {
+    clearInterval(cardioInterval);
+    if (geoWatchId) navigator.geolocation.clearWatch(geoWatchId);
+    if (navigator.vibrate) navigator.vibrate(50);
+    
+    if (typeof saveCardioSession === 'function') {
+        saveCardioSession();
+    }
+};
 
 function initCardioMap() {
     if (!cardioMap) {
@@ -7817,27 +8019,19 @@ function calculateHaversineDistance(lat1, lon1, lat2, lon2) {
     return R * c;
 }
 
-function updateCardioDisplay() {
-    const h = Math.floor(cardioSeconds / 3600);
-    const m = Math.floor((cardioSeconds % 3600) / 60);
-    const s = cardioSeconds % 60;
-    document.getElementById('cardio-timer-display').innerText =
-        `${h > 0 ? h.toString().padStart(2, '0') + ':' : ''}${m.toString().padStart(2, '0')}:${s.toString().padStart(2, '0')}`;
-}
 
 function calculateLivePace() {
-    if (cardioDistanceKm <= 0.05) return;
-    const totalMinutes = cardioSeconds / 60;
-    const paceDec = totalMinutes / cardioDistanceKm;
-    const paceMin = Math.floor(paceDec);
-    const paceSec = Math.round((paceDec - paceMin) * 60);
-    document.getElementById('cardio-pace-display').innerText = `${paceMin}:${paceSec.toString().padStart(2, '0')}`;
+    if (cardioDistanceKm > 0 && cardioSeconds > 0) {
+        let paceSecondsPerKm = cardioSeconds / cardioDistanceKm;
+        let pMin = Math.floor(paceSecondsPerKm / 60);
+        let pSec = Math.floor(paceSecondsPerKm % 60);
+        let paceFormatted = `${pMin}:${pSec.toString().padStart(2, '0')} /km`;
+        
+        const paceEl = document.getElementById('cardio-pace-display');
+        if (paceEl) paceEl.innerText = paceFormatted;
+    }
 }
 
-window.stopCardioTimer = function () {
-    clearInterval(cardioInterval);
-    if (geoWatchId) navigator.geolocation.clearWatch(geoWatchId);
-}
 
 // 🏆 GEÇMİŞ ANTRENMANLARA KAYDETME
 window.saveCardioSession = function () {
@@ -7902,13 +8096,13 @@ function renderPolaroids() {
     const scrollArea = document.createElement('div');
     scrollArea.style.position = 'relative';
     scrollArea.style.width = '100%';
-    
+
     // Duvarın boyunu 1600px'den 2600px'e çıkardık (Daha fazla fotoğraf sığsın diye)
-    scrollArea.style.height = '2600px'; 
+    scrollArea.style.height = '2600px';
     container.appendChild(scrollArea);
 
     // İp sayısını 3'ten 6'ya çıkardık
-   const wires = [
+    const wires = [
         { top: 80 },    // 1. İp
         { top: 320 },   // 2. İp
         { top: 560 },   // 3. İp
@@ -7924,7 +8118,7 @@ function renderPolaroids() {
     function getWireSag(xPercent) {
         const ellipseX = xPercent + 10;
         const dx = (ellipseX - 60) / 60;
-        return 40 * (1 + Math.sqrt(1 - dx * dx)); 
+        return 40 * (1 + Math.sqrt(1 - dx * dx));
     }
 
     // 1. İpleri ve Minik Ampulleri Gerelim
@@ -8040,57 +8234,60 @@ const kpssSyllabusDB = {
     }
 };
 
-window.openKPSSCenter = function() {
+window.openKPSSCenter = function () {
     const hub = document.getElementById('hub-screen');
     if (hub) hub.classList.add('hidden');
     document.getElementById('kpss-screen').classList.remove('hidden');
-    
+
     updateKpssHeader();
     renderKPSSTodayOrWeek();
     updateKpssCountdowns();
-    
+    saveLastScreen('kpss');
+    closeKPSSCenter()
+    saveLastScreen('hub');
+
     // Her 1 saatte bir gün dönümünü kontrol etsin yeterli, saniyelik kasmaya gerek yok
-    setInterval(updateKpssCountdowns, 3600000); 
+    setInterval(updateKpssCountdowns, 3600000);
 };
 
-window.closeKPSSCenter = function() {
+window.closeKPSSCenter = function () {
     document.getElementById('kpss-screen').classList.add('hidden');
     if (typeof returnToHub === 'function') returnToHub();
 };
 
 // --- 1. SINAV SEÇİMİ VE ÜST KISIM ---
-window.openKPSSExamSelector = function() {
+window.openKPSSExamSelector = function () {
     document.getElementById('kpss-exam-selector-modal').style.display = 'flex';
 };
 
-window.selectKPSSExam = function(type) {
+window.selectKPSSExam = function (type) {
     activeKpssExam = type;
     localStorage.setItem('olympus_kpss_exam', type);
     document.getElementById('kpss-exam-selector-modal').style.display = 'none';
-    
+
     updateKpssHeader();
     updateKpssCountdowns();
     renderKPSSTodayOrWeek(); // Müfredat değiştiği için listeyi yenile
-    if(navigator.vibrate) navigator.vibrate(20);
+    if (navigator.vibrate) navigator.vibrate(20);
 };
 
 function updateKpssHeader() {
     const title = document.getElementById('kpss-header-title');
-    if(activeKpssExam === 'onlisans') title.innerText = "KPSS Ön Lisans";
+    if (activeKpssExam === 'onlisans') title.innerText = "KPSS Ön Lisans";
     else title.innerText = "KPSS Ortaöğretim";
 }
 
 function updateKpssCountdowns() {
     const mainEl = document.getElementById('kpss-main-countdown');
     const now = new Date().getTime();
-    
+
     // Sınav Tarihleri
     const examDateStr = activeKpssExam === 'onlisans' ? "2026-10-04T10:15:00" : "2026-10-25T10:15:00";
     const examTime = new Date(examDateStr).getTime();
-    
+
     if (mainEl) {
         const diff = examTime - now;
-        if(diff > 0) {
+        if (diff > 0) {
             const d = Math.floor(diff / (1000 * 60 * 60 * 24));
             mainEl.innerText = `${d} Gün Kaldı`;
         } else {
@@ -8102,22 +8299,22 @@ function updateKpssCountdowns() {
 // ==========================================
 // 👁️ GÖRÜNÜM MODU DEĞİŞTİRİCİ (GÜNCELLENDİ)
 // ==========================================
-window.switchKPSSView = function(mode) {
+window.switchKPSSView = function (mode) {
     kpssViewMode = mode; // 'today', 'week', veya 'overview'
-    
+
     document.getElementById('btn-kpss-today').classList.toggle('active', mode === 'today');
     document.getElementById('btn-kpss-week').classList.toggle('active', mode === 'week');
     document.getElementById('btn-kpss-overview').classList.toggle('active', mode === 'overview');
-    
+
     const hint = document.getElementById('kpss-swipe-hint');
-    if(hint) hint.style.display = mode === 'today' ? 'block' : 'none';
-    
+    if (hint) hint.style.display = mode === 'today' ? 'block' : 'none';
+
     renderKPSSTodayOrWeek();
 };
 // ==========================================
 // 📌 GÜNLÜK HEDEF PARÇALAYICI MOTORU (YENİ)
 // ==========================================
-window.openKPSSDailyTopics = function(subject, topicStr, lessonIndex) {
+window.openKPSSDailyTopics = function (subject, topicStr, lessonIndex) {
     const modal = document.getElementById('kpss-syllabus-modal');
     const list = document.getElementById('syllabus-topics-list');
     const bar = document.getElementById('syllabus-progress-bar');
@@ -8128,7 +8325,7 @@ window.openKPSSDailyTopics = function(subject, topicStr, lessonIndex) {
 
     // Senin yazdığın programdaki "+" veya "&" veya "," işaretlerinden konuları otomatik alt alta böler
     let topics = topicStr.split(/\+|&|,/).map(t => t.trim()).filter(t => t.length > 0);
-    if(topics.length === 0) topics = [topicStr];
+    if (topics.length === 0) topics = [topicStr];
 
     const todayStr = new Date().toLocaleDateString('tr-TR');
     const memoryKey = `kpss_daily_topics_${activeKpssExam}_${todayStr}_${subject}_${lessonIndex}`;
@@ -8154,18 +8351,18 @@ window.openKPSSDailyTopics = function(subject, topicStr, lessonIndex) {
     modal.style.display = 'flex';
 };
 
-window.toggleDailyTopic = function(memoryKey, idx, isDone, subject, topicStr, lessonIndex) {
+window.toggleDailyTopic = function (memoryKey, idx, isDone, subject, topicStr, lessonIndex) {
     let savedProgress = JSON.parse(localStorage.getItem(memoryKey)) || [];
     if (isDone) {
-        if(!savedProgress.includes(idx)) savedProgress.push(idx);
-        if(navigator.vibrate) navigator.vibrate([20, 30]);
+        if (!savedProgress.includes(idx)) savedProgress.push(idx);
+        if (navigator.vibrate) navigator.vibrate([20, 30]);
     } else {
         savedProgress = savedProgress.filter(i => i !== idx);
     }
     localStorage.setItem(memoryKey, JSON.stringify(savedProgress));
-    
+
     // Tıklandığında ekranı anlık yenile
-    openKPSSDailyTopics(subject, topicStr, lessonIndex); 
+    openKPSSDailyTopics(subject, topicStr, lessonIndex);
 };
 
 // --- 3. SWIPE (SAĞA KAYDIRIP TAMAMLAMA) MOTORU ---
@@ -8195,7 +8392,7 @@ function initKpssSwipeEngine() {
                 card.style.transform = 'translateX(0px)';
                 return;
             }
-            
+
             card.style.transition = 'transform 0.4s ease, background 0.4s ease';
             card.style.transform = 'translateX(0px)';
 
@@ -8203,45 +8400,45 @@ function initKpssSwipeEngine() {
                 const index = parseInt(card.getAttribute('data-index'));
                 const todayStr = new Date().toLocaleDateString('tr-TR');
                 let completed = JSON.parse(localStorage.getItem(`kpss_done_${activeKpssExam}_${todayStr}`)) || [];
-                
-                if(!completed.includes(index)) {
+
+                if (!completed.includes(index)) {
                     completed.push(index);
                     card.classList.add('completed');
-                    if(navigator.vibrate) navigator.vibrate(40);
+                    if (navigator.vibrate) navigator.vibrate(40);
                 } else {
                     // Zaten tamamsa geri al
                     completed = completed.filter(i => i !== index);
                     card.classList.remove('completed');
                     card.style.background = '#151515';
-                    if(navigator.vibrate) navigator.vibrate(20);
+                    if (navigator.vibrate) navigator.vibrate(20);
                 }
                 localStorage.setItem(`kpss_done_${activeKpssExam}_${todayStr}`, JSON.stringify(completed));
             } else {
-                if(!card.classList.contains('completed')) card.style.background = '#151515';
+                if (!card.classList.contains('completed')) card.style.background = '#151515';
             }
         });
     });
 }
 
 // --- 4. KONU AĞACI (SYLLABUS) MOTORU VE HAFIZASI ---
-window.openKPSSSyllabus = function(subject) {
-    if(kpssViewMode !== 'today') return; // Sadece bugün modunda tıklanabilsin
-    if(subject === "Deneme Sınavı" || subject === "Dinlenme") return;
+window.openKPSSSyllabus = function (subject) {
+    if (kpssViewMode !== 'today') return; // Sadece bugün modunda tıklanabilsin
+    if (subject === "Deneme Sınavı" || subject === "Dinlenme") return;
 
     const modal = document.getElementById('kpss-syllabus-modal');
     const list = document.getElementById('syllabus-topics-list');
     const bar = document.getElementById('syllabus-progress-bar');
     const pctText = document.getElementById('syllabus-pct-text');
-    
+
     // Seçili sınava göre müfredatı çek
     const topics = kpssSyllabusDB[activeKpssExam][subject];
     if (!topics) return;
 
     document.getElementById('syllabus-title').innerText = subject;
-    
+
     const memoryKey = `kpss_syl_${activeKpssExam}_${subject}`;
     const savedProgress = JSON.parse(localStorage.getItem(memoryKey)) || [];
-    
+
     list.innerHTML = '';
     topics.forEach((topic, index) => {
         const isCompleted = savedProgress.includes(index);
@@ -8262,17 +8459,17 @@ window.openKPSSSyllabus = function(subject) {
     modal.style.display = 'flex';
 };
 
-window.toggleSyllabusTopic = function(subject, index, isDone) {
+window.toggleSyllabusTopic = function (subject, index, isDone) {
     const memoryKey = `kpss_syl_${activeKpssExam}_${subject}`;
     let savedProgress = JSON.parse(localStorage.getItem(memoryKey)) || [];
-    
+
     if (isDone) {
-        if(!savedProgress.includes(index)) savedProgress.push(index);
-        if(navigator.vibrate) navigator.vibrate([20, 30]);
+        if (!savedProgress.includes(index)) savedProgress.push(index);
+        if (navigator.vibrate) navigator.vibrate([20, 30]);
     } else {
         savedProgress = savedProgress.filter(i => i !== index);
     }
-    
+
     localStorage.setItem(memoryKey, JSON.stringify(savedProgress));
     openKPSSSyllabus(subject); // Arayüzü yenile
 };
@@ -8281,37 +8478,37 @@ window.toggleSyllabusTopic = function(subject, index, isDone) {
 let aiChatStep = 0;
 let aiTempData = { weak: "", restDay: "" };
 
-window.openKPSSCreatorSelector = function() {
+window.openKPSSCreatorSelector = function () {
     document.getElementById('kpss-creator-selector-modal').style.display = 'flex';
 };
 
-window.startKpssAiChat = function() {
+window.startKpssAiChat = function () {
     document.getElementById('kpss-creator-selector-modal').style.display = 'none';
     const chatModal = document.getElementById('kpss-ai-chat-modal');
     const msgBox = document.getElementById('kpss-ai-messages');
-    
+
     aiChatStep = 0;
     aiTempData = { weak: "", restDay: "" };
-    
+
     msgBox.innerHTML = ''; // Temizle
     document.getElementById('kpss-ai-input').value = '';
     document.getElementById('kpss-ai-approve-area').style.display = 'none';
     document.getElementById('kpss-ai-input-area').style.display = 'flex';
-    
+
     chatModal.style.display = 'flex';
-    
+
     // Oly İlk Soruyu Sorar
     appendKpssAiMsg("Merhaba şampiyon! Sana özel bir program yapmam için en çok zorlandığın dersi yazar mısın? (Örn: Matematik, Tarih)", 'ai');
 };
 
-window.handleKpssAiResponse = function() {
+window.handleKpssAiResponse = function () {
     const inputEl = document.getElementById('kpss-ai-input');
     const text = inputEl.value.trim();
-    if(!text) return;
-    
+    if (!text) return;
+
     appendKpssAiMsg(text, 'user');
     inputEl.value = '';
-    
+
     if (aiChatStep === 0) {
         aiTempData.weak = text;
         aiChatStep++;
@@ -8334,7 +8531,7 @@ function appendKpssAiMsg(text, sender) {
     const bg = sender === 'ai' ? '#222' : 'var(--goldnova)';
     const color = sender === 'ai' ? '#fff' : '#000';
     const align = sender === 'ai' ? 'flex-start' : 'flex-end';
-    
+
     box.innerHTML += `
         <div style="align-self: ${align}; background: ${bg}; color: ${color}; padding: 10px 14px; border-radius: 12px; font-size: 13px; max-width: 80%; line-height: 1.4;">
             ${text}
@@ -8343,7 +8540,7 @@ function appendKpssAiMsg(text, sender) {
     box.scrollTop = box.scrollHeight;
 }
 
-window.approveKpssAiProgram = function() {
+window.approveKpssAiProgram = function () {
     // Yapay Zekanın Yarattığı Program Mantığı
     const weak = aiTempData.weak || "Matematik";
     let generatedSchedule = {
@@ -8357,59 +8554,59 @@ window.approveKpssAiProgram = function() {
     };
 
     localStorage.setItem(`olympus_kpss_schedule_${activeKpssExam}`, JSON.stringify(generatedSchedule));
-    
+
     document.getElementById('kpss-ai-chat-modal').style.display = 'none';
     renderKPSSTodayOrWeek();
     alert("✅ Sistem başarıyla güncellendi! Yeni programın devrede.");
-    if(navigator.vibrate) navigator.vibrate([50, 100]);
+    if (navigator.vibrate) navigator.vibrate([50, 100]);
 };
 
-window.openKPSSManualBuilder = function() {
+window.openKPSSManualBuilder = function () {
     document.getElementById('kpss-creator-selector-modal').style.display = 'none';
     document.getElementById('kpss-edit-modal').style.display = 'flex';
     // Otomatik olarak bugünü seç
     document.getElementById('kpss-edit-day').value = new Date().getDay().toString();
-    if(typeof renderKPSSEditList === 'function') renderKPSSEditList();
+    if (typeof renderKPSSEditList === 'function') renderKPSSEditList();
 };
 
 // ==========================================
 // ⏳ GELİŞMİŞ POMODORO MOTORU (GHOST CLICK KORUMALI)
 // ==========================================
-let kpssPomodoroInterval; 
-let kpssTime = 45 * 60; 
+let kpssPomodoroInterval;
+let kpssTime = 45 * 60;
 let isKPSSRunning = false;
 let pomodoroPressTimer;
 let isPomodoroLongPress = false;
 let lastPomodoroAction = 0; // Çift tıklama kalkanı
 
-window.startPomodoroPress = function() {
+window.startPomodoroPress = function () {
     isPomodoroLongPress = false;
     pomodoroPressTimer = setTimeout(() => {
         isPomodoroLongPress = true;
         resetKPSSPomodoro(); // 600ms basılı tutarsan sıfırlar
-    }, 600); 
+    }, 600);
 };
 
-window.endPomodoroPress = function() {
+window.endPomodoroPress = function () {
     clearTimeout(pomodoroPressTimer);
-    
+
     // Aynı anda gelen hayalet çift tıklamaları (simülatör hatası) engelle
     const now = Date.now();
-    if (now - lastPomodoroAction < 300) return; 
+    if (now - lastPomodoroAction < 300) return;
     lastPomodoroAction = now;
-    
+
     if (!isPomodoroLongPress) {
-        toggleKPSSPomodoro(); 
+        toggleKPSSPomodoro();
     }
 };
 
-window.cancelPomodoroPress = function() {
-    clearTimeout(pomodoroPressTimer); 
+window.cancelPomodoroPress = function () {
+    clearTimeout(pomodoroPressTimer);
 };
 
-window.toggleKPSSPomodoro = function() {
+window.toggleKPSSPomodoro = function () {
     const btn = document.getElementById('kpss-pomodoro-time');
-    
+
     if (isKPSSRunning) {
         // DURAKLAT
         clearInterval(kpssPomodoroInterval);
@@ -8421,28 +8618,28 @@ window.toggleKPSSPomodoro = function() {
         // BAŞLAT
         isKPSSRunning = true;
         if (navigator.vibrate) navigator.vibrate(30);
-        
+
         kpssPomodoroInterval = setInterval(() => {
             kpssTime--;
             btn.innerText = formatKpssTime() + " ⏸";
             updateKpssIsland(); // Adayı Canlandır
-            
-            if (kpssTime <= 0) { 
-                clearInterval(kpssPomodoroInterval); 
-                isKPSSRunning = false; 
+
+            if (kpssTime <= 0) {
+                clearInterval(kpssPomodoroInterval);
+                isKPSSRunning = false;
                 hideKpssIsland();
-                resetKPSSPomodoro(); 
-                alert("⏰ 45 Dakikalık odaklanma seansı bitti! 10 dakika zihni boşalt."); 
-                if(navigator.vibrate) navigator.vibrate([500,200,500]);
+                resetKPSSPomodoro();
+                alert("⏰ 45 Dakikalık odaklanma seansı bitti! 10 dakika zihni boşalt.");
+                if (navigator.vibrate) navigator.vibrate([500, 200, 500]);
             }
         }, 1000);
     }
 };
 
-window.resetKPSSPomodoro = function() {
-    clearInterval(kpssPomodoroInterval); 
-    isKPSSRunning = false; 
-    kpssTime = 45 * 60; 
+window.resetKPSSPomodoro = function () {
+    clearInterval(kpssPomodoroInterval);
+    isKPSSRunning = false;
+    kpssTime = 45 * 60;
     document.getElementById('kpss-pomodoro-time').innerText = "45:00 ▶";
     hideKpssIsland();
     if (navigator.vibrate) navigator.vibrate([50, 50]);
@@ -8458,8 +8655,8 @@ function formatKpssTime() {
 function updateKpssIsland() {
     const island = document.getElementById('dynamic-island');
     if (!island) return;
-    if(!island.classList.contains('active')) island.classList.add('active');
-    
+    if (!island.classList.contains('active')) island.classList.add('active');
+
     const textEl = document.getElementById('di-text');
     if (textEl) {
         textEl.innerHTML = `<span style="color:#8e44ad; font-weight:900;">📚 Odak:</span> <span style="font-family:monospace; color:#fff; font-size:14px;">${formatKpssTime()}</span>`;
@@ -8476,26 +8673,26 @@ function hideKpssIsland() {
 // ==========================================
 // ✏️ GÜVENLİ MANUEL DÜZENLEME (EDİTÖR) MOTORU
 // ==========================================
-window.renderKPSSEditList = function() {
+window.renderKPSSEditList = function () {
     const day = document.getElementById('kpss-edit-day').value;
-    
+
     // Hafızadan çek, yoksa o haftanın varsayılan kamp programını güvenle al
     const memoryKey = `olympus_kpss_schedule_${activeKpssExam}_w${activeKpssWeek}`;
     let savedSchedule = JSON.parse(localStorage.getItem(memoryKey));
-    
+
     if (!savedSchedule) {
         savedSchedule = getBaseKPSSSchedule(activeKpssExam, activeKpssWeek);
     }
-    
+
     const lessons = savedSchedule[day] || [];
     const listEl = document.getElementById('kpss-edit-list');
-    
+
     listEl.innerHTML = '';
-    if(lessons.length === 0) {
+    if (lessons.length === 0) {
         listEl.innerHTML = '<p style="color:#888; font-size:12px; text-align:center;">Bu güne ait ders yok.</p>';
         return;
     }
-    
+
     lessons.forEach((l, index) => {
         listEl.innerHTML += `
             <div style="display:flex; justify-content:space-between; align-items:center; background:#1a1a1a; padding:10px 15px; border-radius:8px; border:1px solid #333;">
@@ -8509,31 +8706,31 @@ window.renderKPSSEditList = function() {
     });
 };
 
-window.addKPSSLesson = function() {
+window.addKPSSLesson = function () {
     const day = document.getElementById('kpss-edit-day').value;
     const sub = document.getElementById('kpss-new-sub').value.trim();
     const topic = document.getElementById('kpss-new-topic').value.trim();
-    
-    if(!sub || !topic) { alert("Lütfen ders ve konu adı girin."); return; }
-    
+
+    if (!sub || !topic) { alert("Lütfen ders ve konu adı girin."); return; }
+
     const memoryKey = `olympus_kpss_schedule_${activeKpssExam}_w${activeKpssWeek}`;
     let savedSchedule = JSON.parse(localStorage.getItem(memoryKey)) || getBaseKPSSSchedule(activeKpssExam, activeKpssWeek);
-    
-    if(!savedSchedule[day]) savedSchedule[day] = [];
-    
+
+    if (!savedSchedule[day]) savedSchedule[day] = [];
+
     savedSchedule[day].push({ sub: sub, topic: topic });
     localStorage.setItem(memoryKey, JSON.stringify(savedSchedule));
-    
-    document.getElementById('kpss-new-sub').value = ''; 
+
+    document.getElementById('kpss-new-sub').value = '';
     document.getElementById('kpss-new-topic').value = '';
     renderKPSSEditList(); // Listeyi yenile
     if (navigator.vibrate) navigator.vibrate(20);
 };
 
-window.deleteKPSSLesson = function(day, index) {
+window.deleteKPSSLesson = function (day, index) {
     const memoryKey = `olympus_kpss_schedule_${activeKpssExam}_w${activeKpssWeek}`;
     let savedSchedule = JSON.parse(localStorage.getItem(memoryKey)) || getBaseKPSSSchedule(activeKpssExam, activeKpssWeek);
-    
+
     savedSchedule[day].splice(index, 1);
     localStorage.setItem(memoryKey, JSON.stringify(savedSchedule));
     renderKPSSEditList(); // Listeyi yenile
@@ -8544,19 +8741,19 @@ window.deleteKPSSLesson = function(day, index) {
 // ==========================================
 // 🔄 PROGRAMI VARSAYILAN KAMP AYARLARINA SIFIRLA
 // ==========================================
-window.resetKPSSScheduleToDefault = function() {
+window.resetKPSSScheduleToDefault = function () {
     const confirmReset = confirm("Emin misin şampiyon? Mevcut özel programın silinecek ve sistem varsayılan yoğun kampa geri dönecek!");
-    
+
     if (confirmReset) {
         // Hafızadaki o sınava ait özel programı tamamen sil
         localStorage.removeItem(`olympus_kpss_schedule_${activeKpssExam}`);
-        
+
         // Modal içindeki listeyi hemen yenile (otomatik olarak varsayılanı çekecektir)
         renderKPSSEditList();
-        
+
         // Arka plandaki ana ekranı da yenile
         renderKPSSTodayOrWeek();
-        
+
         if (navigator.vibrate) navigator.vibrate([50, 100]);
         alert("✅ Sistem başarıyla fabrika ayarlarına (Standart Kampa) sıfırlandı!");
     }
@@ -8566,10 +8763,10 @@ window.resetKPSSScheduleToDefault = function() {
 // ==========================================
 let activeKpssWeek = 1; // Varsayılan hafta
 
-window.changeKpssWeek = function() {
+window.changeKpssWeek = function () {
     activeKpssWeek = parseInt(document.getElementById('kpss-week-selector').value);
     renderKPSSTodayOrWeek();
-    if(navigator.vibrate) navigator.vibrate(20);
+    if (navigator.vibrate) navigator.vibrate(20);
 };
 
 function getBaseKPSSSchedule(examType, weekNum) {
@@ -8744,7 +8941,7 @@ function getBaseKPSSSchedule(examType, weekNum) {
 function updateKpssDateAndWeek() {
     const dateEl = document.getElementById('kpss-current-date');
     const weekSelector = document.getElementById('kpss-week-selector');
-    if(!dateEl || !weekSelector) return;
+    if (!dateEl || !weekSelector) return;
 
     const now = new Date(); // 20 Ağustos 2026
     const options = { month: 'long', day: 'numeric', weekday: 'long' };
@@ -8754,7 +8951,7 @@ function updateKpssDateAndWeek() {
     const campStart = new Date("2026-08-20T00:00:00").getTime();
     const diffTime = now.getTime() - campStart;
     const diffDays = Math.floor(diffTime / (1000 * 60 * 60 * 24));
-    
+
     // 7 günde bir hafta atlar (0-6 gün: 1. Hafta, 7-13 gün: 2. Hafta...)
     let calculatedWeek = Math.floor(diffDays / 7) + 1;
     if (calculatedWeek < 1) calculatedWeek = 1;
@@ -8768,31 +8965,31 @@ function updateKpssDateAndWeek() {
         weekSelector.value = activeKpssWeek.toString();
     }
 }
-window.changeKpssWeek = function() {
+window.changeKpssWeek = function () {
     window.userManuallySelectedWeek = true; // Kullanıcı elle seçti
     activeKpssWeek = parseInt(document.getElementById('kpss-week-selector').value);
     renderKPSSTodayOrWeek();
-    if(navigator.vibrate) navigator.vibrate(20);
+    if (navigator.vibrate) navigator.vibrate(20);
 };
 
 // ==========================================
 // 👁️ İNTERAKTİF GÖRÜNÜM MOTORU (MÜFREDAT VE HAFTA DESTEKLİ)
 // ==========================================
-window.renderKPSSTodayOrWeek = function() {
-    updateKpssDateAndWeek(); 
-    
+window.renderKPSSTodayOrWeek = function () {
+    updateKpssDateAndWeek();
+
     const container = document.getElementById('kpss-schedule-container');
     container.innerHTML = '';
-    
+
     const memoryKey = `olympus_kpss_schedule_${activeKpssExam}_w${activeKpssWeek}`;
     const schedule = JSON.parse(localStorage.getItem(memoryKey)) || getBaseKPSSSchedule(activeKpssExam, activeKpssWeek);
-    
+
     if (kpssViewMode === 'today') {
         // --- 1. BUGÜN GÖRÜNÜMÜ ---
         const todayIndex = new Date().getDay();
         const todayLessons = schedule[todayIndex] || [];
-        
-        if(todayLessons.length === 0) {
+
+        if (todayLessons.length === 0) {
             container.innerHTML = `<div style="padding:20px; text-align:center; background:#111; border-radius:12px; border:1px dashed #333;"><p style="color:#888; font-size:12px;">Bugün için planlanmış ders yok.</p></div>`;
             return;
         }
@@ -8804,8 +9001,8 @@ window.renderKPSSTodayOrWeek = function() {
             const isDone = completed.includes(index);
             const isExam = l.sub.includes("Deneme");
             let bgIcon = isExam ? "📝" : "📚";
-            
-            let ytBtnHTML = (isExam || l.sub === "Dinlenme" || l.sub.includes("Günlük") || l.sub.includes("Tekrar")) ? '' : 
+
+            let ytBtnHTML = (isExam || l.sub === "Dinlenme" || l.sub.includes("Günlük") || l.sub.includes("Tekrar")) ? '' :
                 `<button class="kpss-youtube-btn" onclick="openKPSSYoutubeSafely('${l.sub}', event)" style="font-size:10px; padding:5px 10px; margin-top:5px; background:rgba(231,76,60,0.2); border:1px solid #e74c3c; color:#fff;">▶ YouTube'da Aç</button>`;
 
             container.innerHTML += `
@@ -8821,21 +9018,21 @@ window.renderKPSSTodayOrWeek = function() {
                 </div>
             `;
         });
-        
-        initKpssSwipeEngine(); 
+
+        initKpssSwipeEngine();
 
     } else if (kpssViewMode === 'week') {
         // --- 2. PROGRAM GÖRÜNÜMÜ (HAFTANIN KONULARI AÇIKÇA LİSTELENİR) ---
         container.innerHTML = `<h3 style="color:var(--goldnova); font-size:14px; margin-bottom:10px; text-align:center;">📅 ${activeKpssWeek}. Hafta Planı</h3>`;
-        
+
         const dayNames = ["Pazar", "Pazartesi", "Salı", "Çarşamba", "Perşembe", "Cuma", "Cumartesi"];
-        const sortedDays = [1, 2, 3, 4, 5, 6, 0]; 
-        
+        const sortedDays = [1, 2, 3, 4, 5, 6, 0];
+
         sortedDays.forEach(dayNum => {
             const lessons = schedule[dayNum] || [];
             let lessonsHTML = '';
-            
-            if(lessons.length === 0) {
+
+            if (lessons.length === 0) {
                 lessonsHTML = '<p style="color:#555; font-size:11px; margin:5px 0;">Bu gün için ders planlanmamış.</p>';
             } else {
                 lessons.forEach(l => {
@@ -8859,10 +9056,10 @@ window.renderKPSSTodayOrWeek = function() {
     } else {
         // --- 3. TÜM MÜFREDAT PANORAMASI (TÜM KONULAR + TİKLENEBİLİR) ---
         container.innerHTML = `<h3 style="color:var(--goldnova); font-size:14px; margin-bottom:10px; text-align:center;">📌 Tüm Müfredat Panoraması</h3>`;
-        
+
         // Aktif sınava göre (Ön Lisans veya Ortaöğretim) tüm müfredatı çekiyoruz
         const syllabus = kpssSyllabusDB[activeKpssExam];
-        
+
         if (!syllabus) {
             container.innerHTML += `<p style="color:#888; font-size:12px; text-align:center;">Bu sınav için müfredat bulunamadı.</p>`;
             return;
@@ -8870,13 +9067,13 @@ window.renderKPSSTodayOrWeek = function() {
 
         Object.keys(syllabus).forEach(sub => {
             let topicsArray = syllabus[sub];
-            
+
             // Konuları tiklenebilir listeye çevir
             let topicCheckboxes = topicsArray.map((t, index) => {
                 const sylMemoryKey = `kpss_syl_${activeKpssExam}_${sub}`;
                 const savedProgress = JSON.parse(localStorage.getItem(sylMemoryKey)) || [];
                 const isCompleted = savedProgress.includes(index);
-                
+
                 return `
                 <div style="display:flex; align-items:center; gap:10px; padding:8px 0; border-bottom:1px solid #222; cursor:pointer;" onclick="toggleSyllabusTopicGlobal('${sub}', ${index}, ${!isCompleted})">
                     <div style="width:16px; height:16px; border:1px solid var(--goldnova); border-radius:4px; display:flex; justify-content:center; align-items:center; background:${isCompleted ? 'var(--goldnova)' : 'transparent'};">
@@ -8903,14 +9100,14 @@ window.renderKPSSTodayOrWeek = function() {
 };
 
 // Gün Akordeon Açma/Kapama Fonksiyonu
-window.toggleKpssDayAccordion = function(dayNum) {
+window.toggleKpssDayAccordion = function (dayNum) {
     const content = document.getElementById(`day-content-${dayNum}`);
     const arrow = document.getElementById(`arrow-${dayNum}`);
-    
+
     if (content.style.display === 'none') {
         content.style.display = 'block';
         arrow.innerText = '▲ Kapat';
-        if(navigator.vibrate) navigator.vibrate(15);
+        if (navigator.vibrate) navigator.vibrate(15);
     } else {
         content.style.display = 'none';
         arrow.innerText = '▼ Aç';
@@ -8918,10 +9115,10 @@ window.toggleKpssDayAccordion = function(dayNum) {
 };
 
 // Sıfırlama Butonunun Hafızasını Çoklu Haftaya Uyarladık
-window.resetKPSSScheduleToDefault = function() {
+window.resetKPSSScheduleToDefault = function () {
     if (confirm("Emin misin şampiyon? Mevcut özel programın silinecek ve seçili hafta standart kampa dönecek!")) {
         localStorage.removeItem(`olympus_kpss_schedule_${activeKpssExam}_w${activeKpssWeek}`);
-        if(typeof renderKPSSEditList === 'function') renderKPSSEditList();
+        if (typeof renderKPSSEditList === 'function') renderKPSSEditList();
         renderKPSSTodayOrWeek();
         alert("✅ Sistem başarıyla fabrika ayarlarına sıfırlandı!");
     }
@@ -8929,7 +9126,7 @@ window.resetKPSSScheduleToDefault = function() {
 // ==========================================
 // 📺 GÜVENLİ YOUTUBE IŞINLANMA MOTORU
 // ==========================================
-window.openKPSSYoutubeSafely = function(subject, event) {
+window.openKPSSYoutubeSafely = function (subject, event) {
     if (event) event.stopPropagation();
     const query = encodeURIComponent(`${subject} KPSS konu anlatımı`);
     window.open(`https://www.youtube.com/results?search_query=${query}`, '_blank');
@@ -8937,17 +9134,1232 @@ window.openKPSSYoutubeSafely = function(subject, event) {
 // ==========================================
 // 📌 PANOROMA (TÜM MÜFREDAT) TİKLEME MOTORU
 // ==========================================
-window.toggleSyllabusTopicGlobal = function(subject, index, isDone) {
+window.toggleSyllabusTopicGlobal = function (subject, index, isDone) {
     const memoryKey = `kpss_syl_${activeKpssExam}_${subject}`;
     let savedProgress = JSON.parse(localStorage.getItem(memoryKey)) || [];
-    
+
     if (isDone) {
-        if(!savedProgress.includes(index)) savedProgress.push(index);
-        if(navigator.vibrate) navigator.vibrate([20, 30]);
+        if (!savedProgress.includes(index)) savedProgress.push(index);
+        if (navigator.vibrate) navigator.vibrate([20, 30]);
     } else {
         savedProgress = savedProgress.filter(i => i !== index);
     }
-    
+
     localStorage.setItem(memoryKey, JSON.stringify(savedProgress));
     renderKPSSTodayOrWeek(); // Ekranı hemen yenileyip tiki göster
 };
+// ==========================================
+// 📚 KPSS AKADEMİ GEÇİŞ MOTORU
+// ==========================================
+window.openKPSSCenter = function() {
+    // 1. Hub'ı ve ana uygulamayı gizle
+    const hub = document.getElementById('hub-screen');
+    if (hub) hub.classList.add('hidden');
+    
+    const appContent = document.getElementById('app-content');
+    if (appContent) appContent.classList.add('hidden');
+
+    // 2. KPSS Ekranını görünür yap
+    const kpssScreen = document.getElementById('kpss-screen');
+    if (kpssScreen) {
+        kpssScreen.classList.remove('hidden');
+        // Eğer CSS display flex gerektiriyorsa:
+        kpssScreen.style.display = 'flex'; 
+    }
+    
+    // 3. Hafızaya kaydet (uygulama kapanırsa burada uyanmak için)
+    if (typeof saveLastScreen === 'function') saveLastScreen('kpss');
+    
+    // 4. KPSS program verilerini çiz
+    if (typeof renderKPSSTodayOrWeek === 'function') renderKPSSTodayOrWeek();
+    
+    if (navigator.vibrate) navigator.vibrate([30, 50]);
+    
+    // 5. Dinamik Ada Bildirimi
+    if (typeof showDynamicIsland === 'function') {
+        showDynamicIsland("KPSS Akademi", "Çalışma merkezine girildi", "📚");
+    }
+};
+
+window.closeKPSSCenter = function() {
+    // 1. KPSS Ekranını gizle
+    const kpssScreen = document.getElementById('kpss-screen');
+    if (kpssScreen) {
+        kpssScreen.classList.add('hidden');
+        kpssScreen.style.display = 'none';
+    }
+    
+    // 2. Hafızayı Hub'a çevir
+    if (typeof saveLastScreen === 'function') saveLastScreen('hub');
+    
+    // 3. Hub'ı geri aç
+    const hub = document.getElementById('hub-screen');
+    if (hub) {
+        hub.classList.remove('hidden');
+        hub.style.display = 'flex';
+    }
+    
+    if (navigator.vibrate) navigator.vibrate(30);
+};
+// ==========================================
+// 🦅 GÜVENLİK GÜÇLERİ KARARGAH MOTORU (HATASIZ VE GÜVENLİ)
+// ==========================================
+// --- AKILLI AÇ / KAPAT KONTROLCÜSÜ ---
+window.toggleSecurityMode = function (type) {
+    const activeMode = localStorage.getItem('olympus_active_sec_mode');
+
+    // Eğer tıklanan logo zaten aktif olan mod ise -> SİVİLE DÖN
+    if (activeMode === type) {
+        exitSecurityMode();
+    } else {
+        // Farklı bir logoya tıklandıysa veya mod kapalıysa -> MODU BAŞLAT
+        triggerSecurityMode(type);
+    }
+};
+
+// --- MODU TETİKLE VE YÜKLE ---
+window.triggerSecurityMode = function (type) {
+    const overlay = document.getElementById('sec-loading-overlay');
+    const imgEl = document.getElementById('sec-loading-img');
+
+    if (!overlay || !imgEl) {
+        openSecurityMode(type, true);
+        return;
+    }
+
+    const sourceLogo = document.getElementById(`logo-${type}`);
+    imgEl.src = sourceLogo.src;
+
+    document.body.classList.remove('polis-theme', 'jandarma-theme');
+    document.body.classList.add(`${type}-theme`);
+
+    overlay.classList.remove('hidden');
+    overlay.style.display = 'flex';
+
+    imgEl.classList.add('sec-animate-img');
+
+    if (navigator.vibrate) navigator.vibrate([100, 100, 300, 100, 500]);
+
+    setTimeout(() => {
+        overlay.style.display = 'none';
+        imgEl.classList.remove('sec-animate-img');
+        openSecurityMode(type, false);
+        let modName = type === 'polis' ? 'POMEM' : 'JAMYO';
+        let modColor = type === 'polis' ? '#fbc531' : '#d32f2f';
+        showDynamicIsland(`${modName} Modu Aktif`, "🦅");
+    }, 2000);
+};
+
+// --- EKRANI AÇ ---
+window.openSecurityMode = function(type, skipAnimation = false) {
+    const hub = document.getElementById('hub-screen');
+    const profile = document.getElementById('profile-screen') || document.getElementById('olympus-screen');
+    
+    if (hub) hub.classList.add('hidden');
+    if (profile) profile.classList.add('hidden');
+    
+    document.getElementById('security-screen').classList.remove('hidden');
+    
+    document.body.classList.remove('polis-theme', 'jandarma-theme');
+    document.body.classList.add(`${type}-theme`);
+    
+    document.getElementById('logo-polis').classList.remove('sec-logo-active');
+    document.getElementById('logo-polis').classList.add('sec-logo-passive');
+    document.getElementById('logo-jandarma').classList.remove('sec-logo-active');
+    document.getElementById('logo-jandarma').classList.add('sec-logo-passive');
+    
+    const activeLogo = document.getElementById(`logo-${type}`);
+    activeLogo.classList.remove('sec-logo-passive');
+    activeLogo.classList.add('sec-logo-active');
+    activeLogo.nextElementSibling.style.color = type === 'polis' ? '#fbc531' : '#d32f2f'; 
+    
+    const titleEl = document.getElementById('sec-header-title');
+    const headerLogoEl = document.getElementById('sec-header-logo');
+    const kurumTextEl = document.getElementById('sec-kurum-text');
+    
+    headerLogoEl.src = activeLogo.src;
+    
+    const tasksDiv = document.getElementById('olympus-sec-tasks');
+    const tasksTitle = document.getElementById('olympus-sec-tasks-title');
+
+    if (type === 'polis') {
+        titleEl.innerText = 'Polis Akademisi (POMEM)';
+        kurumTextEl.innerText = 'Emniyet Teşkilatı Mevzuatı ve Tarihi';
+        activeAcademyLink = "https://www.pa.edu.tr/";
+        if(tasksDiv) {
+            tasksDiv.style.display = 'block';
+            tasksTitle.innerText = '🦅 POMEM GÖREVLERİ';
+        }
+    } else {
+        titleEl.innerText = 'Jandarma Akademisi (JAMYO)';
+        kurumTextEl.innerText = 'Jandarma Teşkilatı Mevzuatı ve Tarihi';
+        activeAcademyLink = "https://vatandas.jandarma.gov.tr/PTM/Giris";
+        if(tasksDiv) {
+            tasksDiv.style.display = 'block';
+            tasksTitle.innerText = '🦅 JAMYO GÖREVLERİ';
+        }
+    }
+    
+    localStorage.setItem('olympus_active_sec_mode', type);
+    if (typeof saveLastScreen === 'function') saveLastScreen('security'); 
+    if (typeof loadSecTasks === 'function') loadSecTasks(type);
+    if (typeof updateSecDisplays === 'function') updateSecDisplays(type);
+
+    // KENDİ DİNAMİK ADAN BURADA DEVREYE GİRİYOR!
+    let modName = type === 'polis' ? 'POMEM' : 'JAMYO';
+    if (typeof showDynamicIsland === 'function') {
+        showDynamicIsland(`${modName} Aktif`, "Akademi Modundasın", "🦅");
+    }
+};
+
+// --- EKRANDAN ÇIK VE PROFİLE DÖN ---
+window.closeSecurityMode = function () {
+    document.getElementById('security-screen').classList.add('hidden');
+    if (typeof saveLastScreen === 'function') saveLastScreen('profile');
+
+    const profile = document.getElementById('profile-screen') || document.getElementById('olympus-screen');
+    if (profile) profile.classList.remove('hidden');
+};
+
+// --- SİVİLE DÖN (GÜVENLİ ÇIKIŞ) ---
+window.exitSecurityMode = function() {
+    document.body.classList.remove('polis-theme', 'jandarma-theme'); 
+    
+    document.getElementById('logo-polis').classList.remove('sec-logo-active');
+    document.getElementById('logo-polis').classList.add('sec-logo-passive');
+    document.getElementById('logo-jandarma').classList.remove('sec-logo-active');
+    document.getElementById('logo-jandarma').classList.add('sec-logo-passive');
+    
+    localStorage.removeItem('olympus_active_sec_mode');
+    
+    const tasksDiv = document.getElementById('olympus-sec-tasks');
+    if(tasksDiv) tasksDiv.style.display = 'none';
+
+    const loadingOverlay = document.getElementById('sec-loading-overlay');
+    if(loadingOverlay) loadingOverlay.style.display = 'none';
+    
+    const imgViewer = document.getElementById('image-viewer-modal');
+    if(imgViewer) imgViewer.style.display = 'none';
+
+    if(navigator.vibrate) navigator.vibrate([50, 100]);
+    
+    // KENDİ DİNAMİK ADAN BURADA DEVREYE GİRİYOR!
+    if (typeof showDynamicIsland === 'function') {
+        showDynamicIsland("Sivil Temaya Dönüldü", "Akademi kapatıldı", "✅");
+    }
+};
+// ==========================================
+// 🦅 MÜLAKAT KUTUCUKLARI HAFIZA MOTORU
+// ==========================================
+window.toggleSecTask = function (taskId, isChecked) {
+    const activeSecMode = localStorage.getItem('olympus_active_sec_mode') || 'polis';
+    const memoryKey = `olympus_sec_tasks_${activeSecMode}`;
+    let tasks = JSON.parse(localStorage.getItem(memoryKey)) || {};
+
+    tasks[taskId] = isChecked;
+    localStorage.setItem(memoryKey, JSON.stringify(tasks));
+    if (isChecked && navigator.vibrate) navigator.vibrate([20, 30]);
+};
+
+window.loadSecTasks = function (type) {
+    const memoryKey = `olympus_sec_tasks_${type}`;
+    let tasks = JSON.parse(localStorage.getItem(memoryKey)) || {};
+
+    document.getElementById('sec-task-1').checked = !!tasks['task-1'];
+    document.getElementById('sec-task-2').checked = !!tasks['task-2'];
+    document.getElementById('sec-task-3').checked = !!tasks['task-3'];
+};
+
+// ==========================================
+// ⏱️ PARKUR SALİSELİK KRONOMETRE MOTORU
+// ==========================================
+let secStopwatchInterval;
+let secStopwatchTime = 0; // 10 milisaniyelik dilimler
+let isSecStopwatchRunning = false;
+
+window.toggleSecStopwatch = function () {
+    const btn = document.getElementById('sec-stopwatch-btn');
+    const display = document.getElementById('sec-stopwatch-display');
+
+    if (isSecStopwatchRunning) {
+        // Durdur
+        clearInterval(secStopwatchInterval);
+        isSecStopwatchRunning = false;
+        btn.innerText = "▶ Devam Ettir";
+        btn.style.background = "var(--sec-accent)";
+        btn.style.color = "#000";
+    } else {
+        // Başlat
+        isSecStopwatchRunning = true;
+        btn.innerText = "⏸ Durdur";
+        btn.style.background = "#e74c3c";
+        btn.style.color = "#fff";
+        if (navigator.vibrate) navigator.vibrate(30);
+
+        secStopwatchInterval = setInterval(() => {
+            secStopwatchTime++;
+            let m = Math.floor(secStopwatchTime / 6000).toString().padStart(2, '0');
+            let s = Math.floor((secStopwatchTime % 6000) / 100).toString().padStart(2, '0');
+            let ms = (secStopwatchTime % 100).toString().padStart(2, '0');
+            display.innerText = `${m}:${s}:${ms}`;
+        }, 10);
+    }
+};
+
+window.resetSecStopwatch = function () {
+    clearInterval(secStopwatchInterval);
+    isSecStopwatchRunning = false;
+    secStopwatchTime = 0;
+    document.getElementById('sec-stopwatch-display').innerText = "00:00:00";
+
+    const btn = document.getElementById('sec-stopwatch-btn');
+    btn.innerText = "▶ Başlat";
+    btn.style.background = "var(--sec-accent)";
+    btn.style.color = "#000";
+};
+// ==========================================
+// 📸 TAM EKRAN FOTOĞRAF İNCELEYİCİ MOTORU
+// ==========================================
+window.openImageViewer = function (imageSrc) {
+    const viewer = document.getElementById('image-viewer-modal');
+    const imgEl = document.getElementById('image-viewer-img');
+
+    imgEl.src = imageSrc;
+
+    viewer.classList.remove('hidden');
+    viewer.style.display = 'flex';
+
+    if (navigator.vibrate) navigator.vibrate(20);
+};
+
+window.closeImageViewer = function () {
+    const viewer = document.getElementById('image-viewer-modal');
+    viewer.style.display = 'none';
+    viewer.classList.add('hidden');
+};
+
+// ==========================================
+// 🔗 RESMİ KURUM LİNK YÖNLENDİRİCİSİ
+// ==========================================
+let activeAcademyLink = "https://ais.pa.edu.tr/";
+
+window.openAcademyLink = function () {
+    window.open(activeAcademyLink, '_blank');
+};
+
+// ==========================================
+// 🦅 AKADEMİ HEDEF VE GERİ SAYIM MOTORU (ÇÖKMEYE KARŞI KORUMALI)
+// ==========================================
+let currentSecModalType = '';
+
+window.openSecModal = function (type) {
+    currentSecModalType = type;
+    const modal = document.getElementById('sec-input-modal');
+    if (!modal) return; // Modal yoksa çökmesini engelle
+
+    modal.classList.remove('hidden');
+    modal.style.display = 'flex';
+
+    document.getElementById('sec-modal-interview-inputs').style.display = type === 'interview' ? 'flex' : 'none';
+    document.getElementById('sec-modal-parkour-inputs').style.display = type === 'parkour' ? 'flex' : 'none';
+    document.getElementById('sec-modal-title').innerText = type === 'interview' ? 'Aşama ve Tarih Belirle' : 'Parkur Hedeflerini Belirle';
+
+    const activeMode = localStorage.getItem('olympus_active_sec_mode') || 'polis';
+    let data = JSON.parse(localStorage.getItem(`olympus_sec_data_${activeMode}`)) || {};
+
+    if (type === 'interview') {
+        const titleInput = document.getElementById('sec-interview-title');
+        const dateInput = document.getElementById('sec-interview-date');
+        // Kalkan: Eğer input HTML'de varsa veriyi yaz
+        if (titleInput) titleInput.value = data.interviewTitle || '';
+        if (dateInput) dateInput.value = data.interviewDate || '';
+    } else {
+        const timeInput = document.getElementById('sec-parkour-time');
+        const scoreInput = document.getElementById('sec-parkour-score');
+        if (timeInput) timeInput.value = data.parkourTime || '';
+        if (scoreInput) scoreInput.value = data.parkourScore || '';
+    }
+
+    if (navigator.vibrate) navigator.vibrate(15);
+};
+
+// --- BİLGİLERİ KAYDET ---
+window.saveSecModalData = function() {
+    const activeMode = localStorage.getItem('olympus_active_sec_mode') || 'polis';
+    let data = JSON.parse(localStorage.getItem(`olympus_sec_data_${activeMode}`)) || {};
+
+    if (currentSecModalType === 'interview') {
+        const titleInput = document.getElementById('sec-interview-title');
+        const dateInput = document.getElementById('sec-interview-date');
+        if(titleInput) data.interviewTitle = titleInput.value.trim() || 'BİR SONRAKİ AŞAMA';
+        if(dateInput) data.interviewDate = dateInput.value;
+    } else {
+        const timeInput = document.getElementById('sec-parkour-time');
+        const scoreInput = document.getElementById('sec-parkour-score');
+        if(timeInput) data.parkourTime = timeInput.value;
+        if(scoreInput) data.parkourScore = scoreInput.value;
+    }
+
+    localStorage.setItem(`olympus_sec_data_${activeMode}`, JSON.stringify(data));
+    closeSecModal();
+    updateSecDisplays(activeMode);
+    
+    if(navigator.vibrate) navigator.vibrate([20, 30]);
+
+    // KENDİ DİNAMİK ADAN BURADA DEVREYE GİRİYOR!
+    if (typeof showDynamicIsland === 'function') {
+        showDynamicIsland("Kayıt Başarılı", "Hedefler sisteme işlendi", "💾");
+    }
+};
+
+window.closeSecModal = function () {
+    const modal = document.getElementById('sec-input-modal');
+    if (modal) {
+        modal.classList.add('hidden');
+        modal.style.display = 'none';
+    }
+};
+
+window.updateSecDisplays = function (mode) {
+    let data = JSON.parse(localStorage.getItem(`olympus_sec_data_${mode}`)) || {};
+
+    const titleDisp = document.getElementById('sec-interview-title-display');
+    const intDisp = document.getElementById('sec-interview-display');
+    const intCount = document.getElementById('sec-interview-countdown');
+
+    if (titleDisp) titleDisp.innerText = data.interviewTitle ? data.interviewTitle.toUpperCase() : "BİR SONRAKİ AŞAMA";
+
+    if (data.interviewDate && intDisp && intCount) {
+        const targetDate = new Date(data.interviewDate);
+        intDisp.innerText = targetDate.toLocaleDateString('tr-TR');
+
+        const today = new Date();
+        today.setHours(0, 0, 0, 0);
+        targetDate.setHours(0, 0, 0, 0);
+
+        const diffTime = targetDate - today;
+        const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+
+        if (diffDays > 0) {
+            intCount.innerText = `⏳ SON ${diffDays} GÜN!`;
+            intCount.style.color = '#fff';
+        } else if (diffDays === 0) {
+            intCount.innerText = "🔥 BÜYÜK GÜN BUGÜN!";
+            intCount.style.color = 'var(--sec-accent)';
+        } else {
+            intCount.innerText = "✓ Aşama Tamamlandı";
+            intCount.style.color = '#888';
+        }
+    } else {
+        if (intDisp) intDisp.innerText = "Tarih Gir ✏️";
+        if (intCount) intCount.innerText = "";
+    }
+
+    const parkDisp = document.getElementById('sec-parkour-display');
+    const scoreDisp = document.getElementById('sec-parkour-score-display');
+
+    if (data.parkourTime || data.parkourScore) {
+        if (parkDisp) parkDisp.innerText = data.parkourTime ? `${data.parkourTime}` : "Süre Yok";
+        if (scoreDisp) scoreDisp.innerText = data.parkourScore ? `Hedef: ${data.parkourScore} Puan` : "";
+    } else {
+        if (parkDisp) parkDisp.innerText = "Hedef Gir ✏️";
+        if (scoreDisp) scoreDisp.innerText = "";
+    }
+};
+
+// ==========================================
+// 🧠 33. DÖNEM POMEM / JAMYO ÇIKMIŞ SORULAR VERİTABANI
+// ==========================================
+const interviewQuestions = [
+    { q: "Polis nedir? Tanımlayınız.", a: "Polis; asayişi, amme intizamını, vatandaşın can, mal ve ırzını koruyan, suç işlenmesini önleyen ve suçluları adalete teslim eden silahlı yürütme ve güvenlik gücüdür." },
+    { q: "Amir ve Üst arasındaki fark nedir?", a: "Amir; hiyerarşik yapı içinde emri altındakilere emir verme yetkisine sahip kişidir. Üst ise; rütbe veya kıdem bakımından daha büyük olan kişidir (her üst, amir olmayabilir)." },
+    { q: "Görevi İhmal nedir?", a: "Kamu görevlisinin yapmakla yükümlü olduğu görevini yapmaması, geciktirmesi veya eksik yapması durumudur." },
+    { q: "Önleyici Polislik ve Adli Polislik nedir?", a: "Önleyici polislik, suç işlenmeden önce suçu engellemek için yapılan çalışmalardır (devriye vb.). Adli polislik ise suç işlendikten sonra failleri yakalamak ve delil toplamakla görevli kısımdır." },
+    { q: "Liyakat nedir?", a: "Bir görevi başarıyla yapabilme yeteneği, yeterlilik, ehliyet ve o işe layık olma durumudur." },
+    { q: "Mobbing nedir?", a: "İş yerinde bir kişiye veya gruba yönelik sistematik olarak uygulanan psikolojik taciz, baskı ve yıldırma politikasıdır." },
+    { q: "Kuvvetler Ayrılığı ilkesi nedir?", a: "Devletin temel organları olan Yasama, Yürütme ve Yargı güçlerinin birbirinden bağımsız olması ve farklı organlarca kullanılmasıdır." },
+    { q: "İstihbarat nedir?", a: "Haberlerin ve verilerin toplanması, analiz edilmesi, değerlendirilmesi sonucu elde edilen işlenmiş ve anlamlı bilgi bütünüdür." },
+    { q: "Anayasa'nın değiştirilemez maddeleri nelerdir?", a: "1- Devletin şekli Cumhuriyettir. 2- Demokratik, laik ve sosyal bir hukuk devletidir. 3- Dili Türkçe, başkenti Ankara, bayrağı al bayrak, marşı İstiklal Marşı'dır." },
+    { q: "Sosyal Devlet nedir?", a: "Vatandaşlarına asgari bir yaşam standardı sunan, eğitim, sağlık ve sosyal güvenlik haklarını güvence altına alan devlettir." },
+    { q: "E-Devlet nedir?", a: "Devlet hizmetlerinin vatandaşlara bilgi ve iletişim teknolojileri kullanılarak elektronik ortamda, şeffaf ve hızlı sunulmasıdır." },
+    { q: "Töre Cinayeti nedir?", a: "Geleneksel inançlar veya toplumsal baskılar bahane edilerek, ailenin 'namusunu' temizlemek gerekçesiyle işlenen cinayetlerdir." },
+    { q: "Kriz Yönetimi nedir?", a: "Beklenmeyen, acil ve tehlikeli durumlara karşı önceden planlanmış stratejilerle en az zararla atlatılmasını sağlayan yönetim sürecidir." },
+    { q: "Demokrasi nedir?", a: "Halkın kendi kendini yönettiği, egemenliğin kayıtsız şartsız millete ait olduğu yönetim biçimidir." },
+    { q: "Lider ve Yönetici arasındaki fark nedir?", a: "Yönetici gücünü makamından ve kurallardan alır; lider ise gücünü vizyonundan, ikna kabiliyetinden ve insanları etkileme gücünden alır." },
+    { q: "Kolluk kuvvetleri nelerdir?", a: "Genel Kolluk: Polis, Jandarma, Sahil Güvenlik. Özel Kolluk: Orman muhafaza, gümrük muhafaza vb. kurumlardır." },
+    { q: "Siber Suç (Bilişim Suçu) nedir?", a: "Bilişim sistemleri (bilgisayar, internet, cep telefonu vb.) kullanılarak işlenen her türlü yasa dışı eylemdir." },
+    { q: "Algı Yönetimi nedir?", a: "Hedef kitlenin düşüncelerini, duygularını ve davranışlarını istenilen yönde şekillendirmek için yapılan stratejik iletişim çalışmalarıdır." },
+    { q: "Empati nedir?", a: "Bir kişinin kendisini karşısındaki kişinin yerine koyarak onun duygularını ve düşüncelerini doğru anlamasıdır." },
+    { q: "Disiplin nedir?", a: "Kurallara ve düzene isteyerek, bilinçli bir şekilde uyma durumudur. Askeriye ve emniyetin temel taşıdır." },
+    { q: "Meşru Müdafaa (Nefsi Müdafaa) nedir?", a: "Kişinin kendisine veya başkasına yönelmiş haksız bir saldırıyı, o anki durumla orantılı bir şekilde defetme zorunluluğudur." },
+    { q: "Zor Kullanma Yetkisi nedir?", a: "Polisin veya jandarmanın, direnen kişileri veya saldırıları etkisiz hale getirmek için bedeni kuvvet, maddi güç veya kanuni şartlar oluştuğunda silah kullanmasıdır." },
+    { q: "İnovasyon nedir?", a: "Yeni veya iyileştirilmiş bir ürünün, hizmetin veya sürecin geliştirilip topluma/kullanıma sunulmasıdır (Yenileşim)." },
+    { q: "Statü nedir?", a: "Bir bireyin toplum veya bir grup içindeki konumu, yeri ve saygınlığıdır." },
+    { q: "Atatürk'ün Milliyetçilik ilkesini açıklayın.", a: "Irk, din, mezhep ayrımı yapmaksızın, kendini Türk sayan herkesin Türk kabul edildiği, birleştirici ve bütünleştirici bir ilkedir." },
+    { q: "Kuvvetler Ayrılığı nedir?", a: "Yasama, yürütme ve yargı güçlerinin birbirinden bağımsız olması ve farklı organlarca kullanılmasıdır." },
+    { q: "Mobbing nedir?", a: "İş yerinde bir kişiye veya gruba yönelik sistematik olarak uygulanan psikolojik taciz ve yıldırma politikasıdır." },
+    { q: "Liderlik ve Yöneticilik arasındaki fark nedir?", a: "Yönetici gücünü makamından ve kurallardan alır; lider ise gücünü vizyonundan ve insanları etkileme kabiliyetinden alır." },
+    { q: "Empati nedir?", a: "Bir kişinin kendisini karşısındaki kişinin yerine koyarak onun duygularını ve düşüncelerini doğru anlamasıdır." },
+    { q: "Siber Suç nedir?", a: "Bilişim sistemleri (bilgisayar, internet, cep telefonu vb.) kullanılarak işlenen her türlü yasa dışı eylemdir." },
+    { q: "Atatürk'ün Milliyetçilik ilkesini açıklayın.", a: "Irk, din, mezhep ayrımı yapmaksızın, kendini Türk sayan herkesin Türk kabul edildiği, birleştirici ve bütünleştirici bir ilkedir." },
+    { q: "Disiplin nedir?", a: "Kurallara ve düzene isteyerek, bilinçli bir şekilde uyma durumudur. Askeriye ve emniyetin temelidir." },
+    { q: "Sosyal Devlet nedir?", a: "Vatandaşlarına asgari bir yaşam standardı sunan, eğitim, sağlık ve sosyal güvenlik haklarını güvence altına alan devlettir." },
+    { q: "Laiklik nedir?", a: "Devlet yönetiminde din ve dünya işlerinin birbirinden ayrılması, devletin tüm inançlara eşit mesafede olmasıdır." },
+    { q: "Algı Yönetimi nedir?", a: "Hedef kitlenin düşüncelerini, duygularını ve davranışlarını istenilen yönde şekillendirmek için yapılan stratejik iletişim çalışmalarıdır." },
+    { q: "Töre Cinayeti nedir?", a: "Geleneksel inançlar veya toplumsal baskılar bahane edilerek, ailenin namusunu temizlemek gerekçesiyle işlenen cinayetlerdir." },
+    { q: "Kriz Yönetimi nedir?", a: "Beklenmeyen, acil ve tehlikeli durumlara karşı önceden planlanmış stratejilerle en az zararla atlatılmasını sağlayan yönetim sürecidir." },
+    { q: "E-Devlet nedir?", a: "Devlet hizmetlerinin vatandaşlara bilgi ve iletişim teknolojileri kullanılarak elektronik ortamda, şeffaf ve hızlı sunulmasıdır." },
+    { q: "Statü nedir?", a: "Bir bireyin toplum veya bir grup içindeki konumu, yeri ve saygınlığıdır." },
+    { q: "Etik ve Ahlak arasındaki fark nedir?", a: "Ahlak toplumun doğrularını temsil ederken, etik daha çok evrensel ve mesleki kurallar bütününü (örn: meslek etiği) ifade eder." },
+    { q: "İnovasyon nedir?", a: "Yeni veya iyileştirilmiş bir ürünün, hizmetin veya sürecin geliştirilip topluma/kullanıma sunulmasıdır (Yenileşim)." },
+    { q: "Magna Carta nedir?", a: "1215'te İngiltere'de kralın yetkilerini kısıtlayan ve hukukun üstünlüğünü kabul eden tarihi sözleşmedir." },
+    { q: "İnsan Hakları nelerdir?", a: "İnsanın sadece insan olmasından dolayı sahip olduğu, devredilemez ve vazgeçilemez temel hak ve özgürlüklerdir (yaşama, eğitim vb.)." },
+    { q: "Kamuoyu nedir?", a: "Belli bir konuda, toplumun genelinin veya büyük bir kesiminin benimsediği ortak düşünce ve tutumdur." },
+    { q: "Demokrasi nedir?", a: "Halkın kendi kendini yönettiği, egemenliğin kayıtsız şartsız millete ait olduğu yönetim biçimidir." },
+    { q: "Türklerin bilinen ilk şairi kimdir?", a: "Aprın Çor Tigin" },
+    { q: "İlk kadın valimiz kimdir?", a: "Lale Aytaman" },
+    { q: "İslamofobi ne demektir?", a: "'İslam Korkusu' yani İslam dinine ya da Müslümanlara karşı duyulan nefret." },
+    { q: "Fiziki haritada yeşil renkli alanlar neyi ifade eder?", a: "Yükseltinin en az olduğu yerleri (Ova, düzlük gibi) ifade eder." },
+    { q: "Rumeli Hisarı hangi padişah döneminde yapıldı?", a: "Fatih Sultan Mehmet" },
+    { q: "Hattuşaş hangi ilimizdedir?", a: "Çorum" },
+    { q: "Kadınlara boşanma hakkı ne zaman verildi?", a: "1926 Türk Medeni Kanunu ile kadınlara boşanma hakkı verildi." },
+    { q: "Sınırlarımız ilk kez hangi kongrede konuşuldu?", a: "Erzurum Kongresi'nde ilk kez millî sınırlardan bahsedilmiştir." },
+    { q: "Anadolu Şairimiz kimdir?", a: "Ömer Bedrettin Uşaklı" },
+    { q: "İslamiyeti kabul eden ilk Türk topluluğu hangisidir?", a: "Karluklar" },
+    { q: "Osmanlı Devleti'nde Bizans ile yapılan ilk savaş hangisidir?", a: "Koyunhisar Savaşı (Osman Bey Dönemi). Galip gelinmiştir." },
+    { q: "Bor madeni genel olarak nerelerden çıkarılır?", a: "Geneli Ege Bölgesi; Kütahya ve Balıkesir çevresi." },
+    { q: "200 TL banknotunun arkasında kim vardır?", a: "Yunus Emre" },
+    { q: "Yaş Antlaşması'nın önemi nedir?", a: "Kırım'ın Rusların hakimiyetine geçmiş olduğunun onaylandığı antlaşmadır." },
+    { q: "Osmanlı Devleti'nde 'Darüleytam' nedir?", a: "Yetimler Yurdu" },
+    { q: "Kutadgu Bilig kim tarafından yazılmıştır ve anlamı nedir?", a: "Yusuf Has Hacip tarafından yazılmıştır. Anlamı 'Mutluluk Veren Bilgi'dir." },
+    { q: "Atatürk Dönemi'nde kurulan bankalar hangileridir?", a: "İş Bankası, Sümerbank, İller Bankası" },
+    { q: "Türkiye'nin matematik konumu nedir?", a: "26-45 Doğu meridyenleri ile 36-42 Kuzey paralelleri arasıdır." },
+    { q: "Sened-i İttifak hangi padişah döneminde imzalanmıştır?", a: "II. Mahmud" },
+    { q: "Kaçkar Dağları hangi ilimizdedir?", a: "Rize" },
+    { q: "Saatleri Ayarlama Enstitüsü kitabının yazarı kimdir?", a: "Ahmet Hamdi Tanpınar" },
+    { q: "Türkiye'nin jeopolitik konumunun özellikleri nelerdir?", a: "Üç tarafının denizlerle çevrili olması ve Asya-Avrupa'yı bağlayan önemli boğazlara sahip olmasıdır." },
+    { q: "Atatürk hangi ilin nüfusuna kayıtlıydı?", a: "Gaziantep" },
+    { q: "Anayasa nedir?", a: "Ülke üzerindeki egemenlik haklarının kullanım yetkisinin devlete verildiğini belirleyen temel toplumsal sözleşmedir." },
+    { q: "Karasal iklimin özellikleri nelerdir?", a: "Yazlar sıcak ve kurak, kışlar soğuk ve kar yağışlıdır. Bitki örtüsü step ve bozkırdır." },
+    { q: "Osmanlı Devleti'nin İran ile yaptığı ilk antlaşma nedir?", a: "Amasya Antlaşması (1555)" },
+    { q: "Osmanlı Devleti'nde saray dışı evlilik yapan ilk padişah kimdir?", a: "Genç Osman (II. Osman)" },
+    { q: "Osmanlı'da gece sokağa çıkma, içki ve tütün yasağını getiren padişah kimdir?", a: "IV. Murat" },
+    { q: "Halkçılık ilkesini açıklar mısınız?", a: "Türk toplumunda zümre ve sınıf egemenliğinin olamayacağı, bütün bireylerin yasa önünde eşitliği esasına dayanan ilkedir." },
+    { q: "Milliyetçilik ilkesi doğrultusunda yapılan inkılaplar nelerdir?", a: "Türk Tarih ve Dil Kurumu'nun kurulması, Yeni Türk Harflerinin kabulü." },
+
+    // ATATÜRK, MİLLİ MÜCADELE VE İNKILAPLAR
+    { q: "Atatürk'ün askerler için söylediği tarihi sözlere örnek verir misiniz?", a: "'Ya İstiklal Ya Ölüm' (Sivas Kongresi) ve 'Ordular! İlk hedefiniz Akdeniz'dir, ileri.' (Büyük Taarruz)" },
+    { q: "Dünya tarihinde ilk kez uçakların savaş aracı olarak kullanıldığı savaş hangisidir?", a: "Trablusgarp Savaşı" },
+    { q: "Atatürk'ün eseri Nutuk'ta nelerden bahsediliyor?", a: "1919-1927 yılları arasındaki Milli Mücadele dönemi ve sonrasındaki süreçler (Cumhuriyetin ilanı, inkılaplar) anlatılır." },
+    { q: "Atatürk'ün yazdığı kitaplara örnek veriniz.", a: "Nutuk, Geometri, Sivas Kongresi Günleri (Cumalı Ordugahı, Zabit ve Kumandan ile Hasbihal)." },
+    { q: "Kurtuluş Savaşı'nın başlangıç tarihi nedir?", a: "19 Mayıs 1919 (Atatürk'ün Samsun'a çıkışı)." },
+    { q: "Amasya Genelgesi hakkında ne biliyorsunuz?", a: "Kurtuluş Savaşı'nın amacı, yöntemi ve gerekçesi belirtilmiştir. İlk kez milli egemenliğe dayalı bir yönetimden bahsedilmiştir." },
+    { q: "Mudanya Ateşkes Antlaşması'nın önemi nedir?", a: "Türkiye Cumhuriyeti'nin sınırlarını belirleyen ilk uluslararası belgedir." },
+
+    // GÜNCEL, KURUMLAR VE TERİMLER
+    { q: "Marmara Bölgesi'nin genel özellikleri nelerdir?", a: "Yükseltisi en az, nüfus yoğunluğu en fazla, sanayisi en gelişmiş bölgedir. Kümes hayvancılığında ileridedir." },
+    { q: "Türkiye'deki terör örgütlerinden 3 tanesini sayınız.", a: "PKK, PYD, FETÖ, DHKP-C vb." },
+    { q: "En çok köyü olan ilimiz hangisidir?", a: "Sivas" },
+    { q: "Divan-ı Lügati't-Türk kitabının yazarı kimdir?", a: "Kaşgarlı Mahmud" },
+    { q: "Filoloji nedir?", a: "Dillerin yapısını ve tarihini işleyen dil bilimidir." },
+    { q: "Demokrasi ve Milli Birlik Günü hangi tarihte kutlanır?", a: "15 Temmuz" },
+    { q: "Turan taktiği (Hilal Taktiği) hakkında bilgi verir misiniz?", a: "Düşmanı yarım ay şeklinde çevreleyerek yok etmeyi amaçlayan geleneksel bir Türk askeri taktiğidir." },
+    { q: "Oltu taşı hangi ilimizde meşhurdur?", a: "Erzurum" },
+    { q: "On İki Ada Yunanistan'a ne zaman verildi?", a: "1947 yılında Paris Antlaşması ile verilmiştir." },
+    { q: "İnsansız hava araçlarımızın (İHA) isimleri nelerdir?", a: "Bayraktar TB2, Akıncı, Anka, Turna, Keklik, Pelikan, Martı, Şimşek." },
+    { q: "Ekber ve Erşed Sistemi hangi padişah döneminde getirilmiştir?", a: "I. Ahmet" },
+    { q: "Marshall Planı nedir?", a: "II. Dünya Savaşı sonrasında (1948-1951 yılları arasında) ABD kaynaklı uygulanan ekonomik yardım planıdır." },
+    { q: "Kıbrıs Barış Harekâtı tarihi ve parolası nedir?", a: "20 Temmuz 1974. Parolası: 'Ayşe Tatile Çıksın'." },
+    { q: "Mesnevi kime aittir?", a: "Mevlana Celaleddin-i Rumi" },
+    { q: "'Büyük Türk' olarak bilinen ve Osmanlı'da en uzun süre tahtta kalan padişah kimdir?", a: "Kanuni Sultan Süleyman" },
+    { q: "Osmanlı Devleti'nin son padişahı kimdir?", a: "Sultan Vahdettin" },
+    { q: "G8 ülkelerini sayar mısınız?", a: "ABD, Kanada, Almanya, İtalya, Fransa, Rusya, Japonya, Birleşik Krallık." },
+    { q: "Osmanlı'da iç sorunken dış sorun hâline gelen olay nedir?", a: "Cem Sultan Olayı" },
+    { q: "'Şair Evlenmesi' adlı eser kime aittir ve özelliği nedir?", a: "İbrahim Şinasi'ye aittir. Edebiyatımızda Batılı tarzdaki ilk tiyatro eseridir." },
+    { q: "İlk milli tankımızın adı nedir?", a: "Altay Tankı" },
+    { q: "Göç ve Türeyiş Destanları kime aittir?", a: "Uygurlar" },
+    { q: "Osmanlı Devleti hangi boydan gelmiştir?", a: "Kayı Boyu" },
+    { q: "Türklerin tarih boyunca kullandığı alfabeler nelerdir?", a: "Göktürk, Uygur, Arap (İslam), Kiril ve Latin alfabeleridir." },
+    { q: "1071 tarihi size neyi ifade ediyor?", a: "Malazgirt Muharebesi. Anadolu'nun kapıları Türklere açılmıştır." },
+    { q: "Falezler (yalıyar) nerelerde görülür?", a: "Genellikle Karadeniz ve Akdeniz Bölgelerinde görülür." },
+    { q: "'Huzur' romanının yazarı kimdir?", a: "Ahmet Hamdi Tanpınar" },
+    { q: "Atatürkçülüğün nitelikleri nelerdir?", a: "Milli Kültür, Eşitlik, Barış ve Huzur, Hürriyet ve Bağımsızlıktır." },
+    { q: "Ege Denizi'ne dökülen akarsularımız hangileridir?", a: "Meriç, Bakırçay, Gediz, Büyük ve Küçük Menderes." },
+    { q: "Heyelanı önlemek için neler yapabiliriz?", a: "Eğimi fazla ve dik yerlere bina yapılmamalı, bu tür alanlar ağaçlandırılmalıdır." },
+    { q: "İç Anadolu Bölgesi'ndeki büyük şehirleri sayınız.", a: "Ankara, Eskişehir, Konya, Kayseri" },
+    { q: "Mübadele nedir?", a: "Değiş tokuş etmek anlamına gelir. (Özellikle Türk-Yunan nüfus mübadelesi olarak bilinir)." },
+    { q: "8 yıla 80 yıllık iş sığdıran padişahımız kimdir?", a: "Yavuz Sultan Selim" },
+    { q: "'Ateşten Gömlek' romanı hangi yazarımıza aittir?", a: "Halide Edip Adıvar" },
+    { q: "Akdeniz ile Atlas Okyanusu'nu birbirine bağlayan boğazın adı nedir?", a: "Cebelitarık Boğazı" },
+    { q: "Mostar Köprüsü nerededir?", a: "Bosna Hersek" },
+    { q: "'Muhibbi' mahlasını kullanan padişahımız kimdir?", a: "Kanuni Sultan Süleyman" },
+    { q: "Türkiye'nin en büyük tatlı su gölü hangisidir?", a: "Beyşehir Gölü" },
+    { q: "Osmanlı Devleti'ndeki müzik okulunun adı nedir?", a: "Darülelhan" },
+    { q: "Mustafa Kemal Atatürk'ün 'benim şehrim' dediği il hangisidir?", a: "Yalova" },
+
+    // ATASÖZÜ VE DEYİM YORUMLAMA MÜLAKAT SORULARI
+    { q: "'Demir tavında dövülür' atasözünü açıklayınız.", a: "Bir işi yapmak için uygun zaman ve yer çok önemli bir husustur." },
+    { q: "'Başını kaşımaya vakti olmamak' deyimini açıklar mısınız?", a: "Çok meşgul olmak, başka bir iş yapmaya zerre vakti olmamak demektir." },
+    { q: "'Acı patlıcanı kırağı çalmaz' atasözünü açıklayınız.", a: "Zorluğa ve sıkıntıya alışık olan kimseyi, yeni kötü durumlar fazla etkilemez." },
+    { q: "'Dikensiz gül olmaz' atasözünü açıklayınız.", a: "Her güzel durumun, olayın veya kişinin mutlaka ufak bir kusuru, hatası olabilir." },
+    { q: "'Altın pas tutmaz' atasözünü açıklayınız.", a: "Şerefli, dürüst ve temiz insana hiç kimse leke süremez, iftiralar onu bozamaz." },
+    { q: "'Buğday başak verince orak pahaya çıkar' atasözünü açıklayınız.", a: "Bugün değersiz veya gereksiz görünen şeyler, ihtiyaç anı (zamanı) geldiğinde büyük değer kazanır." },
+    { q: "Polis vatandaşa nasıl davranmalıdır?", a: "Polis, vatandaşa karşı saygılı, tarafsız, sabırlı ve güler yüzlü davranmalıdır. Görevini yerine getirirken insan haklarına ve hukuka uygun hareket etmeli, vatandaşın güvenini kazanmalıdır." },
+    { q: "Osmanlı Devleti'nde veya Türk devletlerinde töre kavramı nedir?", a: "Töre, eski Türk devletlerinde yazılı olmayan hukuk kuralları ve geleneklerin bütünüdür. Adalet, eşitlik, dürüstlük gibi değerleri içerir ve hükümdarlar bile töreye uymak zorundadır." },
+    { q: "Türkiye'de neden çok deprem olmaktadır?", a: "Türkiye, Alp-Himalaya deprem kuşağı üzerinde yer almaktadır. Kuzey Anadolu, Doğu Anadolu ve Batı Anadolu fay hatları nedeniyle aktif tektonik hareketler yaşanmaktadır." },
+    { q: "Polis memurlarının vatandaşlarla iletişimi nasıl olmalıdır?", a: "Açık, anlaşılır, saygılı ve çözüm odaklı olmalıdır. Vatandaşın sorununu dinlemeli, empati kurmalı ve görevini hukuk çerçevesinde yerine getirmelidir." },
+    { q: "Mustafa Kemal Atatürk'ün ilk katıldığı savaş hangisidir?", a: "1911 yılında gönüllü olarak görev aldığı ve İtalyanlara karşı mücadele ettiği Trablusgarp Savaşı'dır." },
+    { q: "Türkiye bir kıta ülkesi midir?", a: "Türkiye bir kıta ülkesi değildir ancak Asya ve Avrupa olmak üzere iki kıta üzerinde toprakları bulunan, kıtalararası geçiş sağlayan bir ülkedir." },
+    { q: "Polis Akademisinin logosunun anlamı nedir?", a: "Logodaki unsurlar; bilgiyi, hukuku, adaleti ve güvenliği temsil eder. Eğitim, disiplin, devlet otoritesi ve hukukun üstünlüğüne verilen önemi simgeler." },
+    { q: "Coğrafi keşifler sırasında diğer toplumlar nasıl etkilenmiştir?", a: "Avrupa devletleri ekonomik açıdan güçlenirken, keşfedilen bölgelerde sömürgecilik başlamış, yerli halkların yaşam biçimleri ve kültürleri olumsuz etkilenmiştir." },
+    { q: "Organizasyon nedir? Açıklayınız.", a: "Belirli bir amacı gerçekleştirmek için insanların, görevlerin ve kaynakların planlı şekilde bir araya getirilmesidir." },
+    { q: "Dünya mirası nedir?", a: "İnsanlık için evrensel değere sahip olan kültürel ve doğal varlıkların tamamıdır. UNESCO tarafından belirlenir ve tüm insanlığın ortak mirası kabul edilir." },
+    { q: "Liderlik nedir?", a: "Bir kişinin belirli hedeflere ulaşmak için insanları etkileyebilmesi, yönlendirebilmesi ve motive edebilmesidir." },
+    { q: "Farkındalık nedir?", a: "Kişinin kendisinin, çevresinin ve yaşadığı olayların bilinçli şekilde farkında olmasıdır." },
+    { q: "Teknolojinin faydaları nelerdir?", a: "Bilgiye hızlı erişim sağlar, üretkenliği artırır, zamandan tasarruf sağlar. Güvenlik alanında ise kamera sistemleri ve yapay zekâ ile suçla mücadeleye katkı sağlar." },
+    { q: "Coğrafi keşifler Avrupa'yı nasıl etkilemiştir?", a: "Avrupa devletleri zenginleşmiş, ticaret gelişmiş, sömürgecilik faaliyetleri hız kazanmış ve bilimsel düşünce (Rönesans) güçlenmiştir." },
+    { q: "Mustafa Kemal Atatürk'ün 'Yurtta sulh, cihanda sulh' sözünü açıklayınız.", a: "Ülke içinde barış, huzur ve birlik sağlanmadan dış dünyada kalıcı barışın mümkün olmayacağını ifade eder. Barışçı dış politikanın temelidir." },
+    { q: "Balistik nedir?", a: "Ateşli silahlardan çıkan mermilerin hareketlerini, silahları, mühimmatı ve atış izlerini inceleyen bilim dalıdır." },
+    { q: "1876 yılında Osmanlı Devleti'nde ne olmuştur?", a: "I. Meşrutiyet ilan edilmiş ve Osmanlı Devleti'nin ilk anayasası olan Kanun-i Esasi yürürlüğe girerek anayasal yönetime geçiş başlamıştır." },
+    { q: "Amasya Genelgesi'nde yer alan 'Milletin bağımsızlığını yine milletin azim ve kararı kurtaracaktır.' sözü ne ifade etmektedir?", a: "Kurtuluş mücadelesinin milletin iradesiyle yürütüleceğini ifade eder. Milli egemenlik anlayışının temelini oluşturur." },
+    { q: "Haberleşme hürriyeti nedir?", a: "Kişilerin mektup, telefon, e-posta vb. iletişim araçlarıyla serbestçe haberleşebilme hakkıdır. Anayasa ile güvence altına alınmıştır." },
+    { q: "Kapitülasyonların kaldırılması hakkında bilgi veriniz.", a: "Yabancı devletlere tanınan ekonomik ve hukuki ayrıcalıklardı. 24 Temmuz 1923'te Lozan Barış Antlaşması ile tamamen kaldırılarak ekonomik bağımsızlık sağlanmıştır." },
+    { q: "Vatansız kişi kime denir?", a: "Hiçbir devlet tarafından vatandaş olarak kabul edilmeyen, herhangi bir ülkenin vatandaşlığına sahip olmayan kişidir (Apatrid)." },
+    { q: "Felsefenin dijitalleşme üzerindeki etkileri nelerdir?", a: "Yapay zekâ, veri güvenliği, mahremiyet, etik ve insan hakları gibi konularda yol gösterici bir rol üstlenir." },
+    { q: "Ülkemizin güvenliği açısından teknolojinin faydaları nelerdir?", a: "Sınır güvenliği, savunma sanayisi ve istihbarat alanlarında (İHA, SİHA, yapay zekâ vb.) güvenlik güçlerinin daha hızlı ve etkili çalışmasını sağlar." },
+    { q: " 'Her temas iz bırakır.' sözünü adli açıdan açıklayınız.", a: "Locard Değişim Prensibi'ne göre; olay yerine gelen veya bir nesneyle temas eden kişi mutlaka olay yerinde bir iz bırakır veya olay yerinden bir iz alır (Parmak izi, DNA vb.)." },
+    { q: "Sosyal medyanın kurumlar üzerindeki etkileri nelerdir?", a: "Vatandaşlarla hızlı iletişim kurulmasını sağlar ancak yanlış bilgi yayılması (dezenformasyon) ve itibar kaybı gibi riskleri de barındırır." },
+    { q: "Türk Devletlerinde kurultayın önemi nedir?", a: "Eski Türk devletlerinde savaş, barış ve devlet işlerinin görüşüldüğü danışma meclisidir. Ortak akla verilen önemi gösterir." },
+    { q: "Dijital ayak izi nedir?", a: "Bireylerin internet ortamında bıraktıkları veri ve izlerin tamamıdır (Sosyal medya paylaşımları, ziyaret edilen siteler vb.)." },
+    { q: "Atatürk döneminde ekonomiye neden önem verilmiştir? Atatürk kaç yaşında vefat etmiştir?", a: "Siyasi bağımsızlığın ekonomik bağımsızlıkla desteklenmesi gerektiğine inanıldığı için önem verilmiştir. Atatürk 57 yaşında vefat etmiştir." },
+    { q: "Unutulma hakkı nedir?", a: "Kişilerin geçmişteki bazı kişisel verilerinin veya internet içeriklerinin belirli şartlar altında kaldırılmasını isteme hakkıdır." },
+    { q: "Dezenformasyon nedir?", a: "İnsanları yanıltmak amacıyla kasıtlı olarak üretilen veya yayılan yanlış bilgidir." },
+    { q: "Lozan Antlaşması'nın önemi nedir?", a: "24 Temmuz 1923'te imzalanan bu antlaşma ile Türkiye Cumhuriyeti'nin bağımsızlığı uluslararası alanda kabul edilmiş, sınırlar belirlenmiş ve kapitülasyonlar kaldırılmıştır." },
+    { q: "Hukuk devleti nedir?", a: "Tüm kişi ve kurumların hukuk kurallarına bağlı olduğu, temel hak ve özgürlüklerin güvence altında olduğu devlettir." },
+    { q: "Etkili iletişim neden önemlidir?", a: "Yanlış anlaşılmaları önler, iş verimliliğini artırır. Polislik mesleğinde ise vatandaşla güçlü bir güven ilişkisi kurulmasını sağlar." },
+    { q: "1908 yılında ilan edilen II. Meşrutiyet'in önemi nedir?", a: "Padişahın yetkileri sınırlandırılmış, anayasal düzene yeniden geçilmiş ve Türk tarihinde ilk kez çok partili siyasi hayata adım atılmıştır." },
+    { q: "Vatandaşlık ödevleri nelerdir?", a: "Kanunlara uymak, vergi vermek, askerlik yapmak ve oy kullanmak gibi devlete ve topluma karşı yerine getirilmesi gereken sorumluluklardır." },
+    { q: "İklimin beşerî faaliyetler üzerindeki etkileri nelerdir?", a: "Tarım, hayvancılık, ulaşım, yerleşme, turizm ve ekonomik faaliyetleri doğrudan etkiler ve şekillendirir." },
+    { q: "Kadın cinayetleri nasıl önlenebilir?", a: "Eğitim, farkındalık, hukuki yaptırımların etkin uygulanması ve mağdurların erken tespit edilerek korunması ile önlenebilir." },
+    { q: "Hollanda'nın üç şehrini sayınız.", a: "Amsterdam, Rotterdam, Lahey." },
+    { q: "Çanakkale Cephesi'nin dünya genelindeki sonuçları nelerdir?", a: "Osmanlı'nın savaş süresi uzamış, İtilaf Devletleri boğazları geçememiş ve Rusya'ya yardım ulaştırılamadığı için Rusya'da iç karışıklıklar artarak rejim değişmiştir." },
+    { q: "Sabiha Gökçen'in önemi nedir? Hakkında bilgi veriniz.", a: "Atatürk'ün manevi kızıdır. Dünyanın ilk kadın savaş pilotlarından biri, Türkiye'nin ise ilk kadın savaş pilotudur." },
+    { q: "Yeşil Vatan kavramının sanayi ile ilişkisi nedir?", a: "Ormanları ve doğal çevreyi korumaktır. Sanayi faaliyetlerinin doğaya zarar vermeden, çevre dostu ve sürdürülebilir bir şekilde yapılması gerektiğini vurgular." },
+    { q: "Toplumsal olaylar nelerdir?", a: "Göç, eğitim, işsizlik, kentleşme, doğal afetler veya seçimler gibi toplumun tamamını veya bir bölümünü etkileyen sosyal gelişmelerdir." },
+    { q: "Hak ve özgürlük nedir?", a: "Hak, hukukun kişilere tanıdığı yetkidir. Özgürlük ise kişinin başkalarının haklarını ihlal etmeden, kurallar çerçevesinde dilediğini yapabilmesidir." },
+    { q: "Millî hâkimiyet nedir?", a: "Egemenliğin millete ait olması, devlet yönetiminde son sözün milletin iradesine dayanmasıdır." }
+];
+
+window.closeSecModal = function () {
+    const modal = document.getElementById('sec-input-modal');
+    modal.classList.add('hidden');
+    modal.style.display = 'none';
+};
+
+// ==========================================
+// ⚖️ VÜCUT KİTLE İNDEKSİ (VKİ) MOTORU
+// ==========================================
+window.calculateSecVKI = function () {
+    const heightCm = parseFloat(document.getElementById('sec-vki-height').value);
+    const weightKg = parseFloat(document.getElementById('sec-vki-weight').value);
+    const resultBox = document.getElementById('sec-vki-result');
+
+    if (!heightCm || !weightKg) {
+        alert("Lütfen boy ve kilonuzu eksiksiz girin.");
+        return;
+    }
+
+    // Boyu metreye çevir ve VKİ hesapla: Kilo / (Boy * Boy)
+    const heightM = heightCm / 100;
+    const vki = (weightKg / (heightM * heightM)).toFixed(2);
+
+    // Polis ve Jandarma için genel sınır: 18 (dahil) ile 27 (dahil) arası
+    let statusText = "";
+    let bgColor = "";
+    let textColor = "";
+
+    if (vki >= 18 && vki <= 27) {
+        statusText = `VKİ: ${vki} - GEÇERLİ (Standartlara Uygun)`;
+        bgColor = "rgba(39, 174, 96, 0.2)"; // Yeşilimsi
+        textColor = "#2ecc71";
+    } else if (vki > 27 && vki <= 28) {
+        statusText = `VKİ: ${vki} - SINIRDA (Kilo Vermelisin)`;
+        bgColor = "rgba(241, 196, 15, 0.2)"; // Sarımtsı
+        textColor = "#f1c40f";
+    } else if (vki < 18 && vki >= 17) {
+        statusText = `VKİ: ${vki} - SINIRDA (Kilo Almalısın)`;
+        bgColor = "rgba(241, 196, 15, 0.2)";
+        textColor = "#f1c40f";
+    } else {
+        statusText = `VKİ: ${vki} - ELENME SEBEBİ (Sınırların Dışında)`;
+        bgColor = "rgba(231, 76, 60, 0.2)"; // Kırmızımsı
+        textColor = "#e74c3c";
+    }
+
+    resultBox.style.display = 'block';
+    resultBox.style.backgroundColor = bgColor;
+    resultBox.style.color = textColor;
+    resultBox.style.border = `1px solid ${textColor}`;
+    resultBox.innerText = statusText;
+
+    if (navigator.vibrate) navigator.vibrate([20, 30]);
+};
+
+let currentCardIndex = 0;
+let isAnswerShown = false;
+
+window.initFlashcards = function () {
+    currentCardIndex = 0;
+    updateFlashcardUI();
+};
+
+window.updateFlashcardUI = function () {
+    const qEl = document.getElementById('sec-flashcard-q');
+    const aEl = document.getElementById('sec-flashcard-a');
+    const hintEl = document.getElementById('sec-flashcard-hint');
+    const counterEl = document.getElementById('sec-flashcard-counter');
+
+    qEl.innerText = interviewQuestions[currentCardIndex].q;
+    aEl.innerText = interviewQuestions[currentCardIndex].a;
+    counterEl.innerText = `${currentCardIndex + 1}/${interviewQuestions.length}`;
+
+    // Yeni soruya geçildiğinde cevabı gizle
+    isAnswerShown = false;
+    aEl.style.display = 'none';
+    hintEl.style.display = 'block';
+};
+
+window.toggleFlashcardAnswer = function () {
+    const aEl = document.getElementById('sec-flashcard-a');
+    const hintEl = document.getElementById('sec-flashcard-hint');
+    const cardEl = document.getElementById('sec-flashcard');
+
+    isAnswerShown = !isAnswerShown;
+
+    if (isAnswerShown) {
+        aEl.style.display = 'block';
+        hintEl.style.display = 'none';
+        cardEl.style.border = '1px solid var(--sec-accent)';
+        if (navigator.vibrate) navigator.vibrate(15);
+    } else {
+        aEl.style.display = 'none';
+        hintEl.style.display = 'block';
+        cardEl.style.border = '1px dashed var(--sec-accent)';
+    }
+};
+
+window.nextFlashcard = function () {
+    if (currentCardIndex < interviewQuestions.length - 1) {
+        currentCardIndex++;
+        updateFlashcardUI();
+    }
+};
+
+window.prevFlashcard = function () {
+    if (currentCardIndex > 0) {
+        currentCardIndex--;
+        updateFlashcardUI();
+    }
+};
+
+// Ekran açıldığında kartları başlatmak için
+document.addEventListener("DOMContentLoaded", () => {
+    initFlashcards();
+});
+
+window.openStravaApp = function () {
+    if(navigator.vibrate) navigator.vibrate(20);
+    const androidIntent = "intent://#Intent;package=com.strava;scheme=strava;end";
+    const iosScheme = "strava://";
+    const webLink = "https://www.strava.com/";
+
+    const userAgent = navigator.userAgent || navigator.vendor || window.opera;
+
+    if (/android/i.test(userAgent)) {
+        window.location.href = androidIntent;
+    } else if (/iPad|iPhone|iPod/.test(userAgent) && !window.MSStream) {
+        setTimeout(() => { window.location.href = webLink; }, 1500);
+        window.location.href = iosScheme;
+    } else {
+        window.open(webLink, '_blank');
+    }
+};
+
+// Kaydet butonuna basıldığında Story ekranını açan fonksiyon
+const originalSaveCardioSession = window.saveCardioSession || function(){};
+window.saveCardioSession = function () {
+    // Süre, mesafe ve rotayı al
+    const distText = document.getElementById('cardio-distance-display').innerText;
+    const timeText = document.getElementById('cardio-timer-display').innerText;
+    const paceText = document.getElementById('cardio-pace-display').innerText;
+
+    // Arka plan kardiyo ekranını kapat
+    if(typeof closeCardioScreen === 'function') closeCardioScreen();
+
+    // Story Modalını doldur
+    document.getElementById('story-dist').innerText = distText;
+    document.getElementById('story-time').innerText = timeText;
+    document.getElementById('story-pace').innerText = paceText;
+    document.getElementById('story-date').innerText = new Date().toLocaleDateString('tr-TR');
+    
+    // Basit kalori tahmini (Mesafe * 65 kcal)
+    let kcal = (parseFloat(distText) * 65).toFixed(0);
+    document.getElementById('story-kcal').innerText = `${kcal} kcal`;
+
+    // Story modalını aç
+    const storyModal = document.getElementById('cardio-story-modal');
+    storyModal.classList.remove('hidden');
+    storyModal.style.display = 'flex';
+
+    if(typeof showDynamicIsland === 'function') {
+        showDynamicIsland("Kardiyo Kaydedildi", `${distText} km kat edildi!`, "🔥");
+    }
+    if(navigator.vibrate) navigator.vibrate([50, 100, 50]);
+};
+
+window.closeCardioStory = function () {
+    const storyModal = document.getElementById('cardio-story-modal');
+    storyModal.style.display = 'none';
+    storyModal.classList.add('hidden');
+};
+// ==========================================
+// 🎙️ YAPAY ZEKA KOMİSYON SİMÜLATÖRÜ (AYNA MODU)
+// ==========================================
+let simMediaStream = null;
+
+window.openInterviewSimulator = async function () {
+    const modal = document.getElementById('interview-sim-modal');
+    const video = document.getElementById('sim-camera-feed');
+    
+    modal.style.display = 'flex';
+    modal.classList.remove('hidden');
+
+    try {
+        // Ön kamerayı ve mikrofonu çağır
+        simMediaStream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: "user" }, audio: true });
+        video.srcObject = simMediaStream;
+    } catch (err) {
+        console.log("Kamera/Mikrofon erişim hatası:", err);
+        alert("Kamera ve mikrofon izni alınamadı. Lütfen tarayıcı izinlerini kontrol edin.");
+    }
+
+    askRandomSimulationQuestion();
+    if (navigator.vibrate) navigator.vibrate(30);
+};
+
+window.closeInterviewSimulator = function () {
+    const modal = document.getElementById('interview-sim-modal');
+    modal.style.display = 'none';
+    modal.classList.add('hidden');
+
+    // Kamera ve mikrofonu kapat (Işığı söndür)
+    if (simMediaStream) {
+        simMediaStream.getTracks().forEach(track => track.stop());
+        simMediaStream = null;
+    }
+
+    // Konuşma motorunu sustur
+    if ('speechSynthesis' in window) {
+        window.speechSynthesis.cancel();
+    }
+};
+
+window.askRandomSimulationQuestion = function () {
+    // Soru havuzundan rastgele bir soru seç
+    const questionsPool = (typeof interviewQuestions !== 'undefined' && interviewQuestions.length > 0) ? interviewQuestions : [
+        { q: "Kendinizi kısaca tanıtır mısınız?", a: "Özgeçmiş anlatılır." },
+        { q: "Kuvvetler ayrılığı ilkesi nedir?", a: "Yasama, yürütme, yargı bağımsızlığıdır." }
+    ];
+
+    const randomItem = questionsPool[Math.floor(Math.random() * questionsPool.length)];
+    const qEl = document.getElementById('sim-current-question');
+    if (qEl) qEl.innerText = `"${randomItem.q}"`;
+
+    // Tarayıcının yerleşik ses motoru ile soruyu sesli oku (Text-to-Speech)
+    if ('speechSynthesis' in window) {
+        window.speechSynthesis.cancel(); // Önceki sesi kes
+        const utterance = new SpeechSynthesisUtterance(randomItem.q);
+        utterance.lang = 'tr-TR';
+        utterance.rate = 1.0; // Konuşma hızı
+        window.speechSynthesis.speak(utterance);
+    }
+
+    if (navigator.vibrate) navigator.vibrate(15);
+};
+
+// ==========================================
+// 🎙️ YAPAY ZEKA GERÇEK KOMİSYON RAPORU MOTORU
+// ==========================================
+window.finishInterviewSimulation = function () {
+    closeInterviewSimulator();
+
+    // 1. Önce kullanıcıya yapay zekanın düşündüğünü Dinamik Ada ile bildir
+    if (typeof showDynamicIsland === 'function') {
+        showDynamicIsland("Komisyon Değerlendiriyor...", "Yapay Zeka Raporu Hazırlanıyor", "🤖", true);
+    }
+
+    if (navigator.vibrate) navigator.vibrate([50, 100, 50]);
+
+    // 2. Yapay Zekaya (Oly) İstek Gönder
+    generateAIInterviewReport();
+};
+
+async function generateAIInterviewReport() {
+    const prompt = "Aday bir POMEM/Jandarma mülakat provasını (Ayna Modu) tamamladı. Ona gerçek bir komisyon başkanı gibi profesyonel bir değerlendirme raporu ver. Raporun içinde: 1) Hitabet ve Duruş Puanı (100 üzerinden), 2) Eksik veya geliştirilmesi gereken 2 önemli nokta, 3) Motivasyon verici kısa bir kapanış cümlesi olsun. Cevabın net, Türkçe ve maksimum 3-4 cümlelik vurucu bir koçluk formatında olsun.";
+
+    try {
+        // Uygulamanın halihazırda kullandığı Gemini AI motorunu çağırıyoruz
+        const aiResponse = await askGeminiAI(prompt);
+
+        // Yapay zekadan gelen yanıtı Dinamik Ada üzerinden akıcı bir şekilde göster
+        if (typeof showDynamicIsland === 'function') {
+            showDynamicIsland("Yapay Zeka Komisyon Raporu", aiResponse, "🏆");
+        }
+
+        // İstersen daha detaylı okunması için tarayıcı uyarısı (alert) veya şık bir modal olarak da patlatabiliriz:
+        // alert("🤖 KOMİSYON BAŞKANI RAPORU:\n\n" + aiResponse);
+
+    } catch (error) {
+        console.error("AI Rapor Hatası:", error);
+        if (typeof showDynamicIsland === 'function') {
+            showDynamicIsland("Rapor Alındı", "Hitabetin ve özgüvenin oldukça yerindeydi! Geçer not aldın. 🎯", "✨");
+        }
+    }
+}
+// ==========================================
+// 🎙️ ÜCRETSİZ SESLİ MÜLAKAT VE DİNLEME MOTORU
+// ==========================================
+let recognition = null;
+let userSpokenAnswer = ""; // Adayın söylediği kelimeler burada birikecek
+
+window.openInterviewSimulator = async function () {
+    const modal = document.getElementById('interview-sim-modal');
+    const video = document.getElementById('sim-camera-feed');
+    
+    modal.style.display = 'flex';
+    modal.classList.remove('hidden');
+    userSpokenAnswer = "";
+    
+    const speechBox = document.getElementById('sim-user-speech');
+    if(speechBox) speechBox.innerText = "Dinleniyor... Konuşmaya başlayabilirsin.";
+
+    try {
+        // 1. Kamerayı Aç
+        simMediaStream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: "user" }, audio: true });
+        video.srcObject = simMediaStream;
+    } catch (err) {
+        console.log("Kamera erişim hatası:", err);
+    }
+
+    // 2. Ücretsiz Tarayıcı Ses Tanıma (Speech Recognition) Motorunu Başlat
+    const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+    if (SpeechRecognition) {
+        recognition = new SpeechRecognition();
+        recognition.lang = 'tr-TR';
+        recognition.continuous = true; // Sürekli dinle
+        recognition.interimResults = true; // Anlık sonuçları göster
+
+        recognition.onresult = (event) => {
+            let interimText = "";
+            for (let i = event.resultIndex; i < event.results.length; ++i) {
+                if (event.results[i].isFinal) {
+                    userSpokenAnswer += event.results[i][0].transcript + " ";
+                } else {
+                    interimText += event.results[i][0].transcript;
+                }
+            }
+            if (speechBox) {
+                speechBox.innerText = userSpokenAnswer + interimText;
+            }
+        };
+
+        recognition.onerror = (err) => {
+            console.log("Ses tanıma hatası:", err);
+        };
+
+        try {
+            recognition.start();
+        } catch(e) { console.log("Mikrofon zaten açık"); }
+    } else {
+        if(speechBox) speechBox.innerText = "Tarayıcınız ses tanımayı desteklemiyor ama simülasyon aktif.";
+    }
+
+    askRandomSimulationQuestion();
+    if (navigator.vibrate) navigator.vibrate(30);
+};
+
+window.closeInterviewSimulator = function () {
+    const modal = document.getElementById('interview-sim-modal');
+    modal.style.display = 'none';
+    modal.classList.add('hidden');
+
+    // Kamerayı kapat
+    if (simMediaStream) {
+        simMediaStream.getTracks().forEach(track => track.stop());
+        simMediaStream = null;
+    }
+
+    // Mikrofon dinlemesini durdur
+    if (recognition) {
+        try { recognition.stop(); } catch(e){}
+        recognition = null;
+    }
+
+    // Ses motorunu sustur
+    if ('speechSynthesis' in window) {
+        window.speechSynthesis.cancel();
+    }
+};
+
+window.askRandomSimulationQuestion = function () {
+    const questionsPool = (typeof interviewQuestions !== 'undefined' && interviewQuestions.length > 0) ? interviewQuestions : [
+        { q: "Kendinizi kısaca tanıtır mısınız?" },
+        { q: "Kuvvetler ayrılığı ilkesi nedir?" }
+    ];
+
+    const randomItem = questionsPool[Math.floor(Math.random() * questionsPool.length)];
+    const qEl = document.getElementById('sim-current-question');
+    if (qEl) qEl.innerText = `"${randomItem.q}"`;
+
+    if ('speechSynthesis' in window) {
+        window.speechSynthesis.cancel();
+        const utterance = new SpeechSynthesisUtterance(randomItem.q);
+        utterance.lang = 'tr-TR';
+        window.speechSynthesis.speak(utterance);
+    }
+
+    if (navigator.vibrate) navigator.vibrate(15);
+};
+
+window.finishInterviewSimulation = function () {
+    closeInterviewSimulator();
+
+    if (typeof showDynamicIsland === 'function') {
+        showDynamicIsland("Sesin Analiz Ediliyor...", "Yapay Zeka Puanı Hesaplanıyor", "🤖", true);
+    }
+
+    if (navigator.vibrate) navigator.vibrate([50, 100, 50]);
+
+    generateAIInterviewReport(userSpokenAnswer);
+};
+
+async function generateAIInterviewReport(spokenText) {
+    let candidateSpeech = spokenText.trim();
+    if (!candidateSpeech) {
+        candidateSpeech = "Aday mülakat sırasında hiç sesli yanıt vermedi veya mikrofon algılamadı.";
+    }
+
+    const prompt = `Bir POMEM/Jandarma mülakat adayı Ayna Modu'nda komisyon sorusuna şu sözlü yanıtı verdi: "${candidateSpeech}". 
+    Bu yanıtı gerçek bir komisyon başkanı titizliğiyle analiz et ve tamamen **ücretsiz, net ve profesyonel** bir rapor ver. Raporun şunları içersin:
+    1) Net Bir Puan (100 üzerinden).
+    2) Adayın konuşmasındaki eksik kelimeler, hukuki/tarihi hatalar veya hitabet eksiklikleri (Eğer konuşma boşsa bunu eleştir).
+    3) Mülakatı geçip geçemeyeceğine dair net bir hüküm.
+    Cevabın Türkçe, vurucu ve maksimum 3-4 cümle olsun.`;
+
+    try {
+        const aiResponse = await askGeminiAI(prompt);
+
+        if (typeof showDynamicIsland === 'function') {
+            showDynamicIsland("Komisyon Mülakat Raporu", aiResponse, "🏆");
+        }
+    } catch (error) {
+        console.error("AI Rapor Hatası:", error);
+        if (typeof showDynamicIsland === 'function') {
+            showDynamicIsland("Mülakat Tamamlandı", "Ses kayıtların incelendi, harika bir provalı duruş sergiledin! 🎯", "✨");
+        }
+    }
+}
+// ==========================================
+// 🧠 AKILLI FLASHCARD (ARALIKLI TEKRAR) MOTORU
+// ==========================================
+let currentFcIndex = 0;
+let isFcAnswerShown = false;
+
+// Soru veritabanını hafızadan veya ana listeden çek
+function getActiveFlashcards() {
+    let savedProgress = JSON.parse(localStorage.getItem('olympus_fc_progress')) || {};
+    
+    // Eğer veritabanında interviewQuestions varsa onu kullan, yoksa yedekle
+    let pool = (typeof interviewQuestions !== 'undefined' && interviewQuestions.length > 0) ? interviewQuestions : [
+        { q: "Polis vatandaşa nasıl davranmalıdır?", a: "Saygılı, tarafsız ve hukuka uygun." },
+        { q: "Amasya Genelgesi'nin önemi nedir?", a: "Milletin bağımsızlığını yine milletin azim ve kararı kurtaracaktır." }
+    ];
+
+    // Aralıklı tekrar zekası: "hard" (zorlandım) olarak işaretlenenleri listenin başına taşı
+    return pool.map((item, idx) => {
+        return { ...item, id: idx, status: savedProgress[idx] || 'new' };
+    }).sort((a, b) => {
+        if (a.status === 'hard' && b.status !== 'hard') return -1;
+        if (a.status !== 'hard' && b.status === 'hard') return 1;
+        return 0;
+    });
+}
+
+window.renderCurrentFlashcard = function () {
+    const cards = getActiveFlashcards();
+    if (cards.length === 0) return;
+
+    if (currentFcIndex >= cards.length) currentFcIndex = 0; // Döngü
+
+    const currentCard = cards[currentFcIndex];
+    const qEl = document.getElementById('fc-question-text');
+    const aEl = document.getElementById('fc-answer-text');
+    const badgeEl = document.getElementById('fc-stats-badge');
+    const btnArea = document.getElementById('fc-action-buttons');
+
+    if (qEl) qEl.innerText = currentCard.q;
+    if (aEl) {
+        aEl.innerText = currentCard.a;
+        aEl.style.display = 'none'; // İlk başta cevap gizli
+    }
+    if (badgeEl) badgeEl.innerText = `Kart ${currentFcIndex + 1} / ${cards.length} (${currentCard.status.toUpperCase()})`;
+    if (btnArea) btnArea.style.display = 'none'; // Oylama butonları cevap açılınca belirir
+
+    isFcAnswerShown = false;
+};
+
+window.flipFlashcard = function () {
+    const aEl = document.getElementById('fc-answer-text');
+    const btnArea = document.getElementById('fc-action-buttons');
+
+    if (!isFcAnswerShown) {
+        if (aEl) aEl.style.display = 'block';
+        if (btnArea) btnArea.style.display = 'flex'; // Oylama butonlarını göster
+        isFcAnswerShown = true;
+        if (navigator.vibrate) navigator.vibrate(15);
+    }
+};
+
+window.rateFlashcard = function (rating) {
+    const cards = getActiveFlashcards();
+    const currentCard = cards[currentFcIndex];
+
+    // Hafıza durumunu kaydet (hard = tekrar edilecek, easy = ezberlendi)
+    let savedProgress = JSON.parse(localStorage.getItem('olympus_fc_progress')) || {};
+    savedProgress[currentCard.id] = rating;
+    localStorage.setItem('olympus_fc_progress', JSON.stringify(savedProgress));
+
+    if (navigator.vibrate) navigator.vibrate(30);
+
+    // Sonraki karta geç
+    currentFcIndex++;
+    renderCurrentFlashcard();
+
+    if (typeof showDynamicIsland === 'function') {
+        let msg = rating === 'hard' ? "Tekrara eklendi 📌" : (rating === 'good' ? "İyi ilerliyorsun 👍" : "Hafızaya kazındı 🟢");
+        showDynamicIsland("Akıllı Tekrar", msg, "🧠");
+    }
+};
+
+// Sayfa yüklendiğinde kartları hazırla
+document.addEventListener('DOMContentLoaded', () => {
+    setTimeout(renderCurrentFlashcard, 500);
+});
+// ==========================================
+// 🪖 JASEM & POMEM HİYERARŞİ VE PROTOKOL MOTORU
+// ==========================================
+const hierarchyQuestions = [
+    {
+        q: "Jandarma Genel Komutanlığı hangi bakanlığa bağlıdır?",
+        options: ["Milli Savunma Bakanlığı", "İçişleri Bakanlığı", "Adalet Bakanlığı", "Cumhurbaşkanlığı Doğrudan"],
+        correct: 1
+    },
+    {
+        q: "İl sınırları içinde genel kolluk kuvvetlerinin en üst mülki amiri kimdir?",
+        options: ["İl Emniyet Müdürü", "İl Jandarma Komutanı", "Vali", "Cumhuriyet Başsavcısı"],
+        correct: 2
+    },
+    {
+        q: "Emniyet Genel Müdürlüğü hangi bakanlığa bağlıdır?",
+        options: ["İçişleri Bakanlığı", "Milli Savunma Bakanlığı", "Gençlik ve Spor Bakanlığı", "Doğrudan Meclis"],
+        correct: 0
+    },
+    {
+        q: "İlçe sınırları içinde polis ve jandarmanın mülki amiri kimdir?",
+        options: ["İlçe Emniyet Müdürü", "Kaymakam", "Karakol Komutanı", "Belediye Başkanı"],
+        correct: 1
+    },
+    {
+        q: "Sahil Güvenlik Komutanlığı hangi bakanlığa bağlıdır?",
+        options: ["Ulaştırma Bakanlığı", "İçişleri Bakanlığı", "Milli Savunma Bakanlığı", "Tarım ve Orman Bakanlığı"],
+        correct: 1
+    }
+];
+
+let currentHierIndex = 0;
+
+window.renderHierarchyQuestion = function () {
+    const qEl = document.getElementById('hier-question-text');
+    const optContainer = document.getElementById('hier-options-container');
+
+    if (!qEl || !optContainer) return;
+
+    const item = hierarchyQuestions[currentHierIndex];
+    qEl.innerText = `${currentHierIndex + 1}. ${item.q}`;
+    optContainer.innerHTML = '';
+
+    item.options.forEach((opt, idx) => {
+        optContainer.innerHTML += `
+            <button onclick="checkHierarchyAnswer(${idx}, ${item.correct})" style="background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.2); color: #fff; padding: 10px; border-radius: 6px; font-size: 12px; font-weight: bold; cursor: pointer; text-align: left; transition: 0.2s;">
+                ${String.fromCharCode(65 + idx)}) ${opt}
+            </button>
+        `;
+    });
+};
+
+window.checkHierarchyAnswer = function (selected, correct) {
+    if (navigator.vibrate) navigator.vibrate(selected === correct ? 30 : [50, 50, 50]);
+
+    if (selected === correct) {
+        if (typeof showDynamicIsland === 'function') {
+            showDynamicIsland("Doğru Yanıt! 🟢", "Hiyerarşi bilgisi teyit edildi.", "✅");
+        }
+    } else {
+        if (typeof showDynamicIsland === 'function') {
+            showDynamicIsland("Yanlış Yanıt! 🔴", "Teşkilat şemasını incelemelisin.", "❌");
+        }
+    }
+
+    // Sonraki soruya geç
+    currentHierIndex = (currentHierIndex + 1) % hierarchyQuestions.length;
+    setTimeout(renderHierarchyQuestion, 1500);
+};
+
+window.openHierarchyGuide = function () {
+    const modal = document.getElementById('hierarchy-guide-modal');
+    if (modal) {
+        modal.style.display = 'flex';
+        modal.classList.remove('hidden');
+    }
+    if (navigator.vibrate) navigator.vibrate(20);
+};
+
+window.closeHierarchyGuide = function () {
+    const modal = document.getElementById('hierarchy-guide-modal');
+    if (modal) {
+        modal.style.display = 'none';
+        modal.classList.add('hidden');
+    }
+};
+
+// Sayfa yüklendiğinde hiyerarşi testini başlat
+document.addEventListener('DOMContentLoaded', () => {
+    setTimeout(renderHierarchyQuestion, 600);
+});
+// ==========================================
+// 🦅 AKADEMİ MODU HAFIZA VE TEMA KORUMA MOTORU
+// ==========================================
+document.addEventListener("DOMContentLoaded", () => {
+    // Sayfa açıldığında hafızada aktif bir akademi modu var mı kontrol et
+    const activeSecMode = localStorage.getItem('olympus_active_sec_mode');
+    
+    if (activeSecMode === 'polis' || activeSecMode === 'jandarma') {
+        // Fonksiyon mevcutsa temayı ve butonları direkt aktif moda getir
+        if (typeof openSecurityMode === 'function') {
+            // true/false parametreleri varsa animasyonsuz veya doğrudan tetikle
+            setTimeout(() => {
+                openSecurityMode(activeSecMode, true);
+            }, 300);
+        }
+    }
+});

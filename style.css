@@ -321,8 +321,9 @@ h1 {
 
 .tracking-grid {
     display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 12px;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 15px;
+    padding-bottom: 15px; /* Diğer butonlara yapışmasını önler */
 }
 
 .track-card {
@@ -5192,3 +5193,66 @@ body.dilala-mode .panic-btn {
     opacity: 0.05;
     pointer-events: none;
 }
+/* ==========================================
+   🦅 GÜVENLİK GÜÇLERİ LOGO VE TEMA STİLLERİ
+   ========================================== */
+.sec-logo-wrapper {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 8px;
+    cursor: pointer;
+}
+.sec-logo {
+    width: 60px;
+    height: 60px;
+    object-fit: contain;
+    transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    border-radius: 50%;
+}
+.sec-logo-label {
+    color: #888;
+    font-size: 10px;
+    font-weight: bold;
+    letter-spacing: 1px;
+    transition: color 0.3s;
+}
+
+/* Pasif (Gri) Durum */
+.sec-logo-passive {
+    filter: grayscale(1) opacity(0.4);
+    transform: scale(1);
+}
+/* Aktif (Renkli) Durum */
+.sec-logo-active {
+    filter: grayscale(0) opacity(1) drop-shadow(0 0 15px rgba(255, 255, 255, 0.3));
+    transform: scale(1.15);
+}
+.sec-logo-wrapper:active .sec-logo { transform: scale(0.9); }
+
+/* Tema Değişkenleri */
+body.jandarma-theme {
+    --bg-dark: #000b18; /* Lacivert */
+    --sec-accent: #d32f2f; /* Kırmızı */
+    transition: background-color 0.5s ease;
+}
+body.polis-theme {
+    --bg-dark: #05101a; /* Koyu Mavi */
+    --sec-accent: #fbc531; /* Polis Sarısı / Altın */
+    transition: background-color 0.5s ease;
+}
+
+/* Yükleme Animasyonları */
+@keyframes secPulseExpand {
+    0% { transform: scale(1); filter: grayscale(1); opacity: 0.5; }
+    40% { transform: scale(1.5); filter: grayscale(0) drop-shadow(0 0 30px var(--sec-accent)); opacity: 1; }
+    80% { transform: scale(8); filter: grayscale(0) drop-shadow(0 0 50px var(--sec-accent)); opacity: 0; }
+    100% { transform: scale(10); opacity: 0; display: none; }
+}
+@keyframes textFadeIn {
+    0% { opacity: 0; color: #fff; }
+    50% { opacity: 1; text-shadow: 0 0 10px var(--sec-accent); color: var(--sec-accent); }
+    100% { opacity: 0; color: var(--sec-accent); }
+}
+.sec-animate-img { animation: secPulseExpand 2s forwards ease-in-out; }
+.sec-animate-text { animation: textFadeIn 2s forwards ease-in-out; }
