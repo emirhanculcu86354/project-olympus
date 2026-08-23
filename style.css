@@ -5276,22 +5276,7 @@ html, body {
     position: relative;
     overflow: hidden;
 }
-/* ==========================================
-   2. ALT MENÜ YERE SIFIRLAMA (SAFE AREA)
-   ========================================== */
-.bottom-nav {
-    position: fixed;
-    bottom: 0;
-    left: 0;
-    width: 100%;
-    background: #0a0a0a; /* Alt menü arka plan rengin */
-    border-top: 1px solid #222;
-    display: flex;
-    justify-content: space-around;
-    align-items: center;
-    padding-bottom: env(safe-area-inset-bottom); /* iOS alt çizgisi için hayati kod! */
-    z-index: 9999;
-}
+
 /* ==========================================
    3. İÇERİK ALANI DİNAMİK KAYDIRMA
    ========================================== */
@@ -5313,4 +5298,36 @@ html, body {
     z-index: 1000;
     background: var(--bg-dark, #050505);
     padding-top: env(safe-area-inset-top); /* Çentik yüksekliğini otomatik hesaplar */
+}
+/* ==========================================
+   ALT MENÜYÜ YERE SIFIRLAMA VE ÇENTİK AYARI
+   ========================================== */
+.bottom-nav {
+    position: fixed !important;
+    bottom: 0 !important;
+    left: 0 !important;
+    width: 100% !important;
+    background-color: #0a0a0a !important; /* Alt menü rengi, boşluğu dolduracak */
+    display: flex !important;
+    justify-content: space-around !important;
+    align-items: center !important;
+    height: auto !important; /* Eski sabit yüksekliği serbest bırakır */
+    min-height: 65px !important; /* Minimum kalınlık */
+    padding-top: 10px !important;
+    
+    /* İŞTE SİHİRLİ KOD: Alt çizgiyi hesaplar ve kendi arka plan rengiyle aşağı uzatır */
+    padding-bottom: calc(env(safe-area-inset-bottom) + 15px) !important; 
+    
+    border-top: 1px solid #222 !important;
+    z-index: 9999 !important;
+    box-sizing: border-box !important;
+}
+
+/* ==========================================
+   FAB (ORTADAKİ SARI BUTON) HİZALAMASI
+   ========================================== */
+.fab-container {
+    /* Alt menü aşağı uzadığı için sarı butonu da güvenli bir şekilde yukarı taşıyoruz */
+    bottom: calc(env(safe-area-inset-bottom) + 80px) !important;
+    z-index: 10000 !important;
 }
