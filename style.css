@@ -5549,3 +5549,222 @@ body.polis-theme {
     color: #000 !important;
     box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2) !important;
 }
+/* ==========================================
+   💎 SVG PREMIUM İKON ANİMASYONLARI
+   ========================================== */
+.nav-btn .icon svg {
+    width: 24px;
+    height: 24px;
+    /* CSS'teki current color mantığını kullanır, renk ataması otomatik yapılır */
+    transition: transform 0.4s cubic-bezier(0.4, 0, 0.2, 1), filter 0.4s ease;
+}
+
+/* Seçili olduğunda ikon tok bir şekilde yukarı kalkar ve hafifçe altın halesi (glow) yayar */
+.nav-btn.active .icon svg {
+    transform: scale(1.15) translateY(-3px);
+    filter: drop-shadow(0 4px 6px rgba(246, 192, 0, 0.4));
+}
+
+/* Yazıların genel duruşu */
+.nav-btn .text {
+    font-size: 10px !important;
+    font-weight: 700 !important;
+    letter-spacing: 0.5px;
+    transition: opacity 0.3s, transform 0.3s;
+}
+
+/* Aktif olduğunda yazı da ikonla beraber milimetrik olarak yukarı kalkar */
+.nav-btn.active .text {
+    transform: translateY(-1px);
+}
+/* ==========================================
+   🛠️ MODAL (AÇILIR PENCERE) KATMAN DÜZELTMESİ
+   ========================================== */
+
+/* Tüm açılır pencereleri (İdman detayı, Ayarlar, KPSS Seçici vb.) en üst katmana kilitler */
+.modal {
+    z-index: 10005 !important; /* Üst bar (5000) ve Alt Menü (9999) değerlerini ezip geçer */
+}
+
+/* Üst barın aşırı yüksek katmanını normale indiriyoruz */
+.mobile-header {
+    z-index: 900 !important; 
+}
+/* ==========================================
+   🎯 TAKİP MERKEZİ: MAT TİTANYUM PREMIUM STİL
+   ========================================== */
+
+/* 1. Izgara Boşluklarını Düzenleme (Daha ferah ve lüks) */
+.tracking-grid {
+    gap: 16px !important;
+    padding-bottom: 20px !important;
+}
+
+/* 2. Standart Takip Kartları (Derin Siyah & Metalik Hatlar) */
+.track-card {
+    background: linear-gradient(145deg, #181818, #0f0f0f) !important;
+    border: 1px solid #2a2a2a !important;
+    border-radius: 18px !important;
+    padding: 20px 12px !important;
+    
+    /* Üstten ince ışık, alttan tok gölge */
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.4), inset 0 1px 1px rgba(255, 255, 255, 0.03) !important;
+    transition: transform 0.2s cubic-bezier(0.2, 0.8, 0.2, 1), border-color 0.2s ease, box-shadow 0.2s ease !important;
+    
+    display: flex !important;
+    flex-direction: column !important;
+    align-items: center !important;
+    justify-content: center !important;
+}
+
+/* Dokunma (Basılma) Efekti */
+.track-card:active {
+    transform: scale(0.95) !important;
+    border-color: var(--goldnova) !important;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.6), 0 0 15px rgba(246, 192, 0, 0.15) !important;
+}
+
+/* 3. İkon Yuvaları (İçeri Göçük Mat Titanyum) */
+.track-icon {
+    background: #050505 !important;
+    width: 48px !important;
+    height: 48px !important;
+    border-radius: 14px !important;
+    border: 1px solid #222 !important;
+    
+    /* İçeriye doğru karanlık gölge (Gömülü hissi verir) */
+    box-shadow: inset 0 3px 6px rgba(0,0,0,0.8) !important;
+    
+    display: flex !important;
+    justify-content: center !important;
+    align-items: center !important;
+    font-size: 22px !important; /* Emojileri daha elit, ufak bir boyuta çektik */
+    margin-bottom: 12px !important;
+}
+
+/* 4. Tipografi (Yazı Tipi Disiplini) */
+.track-card h4 {
+    color: #fff !important;
+    font-size: 13px !important;
+    font-weight: 800 !important;
+    letter-spacing: 0.5px !important;
+    margin-bottom: 4px !important;
+    text-align: center !important;
+}
+
+.track-card p {
+    color: #71767b !important;
+    font-size: 10px !important;
+    font-weight: 600 !important;
+    text-transform: uppercase !important;
+    letter-spacing: 0.5px !important;
+    text-align: center !important;
+    margin: 0 !important;
+}
+
+/* 5. ÖZEL MOTOR KARTLARI (1RM, Deload, Makro, İdman Geçmişi) */
+.spec-track-card {
+    background: linear-gradient(145deg, #1e1a0f, #0f0f0f) !important;
+    border: 1px solid rgba(246, 192, 0, 0.25) !important;
+}
+
+.spec-track-card .track-icon {
+    border-color: rgba(246, 192, 0, 0.3) !important;
+    box-shadow: inset 0 3px 6px rgba(0,0,0,0.8), 0 0 8px rgba(246, 192, 0, 0.08) !important;
+}
+/* ==========================================
+   🎯 TAKİP MERKEZİ SVG İKON STİLLERİ
+   ========================================== */
+.track-icon svg {
+    width: 22px !important;
+    height: 22px !important;
+    stroke: #fff !important; /* Pasifken net beyaz hatlar */
+    stroke-width: 2px !important;
+    transition: transform 0.25s cubic-bezier(0.2, 0.8, 0.2, 1), stroke 0.25s ease;
+}
+
+/* Kartın üzerine basıldığında ikon hafifçe büyür ve altın sarısına keser */
+.track-card:active .track-icon svg {
+    transform: scale(1.15) !important;
+    stroke: var(--goldnova) !important;
+}
+
+/* Özel Motor Kartlarının İkonları Baştan Altın Rengi Başlar */
+.spec-track-card .track-icon svg {
+    stroke: var(--goldnova) !important;
+}
+/* ==========================================
+   🏆 APPLE WATCH HALKALARI VE STREAK CSS
+   ========================================== */
+
+/* Halkaların bulunduğu kutu konteyneri */
+.activity-rings-container {
+    width: 130px !important;
+    height: 130px !important;
+    position: relative;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+/* Arka plan halkalarının sönük ama kaliteli duruşu */
+.ring-bg {
+    fill: none;
+    stroke: #252525 !important;
+    stroke-linecap: round;
+}
+
+/* Aktif halka hatları ve parlama efektleri */
+.ring-progress {
+    fill: none;
+    stroke-linecap: round;
+    transition: stroke-dashoffset 1s cubic-bezier(0.2, 0.8, 0.2, 1);
+    transform: rotate(-90deg);
+    transform-origin: 50% 50%;
+}
+
+.ring-red { stroke: #ff4444; filter: drop-shadow(0 0 6px rgba(255, 68, 68, 0.4)); }
+.ring-green { stroke: #27ae60; filter: drop-shadow(0 0 6px rgba(39, 174, 96, 0.4)); }
+.ring-blue { stroke: #00d2ff; filter: drop-shadow(0 0 6px rgba(0, 210, 255, 0.4)); }
+
+/* Streak (Haftalık Seri) Gün Kutucukları */
+.streak-day {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 8px;
+}
+
+.streak-circle {
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-size: 13px;
+    font-weight: 900;
+    
+    /* Pasif günlerin içi gömülü titanyum yuva tasarımı */
+    background: #050505 !important;
+    border: 1px solid #222 !important;
+    box-shadow: inset 0 3px 5px rgba(0,0,0,0.8) !important;
+    color: #555 !important;
+    transition: all 0.3s cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+
+/* Tamamlanan (Aktif) Günlerin Altın Sarısı / Zümrüt Parlaması */
+.streak-day.active .streak-circle {
+    background: linear-gradient(135deg, #27ae60, #1e8449) !important;
+    color: #fff !important;
+    border: 1px solid rgba(255,255,255,0.2) !important;
+    box-shadow: 0 4px 15px rgba(39, 174, 96, 0.5), inset 0 2px 4px rgba(255,255,255,0.3) !important;
+    transform: scale(1.05);
+}
+
+.streak-day-label {
+    font-size: 10px;
+    color: #71767b !important;
+    font-weight: 800;
+    letter-spacing: 0.5px;
+}
