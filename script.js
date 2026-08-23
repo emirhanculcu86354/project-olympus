@@ -1642,8 +1642,8 @@ window.saveMacros = function () {
 // ==========================================
 // 🍏 FATSECRET DEEP LINK (UYGULAMA AÇICI) MOTORU
 // ==========================================
-window.openFatSecretApp = function() {
-    if(navigator.vibrate) navigator.vibrate(20);
+window.openFatSecretApp = function () {
+    if (navigator.vibrate) navigator.vibrate(20);
 
     // Android için doğrudan uygulamayı tetikleyen, yoksa Google Play'e atan kod
     const androidIntent = "intent://#Intent;package=com.fatsecret.android;scheme=fatsecret;end";
@@ -4759,7 +4759,7 @@ function initHubTouchSwipe() {
 // ==========================================
 // 🌟 PROFESYONEL KARARGAH WIDGET MOTORU (6'LI MODÜL)
 // ==========================================
-let widgetMode = 0; 
+let widgetMode = 0;
 // 0: Hedef / Motivasyon
 // 1: Su Takibi
 // 2: Haftalık Streak (Seri)
@@ -4779,23 +4779,23 @@ function updateHubWidget() {
 
     if (widgetMode === 0) {
         titleEl.innerText = "🚀 Hedef POMEM / JASEM / KPSS - Asla Durma!";
-    } 
+    }
     else if (widgetMode === 1) {
         let wData = JSON.parse(localStorage.getItem('olympus_water_obj')) || { amount: 0 };
         let goal = parseInt(localStorage.getItem('olympus_water_goal') || 3000);
         titleEl.innerText = `💧 Su Takibi: ${wData.amount} / ${goal} ml`;
-    } 
+    }
     else if (widgetMode === 2) {
         let streak = JSON.parse(localStorage.getItem('olympus_streak_data')) || [false, false, false, false, false, false, false];
         let activeCount = streak.filter(Boolean).length;
         titleEl.innerText = `🔥 Haftalık Seri: ${activeCount} / 7 Gün Aktif`;
-    } 
+    }
     else if (widgetMode === 3) {
         // KPSS Ön Lisans Sınav Tarihi: 4 Ekim 2026
         const kpssDate = new Date('2026-10-04T00:00:00');
         const now = new Date();
         const diffDays = Math.ceil((kpssDate - now) / (1000 * 60 * 60 * 24));
-        
+
         if (diffDays > 0) {
             titleEl.innerText = `⏳ KPSS Ön Lisans'a Kalan: ${diffDays} Gün`;
         } else {
@@ -4923,6 +4923,8 @@ window.returnToHub = function () {
 
     const businessScreen = document.getElementById('business-screen');
     if (businessScreen) businessScreen.classList.add('hidden');
+    const financeScreen = document.getElementById('finance-screen');
+    if (financeScreen) financeScreen.classList.add('hidden');
 
     // 3. Hub ekranını tekrar göster
     const hubScreen = document.getElementById('hub-screen');
@@ -7481,7 +7483,7 @@ window.showDynamicIsland = function (titleOrText, description = "", icon = "⚡"
         // Kompaktı göster, Geniş olanı gizle
         if (compactView) compactView.style.opacity = '1';
         if (expandedView) expandedView.style.opacity = '0';
-        
+
         if (textEl) {
             textEl.innerText = titleOrText;
             textEl.style.display = 'inline-block';
@@ -7494,8 +7496,8 @@ window.showDynamicIsland = function (titleOrText, description = "", icon = "⚡"
         if (navigator.vibrate) navigator.vibrate([10, 30, 10]);
 
         // 4 Saniye sonra gizle
-        setTimeout(() => { 
-            island.classList.remove('active'); 
+        setTimeout(() => {
+            island.classList.remove('active');
             if (waveEl) waveEl.style.display = 'none';
         }, 4000);
         return;
@@ -7518,7 +7520,7 @@ window.showDynamicIsland = function (titleOrText, description = "", icon = "⚡"
     setTimeout(() => {
         island.classList.remove('active');
         island.classList.remove('expanded');
-        
+
         // Kapanırken bir sonraki sefere bozuk çıkmasın diye opacity'leri sıfırla
         setTimeout(() => {
             if (compactView) compactView.style.opacity = '1';
@@ -7843,13 +7845,13 @@ window.openCardioScreen = function (type) {
 
     clearInterval(cardioInterval);
     if (geoWatchId) navigator.geolocation.clearWatch(geoWatchId);
-    
+
     cardioSeconds = 0;
     cardioDistanceKm = 0;
     cardioPath = [];
 
     updateCardioDisplay();
-    
+
     const distDisp = document.getElementById('cardio-distance-display');
     const paceDisp = document.getElementById('cardio-pace-display');
     if (distDisp) distDisp.innerText = "0.00";
@@ -7858,7 +7860,7 @@ window.openCardioScreen = function (type) {
     const startBtn = document.getElementById('cardio-start-btn');
     const actionBtns = document.getElementById('cardio-action-btns');
     const liveDash = document.getElementById('cardio-live-dashboard');
-    
+
     if (startBtn) startBtn.style.display = 'block';
     if (actionBtns) actionBtns.style.display = 'none';
     if (liveDash) liveDash.style.display = 'none';
@@ -7867,7 +7869,7 @@ window.openCardioScreen = function (type) {
 window.closeCardioScreen = function () {
     clearInterval(cardioInterval);
     if (geoWatchId) navigator.geolocation.clearWatch(geoWatchId);
-    
+
     const cardioScreen = document.getElementById('cardio-screen');
     if (cardioScreen) {
         cardioScreen.style.display = 'none';
@@ -7912,7 +7914,7 @@ window.startCardioTimer = function () {
             }
             setTimeout(() => { if (cardioMap) cardioMap.invalidateSize(); }, 300);
         }
-    } catch(e) { console.log("Harita yüklenirken hata:", e); }
+    } catch (e) { console.log("Harita yüklenirken hata:", e); }
 
     if (navigator.vibrate) navigator.vibrate([100, 100, 100]);
     if (typeof showDynamicIsland === 'function') {
@@ -7930,7 +7932,7 @@ function updateCardioDisplay() {
     const m = Math.floor((cardioSeconds % 3600) / 60);
     const s = cardioSeconds % 60;
     const timeFormatted = `${h > 0 ? h + ':' : ''}${m.toString().padStart(2, '0')}:${s.toString().padStart(2, '0')}`;
-    
+
     const timerEl = document.getElementById('cardio-timer-display');
     if (timerEl) timerEl.innerText = timeFormatted;
 }
@@ -7939,7 +7941,7 @@ window.stopCardioTimer = function () {
     clearInterval(cardioInterval);
     if (geoWatchId) navigator.geolocation.clearWatch(geoWatchId);
     if (navigator.vibrate) navigator.vibrate(50);
-    
+
     if (typeof saveCardioSession === 'function') {
         saveCardioSession();
     }
@@ -8026,7 +8028,7 @@ function calculateLivePace() {
         let pMin = Math.floor(paceSecondsPerKm / 60);
         let pSec = Math.floor(paceSecondsPerKm % 60);
         let paceFormatted = `${pMin}:${pSec.toString().padStart(2, '0')} /km`;
-        
+
         const paceEl = document.getElementById('cardio-pace-display');
         if (paceEl) paceEl.innerText = paceFormatted;
     }
@@ -9151,11 +9153,11 @@ window.toggleSyllabusTopicGlobal = function (subject, index, isDone) {
 // ==========================================
 // 📚 KPSS AKADEMİ GEÇİŞ MOTORU
 // ==========================================
-window.openKPSSCenter = function() {
+window.openKPSSCenter = function () {
     // 1. Hub'ı ve ana uygulamayı gizle
     const hub = document.getElementById('hub-screen');
     if (hub) hub.classList.add('hidden');
-    
+
     const appContent = document.getElementById('app-content');
     if (appContent) appContent.classList.add('hidden');
 
@@ -9164,41 +9166,41 @@ window.openKPSSCenter = function() {
     if (kpssScreen) {
         kpssScreen.classList.remove('hidden');
         // Eğer CSS display flex gerektiriyorsa:
-        kpssScreen.style.display = 'flex'; 
+        kpssScreen.style.display = 'flex';
     }
-    
+
     // 3. Hafızaya kaydet (uygulama kapanırsa burada uyanmak için)
     if (typeof saveLastScreen === 'function') saveLastScreen('kpss');
-    
+
     // 4. KPSS program verilerini çiz
     if (typeof renderKPSSTodayOrWeek === 'function') renderKPSSTodayOrWeek();
-    
+
     if (navigator.vibrate) navigator.vibrate([30, 50]);
-    
+
     // 5. Dinamik Ada Bildirimi
     if (typeof showDynamicIsland === 'function') {
         showDynamicIsland("KPSS Akademi", "Çalışma merkezine girildi", "📚");
     }
 };
 
-window.closeKPSSCenter = function() {
+window.closeKPSSCenter = function () {
     // 1. KPSS Ekranını gizle
     const kpssScreen = document.getElementById('kpss-screen');
     if (kpssScreen) {
         kpssScreen.classList.add('hidden');
         kpssScreen.style.display = 'none';
     }
-    
+
     // 2. Hafızayı Hub'a çevir
     if (typeof saveLastScreen === 'function') saveLastScreen('hub');
-    
+
     // 3. Hub'ı geri aç
     const hub = document.getElementById('hub-screen');
     if (hub) {
         hub.classList.remove('hidden');
         hub.style.display = 'flex';
     }
-    
+
     if (navigator.vibrate) navigator.vibrate(30);
 };
 // ==========================================
@@ -9251,34 +9253,34 @@ window.triggerSecurityMode = function (type) {
 };
 
 // --- EKRANI AÇ ---
-window.openSecurityMode = function(type, skipAnimation = false) {
+window.openSecurityMode = function (type, skipAnimation = false) {
     const hub = document.getElementById('hub-screen');
     const profile = document.getElementById('profile-screen') || document.getElementById('olympus-screen');
-    
+
     if (hub) hub.classList.add('hidden');
     if (profile) profile.classList.add('hidden');
-    
+
     document.getElementById('security-screen').classList.remove('hidden');
-    
+
     document.body.classList.remove('polis-theme', 'jandarma-theme');
     document.body.classList.add(`${type}-theme`);
-    
+
     document.getElementById('logo-polis').classList.remove('sec-logo-active');
     document.getElementById('logo-polis').classList.add('sec-logo-passive');
     document.getElementById('logo-jandarma').classList.remove('sec-logo-active');
     document.getElementById('logo-jandarma').classList.add('sec-logo-passive');
-    
+
     const activeLogo = document.getElementById(`logo-${type}`);
     activeLogo.classList.remove('sec-logo-passive');
     activeLogo.classList.add('sec-logo-active');
-    activeLogo.nextElementSibling.style.color = type === 'polis' ? '#fbc531' : '#d32f2f'; 
-    
+    activeLogo.nextElementSibling.style.color = type === 'polis' ? '#fbc531' : '#d32f2f';
+
     const titleEl = document.getElementById('sec-header-title');
     const headerLogoEl = document.getElementById('sec-header-logo');
     const kurumTextEl = document.getElementById('sec-kurum-text');
-    
+
     headerLogoEl.src = activeLogo.src;
-    
+
     const tasksDiv = document.getElementById('olympus-sec-tasks');
     const tasksTitle = document.getElementById('olympus-sec-tasks-title');
 
@@ -9286,7 +9288,7 @@ window.openSecurityMode = function(type, skipAnimation = false) {
         titleEl.innerText = 'Polis Akademisi (POMEM)';
         kurumTextEl.innerText = 'Emniyet Teşkilatı Mevzuatı ve Tarihi';
         activeAcademyLink = "https://www.pa.edu.tr/";
-        if(tasksDiv) {
+        if (tasksDiv) {
             tasksDiv.style.display = 'block';
             tasksTitle.innerText = '🦅 POMEM GÖREVLERİ';
         }
@@ -9294,14 +9296,14 @@ window.openSecurityMode = function(type, skipAnimation = false) {
         titleEl.innerText = 'Jandarma Akademisi (JAMYO)';
         kurumTextEl.innerText = 'Jandarma Teşkilatı Mevzuatı ve Tarihi';
         activeAcademyLink = "https://vatandas.jandarma.gov.tr/PTM/Giris";
-        if(tasksDiv) {
+        if (tasksDiv) {
             tasksDiv.style.display = 'block';
             tasksTitle.innerText = '🦅 JAMYO GÖREVLERİ';
         }
     }
-    
+
     localStorage.setItem('olympus_active_sec_mode', type);
-    if (typeof saveLastScreen === 'function') saveLastScreen('security'); 
+    if (typeof saveLastScreen === 'function') saveLastScreen('security');
     if (typeof loadSecTasks === 'function') loadSecTasks(type);
     if (typeof updateSecDisplays === 'function') updateSecDisplays(type);
 
@@ -9322,27 +9324,27 @@ window.closeSecurityMode = function () {
 };
 
 // --- SİVİLE DÖN (GÜVENLİ ÇIKIŞ) ---
-window.exitSecurityMode = function() {
-    document.body.classList.remove('polis-theme', 'jandarma-theme'); 
-    
+window.exitSecurityMode = function () {
+    document.body.classList.remove('polis-theme', 'jandarma-theme');
+
     document.getElementById('logo-polis').classList.remove('sec-logo-active');
     document.getElementById('logo-polis').classList.add('sec-logo-passive');
     document.getElementById('logo-jandarma').classList.remove('sec-logo-active');
     document.getElementById('logo-jandarma').classList.add('sec-logo-passive');
-    
+
     localStorage.removeItem('olympus_active_sec_mode');
-    
+
     const tasksDiv = document.getElementById('olympus-sec-tasks');
-    if(tasksDiv) tasksDiv.style.display = 'none';
+    if (tasksDiv) tasksDiv.style.display = 'none';
 
     const loadingOverlay = document.getElementById('sec-loading-overlay');
-    if(loadingOverlay) loadingOverlay.style.display = 'none';
-    
-    const imgViewer = document.getElementById('image-viewer-modal');
-    if(imgViewer) imgViewer.style.display = 'none';
+    if (loadingOverlay) loadingOverlay.style.display = 'none';
 
-    if(navigator.vibrate) navigator.vibrate([50, 100]);
-    
+    const imgViewer = document.getElementById('image-viewer-modal');
+    if (imgViewer) imgViewer.style.display = 'none';
+
+    if (navigator.vibrate) navigator.vibrate([50, 100]);
+
     // KENDİ DİNAMİK ADAN BURADA DEVREYE GİRİYOR!
     if (typeof showDynamicIsland === 'function') {
         showDynamicIsland("Sivil Temaya Dönüldü", "Akademi kapatıldı", "✅");
@@ -9484,27 +9486,27 @@ window.openSecModal = function (type) {
 };
 
 // --- BİLGİLERİ KAYDET ---
-window.saveSecModalData = function() {
+window.saveSecModalData = function () {
     const activeMode = localStorage.getItem('olympus_active_sec_mode') || 'polis';
     let data = JSON.parse(localStorage.getItem(`olympus_sec_data_${activeMode}`)) || {};
 
     if (currentSecModalType === 'interview') {
         const titleInput = document.getElementById('sec-interview-title');
         const dateInput = document.getElementById('sec-interview-date');
-        if(titleInput) data.interviewTitle = titleInput.value.trim() || 'BİR SONRAKİ AŞAMA';
-        if(dateInput) data.interviewDate = dateInput.value;
+        if (titleInput) data.interviewTitle = titleInput.value.trim() || 'BİR SONRAKİ AŞAMA';
+        if (dateInput) data.interviewDate = dateInput.value;
     } else {
         const timeInput = document.getElementById('sec-parkour-time');
         const scoreInput = document.getElementById('sec-parkour-score');
-        if(timeInput) data.parkourTime = timeInput.value;
-        if(scoreInput) data.parkourScore = scoreInput.value;
+        if (timeInput) data.parkourTime = timeInput.value;
+        if (scoreInput) data.parkourScore = scoreInput.value;
     }
 
     localStorage.setItem(`olympus_sec_data_${activeMode}`, JSON.stringify(data));
     closeSecModal();
     updateSecDisplays(activeMode);
-    
-    if(navigator.vibrate) navigator.vibrate([20, 30]);
+
+    if (navigator.vibrate) navigator.vibrate([20, 30]);
 
     // KENDİ DİNAMİK ADAN BURADA DEVREYE GİRİYOR!
     if (typeof showDynamicIsland === 'function') {
@@ -9868,7 +9870,7 @@ document.addEventListener("DOMContentLoaded", () => {
 });
 
 window.openStravaApp = function () {
-    if(navigator.vibrate) navigator.vibrate(20);
+    if (navigator.vibrate) navigator.vibrate(20);
     const androidIntent = "intent://#Intent;package=com.strava;scheme=strava;end";
     const iosScheme = "strava://";
     const webLink = "https://www.strava.com/";
@@ -9886,7 +9888,7 @@ window.openStravaApp = function () {
 };
 
 // Kaydet butonuna basıldığında Story ekranını açan fonksiyon
-const originalSaveCardioSession = window.saveCardioSession || function(){};
+const originalSaveCardioSession = window.saveCardioSession || function () { };
 window.saveCardioSession = function () {
     // Süre, mesafe ve rotayı al
     const distText = document.getElementById('cardio-distance-display').innerText;
@@ -9894,14 +9896,14 @@ window.saveCardioSession = function () {
     const paceText = document.getElementById('cardio-pace-display').innerText;
 
     // Arka plan kardiyo ekranını kapat
-    if(typeof closeCardioScreen === 'function') closeCardioScreen();
+    if (typeof closeCardioScreen === 'function') closeCardioScreen();
 
     // Story Modalını doldur
     document.getElementById('story-dist').innerText = distText;
     document.getElementById('story-time').innerText = timeText;
     document.getElementById('story-pace').innerText = paceText;
     document.getElementById('story-date').innerText = new Date().toLocaleDateString('tr-TR');
-    
+
     // Basit kalori tahmini (Mesafe * 65 kcal)
     let kcal = (parseFloat(distText) * 65).toFixed(0);
     document.getElementById('story-kcal').innerText = `${kcal} kcal`;
@@ -9911,10 +9913,10 @@ window.saveCardioSession = function () {
     storyModal.classList.remove('hidden');
     storyModal.style.display = 'flex';
 
-    if(typeof showDynamicIsland === 'function') {
+    if (typeof showDynamicIsland === 'function') {
         showDynamicIsland("Kardiyo Kaydedildi", `${distText} km kat edildi!`, "🔥");
     }
-    if(navigator.vibrate) navigator.vibrate([50, 100, 50]);
+    if (navigator.vibrate) navigator.vibrate([50, 100, 50]);
 };
 
 window.closeCardioStory = function () {
@@ -9930,7 +9932,7 @@ let simMediaStream = null;
 window.openInterviewSimulator = async function () {
     const modal = document.getElementById('interview-sim-modal');
     const video = document.getElementById('sim-camera-feed');
-    
+
     modal.style.display = 'flex';
     modal.classList.remove('hidden');
 
@@ -10035,13 +10037,13 @@ let userSpokenAnswer = ""; // Adayın söylediği kelimeler burada birikecek
 window.openInterviewSimulator = async function () {
     const modal = document.getElementById('interview-sim-modal');
     const video = document.getElementById('sim-camera-feed');
-    
+
     modal.style.display = 'flex';
     modal.classList.remove('hidden');
     userSpokenAnswer = "";
-    
+
     const speechBox = document.getElementById('sim-user-speech');
-    if(speechBox) speechBox.innerText = "Dinleniyor... Konuşmaya başlayabilirsin.";
+    if (speechBox) speechBox.innerText = "Dinleniyor... Konuşmaya başlayabilirsin.";
 
     try {
         // 1. Kamerayı Aç
@@ -10079,9 +10081,9 @@ window.openInterviewSimulator = async function () {
 
         try {
             recognition.start();
-        } catch(e) { console.log("Mikrofon zaten açık"); }
+        } catch (e) { console.log("Mikrofon zaten açık"); }
     } else {
-        if(speechBox) speechBox.innerText = "Tarayıcınız ses tanımayı desteklemiyor ama simülasyon aktif.";
+        if (speechBox) speechBox.innerText = "Tarayıcınız ses tanımayı desteklemiyor ama simülasyon aktif.";
     }
 
     askRandomSimulationQuestion();
@@ -10101,7 +10103,7 @@ window.closeInterviewSimulator = function () {
 
     // Mikrofon dinlemesini durdur
     if (recognition) {
-        try { recognition.stop(); } catch(e){}
+        try { recognition.stop(); } catch (e) { }
         recognition = null;
     }
 
@@ -10178,7 +10180,7 @@ let isFcAnswerShown = false;
 // Soru veritabanını hafızadan veya ana listeden çek
 function getActiveFlashcards() {
     let savedProgress = JSON.parse(localStorage.getItem('olympus_fc_progress')) || {};
-    
+
     // Eğer veritabanında interviewQuestions varsa onu kullan, yoksa yedekle
     let pool = (typeof interviewQuestions !== 'undefined' && interviewQuestions.length > 0) ? interviewQuestions : [
         { q: "Polis vatandaşa nasıl davranmalıdır?", a: "Saygılı, tarafsız ve hukuka uygun." },
@@ -10352,7 +10354,7 @@ document.addEventListener('DOMContentLoaded', () => {
 document.addEventListener("DOMContentLoaded", () => {
     // Sayfa açıldığında hafızada aktif bir akademi modu var mı kontrol et
     const activeSecMode = localStorage.getItem('olympus_active_sec_mode');
-    
+
     if (activeSecMode === 'polis' || activeSecMode === 'jandarma') {
         // Fonksiyon mevcutsa temayı ve butonları direkt aktif moda getir
         if (typeof openSecurityMode === 'function') {
@@ -10366,17 +10368,17 @@ document.addEventListener("DOMContentLoaded", () => {
 // ==========================================
 // 🍎 LİSTE AÇILINCA ÜST ALANI VE ALT BARI GİZLEME KÖPRÜSÜ
 // ==========================================
-window.toggleBottomNav = function(hide) {
+window.toggleBottomNav = function (hide) {
     const bottomNav = document.querySelector('.bottom-nav');
     // Sayfanın en üstündeki ana header ve o görselde görünen başlık alanı
     const mainHeader = document.getElementById('main-header');
     const fabContainer = document.querySelector('.fab-container');
-    
+
     if (bottomNav) {
         if (hide) bottomNav.classList.add('hidden-nav');
         else bottomNav.classList.remove('hidden-nav');
     }
-    
+
     if (mainHeader) {
         if (hide) {
             mainHeader.style.transform = 'translateY(-120%)';
@@ -10389,7 +10391,7 @@ window.toggleBottomNav = function(hide) {
             mainHeader.style.pointerEvents = 'auto';
         }
     }
-    
+
     if (fabContainer) {
         fabContainer.style.transform = hide ? 'translateY(120px)' : 'translateY(0)';
         fabContainer.style.opacity = hide ? '0' : '1';
@@ -10399,7 +10401,7 @@ window.toggleBottomNav = function(hide) {
 // İdman detay listesi (modal) açıldığında tetiklenir
 const originalShowWorkoutModal = window.showWorkoutModal;
 if (typeof showWorkoutModal === 'function') {
-    window.showWorkoutModal = function(dayData) {
+    window.showWorkoutModal = function (dayData) {
         originalShowWorkoutModal(dayData);
         toggleBottomNav(true); // Üst kısım ve alt bar gizlenir
     };
@@ -10414,3 +10416,440 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 });
+document.addEventListener('DOMContentLoaded', () => {
+    const hubSlider = document.getElementById('hub-pages-slider');
+    if (hubSlider) {
+        hubSlider.addEventListener('scroll', () => {
+            let pageIndex = Math.round(hubSlider.scrollLeft / hubSlider.clientWidth);
+            document.querySelectorAll('.hub-dot').forEach((dot, index) => {
+                dot.classList.toggle('active', index === pageIndex);
+            });
+        }, { passive: true });
+    }
+});
+// ==========================================
+// 💳 OLYMPUS BANKACILIK MOTORU (UZUN BASMA, FİLTRE, GRAFİK)
+// ==========================================
+
+let bankFilterType = 'all'; // all, income, expense
+let showAllBankTrans = false; // Son 5 işlemi mi yoksa hepsini mi gösteriyor?
+
+window.switchBankTab = function(tabId, btnEl) {
+    document.querySelectorAll('.bank-tab').forEach(tab => tab.classList.remove('active-tab'));
+    document.querySelectorAll('.bank-nav-btn').forEach(btn => btn.classList.remove('active'));
+    document.getElementById('bank-tab-' + tabId).classList.add('active-tab');
+    if(btnEl) btnEl.classList.add('active');
+    
+    if(tabId === 'stats') renderBankStats();
+    if(tabId === 'cards') renderBankCards();
+    
+    if(navigator.vibrate) navigator.vibrate(20);
+};
+
+window.closeBankActionModal = function() {
+    document.getElementById('bank-action-modal').style.display = 'none';
+};
+
+window.openBankFilterModal = function() {
+    document.getElementById('bank-filter-modal').style.display = 'flex';
+};
+
+window.applyBankFilter = function(type) {
+    bankFilterType = type;
+    document.getElementById('bank-filter-modal').style.display = 'none';
+    showAllBankTrans = true; // Filtre yapılınca hepsini göster
+    renderBankTransactions();
+};
+
+window.toggleAllBankTransactions = function() {
+    showAllBankTrans = true;
+    renderBankTransactions();
+};
+
+document.addEventListener('DOMContentLoaded', () => {
+    initBankApp();
+});
+
+function initBankApp() {
+    let history = JSON.parse(localStorage.getItem('bank_history'));
+    let cards = JSON.parse(localStorage.getItem('bank_cards'));
+    
+    if (!history) {
+        // Grafiği test etmek için bu haftanın tarihlerine göre uydurma veriler
+        const today = new Date();
+        const yesterday = new Date(today); yesterday.setDate(yesterday.getDate() - 1);
+        const formatDt = (d) => d.toISOString().split('T')[0];
+
+        history = [
+            { id: 1, name: "Market", icon: "🛒", amount: -450.00, date: formatDt(today), pending: false },
+            { id: 2, name: "Maaş", icon: "💼", amount: 25000.00, date: formatDt(today), pending: false },
+            { id: 3, name: "Kahve", icon: "☕", amount: -120.00, date: formatDt(yesterday), pending: false },
+            { id: 4, name: "Kira", icon: "🏠", amount: -8500.00, date: formatDt(today), pending: true }
+        ];
+        localStorage.setItem('bank_history', JSON.stringify(history));
+    }
+    if (!cards) {
+        cards = [{ id: 101, bankName: "Olympus Bank", number: "1234", color: "#125e5e" }];
+        localStorage.setItem('bank_cards', JSON.stringify(cards));
+    }
+
+    renderBankTransactions();
+    renderBankCards();
+}
+
+// ============== UZUN BASMA (LONG PRESS) MANTIĞI ==============
+let pressTimer;
+window.startLongPress = function(id, name, amountText, isPending) {
+    pressTimer = window.setTimeout(() => {
+        // 600ms basılı tutulursa menüyü aç
+        document.getElementById('action-trans-id').value = id;
+        document.getElementById('action-trans-title').innerText = name;
+        document.getElementById('action-trans-amount').innerText = amountText;
+        
+        const completeBtn = document.getElementById('btn-mark-complete');
+        completeBtn.style.display = isPending ? 'block' : 'none';
+        
+        document.getElementById('bank-action-modal').style.display = 'flex';
+        if(navigator.vibrate) navigator.vibrate([30, 50]); // Titreşimle bildir
+    }, 600);
+};
+
+window.cancelLongPress = function() {
+    clearTimeout(pressTimer);
+};
+
+// ================= İŞLEMLERİ EKRANA BAS =================
+window.renderBankTransactions = function() {
+    const listEl = document.getElementById('bank-transactions-list');
+    const pendingListEl = document.getElementById('bank-pending-list');
+    const showAllBtn = document.getElementById('bank-show-all-btn');
+    if (!listEl || !pendingListEl) return;
+    
+    let history = JSON.parse(localStorage.getItem('bank_history')) || [];
+    let totalBalance = 0; 
+    
+    listEl.innerHTML = '';
+    pendingListEl.innerHTML = '';
+    
+    // Filtreleme
+    if(bankFilterType === 'income') history = history.filter(t => t.amount > 0);
+    if(bankFilterType === 'expense') history = history.filter(t => t.amount < 0);
+
+    // Tarihe göre sırala (En yeni en üstte)
+    history.sort((a,b) => new Date(b.date) - new Date(a.date));
+
+    let completedTrans = history.filter(t => !t.pending);
+    let pendingTrans = history.filter(t => t.pending);
+
+    // Bakiye Hesapla (Filtreden bağımsız, tüm geçmişten)
+    let fullHistory = JSON.parse(localStorage.getItem('bank_history')) || [];
+    fullHistory.forEach(t => { if(!t.pending) totalBalance += t.amount; });
+
+    // 5 İşlem Limiti
+    let displayLimit = showAllBankTrans ? completedTrans.length : 5;
+    let itemsToDisplay = completedTrans.slice(0, displayLimit);
+
+    if(!showAllBankTrans && completedTrans.length > 5) {
+        showAllBtn.style.display = 'block';
+    } else {
+        showAllBtn.style.display = 'none';
+    }
+
+    // Gerçekleşenleri Bas
+    itemsToDisplay.forEach(t => {
+        const isInc = t.amount > 0;
+        const amountClass = isInc ? "positive" : "negative";
+        let amtVal = Math.abs(t.amount).toLocaleString('tr-TR', {minimumFractionDigits: 2});
+        const amountText = isInc ? `+ ₺${amtVal}` : `- ₺${amtVal}`;
+        
+        // Tr formatında tarih
+        let displayDate = new Date(t.date).toLocaleDateString('tr-TR');
+
+        listEl.innerHTML += `
+            <div class="bank-trans-item" 
+                onmousedown="startLongPress(${t.id}, '${t.name}', '${amountText}', false)" 
+                onmouseup="cancelLongPress()" onmouseleave="cancelLongPress()"
+                ontouchstart="startLongPress(${t.id}, '${t.name}', '${amountText}', false)" 
+                ontouchend="cancelLongPress()">
+                <div style="display:flex; align-items:center;">
+                    <div class="bank-trans-icon">${t.icon}</div>
+                    <div class="bank-trans-details">
+                        <div class="bank-trans-name">${t.name}</div>
+                        <div class="bank-trans-date">${displayDate}</div>
+                    </div>
+                </div>
+                <div class="bank-trans-amount ${amountClass}">${amountText}</div>
+            </div>
+        `;
+    });
+
+    // Bekleyenleri Bas
+    pendingTrans.forEach(t => {
+        let amtVal = Math.abs(t.amount).toLocaleString('tr-TR', {minimumFractionDigits: 2});
+        const amountText = t.amount > 0 ? `+ ₺${amtVal}` : `- ₺${amtVal}`;
+        let displayDate = new Date(t.date).toLocaleDateString('tr-TR');
+
+        pendingListEl.innerHTML += `
+            <div class="bank-trans-item pending" 
+                onmousedown="startLongPress(${t.id}, '${t.name}', '${amountText}', true)" 
+                onmouseup="cancelLongPress()" onmouseleave="cancelLongPress()"
+                ontouchstart="startLongPress(${t.id}, '${t.name}', '${amountText}', true)" 
+                ontouchend="cancelLongPress()">
+                <div style="display:flex; align-items:center;">
+                    <div class="bank-trans-icon">${t.icon}</div>
+                    <div class="bank-trans-details">
+                        <div class="bank-trans-name">${t.name}</div>
+                        <div class="bank-trans-date">${displayDate} (Bekliyor)</div>
+                    </div>
+                </div>
+                <div class="bank-trans-amount negative">${amountText}</div>
+            </div>
+        `;
+    });
+
+    if(listEl.innerHTML === '') listEl.innerHTML = '<p style="color:#aaa; font-size:12px; padding:10px;">Son hareket bulunmuyor.</p>';
+    if(pendingListEl.innerHTML === '') pendingListEl.innerHTML = '<p style="color:#aaa; font-size:12px; padding:10px;">Bekleyen işlem yok.</p>';
+
+    document.getElementById('bank-total-balance').innerText = `₺${totalBalance.toLocaleString('tr-TR', {minimumFractionDigits: 2})}`;
+};
+
+// ================= İŞLEM EKLE & DÜZENLE =================
+window.openTransactionModal = function() {
+    document.getElementById('trans-modal-title').innerText = "Yeni İşlem Ekle";
+    document.getElementById('trans-edit-id').value = ""; 
+    document.getElementById('trans-title').value = '';
+    document.getElementById('trans-amount').value = '';
+    // Tarihi Bugüne Ayarla
+    document.getElementById('trans-date').value = new Date().toISOString().split('T')[0];
+    document.getElementById('trans-pending').checked = false;
+    document.getElementById('bank-transaction-modal').style.display = 'flex';
+};
+
+window.openEditTransaction = function() {
+    const id = parseInt(document.getElementById('action-trans-id').value);
+    let history = JSON.parse(localStorage.getItem('bank_history')) || [];
+    const t = history.find(x => x.id === id);
+    
+    if(t) {
+        document.getElementById('trans-edit-id').value = t.id;
+        document.getElementById('trans-modal-title').innerText = "İşlemi Düzenle";
+        document.getElementById('trans-title').value = t.name;
+        document.getElementById('trans-amount').value = Math.abs(t.amount);
+        document.getElementById('trans-type').value = t.amount >= 0 ? 'income' : 'expense';
+        document.getElementById('trans-date').value = t.date; // Mevcut tarihi getir
+        document.getElementById('trans-pending').checked = t.pending || false;
+
+        closeBankActionModal(); 
+        document.getElementById('bank-transaction-modal').style.display = 'flex';
+    }
+};
+
+window.saveBankTransaction = function() {
+    let editId = document.getElementById('trans-edit-id').value;
+    let title = document.getElementById('trans-title').value || "İşlem";
+    let amt = parseFloat(document.getElementById('trans-amount').value);
+    let type = document.getElementById('trans-type').value;
+    let dateVal = document.getElementById('trans-date').value || new Date().toISOString().split('T')[0];
+    let isPending = document.getElementById('trans-pending').checked;
+    
+    if (!amt || isNaN(amt)) { alert("Geçerli bir tutar girin."); return; }
+
+    if(type === 'expense') amt = -Math.abs(amt);
+    else amt = Math.abs(amt);
+
+    let history = JSON.parse(localStorage.getItem('bank_history')) || [];
+
+    if(editId) {
+        const index = history.findIndex(t => t.id === parseInt(editId));
+        if(index !== -1) {
+            history[index].name = title;
+            history[index].amount = amt;
+            history[index].date = dateVal;
+            history[index].pending = isPending;
+            history[index].icon = amt >= 0 ? "💰" : "💳";
+        }
+    } else {
+        history.push({
+            id: Date.now(),
+            name: title,
+            icon: amt >= 0 ? "💰" : "💳",
+            amount: amt,
+            date: dateVal,
+            pending: isPending
+        });
+    }
+
+    localStorage.setItem('bank_history', JSON.stringify(history));
+    document.getElementById('bank-transaction-modal').style.display = 'none';
+    renderBankTransactions();
+    if(navigator.vibrate) navigator.vibrate(30);
+};
+
+window.deleteBankTransaction = function() {
+    if(confirm("İşlemi silmek istiyor musunuz?")) {
+        const id = parseInt(document.getElementById('action-trans-id').value);
+        let history = JSON.parse(localStorage.getItem('bank_history')) || [];
+        history = history.filter(t => t.id !== id);
+        localStorage.setItem('bank_history', JSON.stringify(history));
+        
+        closeBankActionModal();
+        renderBankTransactions();
+    }
+};
+
+window.markTransactionCompleted = function() {
+    const id = parseInt(document.getElementById('action-trans-id').value);
+    let history = JSON.parse(localStorage.getItem('bank_history')) || [];
+    const index = history.findIndex(t => t.id === id);
+    
+    if(index !== -1) {
+        history[index].pending = false;
+        // Gerçekleştiğinde tarihi o gün yapar
+        history[index].date = new Date().toISOString().split('T')[0];
+        localStorage.setItem('bank_history', JSON.stringify(history));
+    }
+    
+    closeBankActionModal();
+    renderBankTransactions();
+};
+
+// ================= KART KARUSELİ YÖNETİMİ =================
+window.openAddCardModal = function() {
+    document.getElementById('card-bank-name').value = '';
+    document.getElementById('card-number').value = '';
+    document.getElementById('bank-add-card-modal').style.display = 'flex';
+};
+
+window.saveBankCard = function() {
+    let name = document.getElementById('card-bank-name').value || "Banka Kartı";
+    let num = document.getElementById('card-number').value || "0000";
+    let color = document.getElementById('card-color').value;
+
+    let cards = JSON.parse(localStorage.getItem('bank_cards')) || [];
+    cards.push({ id: Date.now(), bankName: name, number: num, color: color });
+    
+    localStorage.setItem('bank_cards', JSON.stringify(cards));
+    document.getElementById('bank-add-card-modal').style.display = 'none';
+    renderBankCards();
+};
+
+window.deleteBankCard = function(id) {
+    if(confirm("Bu kartı silmek istediğine emin misin?")) {
+        let cards = JSON.parse(localStorage.getItem('bank_cards')) || [];
+        cards = cards.filter(c => c.id !== id);
+        localStorage.setItem('bank_cards', JSON.stringify(cards));
+        renderBankCards();
+    }
+};
+
+window.renderBankCards = function() {
+    const carousel = document.getElementById('bank-cards-carousel');
+    if(!carousel) return;
+    
+    let cards = JSON.parse(localStorage.getItem('bank_cards')) || [];
+    carousel.innerHTML = '';
+
+    if(cards.length === 0) {
+        carousel.innerHTML = '<p style="text-align:center; width:100%; color:#888; font-size:12px;">Kayıtlı kartınız bulunmuyor.</p>';
+        return;
+    }
+
+    cards.forEach(c => {
+        carousel.innerHTML += `
+            <div class="bank-card-slide" style="background: linear-gradient(135deg, ${c.color}, #111);">
+                <div style="display:flex; justify-content:space-between; width:100%; align-items:center;">
+                    <span style="font-weight:600; font-size:16px;">${c.bankName}</span>
+                    <span style="font-size:22px; font-weight:900; font-style:italic;">VISA</span>
+                </div>
+                <div class="bank-card-chip"></div>
+                <div style="display:flex; justify-content:space-between; align-items:flex-end; width:100%;">
+                    <div style="display:flex; flex-direction:column;">
+                        <span style="font-size:10px; opacity:0.8; margin-bottom:4px;">Kart Numarası</span>
+                        <span style="font-family:monospace; font-size:18px; letter-spacing:2px;">**** **** **** ${c.number}</span>
+                    </div>
+                </div>
+                <button class="bank-btn-delete-icon" onclick="deleteBankCard(${c.id})">🗑️</button>
+            </div>
+        `;
+    });
+};
+
+// ================= GERÇEK ZAMANLI İSTATİSTİKLER =================
+window.renderBankStats = function() {
+    let history = JSON.parse(localStorage.getItem('bank_history')) || [];
+    
+    // 1. Bu haftanın (Pazartesi-Pazar) sınırlarını bul
+    let curr = new Date();
+    let first = curr.getDate() - curr.getDay() + (curr.getDay() === 0 ? -6 : 1); // Pazartesi
+    let firstDay = new Date(curr.setDate(first));
+    firstDay.setHours(0,0,0,0);
+    
+    let lastDay = new Date(firstDay);
+    lastDay.setDate(lastDay.getDate() + 6);
+    lastDay.setHours(23,59,59,999);
+
+    let weeklyExpenses = [0, 0, 0, 0, 0, 0, 0]; // Pzt, Sal, Çar, Per, Cum, Cmt, Paz
+    let totalWeeklyExpense = 0;
+    let totalIncome = 0;
+    let totalExpenseAllTime = 0;
+
+    history.forEach(t => {
+        if(!t.pending) { 
+            let tDate = new Date(t.date);
+            
+            // Tüm Zamanlar Oranı İçin
+            if(t.amount > 0) totalIncome += t.amount;
+            else totalExpenseAllTime += Math.abs(t.amount);
+
+            // Bu Haftaki Sütun Grafiği İçin
+            if(t.amount < 0 && tDate >= firstDay && tDate <= lastDay) {
+                let dayIndex = tDate.getDay() - 1; 
+                if(dayIndex === -1) dayIndex = 6; // Pazar
+                weeklyExpenses[dayIndex] += Math.abs(t.amount);
+                totalWeeklyExpense += Math.abs(t.amount);
+            }
+        }
+    });
+
+    // Haftalık Toplamı Yaz
+    const weeklyTotalEl = document.getElementById('stat-weekly-total');
+    if(weeklyTotalEl) weeklyTotalEl.innerText = `₺${totalWeeklyExpense.toLocaleString('tr-TR', {minimumFractionDigits: 2})}`;
+
+    // Dinamik Sütun (Bar) Grafiği Boyutlandırma
+    const barContainer = document.getElementById('bank-dynamic-bars');
+    if(barContainer) {
+        barContainer.innerHTML = '';
+        const days = ["Pzt", "Sal", "Çar", "Per", "Cum", "Cmt", "Paz"];
+        let maxExpense = Math.max(...weeklyExpenses);
+        if(maxExpense === 0) maxExpense = 1; // Sıfıra bölme hatasını engelle
+
+        for(let i=0; i<7; i++) {
+            let hPct = (weeklyExpenses[i] / maxExpense) * 100;
+            if(weeklyExpenses[i] > 0 && hPct < 10) hPct = 10; // Görünür olması için min %10
+
+            barContainer.innerHTML += `
+                <div class="bank-bar-wrapper">
+                    <div class="bank-bar" style="height: ${hPct}%;"></div>
+                    <span class="bar-lbl">${days[i]}</span>
+                </div>
+            `;
+        }
+    }
+
+    // Genel Oran (Pasta Grafik)
+    let totalMovements = totalIncome + totalExpenseAllTime;
+    let expensePct = totalMovements > 0 ? Math.round((totalExpenseAllTime / totalMovements) * 100) : 0;
+    let incomePct = totalMovements > 0 ? Math.round((totalIncome / totalMovements) * 100) : 0;
+
+    const donutExp = document.getElementById('donut-expense');
+    const donutInc = document.getElementById('donut-income');
+    
+    if(donutExp) {
+        donutExp.style.background = `conic-gradient(#e74c3c ${expensePct}%, #f4f6f6 0)`;
+        document.getElementById('donut-expense-text').innerText = `%${expensePct}`;
+    }
+    if(donutInc) {
+        donutInc.style.background = `conic-gradient(#27ae60 ${incomePct}%, #f4f6f6 0)`;
+        document.getElementById('donut-income-text').innerText = `%${incomePct}`;
+    }
+};

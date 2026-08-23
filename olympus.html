@@ -167,51 +167,108 @@
         </div>
 
         <main class="hub-content">
+            <!-- 📱 iOS TARZI KAYDIRILABİLİR ANA MENÜ -->
+            <div class="hub-pages-wrapper">
+                <div class="hub-pages-container" id="hub-pages-slider">
 
+                    <!-- 1. SAYFA (İlk 4 Modül) -->
+                    <div class="hub-page">
+                        <div class="hub-grid">
+                            <div class="hub-card hub-card-olympus" onclick="enterAppFromHub('app-content', 'OLYMPUS')">
+                                <span class="hub-card-kicker">CORE</span>
+                                <h3>Olympus</h3>
+                                <p>Kişisel Gelişim & Spor</p>
+                                <div class="hub-card-icon">🏋️‍♂️</div>
+                            </div>
+                            <div class="hub-card hub-card-arcade" onclick="enterAppFromHub('arcade-screen', 'ARCADE')">
+                                <span class="hub-card-kicker">PLAY</span>
+                                <h3>Arcade</h3>
+                                <p>Retro Terminal</p>
+                                <div class="hub-card-icon">🕹️</div>
+                            </div>
+                            <div class="hub-card hub-card-business"
+                                onclick="enterAppFromHub('business-screen', 'BUSINESS')">
+                                <span class="hub-card-kicker">FOCUS</span>
+                                <h3>Business</h3>
+                                <p>Üretkenlik & İş</p>
+                                <div class="hub-card-icon">💼</div>
+                            </div>
+                            <div class="hub-card hub-card-kpss" onclick="openKPSSCenter()">
+                                <span class="hub-card-kicker">STUDY</span>
+                                <h3>KPSS Akademi</h3>
+                                <p>Ders & Deneme Takibi</p>
+                                <div class="hub-card-icon">📚</div>
+                            </div>
+                        </div>
+                    </div>
 
-            <!-- KUSURSUZ 4'LÜ GRID DÜZENİ -->
-            <div class="hub-grid">
-                <!-- 1. OLYMPUS KARTI -->
-                <div class="hub-card hub-card-olympus" onclick="enterAppFromHub('app-content', 'OLYMPUS')">
-                    <span class="hub-card-kicker">CORE</span>
-                    <h3>Olympus</h3>
-                    <p>Kişisel Gelişim & Spor</p>
-                    <div class="hub-card-icon">🏋️‍♂️</div>
+                    <!-- 2. SAYFA (Finans ve Modüller) -->
+                    <div class="hub-page">
+                        <div class="hub-grid">
+                            <!-- FİNANS KARTI -->
+                            <div class="hub-card hub-card-finance" onclick="enterAppFromHub('finance-screen', 'WEALTH')"
+                                style="background: linear-gradient(145deg, #0a192f, #151515) !important; border-color: #00d2ff !important;">
+                                <span class="hub-card-kicker" style="color:#00d2ff;">WEALTH</span>
+                                <h3>Finans</h3>
+                                <p>Bütçe & Nakit Akışı</p>
+                                <div class="hub-card-icon" style="color:#00d2ff;">💳</div>
+                            </div>
+
+                            <!-- BOŞ/YAKINDA KARTLARI (Tasarım Bütünlüğü İçin) -->
+                            <div class="hub-card"
+                                style="background: #111 !important; border-color: #333 !important; opacity:0.5; pointer-events:none;">
+                                <span class="hub-card-kicker" style="color:#555;">SOON</span>
+                                <h3
+                                    style="color:#888 !important; margin-top:7px; font-size:17px; font-weight:800; letter-spacing:-0.35px;">
+                                    Modül 6</h3>
+                                <p style="color:#9e9e9e !important; font-size:10px; margin-top:5px;">Yakında Eklenecek
+                                </p>
+                                <div class="hub-card-icon"
+                                    style="filter:grayscale(1); font-size:30px; margin-top:auto; text-align:right;">🔒
+                                </div>
+                            </div>
+                            <div class="hub-card"
+                                style="background: #111 !important; border-color: #333 !important; opacity:0.5; pointer-events:none;">
+                                <span class="hub-card-kicker" style="color:#555;">SOON</span>
+                                <h3
+                                    style="color:#888 !important; margin-top:7px; font-size:17px; font-weight:800; letter-spacing:-0.35px;">
+                                    Modül 7</h3>
+                                <p style="color:#9e9e9e !important; font-size:10px; margin-top:5px;">Yakında Eklenecek
+                                </p>
+                                <div class="hub-card-icon"
+                                    style="filter:grayscale(1); font-size:30px; margin-top:auto; text-align:right;">🔒
+                                </div>
+                            </div>
+                            <div class="hub-card"
+                                style="background: #111 !important; border-color: #333 !important; opacity:0.5; pointer-events:none;">
+                                <span class="hub-card-kicker" style="color:#555;">SOON</span>
+                                <h3
+                                    style="color:#888 !important; margin-top:7px; font-size:17px; font-weight:800; letter-spacing:-0.35px;">
+                                    Modül 8</h3>
+                                <p style="color:#9e9e9e !important; font-size:10px; margin-top:5px;">Yakında Eklenecek
+                                </p>
+                                <div class="hub-card-icon"
+                                    style="filter:grayscale(1); font-size:30px; margin-top:auto; text-align:right;">🔒
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
                 </div>
 
-                <!-- 2. ARCADE KARTI -->
-                <div class="hub-card hub-card-arcade" onclick="enterAppFromHub('arcade-screen', 'ARCADE')">
-                    <span class="hub-card-kicker">PLAY</span>
-                    <h3>Arcade</h3>
-                    <p>Retro Terminal</p>
-                    <div class="hub-card-icon">🕹️</div>
-                </div>
-
-                <!-- 3. BUSINESS KARTI -->
-                <div class="hub-card hub-card-business" onclick="enterAppFromHub('business-screen', 'BUSINESS')">
-                    <span class="hub-card-kicker">FOCUS</span>
-                    <h3>Business</h3>
-                    <p>Üretkenlik & İş</p>
-                    <div class="hub-card-icon">💼</div>
-                </div>
-
-                <!-- HUB EKRANI: KPSS AKADEMİ BUTONU -->
-                <div class="hub-card hub-card-kpss" onclick="openKPSSCenter()">
-                    <span class="hub-card-kicker">STUDY</span>
-                    <h3>KPSS Akademi</h3>
-                    <p>Ders & Deneme Takibi</p>
-                    <div class="hub-card-icon">📚</div>
+                <!-- Sayfa Noktaları (Pagination Dots) -->
+                <div class="hub-pagination">
+                    <span class="hub-dot active"></span>
+                    <span class="hub-dot"></span>
                 </div>
             </div>
 
-            <!-- ZARİF KARŞILAMA İMZASI (Boşluklar azaltılarak ekranın en altına itildi) -->
+            <!-- Karşılama Metni -->
             <footer class="hub-greeting">
-                <h2 id="hub-greeting-text">İyi Günler,
-                </h2>
-                <p id="hub-greeting-name">Sporcu
-                </p>
-    </div>
-    </div>
+                <h2 id="hub-greeting-text">İyi Günler,</h2>
+                <p id="hub-greeting-name">Sporcu</p>
+            </footer>
+        </main>
     </div>
 
     <!-- SİNEMATİK GEÇİŞ EKRANI (Harflerin İçinden Uçma Animasyonu İçin) -->
@@ -321,7 +378,7 @@
                     <input type="text" id="new-activity-input" placeholder="Yeni disiplin görevi ekle...">
                     <button id="add-activity-btn">+</button>
                 </div>
-                
+
                 <div id="success-banner" class="success-banner hidden">🏆 GÜNLÜK HEDEF VE MANİFESTO TAMAMLANDI!</div>
                 <div id="activity-list" class="checklist-container"></div>
             </section>
@@ -332,42 +389,63 @@
                 <div class="tracking-grid">
                     <div class="track-card" onclick="openTrackingModal('fat')">
                         <div class="track-icon">
-                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                                stroke-linecap="round" stroke-linejoin="round">
+                                <path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6" />
+                            </svg>
                         </div>
                         <h4>Yağ Oranı</h4>
                         <p>US Navy Formülü</p>
                     </div>
                     <div class="track-card" onclick="openTrackingModal('measurements')">
                         <div class="track-icon">
-                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 12h20M2 7h20M2 17h20"/></svg>
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                                stroke-linecap="round" stroke-linejoin="round">
+                                <path d="M2 12h20M2 7h20M2 17h20" />
+                            </svg>
                         </div>
                         <h4>Ölçülerim</h4>
                         <p>Mezura Kaydı</p>
                     </div>
                     <div class="track-card" onclick="openTrackingModal('volume')">
                         <div class="track-icon">
-                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                                stroke-linecap="round" stroke-linejoin="round">
+                                <line x1="18" y1="20" x2="18" y2="10" />
+                                <line x1="12" y1="20" x2="12" y2="4" />
+                                <line x1="6" y1="20" x2="6" y2="14" />
+                            </svg>
                         </div>
                         <h4>İdman Hacmi</h4>
                         <p>5 Temel Hareket</p>
                     </div>
                     <div class="track-card" onclick="openTrackingModal('weight')">
                         <div class="track-icon">
-                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m3 6 3 1m0 0-3 9a5 5 0 0 0 6 0l-3-9m3 9s1.5 2 3 2 3-2 3-2m-3-11V3m-3 2h6"/></svg>
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                                stroke-linecap="round" stroke-linejoin="round">
+                                <path d="m3 6 3 1m0 0-3 9a5 5 0 0 0 6 0l-3-9m3 9s1.5 2 3 2 3-2 3-2m-3-11V3m-3 2h6" />
+                            </svg>
                         </div>
                         <h4>Ağırlık</h4>
                         <p>Kilo Grafiği</p>
                     </div>
                     <div class="track-card" onclick="openTrackingModal('water')">
                         <div class="track-icon">
-                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2.69l5.66 5.66a8 8 0 1 1-11.31 0z"/></svg>
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                                stroke-linecap="round" stroke-linejoin="round">
+                                <path d="M12 2.69l5.66 5.66a8 8 0 1 1-11.31 0z" />
+                            </svg>
                         </div>
                         <h4>Su Tüketimi</h4>
                         <p>Hedef Takibi</p>
                     </div>
                     <div class="track-card" onclick="openTrackingModal('macros')">
                         <div class="track-icon">
-                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 8h1a4 4 0 0 1 0 8h-1M2 8h16v9a4 4 0 0 1-4 4H6a4 4 0 0 1-4-4V8zM6 1v3M10 1v3M14 1v3"/></svg>
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                                stroke-linecap="round" stroke-linejoin="round">
+                                <path
+                                    d="M18 8h1a4 4 0 0 1 0 8h-1M2 8h16v9a4 4 0 0 1-4 4H6a4 4 0 0 1-4-4V8zM6 1v3M10 1v3M14 1v3" />
+                            </svg>
                         </div>
                         <h4>Öğün Takibi</h4>
                         <p>Kalori Grafiği</p>
@@ -375,65 +453,113 @@
                     <!-- YENİ EKLENEN TAKİP KARTLARI -->
                     <div class="track-card" onclick="openTrackingModal('sleep')">
                         <div class="track-icon">
-                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                                stroke-linecap="round" stroke-linejoin="round">
+                                <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z" />
+                            </svg>
                         </div>
                         <h4>Uyku Takibi</h4>
                         <p>Toparlanma Grafiği</p>
                     </div>
                     <div class="track-card" onclick="openTrackingModal('cardio')">
                         <div class="track-icon">
-                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 8h1a4 4 0 0 1 0 8h-1M2 8h16v9a4 4 0 0 1-4 4H6a4 4 0 0 1-4-4V8zM6 1v3M10 1v3M14 1v3"/><circle cx="12" cy="13" r="3"/></svg>
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                                stroke-linecap="round" stroke-linejoin="round">
+                                <path
+                                    d="M18 8h1a4 4 0 0 1 0 8h-1M2 8h16v9a4 4 0 0 1-4 4H6a4 4 0 0 1-4-4V8zM6 1v3M10 1v3M14 1v3" />
+                                <circle cx="12" cy="13" r="3" />
+                            </svg>
                         </div>
                         <h4>Kardiyo</h4>
                         <p>Adım & Mesafe</p>
                     </div>
                     <div class="track-card" onclick="openTrackingModal('active_kcal')">
                         <div class="track-icon">
-                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M8.5 14.5A2.5 2.5 0 0 0 11 12c0-1.38-.5-2-1-3-1.072-2.143-.224-4.054 2-6 .5 2.5 2 4.9 4 6.5 2 1.6 3 3.5 3 5.5a7 7 0 1 1-14 0c0-1.153.433-2.294 1-3a2.5 2.5 0 0 0 2.5 2.5z"/></svg>
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                                stroke-linecap="round" stroke-linejoin="round">
+                                <path
+                                    d="M8.5 14.5A2.5 2.5 0 0 0 11 12c0-1.38-.5-2-1-3-1.072-2.143-.224-4.054 2-6 .5 2.5 2 4.9 4 6.5 2 1.6 3 3.5 3 5.5a7 7 0 1 1-14 0c0-1.153.433-2.294 1-3a2.5 2.5 0 0 0 2.5 2.5z" />
+                            </svg>
                         </div>
                         <h4>Yakılan Kalori</h4>
                         <p>Aktif Enerji</p>
                     </div>
                     <div class="track-card" onclick="openTrackingModal('heart_rate')">
                         <div class="track-icon">
-                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                                stroke-linecap="round" stroke-linejoin="round">
+                                <path
+                                    d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z" />
+                            </svg>
                         </div>
                         <h4>Nabız (BPM)</h4>
                         <p>Dinlenik Nabız</p>
                     </div>
                     <div class="track-card spec-track-card" onclick="openTrackingModal('calculator_1rm')">
                         <div class="track-icon">
-                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="16" height="20" x="4" y="2" rx="2"/><line x1="8" y1="6" x2="16" y2="6"/><line x1="16" y1="14" x2="16" y2="18"/><path d="M16 10h.01"/><path d="M12 10h.01"/><path d="M8 10h.01"/><path d="M12 14h.01"/><path d="M8 14h.01"/><path d="M12 18h.01"/><path d="M8 18h.01"/></svg>
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                                stroke-linecap="round" stroke-linejoin="round">
+                                <rect width="16" height="20" x="4" y="2" rx="2" />
+                                <line x1="8" y1="6" x2="16" y2="6" />
+                                <line x1="16" y1="14" x2="16" y2="18" />
+                                <path d="M16 10h.01" />
+                                <path d="M12 10h.01" />
+                                <path d="M8 10h.01" />
+                                <path d="M12 14h.01" />
+                                <path d="M8 14h.01" />
+                                <path d="M12 18h.01" />
+                                <path d="M8 18h.01" />
+                            </svg>
                         </div>
                         <h4>1RM Motoru</h4>
                         <p>Maks. Güç Hesabı</p>
                     </div>
                     <div class="track-card spec-track-card" onclick="openTrackingModal('supplements')">
                         <div class="track-icon">
-                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m10.5 20.5 10-10a4.95 4.95 0 1 0-7-7l-10 10a4.95 4.95 0 1 0 7 7Z"/><path d="m8.5 8.5 7 7"/></svg>
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                                stroke-linecap="round" stroke-linejoin="round">
+                                <path d="m10.5 20.5 10-10a4.95 4.95 0 1 0-7-7l-10 10a4.95 4.95 0 1 0 7 7Z" />
+                                <path d="m8.5 8.5 7 7" />
+                            </svg>
                         </div>
                         <h4>Yakıt Stoku</h4>
                         <p>Supplement Takibi</p>
                     </div>
                     <div class="track-card spec-track-card" onclick="openTrackingModal('deload_info')">
                         <div class="track-icon">
-                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/></svg>
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                                stroke-linecap="round" stroke-linejoin="round">
+                                <path d="M12 20h9" />
+                                <path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z" />
+                            </svg>
                         </div>
                         <h4>Deload Motoru</h4>
                         <p>Yenilenme Döngüsü</p>
                     </div>
                     <div class="track-card spec-track-card" onclick="openTrackingModal('macro_info')">
                         <div class="track-icon">
-                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4.5 16.5c-1.5 1.26-2 5-2 5s3.74-.5 5-2c.71-.84.7-2.13-.09-2.91a2.18 2.18 0 0 0-2.91-.09z"/><path d="m12 15-3-3a22 22 0 0 1 2-3.95A12.88 12.88 0 0 1 22 2c0 2.72-.78 7.5-6 11a22.35 22.35 0 0 1-4 2z"/><path d="M9 12H4s.55-3.03 2-4c1.62-1.08 3 0 3 0"/><path d="M12 15v5s3.03-.55 4-2c1.08-1.62 0-3 0-3"/></svg>
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                                stroke-linecap="round" stroke-linejoin="round">
+                                <path
+                                    d="M4.5 16.5c-1.5 1.26-2 5-2 5s3.74-.5 5-2c.71-.84.7-2.13-.09-2.91a2.18 2.18 0 0 0-2.91-.09z" />
+                                <path
+                                    d="m12 15-3-3a22 22 0 0 1 2-3.95A12.88 12.88 0 0 1 22 2c0 2.72-.78 7.5-6 11a22.35 22.35 0 0 1-4 2z" />
+                                <path d="M9 12H4s.55-3.03 2-4c1.62-1.08 3 0 3 0" />
+                                <path d="M12 15v5s3.03-.55 4-2c1.08-1.62 0-3 0-3" />
+                            </svg>
                         </div>
                         <h4>Makro Manipülasyon</h4>
                         <p>Besin Dönüşümü</p>
                     </div>
                 </div>
                 <!-- YENİ: GEÇMİŞ İDMANLAR KARTI -->
-                <div class="track-card spec-track-card" onclick="openTrackingModal('past_workouts')" style="margin-top: 15px;">
+                <div class="track-card spec-track-card" onclick="openTrackingModal('past_workouts')"
+                    style="margin-top: 15px;">
                     <div class="track-icon">
-                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 19.5v-15A2.5 2.5 0 0 1 6.5 2H20v20H6.5a2.5 2.5 0 0 1-0-5H20"/></svg>
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                            stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M4 19.5v-15A2.5 2.5 0 0 1 6.5 2H20v20H6.5a2.5 2.5 0 0 1-0-5H20" />
+                        </svg>
                     </div>
                     <h4>İdman Geçmişi</h4>
                     <p>Eski Kayıtlar</p>
@@ -679,7 +805,8 @@
                     </div>
                 </div>
                 <!-- YENİ: APPLE WATCH TARZI GÜNLÜK HALKALAR (PREMIUM KASA) -->
-                <div style="background: linear-gradient(145deg, #181818, #0f0f0f); border: 1px solid #2a2a2a; border-radius: 20px; padding: 20px; margin-bottom: 20px; display: flex; align-items: center; justify-content: space-around; box-shadow: 0 10px 25px rgba(0, 0, 0, 0.5), inset 0 1px 1px rgba(255, 255, 255, 0.03);">
+                <div
+                    style="background: linear-gradient(145deg, #181818, #0f0f0f); border: 1px solid #2a2a2a; border-radius: 20px; padding: 20px; margin-bottom: 20px; display: flex; align-items: center; justify-content: space-around; box-shadow: 0 10px 25px rgba(0, 0, 0, 0.5), inset 0 1px 1px rgba(255, 255, 255, 0.03);">
                     <div class="activity-rings-container">
                         <svg width="130" height="130" viewBox="0 0 130 130">
                             <!-- Arka Plan Halkaları (İçeri göçük mat halka hissi) -->
@@ -698,24 +825,32 @@
                     </div>
                     <div style="display: flex; flex-direction: column; gap: 10px;">
                         <div style="display: flex; align-items: center; gap: 8px;">
-                            <span style="width: 8px; height: 8px; background: #ff4444; border-radius: 50%; box-shadow: 0 0 8px #ff4444;"></span>
-                            <span style="color: #fff; font-size: 11px; font-weight: 800; letter-spacing: 0.5px;">İDMAN</span>
+                            <span
+                                style="width: 8px; height: 8px; background: #ff4444; border-radius: 50%; box-shadow: 0 0 8px #ff4444;"></span>
+                            <span
+                                style="color: #fff; font-size: 11px; font-weight: 800; letter-spacing: 0.5px;">İDMAN</span>
                         </div>
                         <div style="display: flex; align-items: center; gap: 8px;">
-                            <span style="width: 8px; height: 8px; background: #27ae60; border-radius: 50%; box-shadow: 0 0 8px #27ae60;"></span>
-                            <span style="color: #fff; font-size: 11px; font-weight: 800; letter-spacing: 0.5px;">KALORİ</span>
+                            <span
+                                style="width: 8px; height: 8px; background: #27ae60; border-radius: 50%; box-shadow: 0 0 8px #27ae60;"></span>
+                            <span
+                                style="color: #fff; font-size: 11px; font-weight: 800; letter-spacing: 0.5px;">KALORİ</span>
                         </div>
                         <div style="display: flex; align-items: center; gap: 8px;">
-                            <span style="width: 8px; height: 8px; background: #00d2ff; border-radius: 50%; box-shadow: 0 0 8px #00d2ff;"></span>
-                            <span style="color: #fff; font-size: 11px; font-weight: 800; letter-spacing: 0.5px;">SU</span>
+                            <span
+                                style="width: 8px; height: 8px; background: #00d2ff; border-radius: 50%; box-shadow: 0 0 8px #00d2ff;"></span>
+                            <span
+                                style="color: #fff; font-size: 11px; font-weight: 800; letter-spacing: 0.5px;">SU</span>
                         </div>
                     </div>
                 </div>
 
                 <!-- YENİ: 7 GÜNLÜK STREAK TAKVİMİ (MAT TİTANYUM) -->
-                <div class="streak-container" style="background: linear-gradient(145deg, #181818, #0f0f0f) !important; border: 1px solid #2a2a2a !important; border-radius: 20px !important; padding: 20px !important; box-shadow: 0 10px 25px rgba(0, 0, 0, 0.5), inset 0 1px 1px rgba(255, 255, 255, 0.03) !important;">
+                <div class="streak-container"
+                    style="background: linear-gradient(145deg, #181818, #0f0f0f) !important; border: 1px solid #2a2a2a !important; border-radius: 20px !important; padding: 20px !important; box-shadow: 0 10px 25px rgba(0, 0, 0, 0.5), inset 0 1px 1px rgba(255, 255, 255, 0.03) !important;">
                     <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:15px;">
-                        <h3 style="font-size:14px; margin:0; color:#fff; font-weight: 900; letter-spacing: 0.5px;">Haftalık Seri</h3>
+                        <h3 style="font-size:14px; margin:0; color:#fff; font-weight: 900; letter-spacing: 0.5px;">
+                            Haftalık Seri</h3>
                         <span style="color: var(--goldnova); font-size: 11px; font-weight: bold;">🔥 İstikrar</span>
                     </div>
                     <div id="streak-days" style="display:flex; justify-content:space-between;"></div>
@@ -853,30 +988,49 @@
         <nav class="bottom-nav">
             <button class="nav-btn active" data-target="workout-sec">
                 <span class="icon">
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 10v4"/><path d="M20 10v4"/><path d="M6 8v8"/><path d="M18 8v8"/><path d="M6 12h12"/></svg>
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                        stroke-linejoin="round">
+                        <path d="M4 10v4" />
+                        <path d="M20 10v4" />
+                        <path d="M6 8v8" />
+                        <path d="M18 8v8" />
+                        <path d="M6 12h12" />
+                    </svg>
                 </span>
                 <span class="text">İdman</span>
             </button>
             <button class="nav-btn" data-target="diet-sec">
                 <span class="icon">
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 2v7c0 1.1.9 2 2 2h4a2 2 0 0 0 2-2V2"/><path d="M7 2v20"/><path d="M21 15V2v0a5 5 0 0 0-5 5v6c0 1.1.9 2 2 2h3Zm0 0v7"/></svg>
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                        stroke-linejoin="round">
+                        <path d="M3 2v7c0 1.1.9 2 2 2h4a2 2 0 0 0 2-2V2" />
+                        <path d="M7 2v20" />
+                        <path d="M21 15V2v0a5 5 0 0 0-5 5v6c0 1.1.9 2 2 2h3Zm0 0v7" />
+                    </svg>
                 </span>
                 <span class="text">Diyet</span>
             </button>
-            
+
             <div class="hub-nav-btn" onclick="returnToHub()">
                 <span class="hub-icon"></span>
             </div>
-            
+
             <button class="nav-btn" data-target="activity-sec">
                 <span class="icon">
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 11 12 14 22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                        stroke-linejoin="round">
+                        <polyline points="9 11 12 14 22 4" />
+                        <path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11" />
+                    </svg>
                 </span>
                 <span class="text">Görev</span>
             </button>
             <button class="nav-btn" data-target="tracking-sec">
                 <span class="icon">
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                        stroke-linejoin="round">
+                        <polyline points="22 12 18 12 15 21 9 3 6 12 2 12" />
+                    </svg>
                 </span>
                 <span class="text">Takip</span>
             </button>
@@ -3436,27 +3590,271 @@
         </div>
     </div>
     <!-- 📖 HİYERARŞİ VE TEŞKİLAT ŞEMASI REHBERİ (MODAL) -->
-    <div id="hierarchy-guide-modal" class="hidden" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.95); z-index:9999999; flex-direction:column; justify-content:space-between; align-items:center; padding: 20px; box-sizing: border-box;">
-        <div style="width: 100%; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #333; padding-bottom: 10px;">
+    <div id="hierarchy-guide-modal" class="hidden"
+        style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.95); z-index:9999999; flex-direction:column; justify-content:space-between; align-items:center; padding: 20px; box-sizing: border-box;">
+        <div
+            style="width: 100%; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #333; padding-bottom: 10px;">
             <h3 style="color: var(--sec-accent); margin: 0; font-size: 15px;">TEŞKİLAT HİYERARŞİ REHBERİ</h3>
-            <button onclick="closeHierarchyGuide()" style="background: transparent; border: none; color: #ff4444; font-size: 20px; font-weight: bold; cursor: pointer;">✕ Kapat</button>
+            <button onclick="closeHierarchyGuide()"
+                style="background: transparent; border: none; color: #ff4444; font-size: 20px; font-weight: bold; cursor: pointer;">✕
+                Kapat</button>
         </div>
-        
-        <div style="width: 100%; max-width: 400px; flex: 1; overflow-y: auto; padding: 15px 0; color: #ddd; font-size: 12px; line-height: 1.6;">
+
+        <div
+            style="width: 100%; max-width: 400px; flex: 1; overflow-y: auto; padding: 15px 0; color: #ddd; font-size: 12px; line-height: 1.6;">
             <h4 style="color: #00d2ff; margin-top: 0;">1. İçişleri Bakanlığı Bağlantısı</h4>
             <p>Emniyet Genel Müdürlüğü ve Jandarma Genel Komutanlığı doğrudan <b>İçişleri Bakanlığı</b>'na bağlıdır.</p>
-            
+
             <h4 style="color: #00d2ff;">2. Jandarma Komuta Kademesi</h4>
             <p>Jandarma Genel Komutanı -> Bölge Komutanları -> İl Jandarma Komutanları -> İlçe Jandarma Komutanları.</p>
-            
+
             <h4 style="color: #00d2ff;">3. Emniyet Komuta Kademesi</h4>
             <p>Emniyet Genel Müdürü -> Daire Başkanları / İl Emniyet Müdürleri -> İlçe Emniyet Müdürleri / Amirleri.</p>
 
             <h4 style="color: #00d2ff;">4. Mülki İdare Amiri Yetkileri</h4>
-            <p>İlde <b>Vali</b>, ilçede <b>Kaymakam</b> genel kolluk kuvvetlerinin (polis ve jandarma) mülki amiridir. Gerekli durumlarda her iki kuvvete de emir verebilir.</p>
+            <p>İlde <b>Vali</b>, ilçede <b>Kaymakam</b> genel kolluk kuvvetlerinin (polis ve jandarma) mülki amiridir.
+                Gerekli durumlarda her iki kuvvete de emir verebilir.</p>
         </div>
 
-        <button onclick="closeHierarchyGuide()" style="background: var(--sec-accent); color: #000; border: none; padding: 12px; border-radius: 8px; font-weight: bold; width: 100%; max-width: 400px; cursor: pointer;">Anladım, Kapat</button>
+        <button onclick="closeHierarchyGuide()"
+            style="background: var(--sec-accent); color: #000; border: none; padding: 12px; border-radius: 8px; font-weight: bold; width: 100%; max-width: 400px; cursor: pointer;">Anladım,
+            Kapat</button>
+    </div>
+    <!-- ==========================================
+         💳 OLYMPUS WEALTH (TÜRKÇE, DİNAMİK & LÜKS)
+         ========================================== -->
+    <div id="finance-screen" class="full-screen-overlay hidden bank-wrapper">
+        
+        <!-- 🏠 1. SEKME: ANA SAYFA -->
+        <div id="bank-tab-home" class="bank-tab active-tab">
+            <div class="bank-top-section">
+                <div class="bank-header" style="position: relative;">
+                    <span onclick="returnToHub(); document.getElementById('finance-screen').classList.add('hidden');" style="cursor:pointer; font-size:24px; color:#fff; z-index:2;">←</span>
+                    
+                    <!-- 💎 YENİ: MERKEZİ LOGO -->
+                    <img src="bank.png" class="bank-center-logo" alt="Olympus Logo">
+
+                    <!-- ZARİF SVG BİLDİRİM İKONU -->
+                    <div style="position: relative; cursor: pointer; z-index: 2;" onclick="openNotifications()">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:24px; height:24px;">
+                            <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"></path>
+                            <path d="M13.73 21a2 2 0 0 1-3.46 0"></path>
+                        </svg>
+                        <span style="position: absolute; top: -2px; right: 2px; width: 8px; height: 8px; background: #f39c12; border-radius: 50%; border: 2px solid #187777;"></span>
+                    </div>
+                </div>
+                
+                <div class="bank-balance-sec">
+                    <span class="bank-subtitle">Toplam Varlıklarım - TÜRK LİRASI</span>
+                    <h1 class="bank-balance" id="bank-total-balance">₺0,00</h1>
+                    <button class="bank-add-btn" onclick="openTransactionModal()">+ İşlem Ekle</button>
+                </div>
+
+                <div class="bank-wave-container">
+                    <svg viewBox="0 0 500 150" preserveAspectRatio="none" style="height: 100%; width: 100%;">
+                        <path d="M0.00,49.98 C150.00,150.00 349.20,-50.00 500.00,49.98 L500.00,150.00 L0.00,150.00 Z" style="stroke: none; fill: #ffffff;"></path>
+                    </svg>
+                </div>
+            </div>
+
+            <div class="bank-transactions-sec">
+                <div class="bank-trans-header">
+                    <span class="bank-trans-title">Son Hareketler</span>
+                    <span class="bank-trans-filter" onclick="openBankFilterModal()" style="cursor: pointer;">Filtrele ▼</span>
+                </div>
+                
+                <div id="bank-transactions-list" class="bank-trans-list-container">
+                    <!-- JS Dolduracak -->
+                </div>
+                <!-- 5 İşlem Limiti İçin Göster/Gizle Butonu -->
+                <div id="bank-show-all-btn" onclick="toggleAllBankTransactions()" style="text-align: center; color: #125e5e; font-size: 12px; font-weight: bold; margin-top: 15px; margin-bottom: 25px; cursor: pointer; display: none;">
+                    Tümünü Göster ▼
+                </div>
+
+                <div class="bank-trans-header">
+                    <span class="bank-trans-title" style="color: #f39c12;">Bekleyen İşlemler</span>
+                </div>
+                <div id="bank-pending-list" class="bank-trans-list-container">
+                    <!-- JS Dolduracak -->
+                </div>
+            </div>
+        </div>
+
+        <!-- 💳 2. SEKME: KARTLARIM -->
+        <div id="bank-tab-cards" class="bank-tab" style="background-color: #f8f9fa;">
+            <div class="bank-header-light" style="position: relative;">
+                <span onclick="returnToHub(); document.getElementById('finance-screen').classList.add('hidden');" style="cursor:pointer; font-size:24px; color:#333; z-index:2;">←</span>
+                
+                <!-- 💎 YENİ: MERKEZİ LOGO -->
+                <img src="bank.png" class="bank-center-logo" alt="Olympus Logo">
+
+                <!-- ZARİF SVG BİLDİRİM İKONU (KOYU TEMA) -->
+                <div style="position: relative; cursor: pointer; z-index: 2;" onclick="openNotifications()">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="#333" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:24px; height:24px;">
+                        <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"></path>
+                        <path d="M13.73 21a2 2 0 0 1-3.46 0"></path>
+                    </svg>
+                    <span style="position: absolute; top: -2px; right: 2px; width: 8px; height: 8px; background: #f39c12; border-radius: 50%; border: 2px solid #fff;"></span>
+                </div>
+            </div>
+
+            <div class="bank-list-header" style="margin-top:5px;">
+                <span class="bank-list-title">Dijital Cüzdanım</span>
+                <span class="bank-list-count" style="color:#125e5e; cursor:pointer;" onclick="openAddCardModal()">+ Yeni Ekle</span>
+            </div>
+
+            <!-- YENİ: YANA KAYDIRMALI KART KARUSELİ -->
+            <div id="bank-cards-carousel" class="bank-cards-carousel">
+                <!-- JS Dolduracak -->
+            </div>
+            
+            <p style="text-align: center; color: #888; font-size: 10px; margin-top: 10px;">Diğer kartları görmek için yana kaydırın.</p>
+
+            <div class="bank-list-header" style="margin-top:25px;">
+                <span class="bank-list-title">Kart Hareketleri</span>
+            </div>
+            <p style="text-align: center; color: #aaa; font-size: 11px;">Seçili karta ait harcamalar burada listelenir.</p>
+        </div>
+
+        <!-- 📊 3. SEKME: İSTATİSTİKLER -->
+        <div id="bank-tab-stats" class="bank-tab" style="background-color: #ffffff;">
+            <div class="bank-top-section" style="padding-bottom: 30px;">
+                <div class="bank-header">
+                    <span onclick="returnToHub(); document.getElementById('finance-screen').classList.add('hidden');" style="cursor:pointer; font-size:24px; color:#fff;">←</span>
+                    <span style="font-size:20px; color:#fff;">🔔</span>
+                </div>
+                <div style="text-align: center; padding: 20px;">
+                    <span style="color: rgba(255,255,255,0.8); font-size: 12px;">Haftalık Toplam Gider</span>
+                    <h2 id="stat-weekly-total" style="color: #fff; font-size: 32px; margin: 5px 0 0 0;">₺0,00</h2>
+                </div>
+            </div>
+
+            <div style="background-color: #ffffff; border-radius: 30px 30px 0 0; margin-top: -25px; padding: 30px 25px 100px 25px; flex: 1; overflow-y: auto;">
+                <div class="bank-list-header" style="padding: 0; margin-bottom: 20px;">
+                    <span class="bank-list-title">Harcama Grafiği</span>
+                    <span class="bank-list-count" style="color:#a0a0a0;">Bu Hafta</span>
+                </div>
+
+                <!-- GERÇEK ZAMANLI DİKEY SÜTUN GRAFİĞİ -->
+                <div class="bank-bar-chart-container" id="bank-dynamic-bars">
+                    <!-- JS Dolduracak -->
+                </div>
+
+                <div class="bank-list-header" style="padding: 0; margin-top: 30px; margin-bottom: 20px;">
+                    <span class="bank-list-title">Genel Oranlar</span>
+                </div>
+
+                <div class="bank-donut-container">
+                    <div style="display:flex; flex-direction:column; align-items:center; gap:8px;">
+                        <div class="bank-donut" id="donut-expense" style="background: conic-gradient(#e74c3c 0%, #f4f6f6 0);">
+                            <div class="bank-donut-inner" id="donut-expense-text">%0</div>
+                        </div>
+                        <span style="font-size:10px; color:#888; font-weight:bold;">Gider</span>
+                    </div>
+                    <div style="display:flex; flex-direction:column; align-items:center; gap:8px;">
+                        <div class="bank-donut" id="donut-income" style="background: conic-gradient(#27ae60 0%, #f4f6f6 0);">
+                            <div class="bank-donut-inner" id="donut-income-text">%0</div>
+                        </div>
+                        <span style="font-size:10px; color:#888; font-weight:bold;">Gelir</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 📱 CAM ALT NAVİGASYON -->
+        <nav class="bank-bottom-nav">
+            <button class="bank-nav-btn active" onclick="switchBankTab('home', this)">
+                <span class="icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg></span>
+                <span class="text">Ana Sayfa</span>
+            </button>
+            <button class="bank-nav-btn" onclick="switchBankTab('cards', this)">
+                <span class="icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="1" y="4" width="22" height="16" rx="2" ry="2"/><line x1="1" y1="10" x2="23" y2="10"/></svg></span>
+                <span class="text">Kartlarım</span>
+            </button>
+            <button class="bank-nav-btn" onclick="switchBankTab('stats', this)">
+                <span class="icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg></span>
+                <span class="text">İstatistik</span>
+            </button>
+        </nav>
+
+        <!-- 💰 İŞLEM EKLEME / DÜZENLEME MODALI -->
+        <div id="bank-transaction-modal" class="modal" style="z-index: 10050;">
+            <div class="modal-content" style="max-width: 350px; background: #fff; border-radius: 20px;">
+                <h3 id="trans-modal-title" style="color: #125e5e; margin-bottom: 15px; text-align: center;">Yeni İşlem Ekle</h3>
+                
+                <input type="hidden" id="trans-edit-id"> 
+                
+                <input type="text" id="trans-title" placeholder="Açıklama (Örn: Market)" style="width:100%; padding:12px; border:1px solid #ddd; border-radius:8px; margin-bottom:10px; font-size:14px; outline:none; box-sizing: border-box;">
+                
+                <div style="display: flex; gap: 10px; margin-bottom: 10px;">
+                    <input type="number" id="trans-amount" placeholder="Tutar (₺)" style="flex: 2; padding:12px; border:1px solid #ddd; border-radius:8px; font-size:16px; font-weight:bold; outline:none; box-sizing: border-box;">
+                    <select id="trans-type" style="flex: 1; padding:12px; border:1px solid #ddd; border-radius:8px; background:#f4f6f6; outline:none; box-sizing: border-box;">
+                        <option value="expense">Gider</option>
+                        <option value="income">Gelir</option>
+                    </select>
+                </div>
+                
+                <!-- YENİ: TARİH SEÇİCİ -->
+                <input type="date" id="trans-date" style="width:100%; padding:12px; border:1px solid #ddd; border-radius:8px; margin-bottom:10px; font-size:14px; outline:none; box-sizing: border-box;">
+
+                <div style="display: flex; align-items: center; justify-content: space-between; background: #f9f9f9; padding: 12px; border-radius: 8px; margin-bottom: 20px;">
+                    <label style="font-size:13px; color:#555; font-weight:bold;">Bekleyen İşlem Mi?</label>
+                    <input type="checkbox" id="trans-pending" style="width: 20px; height: 20px;">
+                </div>
+
+                <div style="display: flex; gap: 10px;">
+                    <button onclick="saveBankTransaction()" style="flex:2; background:#125e5e; color:#fff; border:none; padding:12px; border-radius:8px; font-weight:bold; cursor:pointer;">Kaydet</button>
+                    <button onclick="document.getElementById('bank-transaction-modal').style.display='none'" style="flex:1; background:transparent; color:#e74c3c; border:1px solid #e74c3c; padding:12px; border-radius:8px; font-weight:bold; cursor:pointer;">İptal</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- ⚙️ İŞLEM AKSİYON MODALI (UZUN BASINCA AÇILIR) -->
+        <div id="bank-action-modal" class="modal" style="z-index: 10051; align-items: flex-end; padding: 0; background: rgba(0,0,0,0.5);" onclick="closeBankActionModal()">
+            <div class="modal-content" onclick="event.stopPropagation()" style="width: 100%; max-width: none; margin: 0; border-radius: 20px 20px 0 0; background: #fff; padding: 30px 20px calc(env(safe-area-inset-bottom) + 90px) 20px; animation: slideUp 0.3s ease;">
+                <input type="hidden" id="action-trans-id">
+                <h3 id="action-trans-title" style="color: #333; text-align: center; margin-top:0; margin-bottom: 5px;">İşlem Adı</h3>
+                <p id="action-trans-amount" style="color: #888; text-align: center; font-size: 24px; font-weight: bold; margin-bottom: 25px;">₺0.00</p>
+                
+                <button onclick="markTransactionCompleted()" id="btn-mark-complete" style="width:100%; background:#27ae60; color:#fff; border:none; padding:15px; border-radius:12px; font-weight:bold; margin-bottom:10px; cursor:pointer; display:none;">✅ Gerçekleşti Olarak İşaretle</button>
+                <button onclick="openEditTransaction()" style="width:100%; background:rgba(0, 210, 255, 0.1); color:#00a8cc; border:1px solid #00d2ff; padding:15px; border-radius:12px; font-weight:bold; margin-bottom:10px; cursor:pointer;">✏️ İşlemi Düzenle</button>
+                <button onclick="deleteBankTransaction()" style="width:100%; background:rgba(231, 76, 60, 0.1); color:#e74c3c; border:1px solid #e74c3c; padding:15px; border-radius:12px; font-weight:bold; margin-bottom:10px; cursor:pointer;">🗑️ İşlemi Sil</button>
+            </div>
+        </div>
+
+        <!-- 🔍 FİLTRELEME MODALI -->
+        <div id="bank-filter-modal" class="modal" style="z-index: 10050;">
+            <div class="modal-content" style="max-width: 300px; background: #fff; border-radius: 20px;">
+                <h3 style="color: #125e5e; margin-bottom: 15px; text-align: center;">İşlemleri Filtrele</h3>
+                <button onclick="applyBankFilter('all')" style="width:100%; background:#f4f6f6; color:#333; border:none; padding:12px; border-radius:8px; font-weight:bold; margin-bottom:8px; cursor:pointer;">Tümü</button>
+                <button onclick="applyBankFilter('income')" style="width:100%; background:rgba(39, 174, 96, 0.1); color:#27ae60; border:1px solid #27ae60; padding:12px; border-radius:8px; font-weight:bold; margin-bottom:8px; cursor:pointer;">Sadece Gelirler</button>
+                <button onclick="applyBankFilter('expense')" style="width:100%; background:rgba(231, 76, 60, 0.1); color:#e74c3c; border:1px solid #e74c3c; padding:12px; border-radius:8px; font-weight:bold; margin-bottom:8px; cursor:pointer;">Sadece Giderler</button>
+                <button onclick="document.getElementById('bank-filter-modal').style.display='none'" style="width:100%; background:transparent; color:#888; border:none; padding:12px; border-radius:8px; font-weight:bold; margin-top:10px; cursor:pointer;">İptal</button>
+            </div>
+        </div>
+
+        <!-- 💳 KART EKLEME MODALI -->
+        <div id="bank-add-card-modal" class="modal" style="z-index: 10050;">
+            <!-- ... (Eski Kart Ekleme Modalı İçeriği Aynı) ... -->
+            <div class="modal-content" style="max-width: 350px; background: #fff; border-radius: 20px;">
+                <h3 style="color: #125e5e; margin-bottom: 15px; text-align: center;">Kredi Kartı Ekle</h3>
+                <input type="text" id="card-bank-name" placeholder="Banka Adı (Örn: Garanti BBVA)" style="width:100%; padding:12px; border:1px solid #ddd; border-radius:8px; margin-bottom:10px; font-size:14px; outline:none; box-sizing: border-box;">
+                <input type="text" id="card-number" placeholder="Kart Son 4 Hane (Örn: 1234)" maxlength="4" style="width:100%; padding:12px; border:1px solid #ddd; border-radius:8px; margin-bottom:10px; font-size:14px; outline:none; box-sizing: border-box;">
+                <select id="card-color" style="width:100%; padding:12px; border:1px solid #ddd; border-radius:8px; margin-bottom:20px; font-size:14px; outline:none; background:#f4f6f6; box-sizing: border-box;">
+                    <option value="#125e5e">Olympus Turkuazı</option>
+                    <option value="#2980b9">Klasik Mavi</option>
+                    <option value="#e74c3c">Kırmızı</option>
+                    <option value="#27ae60">Yeşil</option>
+                    <option value="#8e44ad">Mor</option>
+                    <option value="#2c3e50">Siyah</option>
+                </select>
+                <div style="display: flex; gap: 10px;">
+                    <button onclick="saveBankCard()" style="flex:2; background:#125e5e; color:#fff; border:none; padding:12px; border-radius:8px; font-weight:bold; cursor:pointer;">Ekle</button>
+                    <button onclick="document.getElementById('bank-add-card-modal').style.display='none'" style="flex:1; background:transparent; color:#e74c3c; border:1px solid #e74c3c; padding:12px; border-radius:8px; font-weight:bold; cursor:pointer;">İptal</button>
+                </div>
+            </div>
+        </div>
+
     </div>
 
     <script src="script.js"></script>

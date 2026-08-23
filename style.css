@@ -5943,3 +5943,374 @@ body.polis-theme {
     box-shadow: 0 10px 25px rgba(246, 192, 0, 0.15) !important;
     margin-bottom: 15px !important;
 }
+/* ==========================================
+   📱 HUB SAYFA KAYDIRMA (iOS YAPI) KESİN ÇÖZÜM
+   ========================================== */
+.hub-pages-wrapper {
+    width: 100%;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+}
+
+.hub-pages-container {
+    display: flex !important;
+    flex-direction: row !important; /* Tüm sayfaları yan yana dizer */
+    width: 100%;
+    overflow-x: auto;
+    scroll-snap-type: x mandatory;
+    scrollbar-width: none;
+    -webkit-overflow-scrolling: touch;
+    gap: 30px; /* 1. Sayfa ile 2. Sayfa arasına 30px boşluk atar */
+}
+
+.hub-pages-container::-webkit-scrollbar {
+    display: none; /* Scroll bar çizgisini gizler */
+}
+
+.hub-page {
+    flex: 0 0 100% !important; /* Küçülmeyi yasaklar, tam %100 ekran boyunda tutar */
+    width: 100% !important;
+    scroll-snap-align: start;
+    padding: 0; 
+}
+
+.hub-pagination {
+    display: flex;
+    justify-content: center;
+    gap: 8px;
+    margin-top: 15px;
+}
+
+.hub-dot {
+    width: 8px;
+    height: 8px;
+    background: rgba(255,255,255,0.2);
+    border-radius: 50%;
+    transition: 0.3s;
+}
+
+.hub-dot.active {
+    background: var(--goldnova);
+    width: 16px;
+    border-radius: 4px;
+}
+/* ==========================================
+   💳 MOCKUP BANKA UYGULAMASI (KUSURSUZ TASARIM & YÜZEN CAM NAV)
+   ========================================== */
+.bank-wrapper {
+    background-color: #ffffff !important; /* Arka plan bembeyaz, yeşil sızıntısı bitti */
+    position: fixed !important;
+    top: 0; left: 0; 
+    width: 100vw !important; 
+    height: 100dvh !important;
+    z-index: 10000;
+    display: flex;
+    flex-direction: column;
+    align-items: stretch !important; /* MUCİZE 1: Ezilmeyi iptal eder, ekranı %100 doldurur */
+    justify-content: flex-start !important;
+}
+
+.bank-tab {
+    display: none; 
+    flex: 1;
+    flex-direction: column;
+    height: 100%;
+    overflow: hidden; 
+    width: 100% !important; /* Tam genişlik garantisi */
+}
+.bank-tab.active-tab {
+    display: flex;
+}
+
+/* Üst Koyu Yeşil / Turkuaz Alan (Home Sekmesi) */
+.bank-top-section {
+    background: linear-gradient(180deg, #187777 0%, #125e5e 100%);
+    width: 100% !important;
+    padding-top: calc(env(safe-area-inset-top) + 20px);
+    display: flex;
+    flex-direction: column;
+    color: white;
+    flex-shrink: 0;
+    position: relative;
+}
+
+.bank-header {
+    display: flex; justify-content: space-between; align-items: center; padding: 0 25px;
+}
+
+.bank-header-light {
+    display: flex; justify-content: space-between; align-items: center;
+    padding: calc(env(safe-area-inset-top) + 20px) 25px 10px 25px;
+    background: #ffffff; color: #333; flex-shrink: 0;
+    width: 100% !important;
+}
+
+/* Bakiye Alanı */
+.bank-balance-sec {
+    display: flex; flex-direction: column; align-items: center; padding: 25px 0 10px 0; z-index: 2;
+}
+.bank-subtitle { font-size: 11px; opacity: 0.8; margin-bottom: 8px; font-weight: 500;}
+.bank-balance { font-size: 38px; font-weight: 600; margin: 0 0 15px 0; color:#fff; }
+.bank-add-btn { background: rgba(255,255,255,0.15); border: 1px solid rgba(255,255,255,0.3); color: white; padding: 6px 20px; border-radius: 20px; font-size: 12px; cursor: pointer; }
+
+/* DALGA EFEKTİ (WAVE) */
+.bank-wave-container {
+    width: 100%;
+    height: 40px;
+    margin-top: -10px; 
+    z-index: 1;
+}
+.bank-wave-container svg {
+    display: block; width: 100%; height: 100%;
+}
+
+/* Beyaz İşlem Kartı Alanı */
+.bank-transactions-sec {
+    background-color: #ffffff;
+    border-radius: 0; /* Dalga hallediyor, yanlardan sızıntı yapmasın diye sıfırlandı */
+    flex: 1; 
+    min-height: 0; 
+    margin-top: -2px; /* Dalgaya tam yapışma payı */
+    padding: 20px 25px 120px 25px; 
+    display: flex;
+    flex-direction: column;
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
+    width: 100% !important;
+}
+
+.bank-trans-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 25px; flex-shrink: 0; width: 100%; }
+.bank-trans-title { font-weight: 700; color: #125e5e; font-size: 16px; }
+.bank-trans-filter { color: #a0a0a0; font-size: 12px; font-weight: 600; }
+
+.bank-trans-list-container {
+    display: flex; flex-direction: column; gap: 18px; width: 100%;
+}
+
+.bank-trans-item { display: flex; justify-content: space-between; align-items: center; width: 100%; }
+.bank-trans-icon {
+    width: 45px; height: 45px; background-color: #f0f4f4; border-radius: 50%;
+    display: flex; justify-content: center; align-items: center; font-size: 18px; color: #666;
+    flex-shrink: 0;
+}
+.bank-trans-details { flex: 1; margin-left: 15px; display: flex; flex-direction: column; justify-content: center; text-align: left; }
+.bank-trans-name { font-size: 14px; font-weight: 700; color: #333; margin-bottom: 4px; }
+.bank-trans-date { font-size: 11px; color: #999; font-weight: 500;}
+.bank-trans-amount { font-size: 15px; font-weight: 800; color: #333; }
+.bank-trans-amount.negative { color: #333; }
+.bank-trans-amount.positive { color: #125e5e; }
+
+/* 💳 KARTLAR VE İSTATİSTİKLER */
+.bank-big-card {
+    background: linear-gradient(135deg, #1b7a7a, #125e5e, #0a3d3d);
+    border-radius: 16px; padding: 20px; color: white; margin: 15px 25px 25px 25px;
+    box-shadow: 0 10px 25px rgba(18, 94, 94, 0.4); height: 180px; display: flex; flex-direction: column; justify-content: space-between;
+}
+.bank-card-chip { width: 35px; height: 25px; background: #e0bb4f; border-radius: 4px; opacity: 0.9; }
+.bank-list-header { display: flex; justify-content: space-between; align-items: center; padding: 0 25px; margin-bottom: 15px; width:100%; box-sizing: border-box;}
+.bank-list-title { font-weight: 700; color: #125e5e; font-size: 16px; }
+.bank-list-count { color: #a0a0a0; font-size: 12px; font-weight: bold; }
+.bank-cards-list { display: flex; flex-direction: column; gap: 15px; padding: 0 25px; margin-bottom: 20px; width:100%; box-sizing: border-box;}
+.bank-card-item { display: flex; justify-content: space-between; align-items: center; width:100%;}
+.bank-mini-card { width: 45px; height: 30px; border-radius: 6px; }
+.bank-btn-delete { background: #e74c3c; color: white; border: none; padding: 6px 14px; border-radius: 12px; font-size: 10px; font-weight: bold; cursor: pointer; }
+.bank-lorem-text { padding: 0 25px 100px 25px; color: #a0a0a0; font-size: 11px; line-height: 1.5; }
+
+/* İstatistik Grafiği */
+.bank-donut-container { display: flex; justify-content: space-between; padding: 0 25px; margin-bottom: 10px; width: 100%; box-sizing: border-box;}
+.bank-donut { width: 70px; height: 70px; border-radius: 50%; display: flex; justify-content: center; align-items: center; }
+.bank-donut-inner { width: 54px; height: 54px; background: #ffffff; border-radius: 50%; display: flex; justify-content: center; align-items: center; font-size: 13px; color: #333; font-weight: bold; }
+
+/* 📱 YÜZEN, RADİUSLU CAM ALT MENÜ */
+.bank-bottom-nav {
+    position: fixed !important;
+    bottom: calc(env(safe-area-inset-bottom, 15px) + 15px) !important; /* Ekrandan 15px yukarıda yüzer */
+    left: 15px !important;
+    right: 15px !important;
+    width: calc(100% - 30px) !important; /* Kenarlardan 15px içeride */
+    height: 65px !important;
+    
+    background: rgba(255, 255, 255, 0.85) !important;
+    backdrop-filter: blur(25px) !important;
+    -webkit-backdrop-filter: blur(25px) !important;
+    
+    display: flex !important;
+    justify-content: space-around !important;
+    align-items: center !important; 
+    
+    padding: 0 !important; /* Ortalamayı bozmasın diye padding sıfırlandı */
+    border-top: 1px solid rgba(255, 255, 255, 0.4) !important;
+    border-radius: 25px !important; /* MUCİZE 2: YUVARLAK KÖŞELER */
+    z-index: 10050 !important;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.1) !important;
+}
+
+.bank-nav-btn {
+    background: transparent;
+    border: none;
+    color: #a0aab5;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 4px;
+    flex: 1;
+    cursor: pointer;
+    transition: 0.2s;
+}
+
+.bank-nav-btn.active {
+    color: #125e5e; /* Turkuaz Tema Rengi */
+}
+
+/* SVG İKON KONTROLLERİ */
+.bank-nav-btn .icon svg {
+    width: 22px; 
+    height: 22px; 
+    transition: 0.2s;
+}
+.bank-nav-btn .text { 
+    font-size: 10px; 
+    font-weight: 700; 
+}
+/* ==========================================
+   💳 MOCKUP BANKA UYGULAMASI EKLENTİLERİ
+   ========================================== */
+/* Alttan Açılan Modal Animasyonu */
+@keyframes slideUp {
+    from { transform: translateY(100%); }
+    to { transform: translateY(0); }
+}
+
+/* İşlem Kartları (Tıklanabilir) */
+.bank-trans-item { 
+    display: flex; justify-content: space-between; align-items: center; width: 100%;
+    background: #fff; padding: 10px 15px; border-radius: 12px; border: 1px solid #f0f0f0;
+    cursor: pointer; transition: 0.2s; box-shadow: 0 2px 5px rgba(0,0,0,0.02);
+}
+.bank-trans-item:active { transform: scale(0.97); background: #f9f9f9; }
+
+/* Bekleyen İşlem Stili */
+.bank-trans-item.pending {
+    opacity: 0.7;
+    border: 1px dashed #ccc;
+    background: #fafafa;
+}
+
+/* Kartlar Sayfası Düzeni */
+.bank-big-card {
+    background: linear-gradient(135deg, #1b7a7a, #125e5e, #0a3d3d);
+    border-radius: 16px; padding: 20px; color: white; margin: 15px 25px 25px 25px;
+    box-shadow: 0 10px 25px rgba(18, 94, 94, 0.4); height: 180px; display: flex; flex-direction: column; justify-content: space-between;
+}
+.bank-card-chip { width: 35px; height: 25px; background: #e0bb4f; border-radius: 4px; opacity: 0.9; }
+
+/* Dinamik Renkli Kart Listesi */
+.bank-cards-list { display: flex; flex-direction: column; gap: 15px; padding: 0 25px; margin-bottom: 20px; width:100%; box-sizing: border-box;}
+.bank-card-list-item { 
+    display: flex; justify-content: space-between; align-items: center; width:100%;
+    background: #fff; padding: 15px; border-radius: 12px; box-shadow: 0 4px 10px rgba(0,0,0,0.05); cursor: pointer;
+}
+.bank-card-list-item:active { transform: scale(0.98); }
+.bank-mini-card { width: 45px; height: 30px; border-radius: 6px; box-shadow: 0 2px 5px rgba(0,0,0,0.2); }
+/* ==========================================
+   💳 MOCKUP BANKA UYGULAMASI (KART & İSTATİSTİK)
+   ========================================== */
+/* İstatistik Sütun Grafiği */
+.bank-bar-chart-container { 
+    display: flex; justify-content: space-between; align-items: flex-end; 
+    height: 140px; margin: 10px 0 20px 0; 
+}
+.bank-bar-wrapper { 
+    width: 28px; height: 100%; display: flex; flex-direction: column; align-items: center; justify-content: flex-end; gap: 8px;
+}
+.bank-bar { 
+    width: 14px; background: linear-gradient(180deg, #187777 0%, #125e5e 100%); 
+    border-radius: 8px; transition: height 0.5s ease;
+}
+.bar-lbl { font-size: 10px; color: #a0a0a0; font-weight: bold; }
+
+/* Büyük Kart (Cards Sekmesi) */
+.bank-big-card {
+    background: linear-gradient(135deg, #1b7a7a, #125e5e, #0a3d3d);
+    border-radius: 20px; padding: 25px; color: white; margin: 15px 25px 25px 25px;
+    box-shadow: 0 15px 35px rgba(18, 94, 94, 0.4); height: 200px; display: flex; flex-direction: column; justify-content: space-between;
+    transition: background 0.3s ease;
+}
+.bank-card-chip { width: 40px; height: 28px; background: #e0bb4f; border-radius: 6px; opacity: 0.9; box-shadow: inset 0 2px 5px rgba(0,0,0,0.2); }
+
+/* İşlem Kartları Genel Düzen */
+.bank-trans-item { 
+    display: flex; justify-content: space-between; align-items: center; width: 100%;
+    background: #fff; padding: 12px 15px; border-radius: 16px; border: 1px solid #f0f0f0;
+    cursor: pointer; transition: 0.2s; box-shadow: 0 4px 10px rgba(0,0,0,0.03); box-sizing: border-box;
+}
+.bank-trans-item:active { transform: scale(0.97); background: #f9f9f9; }
+.bank-trans-item.pending { opacity: 0.8; border: 1px dashed #ccc; background: #fcfcfc; }
+/* ==========================================
+   💳 BANKA: YANA KAYDIRMALI KART KARUSELİ
+   ========================================== */
+.bank-cards-carousel {
+    display: flex;
+    overflow-x: auto;
+    scroll-snap-type: x mandatory;
+    gap: 15px;
+    padding: 10px 25px 20px 25px;
+    scrollbar-width: none;
+    -webkit-overflow-scrolling: touch;
+}
+.bank-cards-carousel::-webkit-scrollbar { display: none; }
+
+.bank-card-slide {
+    min-width: calc(100% - 30px); /* Sonraki kartın ucu gözüksün diye %100'den küçük */
+    scroll-snap-align: center;
+    background: linear-gradient(135deg, #1b7a7a, #125e5e, #0a3d3d);
+    border-radius: 16px;
+    padding: 20px;
+    color: white;
+    box-shadow: 0 10px 20px rgba(0,0,0,0.2);
+    height: 180px;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    position: relative;
+}
+
+.bank-btn-delete-icon {
+    position: absolute;
+    top: 15px; right: 15px;
+    background: rgba(255,255,255,0.2);
+    border: none; color: #fff;
+    width: 30px; height: 30px; border-radius: 8px;
+    display: flex; justify-content: center; align-items: center;
+    cursor: pointer; font-size: 16px;
+}
+
+/* İşlem Kartları - Uzun Basma Efekti (Seçimi Engelleme) */
+.bank-trans-item { 
+    user-select: none;
+    -webkit-user-select: none;
+    -webkit-touch-callout: none;
+}
+.bank-trans-item:active { transform: scale(0.95); background: #f0f4f4; }
+/* ==========================================
+   💎 BANKA MERKEZİ LOGO STİLİ
+   ========================================== */
+.bank-center-logo {
+    position: absolute; /* Soldaki ve sağdaki butonlardan bağımsız tam ortaya asılır */
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 44px;
+    height: 44px;
+    object-fit: cover;
+    
+    /* Resmin siyah köşelerini kesip atar, sadece logoyu bırakır */
+    border-radius: 50%; 
+    
+    /* Uygulamadan hafifçe dışarı çıkıyormuş hissi (3D) */
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
+    border: 1px solid rgba(255, 255, 255, 0.15);
+    z-index: 1;
+}
