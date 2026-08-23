@@ -5257,124 +5257,73 @@ body.polis-theme {
 .sec-animate-img { animation: secPulseExpand 2s forwards ease-in-out; }
 .sec-animate-text { animation: textFadeIn 2s forwards ease-in-out; }
 /* =========================================================
-   PROJECT OLYMPUS - TRUE EDGE TO EDGE
-   iOS SAFE AREA FIX
+   PROJECT OLYMPUS
+   iOS EDGE-TO-EDGE BOTTOM NAV
    ========================================================= */
 
-html {
-    width: 100%;
-    height: 100%;
-    margin: 0;
-    padding: 0;
-    background: #0d0d0d;
-}
+@supports (padding-bottom: env(safe-area-inset-bottom)) {
 
-body {
-    width: 100%;
-    height: 100%;
-    min-height: 100%;
-    margin: 0;
-    padding: 0;
-    background: #0d0d0d;
-    overflow: hidden;
-}
+    #app-content > .bottom-nav {
+        position: fixed;
 
-/* Uygulamanın tamamı fiziksel viewport'u kaplasın */
-#app-content {
-    position: fixed;
-    inset: 0;
+        left: 0;
+        right: 0;
 
-    width: 100%;
-    height: 100%;
+        /*
+         * Barı Home Indicator'ın altına doğru uzatıyoruz.
+         */
+        bottom: calc(-1 * env(safe-area-inset-bottom));
 
-    margin: 0;
-    padding: 0;
+        width: 100%;
 
-    display: flex;
-    flex-direction: column;
+        /*
+         * Normal bar + iPhone alt bölgesi
+         */
+        height: calc(55px + env(safe-area-inset-bottom));
 
-    overflow: hidden;
+        min-height: calc(55px + env(safe-area-inset-bottom));
 
-    background: var(--bg-dark);
-}
+        padding: 0;
+        margin: 0;
 
-/* İçerik */
-#app-content > .content {
-    flex: 1 1 auto;
-    min-height: 0;
+        box-sizing: border-box;
 
-    overflow-y: auto;
-    -webkit-overflow-scrolling: touch;
+        /*
+         * ÖNEMLİ:
+         * İkonlar genişletilmiş alanın ortasına değil,
+         * normal 55px'lik bölümün ortasına yerleşecek.
+         */
+        display: flex;
+        align-items: flex-start;
+        justify-content: space-around;
 
-    padding: 15px 15px 70px 15px;
+        background: var(--nav-bg);
 
-    box-sizing: border-box;
-}
+        border-top: 1px solid #252525;
 
-/* =========================================================
-   BOTTOM NAV
-   ========================================================= */
+        z-index: 99999;
 
-#app-content > .bottom-nav {
-    position: fixed;
+        backdrop-filter: blur(20px);
+        -webkit-backdrop-filter: blur(20px);
+    }
 
-    left: 0;
-    right: 0;
-    bottom: 0;
+    /*
+     * İkonların bulunduğu gerçek navigasyon alanı
+     * hâlâ sadece 55px.
+     */
+    #app-content > .bottom-nav .nav-btn,
+    #app-content > .bottom-nav .hub-nav-btn {
 
-    width: 100%;
-    height: 55px;
+        height: 55px;
+        min-height: 55px;
 
-    min-height: 55px;
+        margin: 0;
+        padding: 0;
 
-    margin: 0;
-    padding: 0;
+        flex: 1;
 
-    box-sizing: border-box;
-
-    display: flex;
-    align-items: center;
-    justify-content: space-around;
-
-    background: var(--nav-bg);
-
-    border-top: 1px solid #252525;
-
-    z-index: 99999;
-
-    backdrop-filter: blur(20px);
-    -webkit-backdrop-filter: blur(20px);
-}
-
-/* Nav ikonları tam olarak 55px barın ortasında */
-#app-content > .bottom-nav .nav-btn,
-#app-content > .bottom-nav .hub-nav-btn {
-    height: 55px;
-    min-height: 55px;
-
-    margin: 0;
-    padding: 0;
-
-    display: flex;
-    align-items: center;
-    justify-content: center;
-}
-
-/* =========================================================
-   iOS - SAFE AREA'YI LAYOUT'A KARIŞTIRMA
-   ========================================================= */
-
-/*
-   Header'da safe-area kullanma.
-*/
-#app-content .mobile-header {
-    padding-top: 12px;
-}
-
-/*
-   Bottom navigation'da safe-area kullanma.
-*/
-#app-content > .bottom-nav {
-    padding-bottom: 0;
-    margin-bottom: 0;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
 }
