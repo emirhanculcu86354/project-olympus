@@ -5256,3 +5256,61 @@ body.polis-theme {
 }
 .sec-animate-img { animation: secPulseExpand 2s forwards ease-in-out; }
 .sec-animate-text { animation: textFadeIn 2s forwards ease-in-out; }
+/* ==========================================
+   1. TAM EKRAN VE DİNAMİK YÜKSEKLİK KİLİDİ
+   ========================================== */
+html, body {
+    height: 100dvh !important; /* 'vh' yerine 'dvh' kullanıyoruz. Mobil barların boşluğunu yok eder! */
+    width: 100%;
+    margin: 0;
+    padding: 0;
+    overflow: hidden !important; /* Dışa taşmayı ve sayfanın sekmesini engeller */
+    background-color: var(--bg-dark, #050505);
+}
+
+#app-content {
+    display: flex;
+    flex-direction: column;
+    height: 100dvh;
+    width: 100%;
+    position: relative;
+    overflow: hidden;
+}
+/* ==========================================
+   2. ALT MENÜ YERE SIFIRLAMA (SAFE AREA)
+   ========================================== */
+.bottom-nav {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    background: #0a0a0a; /* Alt menü arka plan rengin */
+    border-top: 1px solid #222;
+    display: flex;
+    justify-content: space-around;
+    align-items: center;
+    padding-bottom: env(safe-area-inset-bottom); /* iOS alt çizgisi için hayati kod! */
+    z-index: 9999;
+}
+/* ==========================================
+   3. İÇERİK ALANI DİNAMİK KAYDIRMA
+   ========================================== */
+.content {
+    flex: 1;
+    overflow-y: auto;
+    overflow-x: hidden;
+    -webkit-overflow-scrolling: touch; /* iOS'ta yağ gibi akıcı kaydırma sağlar */
+    padding-bottom: calc(80px + env(safe-area-inset-bottom)); /* Alt menü yüksekliği kadar boşluk bırakır, yazılar menü altında kalmaz */
+    padding-top: 10px;
+}
+/* ==========================================
+   4. ÜST BAR ÇENTİK (NOTCH) UYUMU
+   ========================================== */
+.mobile-header {
+    position: sticky;
+    top: 0;
+    width: 100%;
+    z-index: 1000;
+    background: var(--bg-dark, #050505);
+    padding-top: env(safe-area-inset-top); /* Çentik yüksekliğini otomatik hesaplar */
+}
