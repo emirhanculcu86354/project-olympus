@@ -2798,37 +2798,6 @@ input:checked+.ios-slider:before {
 }
 
 /* ==========================================
-   🌟 ALT BAR MERKEZ ÜS (HUB) BUTONU
-========================================== */
-.hub-nav-btn {
-    background: linear-gradient(135deg, var(--goldnova), #e6b800);
-    border: 4px solid #050505;
-    border-radius: 50%;
-    width: 60px;
-    height: 60px;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    transform: translateY(-15px);
-    /* Butonu barın üstüne doğru kaldırır */
-    cursor: pointer;
-    box-shadow: 0 4px 15px rgba(246, 192, 0, 0.4);
-    color: #000;
-    z-index: 100;
-    transition: transform 0.2s cubic-bezier(0.25, 0.8, 0.25, 1), filter 0.2s;
-}
-
-.hub-nav-btn:active {
-    transform: translateY(-15px) scale(0.9);
-    filter: brightness(1.2);
-}
-
-.hub-icon {
-    font-size: 32px;
-    font-weight: 900;
-}
-
-/* ==========================================
    🇹🇷 GERÇEKÇİ KUMAŞ DALGALANMA EFEKTİ
    ========================================== */
 .flag-wrapper {
@@ -5256,3 +5225,327 @@ body.polis-theme {
 }
 .sec-animate-img { animation: secPulseExpand 2s forwards ease-in-out; }
 .sec-animate-text { animation: textFadeIn 2s forwards ease-in-out; }
+/* ==========================================
+   🚀 YENİ NESİL ŞEFFAF VE YÜZEN ALT MENÜ
+   ========================================== */
+
+/* 1. Menüyü ekranın altından koparıp havaya (şeffaf cam olarak) asıyoruz */
+.bottom-nav {
+    position: fixed !important;
+    /* Telefonun alt çizgisinden 15px yukarıda havada durur */
+    bottom: calc(env(safe-area-inset-bottom, 15px) + 15px) !important;
+    left: 15px !important;
+    right: 15px !important;
+    width: calc(100% - 30px) !important;
+    height: 65px !important;
+    
+    /* İSTEDİĞİN ŞEFFAFLIK BURADA: %65 Saydam Siyah */
+    background: rgba(10, 10, 10, 0.65) !important; 
+    backdrop-filter: blur(15px) !important;
+    -webkit-backdrop-filter: blur(15px) !important;
+    
+    display: flex !important;
+    justify-content: space-around !important;
+    align-items: center !important;
+    
+    /* Menüyü hap gibi yuvarlak ve şık yapar */
+    border-radius: 25px !important;
+    border: 1px solid rgba(255, 255, 255, 0.1) !important;
+    padding: 0 !important;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.8) !important;
+    z-index: 9999 !important;
+}
+
+
+/* 3. Sağdaki Sarı (+) Butonunu güvenli alana çıkarırız */
+.fab-container {
+    bottom: calc(env(safe-area-inset-bottom, 15px) + 105px) !important;
+    right: 15px !important;
+    z-index: 10000 !important;
+}
+
+/* 4. Sayfadaki yazıların menünün arkasında ezilmesini engelleriz */
+.content {
+    padding-bottom: 130px !important; 
+}
+/* ==========================================
+   🌟 PREMIUM HUB BUTTON (MINIMALIST & ELEGANT)
+   ========================================== */
+
+/* 1. DIŞ KASA: Derin Siyah ve İnce Zarif Çerçeve */
+.hub-nav-btn {
+    position: relative !important;
+    width: 60px !important;
+    height: 60px !important;
+    border-radius: 50% !important;
+    
+    /* Yüzen menüdeki hizası */
+    transform: translateY(-25px) !important; 
+    z-index: 10000 !important;
+    cursor: pointer;
+    
+    /* Dümdüz, elit ve kapkaranlık bir arka plan */
+    background: #050505 !important;
+    
+    /* İncecik, premium bir altın sınır çizgisi */
+    border: 1.5px solid rgba(246, 192, 0, 0.6) !important;
+    
+    /* Abartısız, derin bir soft gölge */
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.7), 0 0 15px rgba(246, 192, 0, 0.1) !important;
+    
+    display: flex !important;
+    justify-content: center !important;
+    align-items: center !important;
+    transition: transform 0.3s cubic-bezier(0.2, 0.8, 0.2, 1), box-shadow 0.3s ease !important;
+    
+}
+
+/* Basılma (Dokunma) Efekti */
+.hub-nav-btn:active {
+    transform: translateY(-20px) scale(0.92) !important;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.8), 0 0 5px rgba(246, 192, 0, 0.2) !important;
+}
+
+/* Eski emojileri tamamen yok et */
+.hub-nav-btn .hub-icon::after {
+    content: none !important;
+}
+
+/* 2. İÇ SEMBOL: Kusursuz Geometrik 4'lü Izgara (Pure CSS) */
+.hub-nav-btn .hub-icon {
+    position: relative;
+    /* Tek bir ana kutu (sol üstteki) */
+    width: 8px !important;
+    height: 8px !important;
+    background-color: var(--goldnova) !important;
+    border-radius: 2px !important;
+    
+    /* Bu sihirli kod, o tek kutunun 3 kopyasını çıkararak kusursuz bir 2x2 menü ikonu oluşturur */
+    box-shadow: 
+        12px 0 0 var(--goldnova), 
+        0 12px 0 var(--goldnova), 
+        12px 12px 0 var(--goldnova) !important;
+        
+    /* Tüm ızgarayı butonun tam merkezine oturtmak için ofset (12px'in yarısı) */
+    transform: translate(-6px, -6px) !important;
+    font-size: 0 !important; /* Herhangi bir metin/emoji kalıntısını ezer */
+}
+/* ==========================================
+   💎 SAF CAM (PURE GLASS) ALT MENÜ
+   ========================================== */
+.bottom-nav {
+    position: fixed !important;
+    bottom: calc(env(safe-area-inset-bottom, 15px) + 15px) !important;
+    left: 15px !important;
+    right: 15px !important;
+    width: calc(100% - 30px) !important;
+    height: 65px !important;
+    
+    /* Saf şeffaflık, koyu gölgeler silindi */
+    background: rgba(15, 15, 15, 0.55) !important; 
+    backdrop-filter: blur(25px) !important;
+    -webkit-backdrop-filter: blur(25px) !important;
+    
+    border-radius: 25px !important;
+    border: 1px solid rgba(255, 255, 255, 0.08) !important;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5) !important;
+    
+    display: flex !important;
+    justify-content: space-around !important;
+    align-items: center !important;
+    padding: 0 !important;
+    z-index: 9999 !important;
+}
+
+.content {
+    padding-bottom: 130px !important; 
+}
+
+
+/* ==========================================
+   💎 SAF CAM ÜST BAR (DİNAMİK YÜKSEKLİK ÇÖZÜMÜ)
+   ========================================== */
+.mobile-header {
+    position: sticky !important;
+    top: 0 !important;
+    width: 100% !important;
+    z-index: 5000 !important;
+    
+    background: rgba(10, 10, 10, 0.6) !important;
+    backdrop-filter: blur(25px) !important;
+    -webkit-backdrop-filter: blur(25px) !important;
+    
+    border-bottom: 1px solid rgba(255, 255, 255, 0.05) !important;
+    padding: calc(env(safe-area-inset-top, 20px) + 10px) 15px 15px 15px !important;
+    
+    /* HARİKA ÇÖZÜM: Flex ve Gap kullanarak boşlukları otomatik yönetiriz */
+    display: flex !important;
+    flex-direction: column !important;
+    gap: 15px !important; 
+}
+
+.header-top {
+    display: flex !important;
+    justify-content: space-between !important;
+    align-items: center !important;
+    /* Sabit alt boşluğu sildik! Artık kutu gizlenince bar anında daralacak */
+    margin-bottom: 0 !important; 
+    width: 100% !important;
+}
+
+/* ==========================================
+   🏆 PROFİL EKRANI: MAT TİTANYUM (SOLID PREMIUM)
+   ========================================== */
+
+/* 1. Ölçü Trendleri (Kilo, Boy vb. Kutucuklar) */
+.read-only-stat {
+    /* Mat ve tok koyu gri geçiş */
+    background: linear-gradient(145deg, #1c1c1c, #0f0f0f) !important;
+    border: 1px solid #2a2a2a !important;
+    border-radius: 14px !important;
+    padding: 18px 10px !important;
+    display: flex !important;
+    flex-direction: column !important;
+    align-items: center !important;
+    justify-content: center !important;
+    
+    /* Üstten ince bir ışık sızıntısı ve alttan ağır gölge (Metalik his) */
+    box-shadow: 0 8px 16px rgba(0, 0, 0, 0.6), inset 0 1px 1px rgba(255, 255, 255, 0.03) !important;
+    transition: transform 0.2s cubic-bezier(0.2, 0.8, 0.2, 1), border-color 0.2s !important;
+}
+
+.read-only-stat:active {
+    transform: scale(0.95) !important;
+    border-color: var(--goldnova) !important;
+}
+
+.read-only-stat span {
+    color: #71767b !important;
+    font-size: 10px !important;
+    text-transform: uppercase !important;
+    letter-spacing: 1px !important;
+    margin-bottom: 8px !important;
+    font-weight: 700 !important;
+}
+
+.read-only-stat strong {
+    color: #fff !important;
+    font-size: 18px !important;
+    font-weight: 900 !important;
+    font-family: 'Montserrat', sans-serif !important;
+    letter-spacing: 0.5px !important;
+}
+
+/* Birimlerin (cm, kg) yanına altın rengi vurgu */
+.read-only-stat strong small {
+    font-size: 11px !important;
+    color: var(--goldnova) !important;
+    margin-left: 2px !important;
+}
+
+/* 2. Profildeki Diğer Kartlar (Halkalar, Streak, Aksiyon Menüsü) */
+#profile-sec > div[style*="background: #151515"], 
+.streak-container, 
+.action-card {
+    background: linear-gradient(145deg, #181818, #111) !important;
+    
+    /* Şeffaflığı (Bulanıklığı) tamamen kapattık! */
+    backdrop-filter: none !important; 
+    -webkit-backdrop-filter: none !important;
+    
+    border: 1px solid #2a2a2a !important;
+    border-radius: 16px !important;
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.5), inset 0 1px 1px rgba(255, 255, 255, 0.03) !important;
+}
+
+/* 3. Aksiyon Grid (Sohbet, Arena vs.) İçi İkonlar */
+.action-card {
+    padding: 16px !important;
+}
+
+.action-icon {
+    /* İkonların olduğu kutucukları içeri doğru gömülü (inset) yaptık */
+    background: #050505 !important;
+    border: 1px solid #222 !important;
+    box-shadow: inset 0 2px 5px rgba(0,0,0,0.8) !important;
+}
+
+/* 4. Skor Yuvarlağı (%33 yazan yer) */
+.score-circle {
+    background: linear-gradient(145deg, #222, #0a0a0a) !important;
+    border: 2px solid var(--goldnova) !important;
+    color: var(--goldnova) !important;
+    box-shadow: 0 0 20px rgba(246, 192, 0, 0.15), inset 0 4px 10px rgba(0,0,0,0.8) !important;
+    font-size: 22px !important;
+}
+
+/* 5. Gelişim Galerisi Kartları (Premium Fotoğraf Çerçevesi) */
+.progress-item {
+    background: #111 !important;
+    border: 2px solid #2a2a2a !important;
+    border-radius: 14px !important;
+    
+    /* Fotoğrafla dış kasa arasına ince bir mat boşluk (Passepartout efekti) */
+    padding: 4px !important; 
+    box-shadow: 0 10px 20px rgba(0, 0, 0, 0.7) !important;
+}
+
+.progress-item img {
+    border-radius: 10px !important; /* Dış çerçeveye uyumlu iç kavis */
+}
+
+/* 6. Takipçi ve Skor Üst Alanı (Gereksiz Arka Planı Sildik) */
+#profile-sec > div:nth-child(2) {
+    background: transparent !important;
+    backdrop-filter: none !important;
+    -webkit-backdrop-filter: none !important;
+    border: none !important;
+    box-shadow: none !important;
+}
+
+/* ==========================================
+   💎 PREMIUM GÜN SEÇİCİ (DÜZELTİLMİŞ)
+   ========================================== */
+.day-tracker-container {
+    display: flex; /* !important SİLİNDİ: Artık sadece gereken sayfalarda görünecek */
+    justify-content: space-between !important;
+    align-items: center !important;
+    background: transparent !important; 
+    border: none !important;
+    padding: 0 5px !important;
+}
+
+.current-day-badge {
+    color: #fff !important;
+    font-size: 15px !important;
+    font-weight: 700 !important;
+    letter-spacing: 0.5px !important;
+}
+
+.toggle-container {
+    background: rgba(255, 255, 255, 0.08) !important;
+    border-radius: 20px !important;
+    padding: 4px !important;
+    display: flex !important;
+    gap: 2px !important;
+    border: none !important;
+}
+
+.day-toggle {
+    border-radius: 16px !important;
+    color: #888 !important;
+    background: transparent !important;
+    border: none !important;
+    font-weight: 600 !important;
+    font-size: 12px !important;
+    padding: 6px 14px !important;
+    transition: 0.2s !important;
+    cursor: pointer;
+}
+
+/* Aktif (Seçili) Buton - Bembeyaz iOS Stili */
+.day-toggle.active {
+    background: #fff !important;
+    color: #000 !important;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2) !important;
+}
