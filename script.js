@@ -10364,12 +10364,12 @@ document.addEventListener("DOMContentLoaded", () => {
     }
 });
 // ==========================================
-// 🍎 ÜST VE ALT BARLARI KESİN GİZLEME KÖPRÜSÜ
+// 🍎 LİSTE AÇILINCA ÜST ALANI VE ALT BARI GİZLEME KÖPRÜSÜ
 // ==========================================
 window.toggleBottomNav = function(hide) {
     const bottomNav = document.querySelector('.bottom-nav');
-    // Hem class hem de senin kodlarında geçen main-header ID'sini doğrudan hedef alıyoruz
-    const mobileHeader = document.querySelector('.mobile-header') || document.getElementById('main-header');
+    // Sayfanın en üstündeki ana header ve o görselde görünen başlık alanı
+    const mainHeader = document.getElementById('main-header');
     const fabContainer = document.querySelector('.fab-container');
     
     if (bottomNav) {
@@ -10377,16 +10377,16 @@ window.toggleBottomNav = function(hide) {
         else bottomNav.classList.remove('hidden-nav');
     }
     
-    if (mobileHeader) {
+    if (mainHeader) {
         if (hide) {
-            mobileHeader.style.transform = 'translateY(-120%)';
-            mobileHeader.style.opacity = '0';
-            mobileHeader.style.pointerEvents = 'none';
-            mobileHeader.style.transition = 'transform 0.35s ease, opacity 0.3s ease';
+            mainHeader.style.transform = 'translateY(-120%)';
+            mainHeader.style.opacity = '0';
+            mainHeader.style.pointerEvents = 'none';
+            mainHeader.style.transition = 'transform 0.35s ease, opacity 0.3s ease';
         } else {
-            mobileHeader.style.transform = 'translateY(0)';
-            mobileHeader.style.opacity = '1';
-            mobileHeader.style.pointerEvents = 'auto';
+            mainHeader.style.transform = 'translateY(0)';
+            mainHeader.style.opacity = '1';
+            mainHeader.style.pointerEvents = 'auto';
         }
     }
     
@@ -10395,21 +10395,22 @@ window.toggleBottomNav = function(hide) {
         fabContainer.style.opacity = hide ? '0' : '1';
     }
 };
-// İdman listesi (modal) açıldığında bu fonksiyon tetiklenir
+
+// İdman detay listesi (modal) açıldığında tetiklenir
 const originalShowWorkoutModal = window.showWorkoutModal;
 if (typeof showWorkoutModal === 'function') {
     window.showWorkoutModal = function(dayData) {
         originalShowWorkoutModal(dayData);
-        toggleBottomNav(true); // Üst bar, alt bar ve FAB gizlenir!
+        toggleBottomNav(true); // Üst kısım ve alt bar gizlenir
     };
 }
 
-// İdman modalı kapatıldığında her şey yerine geri gelir
+// Kapat butonuna basıldığında her şey geri gelir
 document.addEventListener('DOMContentLoaded', () => {
     const closeWorkoutBtn = document.querySelector('.close-modal-btn');
     if (closeWorkoutBtn) {
         closeWorkoutBtn.addEventListener('click', () => {
-            toggleBottomNav(false); // Üst bar, alt bar ve FAB geri gelir!
+            toggleBottomNav(false); // Üst kısım ve alt bar geri gelir
         });
     }
 });
