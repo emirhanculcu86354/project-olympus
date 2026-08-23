@@ -644,24 +644,6 @@ h1 {
     font-size: 16px;
 }
 
-/* EN İNCE ALT NAVİGASYON */
-.bottom-nav {
-    position: fixed;
-    bottom: 0;
-    left: 0;
-    right: 0;
-    height: 55px;
-    background-color: var(--nav-bg);
-    backdrop-filter: blur(20px);
-    -webkit-backdrop-filter: blur(20px);
-    display: flex;
-    justify-content: space-around;
-    align-items: center;
-    padding-bottom: 0;
-    border-top: 1px solid #252525;
-    z-index: 9999;
-}
-
 .nav-btn {
     background: transparent;
     border: none;
@@ -5226,42 +5208,37 @@ body.polis-theme {
 .sec-animate-img { animation: secPulseExpand 2s forwards ease-in-out; }
 .sec-animate-text { animation: textFadeIn 2s forwards ease-in-out; }
 /* ==========================================
-   🚀 YENİ NESİL ŞEFFAF VE YÜZEN ALT MENÜ
+   🍎 İPHONE ALT BAR VE MODAL GİZLEME KESİN ÇÖZÜMÜ
    ========================================== */
-
-/* 1. Menüyü ekranın altından koparıp havaya (şeffaf cam olarak) asıyoruz */
 .bottom-nav {
     position: fixed !important;
-    /* Telefonun alt çizgisinden 15px yukarıda havada durur */
-    bottom: calc(env(safe-area-inset-bottom, 15px) + 15px) !important;
-    left: 15px !important;
-    right: 15px !important;
-    width: calc(100% - 30px) !important;
-    height: 65px !important;
+    bottom: 0 !important;
+    left: 0 !important;
+    right: 0 !important;
+    width: 100% !important;
+    height: 70px !important;
     
-    /* İSTEDİĞİN ŞEFFAFLIK BURADA: %65 Saydam Siyah */
-    background: rgba(10, 10, 10, 0.65) !important; 
-    backdrop-filter: blur(15px) !important;
-    -webkit-backdrop-filter: blur(15px) !important;
+    background: rgba(10, 10, 10, 0.85) !important;
+    backdrop-filter: blur(25px) !important;
+    -webkit-backdrop-filter: blur(25px) !important;
     
     display: flex !important;
     justify-content: space-around !important;
     align-items: center !important;
     
-    /* Menüyü hap gibi yuvarlak ve şık yapar */
-    border-radius: 25px !important;
-    border: 1px solid rgba(255, 255, 255, 0.1) !important;
-    padding: 0 !important;
-    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.8) !important;
-    z-index: 9999 !important;
+    padding-bottom: env(safe-area-inset-bottom, 15px) !important;
+    border-top: 1px solid rgba(255, 255, 255, 0.1) !important;
+    
+    /* Z-index değeri modallardan (10005) düşük tutuldu ki liste açılınca arkada kalsın */
+    z-index: 999 !important; 
+    transition: transform 0.3s ease, opacity 0.3s ease !important;
 }
 
-
-/* 3. Sağdaki Sarı (+) Butonunu güvenli alana çıkarırız */
+/* Sağdaki Sarı (+) Butonunu alt bara göre konumlandırıyoruz */
 .fab-container {
-    bottom: calc(env(safe-area-inset-bottom, 15px) + 105px) !important;
-    right: 15px !important;
-    z-index: 10000 !important;
+    bottom: 90px !important;
+    right: 20px !important;
+    z-index: 1000 !important;
 }
 
 /* 4. Sayfadaki yazıların menünün arkasında ezilmesini engelleriz */

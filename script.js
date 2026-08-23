@@ -10363,3 +10363,39 @@ document.addEventListener("DOMContentLoaded", () => {
         }
     }
 });
+// ==========================================
+// 🍎 İPHONE ALT BAR GİZLEME VE GÖSTERME KÖPRÜSÜ
+// ==========================================
+window.toggleBottomNav = function(hide) {
+    const bottomNav = document.querySelector('.bottom-nav');
+    const fabContainer = document.querySelector('.fab-container');
+    
+    if (bottomNav) {
+        bottomNav.style.transform = hide ? 'translateY(100%)' : 'translateY(0)';
+        bottomNav.style.opacity = hide ? '0' : '1';
+        bottomNav.style.pointerEvents = hide ? 'none' : 'auto';
+    }
+    if (fabContainer) {
+        fabContainer.style.transform = hide ? 'translateY(100px)' : 'translateY(0)';
+        fabContainer.style.opacity = hide ? '0' : '1';
+    }
+};
+
+// Senin script.js içindeki modal açma/kapatma tetikleyicilerine köprü kuruyoruz:
+const originalShowWorkoutModal = window.showWorkoutModal;
+if (typeof showWorkoutModal === 'function') {
+    window.showWorkoutModal = function(dayData) {
+        originalShowWorkoutModal(dayData);
+        toggleBottomNav(true); // İdman detay listesi açılınca alt barı aşağı kaydır ve gizle
+    };
+}
+
+// İdman modalı kapandığında alt barı geri getir
+document.addEventListener('DOMContentLoaded', () => {
+    const closeWorkoutBtn = document.querySelector('.close-modal-btn');
+    if (closeWorkoutBtn) {
+        closeWorkoutBtn.addEventListener('click', () => {
+            toggleBottomNav(false);
+        });
+    }
+});
