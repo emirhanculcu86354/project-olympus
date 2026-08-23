@@ -18,20 +18,13 @@
 
 html,
 body {
-    height: 100dvh !important; /* 100% SİLİNDİ, APPLE İÇİN DİNAMİK YÜKSEKLİK GELDİ */
+    height: 100%;
     width: 100%;
     background-color: var(--bg-dark);
     color: var(--text-light);
     overflow: hidden;
     margin: 0;
     padding: 0;
-}
-
-/* Apple Safari Siyah Blok Kesin Çözümü */
-@supports (-webkit-touch-callout: none) {
-    html, body {
-        height: -webkit-fill-available !important;
-    }
 }
 
 body {
@@ -5219,27 +5212,31 @@ body.polis-theme {
    ========================================== */
 .bottom-nav {
     position: fixed !important;
-    bottom: 0 !important;
+    bottom: -35px !important; /* Normalde 0'da durur */
     left: 0 !important;
     right: 0 !important;
     width: 100% !important;
-    height: 65px !important; /* UZAMA İPTAL EDİLDİ, SABİT BOYUT */
+    height: calc(65px + env(safe-area-inset-bottom, 15px)) !important;
     
-    background: rgba(10, 10, 10, 0.75) !important;
+    background: rgba(10, 10, 10, 0.85) !important;
     backdrop-filter: blur(25px) !important;
     -webkit-backdrop-filter: blur(25px) !important;
     
     display: flex !important;
     justify-content: space-around !important;
-    align-items: center !important;
-    padding: 0 !important; /* EXTRA BOŞLUKLAR SİLİNDİ */
+    align-items: flex-start !important;
+    padding-top: 12px !important;
+    padding-bottom: env(safe-area-inset-bottom, 15px) !important;
     border-top: 1px solid rgba(255, 255, 255, 0.1) !important;
+    
     z-index: 999 !important;
+    /* Akıcı bir şekilde aşağı kayması için animasyon süresi */
     transition: transform 0.35s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.3s ease !important;
 }
 
+/* Sınıf eklendiğinde alt bar eksi değere (-100px) inerek tamamen ekran dışına çıkar */
 .bottom-nav.hidden-nav {
-    transform: translateY(100px) !important;
+    transform: translateY(100px) !important; /* Eksi/aşağı yönlü itme */
     opacity: 0 !important;
     pointer-events: none !important;
 }
