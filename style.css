@@ -18,13 +18,20 @@
 
 html,
 body {
-    height: 100%;
+    height: 100dvh !important; /* 100% SİLİNDİ, APPLE İÇİN DİNAMİK YÜKSEKLİK GELDİ */
     width: 100%;
     background-color: var(--bg-dark);
     color: var(--text-light);
     overflow: hidden;
     margin: 0;
     padding: 0;
+}
+
+/* Apple Safari Siyah Blok Kesin Çözümü */
+@supports (-webkit-touch-callout: none) {
+    html, body {
+        height: -webkit-fill-available !important;
+    }
 }
 
 body {
