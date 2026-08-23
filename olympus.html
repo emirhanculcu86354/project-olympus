@@ -3621,26 +3621,51 @@
             Kapat</button>
     </div>
     <!-- ==========================================
-         💳 OLYMPUS WEALTH (TÜRKÇE, DİNAMİK & LÜKS)
+         💳 OLYMPUS WEALTH (BİLDİRİM, YATIRIM VE KART YÖNETİMİ)
          ========================================== -->
     <div id="finance-screen" class="full-screen-overlay hidden bank-wrapper">
         
+        <!-- 🔐 GİRİŞ YAP EKRANI -->
+        <div id="bank-login-overlay" style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: linear-gradient(135deg, #0b1121 0%, #125e5e 50%, #051b1b 100%); z-index: 10100; display: flex; flex-direction: column; justify-content: space-between; padding: 60px 20px 40px 20px; box-sizing: border-box; overflow: hidden;">
+            <div style="position: absolute; top: -100px; left: -100px; width: 350px; height: 350px; background: radial-gradient(circle, rgba(255,255,255,0.05) 0%, transparent 70%); border-radius: 50%; pointer-events: none;"></div>
+            <div style="position: absolute; bottom: -50px; right: -80px; width: 300px; height: 300px; background: radial-gradient(circle, rgba(0,210,255,0.15) 0%, transparent 70%); border-radius: 50%; pointer-events: none;"></div>
+
+            <div style="position: relative; width: 100%; height: 60px; display: flex; justify-content: center; z-index: 10;">
+                <img src="bank.png" id="bank-login-logo" style="width: 60px; height: 60px; border-radius: 50%; object-fit: cover; box-shadow: 0 10px 25px rgba(0,0,0,0.5); border: 1px solid rgba(255,255,255,0.3); transition: all 1s cubic-bezier(0.645, 0.045, 0.355, 1);">
+            </div>
+            <div id="bank-login-content" style="display: flex; flex-direction: column; align-items: center; transition: opacity 0.3s ease; z-index: 10; margin-top: 10px;">
+                <div style="position: relative; margin-bottom: 15px;">
+                    <img src="icon.png" class="dynamic-user-avatar" style="width: 90px; height: 90px; border-radius: 50%; object-fit: cover; border: 3px solid #00d2ff; padding: 3px; background: rgba(0,0,0,0.3); box-shadow: 0 8px 25px rgba(0, 210, 255, 0.3);">
+                    <div style="position: absolute; bottom: 5px; right: 5px; background: #27ae60; width: 15px; height: 15px; border-radius: 50%; border: 2px solid #125e5e; box-shadow: 0 0 8px rgba(39,174,96,0.8);"></div>
+                </div>
+                <h2 style="color: rgba(255,255,255,0.7); margin-bottom: 2px; font-size: 16px; font-weight: 500; letter-spacing: 1px;">Hoş geldin,</h2>
+                <h1 id="bank-user-name" class="dynamic-user-name" style="color: #ffffff; margin-bottom: 30px; font-size: 28px; font-weight: 900; letter-spacing: 0.5px; text-shadow: 0 4px 10px rgba(0,0,0,0.5);">Emirhan Çulcu</h1>
+                <div style="background: rgba(255, 255, 255, 0.05); backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px); padding: 25px 20px; border-radius: 20px; border: 1px solid rgba(255, 255, 255, 0.1); box-shadow: 0 10px 40px rgba(0,0,0,0.3); margin-bottom: 40px; width: 90%; text-align: center;">
+                    <span style="font-size: 26px; margin-bottom: 10px; display: block; filter: drop-shadow(0 2px 5px rgba(0,0,0,0.5));">💎</span>
+                    <p id="bank-daily-message" style="color: #e0e0e0; font-size: 13px; margin: 0; font-style: italic; line-height: 1.6;">"Servet, ne kadar kazandığınla değil; ne kadarını yönetebildiğinle ölçülür."</p>
+                </div>
+                <button onclick="performBankLogin()" style="background: linear-gradient(135deg, #00d2ff, #125e5e); color: white; border: none; padding: 18px 40px; border-radius: 30px; font-size: 16px; font-weight: 900; box-shadow: 0 10px 20px rgba(0, 210, 255, 0.3), inset 0 2px 4px rgba(255,255,255,0.3); cursor: pointer; width: 85%; transition: transform 0.2s; letter-spacing: 1.5px; text-transform: uppercase;">Giriş Yap</button>
+            </div>
+            <div id="bank-login-footer" style="text-align: center; color: rgba(255,255,255,0.5); font-size: 10px; transition: opacity 0.3s ease; z-index: 10; display: flex; flex-direction: column; align-items: center; gap: 5px;">
+                <span>Olympus Wealth Management &copy; 2026</span>
+                <span style="display: flex; align-items: center; gap: 4px; justify-content: center; background: rgba(0,0,0,0.3); padding: 4px 10px; border-radius: 12px; border: 1px solid rgba(255,255,255,0.1);">
+                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg> 
+                    Biyometrik Doğrulama Aktif
+                </span>
+            </div>
+        </div>
+
         <!-- 🏠 1. SEKME: ANA SAYFA -->
         <div id="bank-tab-home" class="bank-tab active-tab">
             <div class="bank-top-section">
-                <div class="bank-header" style="position: relative;">
-                    <span onclick="returnToHub(); document.getElementById('finance-screen').classList.add('hidden');" style="cursor:pointer; font-size:24px; color:#fff; z-index:2;">←</span>
-                    
-                    <!-- 💎 YENİ: MERKEZİ LOGO -->
+                <div class="bank-header">
+                    <span onclick="closeWealthApp()" style="cursor:pointer; font-size:24px; color:#fff; z-index:2; flex:1;">←</span>
                     <img src="bank.png" class="bank-center-logo" alt="Olympus Logo">
-
-                    <!-- ZARİF SVG BİLDİRİM İKONU -->
-                    <div style="position: relative; cursor: pointer; z-index: 2;" onclick="openNotifications()">
-                        <svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:24px; height:24px;">
-                            <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"></path>
-                            <path d="M13.73 21a2 2 0 0 1-3.46 0"></path>
-                        </svg>
-                        <span style="position: absolute; top: -2px; right: 2px; width: 8px; height: 8px; background: #f39c12; border-radius: 50%; border: 2px solid #187777;"></span>
+                    <div style="flex:1; display:flex; justify-content:flex-end; z-index:2;" onclick="openBankNotifications()">
+                        <div style="position: relative; cursor: pointer;">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:24px; height:24px;"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"></path><path d="M13.73 21a2 2 0 0 1-3.46 0"></path></svg>
+                            <span style="position: absolute; top: -2px; right: 2px; width: 8px; height: 8px; background: #f39c12; border-radius: 50%; border: 2px solid #187777;"></span>
+                        </div>
                     </div>
                 </div>
                 
@@ -3651,9 +3676,7 @@
                 </div>
 
                 <div class="bank-wave-container">
-                    <svg viewBox="0 0 500 150" preserveAspectRatio="none" style="height: 100%; width: 100%;">
-                        <path d="M0.00,49.98 C150.00,150.00 349.20,-50.00 500.00,49.98 L500.00,150.00 L0.00,150.00 Z" style="stroke: none; fill: #ffffff;"></path>
-                    </svg>
+                    <svg viewBox="0 0 500 150" preserveAspectRatio="none" style="height: 100%; width: 100%;"><path d="M0.00,49.98 C150.00,150.00 349.20,-50.00 500.00,49.98 L500.00,150.00 L0.00,150.00 Z" style="stroke: none; fill: #ffffff;"></path></svg>
                 </div>
             </div>
 
@@ -3662,69 +3685,56 @@
                     <span class="bank-trans-title">Son Hareketler</span>
                     <span class="bank-trans-filter" onclick="openBankFilterModal()" style="cursor: pointer;">Filtrele ▼</span>
                 </div>
-                
-                <div id="bank-transactions-list" class="bank-trans-list-container">
-                    <!-- JS Dolduracak -->
-                </div>
-                <!-- 5 İşlem Limiti İçin Göster/Gizle Butonu -->
-                <div id="bank-show-all-btn" onclick="toggleAllBankTransactions()" style="text-align: center; color: #125e5e; font-size: 12px; font-weight: bold; margin-top: 15px; margin-bottom: 25px; cursor: pointer; display: none;">
-                    Tümünü Göster ▼
-                </div>
+                <div id="bank-transactions-list" class="bank-trans-list-container"></div>
+                <div id="bank-show-all-btn" onclick="toggleAllBankTransactions()" style="text-align: center; color: #125e5e; font-size: 12px; font-weight: bold; margin-top: 15px; margin-bottom: 25px; cursor: pointer; display: none;">Tümünü Göster ▼</div>
 
                 <div class="bank-trans-header">
                     <span class="bank-trans-title" style="color: #f39c12;">Bekleyen İşlemler</span>
                 </div>
-                <div id="bank-pending-list" class="bank-trans-list-container">
-                    <!-- JS Dolduracak -->
-                </div>
+                <div id="bank-pending-list" class="bank-trans-list-container"></div>
             </div>
         </div>
 
-        <!-- 💳 2. SEKME: KARTLARIM -->
-        <div id="bank-tab-cards" class="bank-tab" style="background-color: #f8f9fa;">
-            <div class="bank-header-light" style="position: relative;">
-                <span onclick="returnToHub(); document.getElementById('finance-screen').classList.add('hidden');" style="cursor:pointer; font-size:24px; color:#333; z-index:2;">←</span>
-                
-                <!-- 💎 YENİ: MERKEZİ LOGO -->
-                <img src="bank.png" class="bank-center-logo" alt="Olympus Logo">
-
-                <!-- ZARİF SVG BİLDİRİM İKONU (KOYU TEMA) -->
-                <div style="position: relative; cursor: pointer; z-index: 2;" onclick="openNotifications()">
-                    <svg viewBox="0 0 24 24" fill="none" stroke="#333" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:24px; height:24px;">
-                        <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"></path>
-                        <path d="M13.73 21a2 2 0 0 1-3.46 0"></path>
-                    </svg>
-                    <span style="position: absolute; top: -2px; right: 2px; width: 8px; height: 8px; background: #f39c12; border-radius: 50%; border: 2px solid #fff;"></span>
+        <!-- 💳 2. SEKME: KARTLARIM (CÜZDAN) -->
+        <div id="bank-tab-cards" class="bank-tab" style="background-color: #f4f6f6;">
+            <div class="bank-header-light" style="background: transparent;">
+                <span onclick="closeWealthApp()" style="cursor:pointer; font-size:24px; color:#333; z-index:2; flex:1;">←</span>
+                <img src="bank.png" class="bank-center-logo" alt="Olympus Logo" style="box-shadow: 0 4px 10px rgba(0,0,0,0.1);">
+                <div style="flex:1; display:flex; justify-content:flex-end; z-index:2;" onclick="openBankNotifications()">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="#333" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:24px; height:24px;"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"></path><path d="M13.73 21a2 2 0 0 1-3.46 0"></path></svg>
                 </div>
             </div>
 
-            <div class="bank-list-header" style="margin-top:5px;">
-                <span class="bank-list-title">Dijital Cüzdanım</span>
-                <span class="bank-list-count" style="color:#125e5e; cursor:pointer;" onclick="openAddCardModal()">+ Yeni Ekle</span>
-            </div>
+            <div style="flex: 1; overflow-y: auto; padding-bottom: 100px;">
+                <div class="bank-list-header" style="margin-top:5px;">
+                    <span class="bank-list-title">Dijital Cüzdanım</span>
+                    <span class="bank-list-count" style="color:#125e5e; cursor:pointer;" onclick="openAddCardModal()">+ Yeni Ekle</span>
+                </div>
 
-            <!-- YENİ: YANA KAYDIRMALI KART KARUSELİ -->
-            <div id="bank-cards-carousel" class="bank-cards-carousel">
-                <!-- JS Dolduracak -->
-            </div>
-            
-            <p style="text-align: center; color: #888; font-size: 10px; margin-top: 10px;">Diğer kartları görmek için yana kaydırın.</p>
+                <div id="bank-cards-carousel" class="bank-cards-carousel"></div>
+                <p style="text-align: center; color: #888; font-size: 10px; margin-top: 10px; margin-bottom: 25px;">Diğer kartları görmek için yana kaydırın.</p>
 
-            <div class="bank-list-header" style="margin-top:25px;">
-                <span class="bank-list-title">Kart Hareketleri</span>
+                <div class="bank-list-header">
+                    <span class="bank-list-title">Kart Detayları</span>
+                </div>
+                <div id="bank-all-cards-detailed-list" style="padding: 0 25px; display: flex; flex-direction: column; gap: 15px;">
+                    <!-- JS Dolduracak -->
+                </div>
             </div>
-            <p style="text-align: center; color: #aaa; font-size: 11px;">Seçili karta ait harcamalar burada listelenir.</p>
         </div>
 
         <!-- 📊 3. SEKME: İSTATİSTİKLER -->
         <div id="bank-tab-stats" class="bank-tab" style="background-color: #ffffff;">
             <div class="bank-top-section" style="padding-bottom: 30px;">
                 <div class="bank-header">
-                    <span onclick="returnToHub(); document.getElementById('finance-screen').classList.add('hidden');" style="cursor:pointer; font-size:24px; color:#fff;">←</span>
-                    <span style="font-size:20px; color:#fff;">🔔</span>
+                    <span onclick="closeWealthApp()" style="cursor:pointer; font-size:24px; color:#fff; z-index:2; flex:1;">←</span>
+                    <img src="bank.png" class="bank-center-logo" alt="Olympus Logo">
+                    <div style="flex:1; display:flex; justify-content:flex-end; z-index:2;" onclick="openBankNotifications()">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:24px; height:24px;"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"></path><path d="M13.73 21a2 2 0 0 1-3.46 0"></path></svg>
+                    </div>
                 </div>
                 <div style="text-align: center; padding: 20px;">
-                    <span style="color: rgba(255,255,255,0.8); font-size: 12px;">Haftalık Toplam Gider</span>
+                    <span style="color: rgba(255,255,255,0.8); font-size: 12px;">Haftalık Toplam Harcama</span>
                     <h2 id="stat-weekly-total" style="color: #fff; font-size: 32px; margin: 5px 0 0 0;">₺0,00</h2>
                 </div>
             </div>
@@ -3735,10 +3745,7 @@
                     <span class="bank-list-count" style="color:#a0a0a0;">Bu Hafta</span>
                 </div>
 
-                <!-- GERÇEK ZAMANLI DİKEY SÜTUN GRAFİĞİ -->
-                <div class="bank-bar-chart-container" id="bank-dynamic-bars">
-                    <!-- JS Dolduracak -->
-                </div>
+                <div class="bank-bar-chart-container" id="bank-dynamic-bars"></div>
 
                 <div class="bank-list-header" style="padding: 0; margin-top: 30px; margin-bottom: 20px;">
                     <span class="bank-list-title">Genel Oranlar</span>
@@ -3761,7 +3768,85 @@
             </div>
         </div>
 
-        <!-- 📱 CAM ALT NAVİGASYON -->
+        <!-- 👤 4. SEKME: PROFİL -->
+        <div id="bank-tab-profile" class="bank-tab" style="background-color: #f4f6f6;">
+            <div class="bank-top-section" style="padding-bottom: 0;">
+                <div class="bank-header">
+                    <span onclick="closeWealthApp()" style="cursor:pointer; font-size:24px; color:#fff; z-index:2; flex:1;">←</span>
+                    <span style="flex:1; text-align:center; font-weight:900; color:#fff; font-size:16px; z-index:2;">Profil</span>
+                    <div style="flex:1; display:flex; justify-content:flex-end; z-index:2;" onclick="openBankNotifications()">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:24px; height:24px;"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"></path><path d="M13.73 21a2 2 0 0 1-3.46 0"></path></svg>
+                    </div>
+                </div>
+
+                <div class="bank-profile-header" style="z-index: 2; padding-top: 10px;">
+                    <img src="icon.png" class="bank-profile-avatar dynamic-user-avatar" alt="Profil Fotoğrafı" style="border-color: #fff;">
+                    <h2 class="bank-profile-name dynamic-user-name" style="color: #fff;">Emirhan Çulcu</h2>
+                    <span class="bank-profile-title" style="color: rgba(255,255,255,0.8);">Olympus Premium Müşteri</span>
+                </div>
+
+                <div class="bank-wave-container" style="margin-top: -20px;">
+                    <svg viewBox="0 0 500 150" preserveAspectRatio="none" style="height: 100%; width: 100%;"><path d="M0.00,49.98 C150.00,150.00 349.20,-50.00 500.00,49.98 L500.00,150.00 L0.00,150.00 Z" style="stroke: none; fill: #f4f6f6;"></path></svg>
+                </div>
+            </div>
+
+            <div style="flex: 1; overflow-y: auto; padding: 10px 25px 110px 25px; display: flex; flex-direction: column; gap: 12px;">
+                
+                <div class="bank-list-header" style="padding:0; margin-bottom:5px;">
+                    <span class="bank-list-title">Yatırım Portföyü</span>
+                </div>
+                <div class="bank-donut-container" style="margin-bottom: 15px; padding: 0;">
+                    <div style="display:flex; flex-direction:column; align-items:center; gap:8px;">
+                        <div class="bank-donut" id="donut-invest-gold" style="background: conic-gradient(#f1c40f 45%, #fff 0);">
+                            <div class="bank-donut-inner">%45</div>
+                        </div>
+                        <span style="font-size:10px; color:#888; font-weight:bold;">Altın</span>
+                    </div>
+                    <div style="display:flex; flex-direction:column; align-items:center; gap:8px;">
+                        <div class="bank-donut" id="donut-invest-stock" style="background: conic-gradient(#3498db 35%, #fff 0);">
+                            <div class="bank-donut-inner">%35</div>
+                        </div>
+                        <span style="font-size:10px; color:#888; font-weight:bold;">Hisse Senedi</span>
+                    </div>
+                    <div style="display:flex; flex-direction:column; align-items:center; gap:8px;">
+                        <div class="bank-donut" id="donut-invest-crypto" style="background: conic-gradient(#9b59b6 20%, #fff 0);">
+                            <div class="bank-donut-inner">%20</div>
+                        </div>
+                        <span style="font-size:10px; color:#888; font-weight:bold;">Kripto</span>
+                    </div>
+                </div>
+
+                <div class="bank-list-header" style="padding:0; margin-top:10px; margin-bottom:5px;">
+                    <span class="bank-list-title">Yönetim & Ayarlar</span>
+                </div>
+                <div class="bank-profile-item" onclick="openBankGenericModal('Ödeme Talimatları', 'Aktif otomatik fatura talimatınız bulunmuyor. Eklemek için + butonunu kullanın.')">
+                    <div class="bank-profile-icon" style="background: rgba(39, 174, 96, 0.1); color: #27ae60;">🔄</div>
+                    <div style="flex:1;">
+                        <h4 style="margin:0 0 3px 0; color:#333; font-size:14px;">Ödeme Talimatları</h4>
+                        <p style="margin:0; color:#888; font-size:11px;">Otomatik fatura ve abonelikler</p>
+                    </div>
+                    <span style="color:#ccc; font-size:18px;">›</span>
+                </div>
+                <div class="bank-profile-item" onclick="openBankGenericModal('Planlanan Ödemeler', 'Gelecek aya ait kredi kartı aidatı (120 ₺) planlanmıştır.')">
+                    <div class="bank-profile-icon" style="background: rgba(243, 156, 18, 0.1); color: #f39c12;">📅</div>
+                    <div style="flex:1;">
+                        <h4 style="margin:0 0 3px 0; color:#333; font-size:14px;">Planlanan Ödemeler</h4>
+                        <p style="margin:0; color:#888; font-size:11px;">Gelecek tarihli işlemler ve taksitler</p>
+                    </div>
+                    <span style="color:#ccc; font-size:18px;">›</span>
+                </div>
+                <div class="bank-profile-item" onclick="openBankGenericModal('Hesap Ayarları', 'Günlük işlem limitiniz: 50.000 ₺. Şifre değiştirme işlemleri için güvenlik sekmesine gidin.')">
+                    <div class="bank-profile-icon" style="background: rgba(41, 128, 185, 0.1); color: #2980b9;">⚙️</div>
+                    <div style="flex:1;">
+                        <h4 style="margin:0 0 3px 0; color:#333; font-size:14px;">Hesap Ayarları</h4>
+                        <p style="margin:0; color:#888; font-size:11px;">Limit, şifre ve güvenlik işlemleri</p>
+                    </div>
+                    <span style="color:#ccc; font-size:18px;">›</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- 📱 CAM ALT NAVİGASYON (4 BUTONLU) -->
         <nav class="bank-bottom-nav">
             <button class="bank-nav-btn active" onclick="switchBankTab('home', this)">
                 <span class="icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg></span>
@@ -3769,23 +3854,37 @@
             </button>
             <button class="bank-nav-btn" onclick="switchBankTab('cards', this)">
                 <span class="icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="1" y="4" width="22" height="16" rx="2" ry="2"/><line x1="1" y1="10" x2="23" y2="10"/></svg></span>
-                <span class="text">Kartlarım</span>
+                <span class="text">Cüzdan</span>
             </button>
             <button class="bank-nav-btn" onclick="switchBankTab('stats', this)">
                 <span class="icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg></span>
                 <span class="text">İstatistik</span>
             </button>
+            <button class="bank-nav-btn" onclick="switchBankTab('profile', this)">
+                <span class="icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg></span>
+                <span class="text">Profil</span>
+            </button>
         </nav>
 
-        <!-- 💰 İŞLEM EKLEME / DÜZENLEME MODALI -->
+        <!-- 🔔 BİLDİRİMLER MODALI -->
+        <div id="bank-notifications-modal" class="modal" style="z-index: 10060;">
+            <div class="modal-content" style="max-width: 300px; background: #fff; border-radius: 20px;">
+                <h3 style="color: #125e5e; margin-bottom: 15px; text-align: center;">Bildirimler</h3>
+                <div style="display: flex; flex-direction: column; gap: 10px; max-height: 250px; overflow-y: auto;">
+                    <div style="font-size: 12px; color: #555; padding: 10px; border-bottom: 1px solid #eee;">
+                        <strong>Sistem:</strong> Olympus Wealth hesabınıza hoş geldiniz. Verileriniz şifrelenmiştir.
+                    </div>
+                </div>
+                <button onclick="document.getElementById('bank-notifications-modal').style.display='none'" style="width:100%; background:#f4f6f6; color:#333; border:none; padding:12px; border-radius:8px; font-weight:bold; margin-top:15px; cursor:pointer;">Kapat</button>
+            </div>
+        </div>
+
+        <!-- MODALLAR (İşlem Ekle, Aksiyon, Filtre, Kart Ekle, Genel Modal) -->
         <div id="bank-transaction-modal" class="modal" style="z-index: 10050;">
             <div class="modal-content" style="max-width: 350px; background: #fff; border-radius: 20px;">
                 <h3 id="trans-modal-title" style="color: #125e5e; margin-bottom: 15px; text-align: center;">Yeni İşlem Ekle</h3>
-                
                 <input type="hidden" id="trans-edit-id"> 
-                
                 <input type="text" id="trans-title" placeholder="Açıklama (Örn: Market)" style="width:100%; padding:12px; border:1px solid #ddd; border-radius:8px; margin-bottom:10px; font-size:14px; outline:none; box-sizing: border-box;">
-                
                 <div style="display: flex; gap: 10px; margin-bottom: 10px;">
                     <input type="number" id="trans-amount" placeholder="Tutar (₺)" style="flex: 2; padding:12px; border:1px solid #ddd; border-radius:8px; font-size:16px; font-weight:bold; outline:none; box-sizing: border-box;">
                     <select id="trans-type" style="flex: 1; padding:12px; border:1px solid #ddd; border-radius:8px; background:#f4f6f6; outline:none; box-sizing: border-box;">
@@ -3793,15 +3892,11 @@
                         <option value="income">Gelir</option>
                     </select>
                 </div>
-                
-                <!-- YENİ: TARİH SEÇİCİ -->
                 <input type="date" id="trans-date" style="width:100%; padding:12px; border:1px solid #ddd; border-radius:8px; margin-bottom:10px; font-size:14px; outline:none; box-sizing: border-box;">
-
                 <div style="display: flex; align-items: center; justify-content: space-between; background: #f9f9f9; padding: 12px; border-radius: 8px; margin-bottom: 20px;">
                     <label style="font-size:13px; color:#555; font-weight:bold;">Bekleyen İşlem Mi?</label>
                     <input type="checkbox" id="trans-pending" style="width: 20px; height: 20px;">
                 </div>
-
                 <div style="display: flex; gap: 10px;">
                     <button onclick="saveBankTransaction()" style="flex:2; background:#125e5e; color:#fff; border:none; padding:12px; border-radius:8px; font-weight:bold; cursor:pointer;">Kaydet</button>
                     <button onclick="document.getElementById('bank-transaction-modal').style.display='none'" style="flex:1; background:transparent; color:#e74c3c; border:1px solid #e74c3c; padding:12px; border-radius:8px; font-weight:bold; cursor:pointer;">İptal</button>
@@ -3809,20 +3904,17 @@
             </div>
         </div>
 
-        <!-- ⚙️ İŞLEM AKSİYON MODALI (UZUN BASINCA AÇILIR) -->
         <div id="bank-action-modal" class="modal" style="z-index: 10051; align-items: flex-end; padding: 0; background: rgba(0,0,0,0.5);" onclick="closeBankActionModal()">
             <div class="modal-content" onclick="event.stopPropagation()" style="width: 100%; max-width: none; margin: 0; border-radius: 20px 20px 0 0; background: #fff; padding: 30px 20px calc(env(safe-area-inset-bottom) + 90px) 20px; animation: slideUp 0.3s ease;">
                 <input type="hidden" id="action-trans-id">
                 <h3 id="action-trans-title" style="color: #333; text-align: center; margin-top:0; margin-bottom: 5px;">İşlem Adı</h3>
                 <p id="action-trans-amount" style="color: #888; text-align: center; font-size: 24px; font-weight: bold; margin-bottom: 25px;">₺0.00</p>
-                
                 <button onclick="markTransactionCompleted()" id="btn-mark-complete" style="width:100%; background:#27ae60; color:#fff; border:none; padding:15px; border-radius:12px; font-weight:bold; margin-bottom:10px; cursor:pointer; display:none;">✅ Gerçekleşti Olarak İşaretle</button>
                 <button onclick="openEditTransaction()" style="width:100%; background:rgba(0, 210, 255, 0.1); color:#00a8cc; border:1px solid #00d2ff; padding:15px; border-radius:12px; font-weight:bold; margin-bottom:10px; cursor:pointer;">✏️ İşlemi Düzenle</button>
                 <button onclick="deleteBankTransaction()" style="width:100%; background:rgba(231, 76, 60, 0.1); color:#e74c3c; border:1px solid #e74c3c; padding:15px; border-radius:12px; font-weight:bold; margin-bottom:10px; cursor:pointer;">🗑️ İşlemi Sil</button>
             </div>
         </div>
 
-        <!-- 🔍 FİLTRELEME MODALI -->
         <div id="bank-filter-modal" class="modal" style="z-index: 10050;">
             <div class="modal-content" style="max-width: 300px; background: #fff; border-radius: 20px;">
                 <h3 style="color: #125e5e; margin-bottom: 15px; text-align: center;">İşlemleri Filtrele</h3>
@@ -3833,13 +3925,12 @@
             </div>
         </div>
 
-        <!-- 💳 KART EKLEME MODALI -->
         <div id="bank-add-card-modal" class="modal" style="z-index: 10050;">
-            <!-- ... (Eski Kart Ekleme Modalı İçeriği Aynı) ... -->
             <div class="modal-content" style="max-width: 350px; background: #fff; border-radius: 20px;">
                 <h3 style="color: #125e5e; margin-bottom: 15px; text-align: center;">Kredi Kartı Ekle</h3>
                 <input type="text" id="card-bank-name" placeholder="Banka Adı (Örn: Garanti BBVA)" style="width:100%; padding:12px; border:1px solid #ddd; border-radius:8px; margin-bottom:10px; font-size:14px; outline:none; box-sizing: border-box;">
                 <input type="text" id="card-number" placeholder="Kart Son 4 Hane (Örn: 1234)" maxlength="4" style="width:100%; padding:12px; border:1px solid #ddd; border-radius:8px; margin-bottom:10px; font-size:14px; outline:none; box-sizing: border-box;">
+                <input type="text" id="card-exp-date" placeholder="Son Kull. (Örn: 12/28)" maxlength="5" style="width:100%; padding:12px; border:1px solid #ddd; border-radius:8px; margin-bottom:10px; font-size:14px; outline:none; box-sizing: border-box;">
                 <select id="card-color" style="width:100%; padding:12px; border:1px solid #ddd; border-radius:8px; margin-bottom:20px; font-size:14px; outline:none; background:#f4f6f6; box-sizing: border-box;">
                     <option value="#125e5e">Olympus Turkuazı</option>
                     <option value="#2980b9">Klasik Mavi</option>
@@ -3855,6 +3946,13 @@
             </div>
         </div>
 
+        <div id="bank-generic-modal" class="modal" style="z-index: 10060;">
+            <div class="modal-content" style="max-width: 300px; background: #fff; border-radius: 20px; text-align: center; padding: 25px;">
+                <h3 id="bank-generic-title" style="color: #125e5e; margin-top: 0; margin-bottom: 10px;">Başlık</h3>
+                <p id="bank-generic-desc" style="color: #666; font-size: 13px; line-height: 1.5; margin-bottom: 20px;">İçerik mesajı</p>
+                <button onclick="document.getElementById('bank-generic-modal').style.display='none'" style="width:100%; background:#125e5e; color:#fff; border:none; padding:12px; border-radius:8px; font-weight:bold; cursor:pointer;">Anladım</button>
+            </div>
+        </div>
     </div>
 
     <script src="script.js"></script>

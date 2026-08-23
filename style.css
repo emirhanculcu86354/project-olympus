@@ -6314,3 +6314,137 @@ body.polis-theme {
     border: 1px solid rgba(255, 255, 255, 0.15);
     z-index: 1;
 }
+/* ==========================================
+   💳 OLYMPUS WEALTH (GİRİŞ EKRANI & PROFİL)
+   ========================================== */
+
+/* Profil ve Yönetim Öğeleri */
+.bank-profile-item {
+    display: flex; align-items: center; gap: 15px; padding: 15px;
+    background: #fff; border-radius: 16px; box-shadow: 0 4px 10px rgba(0,0,0,0.03);
+    cursor: pointer; transition: 0.2s; border: 1px solid #f0f0f0;
+}
+.bank-profile-item:active { transform: scale(0.97); background: #f9f9f9; }
+.bank-profile-icon {
+    width: 40px; height: 40px; border-radius: 12px; display: flex; justify-content: center; align-items: center; font-size: 18px;
+}
+
+/* Sütun Grafiklerinin İçine Değer Yazma */
+.bank-bar-chart-container { 
+    display: flex; justify-content: space-between; align-items: flex-end; 
+    height: 160px; margin: 10px 0 20px 0; 
+}
+.bank-bar-wrapper { 
+    width: 32px; height: 100%; display: flex; flex-direction: column; align-items: center; justify-content: flex-end; gap: 6px;
+}
+.bar-value {
+    font-size: 9px; color: #125e5e; font-weight: 800; margin-bottom: 2px;
+}
+.bank-bar { 
+    width: 16px; background: linear-gradient(180deg, #187777 0%, #125e5e 100%); 
+    border-radius: 8px; transition: height 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+}
+/* ==========================================
+   💎 BANKA MERKEZİ LOGO VE HEADER DÜZENLEMESİ
+   ========================================== */
+.bank-header, .bank-header-light {
+    position: relative; /* Logonun absolute hizalaması için şart */
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0 25px;
+    height: 50px; /* Logo yukarı kaçmasın diye sabit yükseklik */
+    width: 100%;
+    box-sizing: border-box;
+}
+
+.bank-center-logo {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 46px;
+    height: 46px;
+    border-radius: 50%; /* Siyahlıkları yuvarlak keser */
+    object-fit: cover;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+    border: 2px solid rgba(255, 255, 255, 0.8);
+    z-index: 10;
+}
+
+/* ==========================================
+   👤 4. SEKME: PROFİL EKRANI STİLLERİ
+   ========================================== */
+.bank-profile-header {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 20px 25px;
+    margin-bottom: 10px;
+}
+
+.bank-profile-avatar {
+    width: 85px;
+    height: 85px;
+    border-radius: 50%;
+    object-fit: cover;
+    border: 3px solid #125e5e;
+    padding: 2px;
+    margin-bottom: 12px;
+    box-shadow: 0 8px 20px rgba(0,0,0,0.1);
+}
+
+.bank-profile-name {
+    font-size: 20px;
+    font-weight: 800;
+    color: #333;
+    margin: 0 0 2px 0;
+}
+
+.bank-profile-title {
+    font-size: 12px;
+    color: #888;
+    font-weight: 500;
+}
+/* ==========================================
+   💳 BANKA: CÜZDAN DETAY LİSTESİ
+   ========================================== */
+.bank-card-detail-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background: #fff;
+    padding: 15px;
+    border-radius: 12px;
+    border: 1px solid #f0f0f0;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.02);
+}
+.bank-card-detail-left {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+.bank-card-detail-info h4 {
+    margin: 0 0 4px 0;
+    color: #333;
+    font-size: 14px;
+}
+.bank-card-detail-info p {
+    margin: 0;
+    color: #888;
+    font-size: 11px;
+    font-family: monospace;
+}
+.bank-card-detail-right {
+    text-align: right;
+}
+.bank-card-detail-right span {
+    display: block;
+    color: #aaa;
+    font-size: 10px;
+    margin-bottom: 2px;
+}
+.bank-card-detail-right strong {
+    color: #125e5e;
+    font-size: 13px;
+}
