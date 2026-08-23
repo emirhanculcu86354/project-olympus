@@ -5208,35 +5208,47 @@ body.polis-theme {
 .sec-animate-img { animation: secPulseExpand 2s forwards ease-in-out; }
 .sec-animate-text { animation: textFadeIn 2s forwards ease-in-out; }
 /* ==========================================
-   🍎 HOME INDICATOR ŞEFFAF BÜTÜNLEŞTİRME
+   🍎 ALT BAR EKSİ SEVİYE & ÜST BAR GİZLEME
    ========================================== */
 .bottom-nav {
     position: fixed !important;
-    bottom: 0 !important;
+    bottom: 0 !important; /* Normalde 0'da durur */
     left: 0 !important;
     right: 0 !important;
     width: 100% !important;
-    
-    /* Yüksekliği telefonun güvenli alt boşluğunu içine alacak şekilde dinamik yapıyoruz */
     height: calc(65px + env(safe-area-inset-bottom, 15px)) !important;
     
-    /* %65 Saydam Cam Efekti */
-    background: rgba(10, 10, 10, 0.65) !important;
+    background: rgba(10, 10, 10, 0.85) !important;
     backdrop-filter: blur(25px) !important;
     -webkit-backdrop-filter: blur(25px) !important;
     
     display: flex !important;
     justify-content: space-around !important;
-    align-items: flex-start !important; /* İkonları üst hizada tutar, aşağı ezilmez */
-    
-    /* İkonları üstten dengeli hizalamak için özel iç boşluk */
+    align-items: flex-start !important;
     padding-top: 12px !important;
-    /* Beyaz çizginin (Home Bar) arkasının şeffaf görünmesi için alt boşluğu sıfırlıyoruz */
     padding-bottom: env(safe-area-inset-bottom, 15px) !important;
-    
     border-top: 1px solid rgba(255, 255, 255, 0.1) !important;
+    
     z-index: 999 !important;
-    box-sizing: border-box !important;
+    /* Akıcı bir şekilde aşağı kayması için animasyon süresi */
+    transition: transform 0.35s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.3s ease !important;
+}
+
+/* Sınıf eklendiğinde alt bar eksi değere (-100px) inerek tamamen ekran dışına çıkar */
+.bottom-nav.hidden-nav {
+    transform: translateY(100px) !important; /* Eksi/aşağı yönlü itme */
+    opacity: 0 !important;
+    pointer-events: none !important;
+}
+
+/* Üst barın (Header) liste açıldığında gizlenmesi için sınıf */
+.mobile-header {
+    transition: transform 0.35s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.3s ease !important;
+}
+.mobile-header.hidden-header {
+    transform: translateY(-100%) !important; /* Yukarı doğru fırlayıp kaybolur */
+    opacity: 0 !important;
+    pointer-events: none !important;
 }
 
 /* İkonların ve yazıların konumu */

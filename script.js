@@ -10364,38 +10364,44 @@ document.addEventListener("DOMContentLoaded", () => {
     }
 });
 // ==========================================
-// 🍎 İPHONE ALT BAR GİZLEME VE GÖSTERME KÖPRÜSÜ
+// 🍎 LİSTE/MODAL AÇILINCA ÜST VE ALT BARLARI GİZLEME KÖPRÜSÜ
 // ==========================================
 window.toggleBottomNav = function(hide) {
     const bottomNav = document.querySelector('.bottom-nav');
+    const mobileHeader = document.querySelector('.mobile-header');
     const fabContainer = document.querySelector('.fab-container');
     
     if (bottomNav) {
-        bottomNav.style.transform = hide ? 'translateY(100%)' : 'translateY(0)';
-        bottomNav.style.opacity = hide ? '0' : '1';
-        bottomNav.style.pointerEvents = hide ? 'none' : 'auto';
+        if (hide) bottomNav.classList.add('hidden-nav');
+        else bottomNav.classList.remove('hidden-nav');
     }
+    
+    if (mobileHeader) {
+        if (hide) mobileHeader.classList.add('hidden-header');
+        else mobileHeader.classList.remove('hidden-header');
+    }
+    
     if (fabContainer) {
-        fabContainer.style.transform = hide ? 'translateY(100px)' : 'translateY(0)';
+        fabContainer.style.transform = hide ? 'translateY(120px)' : 'translateY(0)';
         fabContainer.style.opacity = hide ? '0' : '1';
     }
 };
 
-// Senin script.js içindeki modal açma/kapatma tetikleyicilerine köprü kuruyoruz:
+// İdman listesi (modal) açıldığında bu fonksiyon tetiklenir
 const originalShowWorkoutModal = window.showWorkoutModal;
 if (typeof showWorkoutModal === 'function') {
     window.showWorkoutModal = function(dayData) {
         originalShowWorkoutModal(dayData);
-        toggleBottomNav(true); // İdman detay listesi açılınca alt barı aşağı kaydır ve gizle
+        toggleBottomNav(true); // Üst bar, alt bar ve FAB gizlenir!
     };
 }
 
-// İdman modalı kapandığında alt barı geri getir
+// İdman modalı kapatıldığında her şey yerine geri gelir
 document.addEventListener('DOMContentLoaded', () => {
     const closeWorkoutBtn = document.querySelector('.close-modal-btn');
     if (closeWorkoutBtn) {
         closeWorkoutBtn.addEventListener('click', () => {
-            toggleBottomNav(false);
+            toggleBottomNav(false); // Üst bar, alt bar ve FAB geri gelir!
         });
     }
 });
