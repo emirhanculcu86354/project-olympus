@@ -5208,7 +5208,7 @@ body.polis-theme {
 .sec-animate-img { animation: secPulseExpand 2s forwards ease-in-out; }
 .sec-animate-text { animation: textFadeIn 2s forwards ease-in-out; }
 /* ==========================================
-   🍎 İPHONE ALT BAR VE MODAL GİZLEME KESİN ÇÖZÜMÜ
+   🍎 HOME INDICATOR ŞEFFAF BÜTÜNLEŞTİRME
    ========================================== */
 .bottom-nav {
     position: fixed !important;
@@ -5216,27 +5216,46 @@ body.polis-theme {
     left: 0 !important;
     right: 0 !important;
     width: 100% !important;
-    height: 70px !important;
     
-    background: rgba(10, 10, 10, 0.85) !important;
+    /* Yüksekliği telefonun güvenli alt boşluğunu içine alacak şekilde dinamik yapıyoruz */
+    height: calc(65px + env(safe-area-inset-bottom, 15px)) !important;
+    
+    /* %65 Saydam Cam Efekti */
+    background: rgba(10, 10, 10, 0.65) !important;
     backdrop-filter: blur(25px) !important;
     -webkit-backdrop-filter: blur(25px) !important;
     
     display: flex !important;
     justify-content: space-around !important;
-    align-items: center !important;
+    align-items: flex-start !important; /* İkonları üst hizada tutar, aşağı ezilmez */
     
+    /* İkonları üstten dengeli hizalamak için özel iç boşluk */
+    padding-top: 12px !important;
+    /* Beyaz çizginin (Home Bar) arkasının şeffaf görünmesi için alt boşluğu sıfırlıyoruz */
     padding-bottom: env(safe-area-inset-bottom, 15px) !important;
-    border-top: 1px solid rgba(255, 255, 255, 0.1) !important;
     
-    /* Z-index değeri modallardan (10005) düşük tutuldu ki liste açılınca arkada kalsın */
-    z-index: 999 !important; 
-    transition: transform 0.3s ease, opacity 0.3s ease !important;
+    border-top: 1px solid rgba(255, 255, 255, 0.1) !important;
+    z-index: 999 !important;
+    box-sizing: border-box !important;
 }
 
-/* Sağdaki Sarı (+) Butonunu alt bara göre konumlandırıyoruz */
+/* İkonların ve yazıların konumu */
+.nav-btn {
+    background: transparent;
+    border: none;
+    color: #888;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 4px;
+    flex: 1;
+    cursor: pointer;
+}
+
+/* Sağdaki Sarı (+) Butonunu yeni bar yüksekliğine göre ayarlıyoruz */
 .fab-container {
-    bottom: 90px !important;
+    bottom: calc(env(safe-area-inset-bottom, 15px) + 85px) !important;
     right: 20px !important;
     z-index: 1000 !important;
 }
