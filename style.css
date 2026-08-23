@@ -5300,23 +5300,23 @@ html, body {
     padding-top: env(safe-area-inset-top); /* Çentik yüksekliğini otomatik hesaplar */
 }
 /* ==========================================
-   ALT MENÜYÜ YERE SIFIRLAMA VE ÇENTİK AYARI
+   ALT MENÜYÜ YERE SIFIRLAMA (MANUEL AYAR)
    ========================================== */
 .bottom-nav {
     position: fixed !important;
     bottom: 0 !important;
     left: 0 !important;
     width: 100% !important;
-    background-color: #0a0a0a !important; /* Alt menü rengi, boşluğu dolduracak */
+    background-color: #0a0a0a !important;
     display: flex !important;
     justify-content: space-around !important;
     align-items: center !important;
-    height: auto !important; /* Eski sabit yüksekliği serbest bırakır */
-    min-height: 65px !important; /* Minimum kalınlık */
+    height: auto !important;
+    min-height: 65px !important;
     padding-top: 10px !important;
     
-    /* İŞTE SİHİRLİ KOD: Alt çizgiyi hesaplar ve kendi arka plan rengiyle aşağı uzatır */
-    padding-bottom: calc(env(safe-area-inset-bottom) + 15px) !important; 
+    /* MANUEL MÜDAHALE: O siyah boşluğu tamamen kendi rengiyle doldurması için sabit 35px verdik */
+    padding-bottom: 35px !important; 
     
     border-top: 1px solid #222 !important;
     z-index: 9999 !important;
@@ -5324,10 +5324,23 @@ html, body {
 }
 
 /* ==========================================
-   FAB (ORTADAKİ SARI BUTON) HİZALAMASI
+   FAB (ORTADAKİ SARI BUTON) MANUEL HİZALAMASI
    ========================================== */
 .fab-container {
-    /* Alt menü aşağı uzadığı için sarı butonu da güvenli bir şekilde yukarı taşıyoruz */
-    bottom: calc(env(safe-area-inset-bottom) + 80px) !important;
+    /* Alt menü kalınlaştığı için sarı butonu sabit 95px yukarı ittik */
+    bottom: 95px !important;
     z-index: 10000 !important;
+}
+
+/* ==========================================
+   İÇERİK ALANI KAYDIRMA (MANUEL)
+   ========================================== */
+.content {
+    flex: 1;
+    overflow-y: auto;
+    overflow-x: hidden;
+    -webkit-overflow-scrolling: touch;
+    /* Sayfa sonundaki yazıların menünün altında ezilmemesi için manuel boşluk */
+    padding-bottom: 120px !important; 
+    padding-top: 10px;
 }
