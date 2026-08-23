@@ -10364,11 +10364,12 @@ document.addEventListener("DOMContentLoaded", () => {
     }
 });
 // ==========================================
-// 🍎 LİSTE/MODAL AÇILINCA ÜST VE ALT BARLARI GİZLEME KÖPRÜSÜ
+// 🍎 ÜST VE ALT BARLARI KESİN GİZLEME KÖPRÜSÜ
 // ==========================================
 window.toggleBottomNav = function(hide) {
     const bottomNav = document.querySelector('.bottom-nav');
-    const mobileHeader = document.querySelector('.mobile-header');
+    // Hem class hem de senin kodlarında geçen main-header ID'sini doğrudan hedef alıyoruz
+    const mobileHeader = document.querySelector('.mobile-header') || document.getElementById('main-header');
     const fabContainer = document.querySelector('.fab-container');
     
     if (bottomNav) {
@@ -10377,8 +10378,16 @@ window.toggleBottomNav = function(hide) {
     }
     
     if (mobileHeader) {
-        if (hide) mobileHeader.classList.add('hidden-header');
-        else mobileHeader.classList.remove('hidden-header');
+        if (hide) {
+            mobileHeader.style.transform = 'translateY(-120%)';
+            mobileHeader.style.opacity = '0';
+            mobileHeader.style.pointerEvents = 'none';
+            mobileHeader.style.transition = 'transform 0.35s ease, opacity 0.3s ease';
+        } else {
+            mobileHeader.style.transform = 'translateY(0)';
+            mobileHeader.style.opacity = '1';
+            mobileHeader.style.pointerEvents = 'auto';
+        }
     }
     
     if (fabContainer) {
@@ -10386,7 +10395,6 @@ window.toggleBottomNav = function(hide) {
         fabContainer.style.opacity = hide ? '0' : '1';
     }
 };
-
 // İdman listesi (modal) açıldığında bu fonksiyon tetiklenir
 const originalShowWorkoutModal = window.showWorkoutModal;
 if (typeof showWorkoutModal === 'function') {

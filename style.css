@@ -5212,7 +5212,7 @@ body.polis-theme {
    ========================================== */
 .bottom-nav {
     position: fixed !important;
-    bottom: 0 !important; /* Normalde 0'da durur */
+    bottom: -35 !important; /* Normalde 0'da durur */
     left: 0 !important;
     right: 0 !important;
     width: 100% !important;
