@@ -5338,3 +5338,46 @@ html, body {
     background: var(--bg-dark, #050505) !important;
     padding-top: env(safe-area-inset-top, 40px) !important; 
 }
+/* ==========================================
+   🧹 SİSTEM KURTARMA: ALT BAR VE BUTON SIFIRLAMASI
+   ========================================== */
+
+/* 1. Alt Menüyü Yeniden İnşa Et (Kesin ve Sabit Yükseklik) */
+.bottom-nav {
+    position: fixed !important;
+    bottom: 0 !important;
+    left: 0 !important;
+    right: 0 !important;
+    width: 100% !important;
+    height: 85px !important; /* iPhone alt çizgisi için özel boşluğu içine alan sabit kalınlık */
+    background-color: rgba(10, 10, 10, 0.96) !important;
+    backdrop-filter: blur(20px) !important;
+    -webkit-backdrop-filter: blur(20px) !important;
+    display: flex !important;
+    justify-content: space-around !important;
+    align-items: flex-start !important; /* İkonları alt çizgiye ezilmemesi için yukarı yapıştırır */
+    padding-top: 12px !important; /* İkonları yukarıdan hafifçe hizalar */
+    padding-bottom: 0 !important; /* Hatalı taşmaları engeller */
+    border-top: 1px solid #252525 !important;
+    z-index: 9999 !important;
+    box-sizing: border-box !important;
+}
+
+/* 2. Ortadaki Ana HUB (Sarı Olympus) Butonunu Kurtar */
+.hub-nav-btn {
+    transform: translateY(-20px) !important; /* Kalınlaşan barın içinden yukarı doğru çeker */
+    z-index: 10000 !important;
+}
+
+/* 3. Sağdaki Aksiyon (FAB +) Butonunu Kurtar */
+.fab-container {
+    position: fixed !important;
+    bottom: 105px !important; /* Yeni menü kalınlığına göre ezilmekten kurtarıldı */
+    right: 20px !important;
+    z-index: 10000 !important;
+}
+
+/* 4. Sayfa İçeriklerinin Menü Altında Kalmasını Engelle */
+.content {
+    padding-bottom: 110px !important; 
+}
