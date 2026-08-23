@@ -18,7 +18,7 @@
 
 html,
 body {
-    height: 100dvh; /* 100% yerine dinamik viewport kullanıyoruz */
+    height: 100%;
     width: 100%;
     background-color: var(--bg-dark);
     color: var(--text-light);
@@ -1411,7 +1411,7 @@ body.light-mode {
 
 /* Sabit siyah/koyu arka planlı elemanları beyaz yapıyoruz */
 body.light-mode .mobile-header,
-body.light-mode,
+body.light-mode .bottom-nav,
 body.light-mode .header-top {
     background-color: #ffffff;
     border-color: #ddd;
@@ -2960,7 +2960,7 @@ input:checked+.ios-slider:before {
 .chat-room-person i { background:#545454; }
 .messages-page-fab { position:absolute; z-index:2; right:19px; bottom:87px; display:grid; width:56px; height:56px; place-items:center; border:0; border-radius:50%; cursor:pointer; color:#111; background:var(--goldnova); box-shadow:0 8px 22px rgba(246,192,0,.35); font-size:25px; transition:transform .2s ease; }
 .messages-page-fab:active { transform:scale(.9) rotate(-10deg); }
-.messaging-open { display:none !important; }
+.messaging-open .fab-container { display:none !important; }
 @keyframes messagesPageIn { from { opacity:0; transform:translateX(16px); } to { opacity:1; transform:none; } }
 @media (min-width:601px) { .messages-page { left:50%; width:min(100%, 600px); right:auto; transform:translateX(calc(-50% + 20px)); border-left:1px solid #2b2b2b; border-right:1px solid #2b2b2b; } .messages-page.active { transform:translateX(-50%); } }
 
@@ -5207,6 +5207,42 @@ body.polis-theme {
 }
 .sec-animate-img { animation: secPulseExpand 2s forwards ease-in-out; }
 .sec-animate-text { animation: textFadeIn 2s forwards ease-in-out; }
+/* ==========================================
+   🍎 ALT BAR EKSİ SEVİYE & ÜST BAR GİZLEME
+   ========================================== */
+.bottom-nav {
+    position: fixed !important;
+    bottom: 0 !important;
+    left: 0 !important;
+    right: 0 !important;
+    width: 100% !important;
+    
+    /* Yükseklik = Barın kendi boyu + Telefonun alt çizgi boşluğu */
+    height: calc(65px + env(safe-area-inset-bottom)) !important;
+    
+    background: rgba(10, 10, 10, 0.75) !important;
+    backdrop-filter: blur(25px) !important;
+    -webkit-backdrop-filter: blur(25px) !important;
+    
+    display: flex !important;
+    justify-content: space-around !important;
+    align-items: flex-start !important; /* İkonlar yukarı yaslansın */
+    
+    padding-top: 12px !important;
+    /* Alt boşluğu iPhone'un Home Indicator çizgisine göre dinamik bırakıyoruz */
+    padding-bottom: env(safe-area-inset-bottom) !important;
+    
+    border-top: 1px solid rgba(255, 255, 255, 0.1) !important;
+    z-index: 999 !important;
+    transition: transform 0.35s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.3s ease !important;
+}
+/* Sınıf eklendiğinde alt bar eksi değere (-100px) inerek tamamen ekran dışına çıkar */
+.bottom-nav.hidden-nav {
+    transform: translateY(100px) !important; /* Eksi/aşağı yönlü itme */
+    opacity: 0 !important;
+    pointer-events: none !important;
+}
+
 /* Üst barın (Header) liste açıldığında gizlenmesi için sınıf */
 .mobile-header {
     transition: transform 0.35s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.3s ease !important;
@@ -5229,6 +5265,13 @@ body.polis-theme {
     gap: 4px;
     flex: 1;
     cursor: pointer;
+}
+
+/* Sağdaki Sarı (+) Butonunu yeni bar yüksekliğine göre ayarlıyoruz */
+.fab-container {
+    bottom: calc(env(safe-area-inset-bottom, 15px) + 85px) !important;
+    right: 20px !important;
+    z-index: 1000 !important;
 }
 
 /* 4. Sayfadaki yazıların menünün arkasında ezilmesini engelleriz */
@@ -5297,6 +5340,33 @@ body.polis-theme {
     transform: translate(-6px, -6px) !important;
     font-size: 0 !important; /* Herhangi bir metin/emoji kalıntısını ezer */
 }
+/* ==========================================
+   💎 SAF CAM (PURE GLASS) ALT MENÜ
+   ========================================== */
+.bottom-nav {
+    position: fixed !important;
+    bottom: calc(env(safe-area-inset-bottom, 15px) + 15px) !important;
+    left: 15px !important;
+    right: 15px !important;
+    width: calc(100% - 30px) !important;
+    height: 65px !important;
+    
+    /* Saf şeffaflık, koyu gölgeler silindi */
+    background: rgba(15, 15, 15, 0.55) !important; 
+    backdrop-filter: blur(25px) !important;
+    -webkit-backdrop-filter: blur(25px) !important;
+    
+    border-radius: 25px !important;
+    border: 1px solid rgba(255, 255, 255, 0.08) !important;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5) !important;
+    
+    display: flex !important;
+    justify-content: space-around !important;
+    align-items: center !important;
+    padding: 0 !important;
+    z-index: 9999 !important;
+}
+
 .content {
     padding-bottom: 130px !important; 
 }
@@ -5869,47 +5939,4 @@ body.polis-theme {
     letter-spacing: 1px !important;
     box-shadow: 0 10px 25px rgba(246, 192, 0, 0.15) !important;
     margin-bottom: 15px !important;
-}
-/* ==========================================
-   🍎 NİHAİ İPHONE ALT BAR & HOME INDICATOR ÇÖZÜMÜ
-   ========================================== */
-.bottom-nav {
-    position: fixed !important;
-    bottom: 0 !important;
-    left: 0 !important;
-    right: 0 !important;
-    width: 100% !important;
-    
-    /* Safari çökmesini önlemek için "20px" yedek değeri eklendi */
-    height: calc(65px + env(safe-area-inset-bottom, 20px)) !important;
-    
-    background: rgba(10, 10, 10, 0.75) !important;
-    backdrop-filter: blur(25px) !important;
-    -webkit-backdrop-filter: blur(25px) !important;
-    
-    display: flex !important;
-    justify-content: space-around !important;
-    align-items: flex-start !important; /* İkonların ezilmesini önler */
-    
-    padding-top: 12px !important;
-    padding-bottom: env(safe-area-inset-bottom, 20px) !important;
-    
-    border-top: 1px solid rgba(255, 255, 255, 0.1) !important;
-    z-index: 999 !important;
-    transition: transform 0.35s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.3s ease !important;
-}
-
-/* Modallar açıldığında barı eksi seviyeye (-150px) fırlatarak gizler */
-.bottom-nav.hidden-nav {
-    transform: translateY(150px) !important;
-    opacity: 0 !important;
-    pointer-events: none !important;
-}
-
-/* Sağdaki Sarı (+) Butonunun Konumu */
-.fab-container {
-    bottom: calc(env(safe-area-inset-bottom, 20px) + 85px) !important;
-    right: 20px !important;
-    z-index: 1000 !important;
-    transition: transform 0.35s ease, opacity 0.3s ease !important;
 }
