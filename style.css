@@ -7493,10 +7493,10 @@ body {
 
     top: auto !important;
     bottom: 0 !important;
-    left: 0 !important;
-    right: 0 !important;
+    left: 10px !important;
+    right: 10px !important;
 
-    width: 100% !important;
+    width: calc(100% - 20px) !important;
     height: calc(65px + env(safe-area-inset-bottom)) !important;
 
     padding-top: 0 !important;
@@ -7506,7 +7506,7 @@ body {
 
     box-sizing: border-box !important;
 
-    border-radius: 0 !important;
+    border-radius: 25px 25px 0 0 !important;
 
     background: rgba(10, 10, 10, 0.92) !important;
 
@@ -7548,7 +7548,7 @@ body {
 
 .mobile-header {
     padding-top: 0 !important;
-}
+} 
 
 /* =========================================================
    ALT MENÜ İÇERİK PAYI
@@ -7558,4 +7558,29 @@ body {
     padding-bottom: calc(
         65px + env(safe-area-inset-bottom) + 20px
     ) !important;
+}
+/* =========================================================
+   iOS ÜST SAFE AREA - ESKİ HİZAYA GERİ DÖN
+   Alt taraf edge-to-edge olarak kalır.
+   ========================================================= */
+
+.mobile-header {
+    padding-top: env(safe-area-inset-top) !important;
+}
+
+/* Üst barı kullanan tam ekran ekranlar */
+.workout-player-header,
+.full-screen-overlay > .header-top,
+#kpss-screen > .header-top,
+#security-screen > .header-top {
+    padding-top: calc(env(safe-area-inset-top) + 15px) !important;
+}
+
+/* Banka üst alanları */
+.bank-top-section {
+    padding-top: calc(env(safe-area-inset-top) + 20px) !important;
+}
+
+.bank-header-light {
+    padding-top: calc(env(safe-area-inset-top) + 20px) !important;
 }
