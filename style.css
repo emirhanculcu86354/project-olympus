@@ -7554,23 +7554,31 @@ body {
 }
 
 /* =========================================================
-   🌟 5. HUB EKRANI DÜZENLEMELERİ (BOŞLUKLAR VE KARŞILAMA)
+   🌟 5. HUB EKRANI DÜZENLEMELERİ (KUSURSUZ ESNEKLİK)
    ========================================================= */
+
 .hub-widget-wrap {
-    margin: 20px 16px 20px 16px !important; /* Widget ile butonlar arasına nefes alma boşluğu eklendi */
+    flex: 0 0 auto !important; /* Kutunun yüksekliğini serbest bıraktık, ezilmeyi önler */
+    margin: 12px 16px 15px 16px !important; /* Widget ile butonlar arasına dengeli bir boşluk */
 }
 
 .hub-content {
-    gap: 24px !important; /* Hub içindeki tüm ögelerin aralığı ferahlatıldı */
-    padding-bottom: calc(65px + env(safe-area-inset-bottom, 15px) + 40px) !important; /* En alttaki kaydırma payı */
+    gap: 10px !important; /* Kartlar ve widget arasındaki gereksiz dev boşluğu kıstık */
+    /* MUCİZE: Hub ekranında alt menü olmadığı için o devasa boşluğu kaldırdık! */
+    padding-bottom: calc(env(safe-area-inset-bottom, 15px) + 20px) !important; 
+}
+
+.hub-pages-wrapper {
+    flex: 0 0 auto !important; 
+    min-height: 310px !important; /* Kartların asla sıkışmamasını ve scroll çıkarmamasını garanti eder */
 }
 
 .hub-greeting {
     margin-top: auto !important;
-    margin-bottom: 30px !important; /* Karşılama yazısı alt menünün üstüne doğru itildi */
+    margin-bottom: 35px !important; /* Karşılama yazısını çok daha belirgin şekilde yukarı aldık */
 }
 
-/* Alt Menü İçerik Payı (Diğer Sayfalar İçin) */
+/* Alt Menü İçerik Payı (Diğer İç Sayfalar İçin Geçerli Olan) */
 .content {
     padding-bottom: calc(65px + env(safe-area-inset-bottom, 15px) + 30px) !important;
 }
