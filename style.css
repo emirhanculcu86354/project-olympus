@@ -17,9 +17,8 @@
 }
 
 html, body {
-    height: 100%;
+    height: 100dvh !important;
     min-height: 100vh;
-    min-height: -webkit-fill-available; /* Apple'ın ekran hesaplama bug'ını çözer */
     width: 100%;
     background-color: var(--bg-dark);
     color: var(--text-light);
@@ -685,7 +684,6 @@ h1 {
     width: 100% !important;
     height: 100% !important;
     min-height: 100vh !important;
-    min-height: -webkit-fill-available !important;
     background-color: var(--bg-dark);
     z-index: 3000;
     display: flex;
@@ -6634,7 +6632,6 @@ body.polis-theme {
     width: 100% !important;
     height: 100% !important;
     min-height: 100vh !important;
-    min-height: -webkit-fill-available !important;
     z-index: 10000 !important;
     display: flex;
     flex-direction: column;
@@ -7457,4 +7454,108 @@ body.polis-theme {
 .bank-card-detail-right strong {
     color: #125e5e;
     font-size: 13px;
+}
+/* =========================================================
+   iOS SAFARI — GERÇEK EDGE-TO-EDGE ÇÖZÜMÜ
+   ========================================================= */
+
+html {
+    width: 100%;
+    height: 100%;
+    margin: 0;
+    padding: 0;
+    background: var(--bg-dark);
+}
+
+body {
+    width: 100%;
+    height: 100dvh;
+    min-height: 100dvh;
+    margin: 0 !important;
+    padding: 0 !important;
+    overflow: hidden;
+    background: var(--bg-dark);
+}
+
+#app-content {
+    width: 100%;
+    height: 100dvh;
+    min-height: 100dvh;
+    overflow: hidden;
+}
+
+/* =========================================================
+   ANA ALT MENÜ
+   ========================================================= */
+
+.bottom-nav {
+    position: fixed !important;
+
+    top: auto !important;
+    bottom: 0 !important;
+    left: 0 !important;
+    right: 0 !important;
+
+    width: 100% !important;
+    height: calc(65px + env(safe-area-inset-bottom)) !important;
+
+    padding-top: 0 !important;
+    padding-right: 0 !important;
+    padding-left: 0 !important;
+    padding-bottom: env(safe-area-inset-bottom) !important;
+
+    box-sizing: border-box !important;
+
+    border-radius: 0 !important;
+
+    background: rgba(10, 10, 10, 0.92) !important;
+
+    z-index: 99999 !important;
+}
+
+/* =========================================================
+   BANKA ALT MENÜ
+   ========================================================= */
+
+.bank-bottom-nav {
+    position: fixed !important;
+
+    top: auto !important;
+    bottom: 0 !important;
+    left: 0 !important;
+    right: 0 !important;
+
+    width: 100% !important;
+    height: calc(65px + env(safe-area-inset-bottom)) !important;
+
+    padding-top: 0 !important;
+    padding-right: 0 !important;
+    padding-left: 0 !important;
+    padding-bottom: env(safe-area-inset-bottom) !important;
+
+    box-sizing: border-box !important;
+
+    border-radius: 0 !important;
+
+    background: rgba(255,255,255,0.92) !important;
+
+    z-index: 10050 !important;
+}
+
+/* =========================================================
+   ANA HEADER
+   ========================================================= */
+
+.mobile-header {
+    padding-top: 0 !important;
+}
+
+/* =========================================================
+   ALT MENÜ İÇERİK PAYI
+   ========================================================= */
+
+.content {
+    padding-bottom: calc(
+        65px + env(safe-area-inset-bottom) + 20px
+    ) !important;
 }
