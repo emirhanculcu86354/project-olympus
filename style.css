@@ -1,8 +1,4 @@
 :root {
-    --safe-top: env(safe-area-inset-top, 0px);
-    --safe-right: env(safe-area-inset-right, 0px);
-    --safe-bottom: env(safe-area-inset-bottom, 0px);
-    --safe-left: env(safe-area-inset-left, 0px);
     --bg-dark: #121212;
     --nav-bg: rgba(20, 20, 20, 0.96);
     --card-bg: #1e1e1e;
@@ -20,9 +16,10 @@
     -webkit-tap-highlight-color: transparent;
 }
 
-html,
-body {
-    height: 100dvh !important;
+html, body {
+    height: 100%;
+    min-height: 100vh;
+    min-height: -webkit-fill-available; /* Apple'ın ekran hesaplama bug'ını çözer */
     width: 100%;
     background-color: var(--bg-dark);
     color: var(--text-light);
@@ -680,23 +677,23 @@ h1 {
 }
 
 .full-screen-overlay {
-    position: fixed;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
+    position: fixed !important;
+    top: 0 !important;
+    left: 0 !important;
+    right: 0 !important;
+    bottom: 0 !important; /* Height yerine bottom:0 kullanarak dibe zorla yapıştırırız */
+    width: 100% !important;
+    height: 100% !important;
+    min-height: 100vh !important;
+    min-height: -webkit-fill-available !important;
     background-color: var(--bg-dark);
     z-index: 3000;
     display: flex;
     flex-direction: column;
     justify-content: center;
     align-items: center;
-    width: 100vw;
-    height: 100dvh;
-    min-height: 100svh;
-    padding-bottom: 0px !important;
+    padding-bottom: 0 !important;
 }
-
 .login-box {
     background: var(--card-bg);
     padding: 40px 20px;
@@ -6629,18 +6626,31 @@ body.polis-theme {
    ========================================== */
 .bank-wrapper {
     background-color: #ffffff !important;
-    /* Arka plan bembeyaz, yeşil sızıntısı bitti */
     position: fixed !important;
-    top: 0;
-    left: 0;
-    width: 100vw !important;
-    height: 100dvh !important;
-    z-index: 10000;
+    top: 0 !important;
+    left: 0 !important;
+    right: 0 !important;
+    bottom: 0 !important;
+    width: 100% !important;
+    height: 100% !important;
+    min-height: 100vh !important;
+    min-height: -webkit-fill-available !important;
+    z-index: 10000 !important;
     display: flex;
     flex-direction: column;
     align-items: stretch !important;
-    /* MUCİZE 1: Ezilmeyi iptal eder, ekranı %100 doldurur */
     justify-content: flex-start !important;
+}
+
+.bank-wrapper::after {
+    content: '';
+    position: fixed;
+    bottom: -50px; /* Güvenli alanın (Safe Area) altına taşırır */
+    left: 0;
+    right: 0;
+    height: 50px;
+    background-color: #ffffff !important; /* Alt siyahlığı beyaza boyar */
+    z-index: -1; /* İçeriklerin arkasında kalır */
 }
 
 .bank-tab {
