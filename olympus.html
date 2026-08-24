@@ -1661,7 +1661,7 @@
     </div>
     <!-- ================= ARCADE TERMINAL EKRANI ================= -->
     <div id="arcade-screen" class="full-screen-overlay hidden"
-        style="z-index: 10000; background: #050505; justify-content: flex-start; padding-bottom: env(safe-area-inset-bottom);">
+        style="z-index: 10000; background: #050505; justify-content: flex-start; padding-bottom: 0;">
 
         <div class="header-top"
             style="width:100%; padding: calc(env(safe-area-inset-top) + 15px) 20px 15px 20px; background:#000; border-bottom: 2px solid #8a2be2; display: flex; justify-content: space-between; align-items: center; flex-shrink: 0;">
@@ -2878,7 +2878,7 @@
 
         <!-- ALT SABİT BUTONLAR (Yukarı Taşındı ve Güvenceye Alındı) -->
         <div
-            style="padding: 15px 20px calc(env(safe-area-inset-bottom) + 60px) 20px; width: 100%; box-sizing: border-box; background: linear-gradient(to top, #050505 80%, transparent); display: flex; justify-content: center; position: relative; z-index: 100;">
+            style="padding: 15px 20px 60px 20px; width: 100%; box-sizing: border-box; background: linear-gradient(to top, #050505 80%, transparent); display: flex; justify-content: center; position: relative; z-index: 100;">
 
             <button id="cardio-start-btn" onclick="startCardioTimer()"
                 style="background: #27ae60; border: none; color: white; width: 90px; height: 90px; border-radius: 50%; font-size: 18px; font-weight: bold; box-shadow: 0 0 30px rgba(39, 174, 96, 0.4); cursor: pointer; transform: translateY(-10px);">BAŞLA</button>
@@ -3905,7 +3905,7 @@
         </div>
 
         <div id="bank-action-modal" class="modal" style="z-index: 10051; align-items: flex-end; padding: 0; background: rgba(0,0,0,0.5);" onclick="closeBankActionModal()">
-            <div class="modal-content" onclick="event.stopPropagation()" style="width: 100%; max-width: none; margin: 0; border-radius: 20px 20px 0 0; background: #fff; padding: 30px 20px calc(env(safe-area-inset-bottom) + 90px) 20px; animation: slideUp 0.3s ease;">
+            <div class="modal-content" onclick="event.stopPropagation()" style="width: 100%; max-width: none; margin: 0; border-radius: 20px 20px 0 0; background: #fff;padding: 30px 20px 100px 20px; animation: slideUp 0.3s ease;">
                 <input type="hidden" id="action-trans-id">
                 <h3 id="action-trans-title" style="color: #333; text-align: center; margin-top:0; margin-bottom: 5px;">İşlem Adı</h3>
                 <p id="action-trans-amount" style="color: #888; text-align: center; font-size: 24px; font-weight: bold; margin-bottom: 25px;">₺0.00</p>

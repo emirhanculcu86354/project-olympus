@@ -694,7 +694,7 @@ h1 {
     width: 100vw;
     height: 100dvh;
     min-height: 100svh;
-    padding-bottom: var(--safe-bottom);
+    padding-bottom: 0px !important;
 }
 
 .login-box {
@@ -986,7 +986,7 @@ h1 {
 
 /* Footer & Input Alanı */
 .oly-chat-footer {
-    padding: 10px 15px env(safe-area-inset-bottom) 15px;
+    padding: 10px 15px 15px 15px;
     background: #1a1a1a;
     border-top: 1px solid #333;
     display: flex;
@@ -3214,7 +3214,7 @@ input:checked+.ios-slider:before {
     display: flex;
     align-items: center;
     gap: 10px;
-    padding: 10px 15px calc(env(safe-area-inset-bottom) + 10px);
+    padding: 10px 15px 15px 15px;
     background: #151515;
     border-top: 1px solid #2c2c2c;
 }
