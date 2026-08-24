@@ -1,4 +1,5 @@
 :root {
+    --bg-dark: #121212;
     --nav-bg: rgba(20, 20, 20, 0.96);
     --card-bg: #1e1e1e;
     --modal-bg: #222;
@@ -6639,17 +6640,6 @@ body.polis-theme {
     flex-direction: column;
     align-items: stretch !important;
     justify-content: flex-start !important;
-}
-
-.bank-wrapper::after {
-    content: '';
-    position: fixed;
-    bottom: -50px; /* Güvenli alanın (Safe Area) altına taşırır */
-    left: 0;
-    right: 0;
-    height: 50px;
-    background-color: #ffffff !important; /* Alt siyahlığı beyaza boyar */
-    z-index: -1; /* İçeriklerin arkasında kalır */
 }
 
 .bank-tab {
