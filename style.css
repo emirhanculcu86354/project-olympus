@@ -6666,21 +6666,28 @@ body.polis-theme {
 }
 
 .bank-header {
+    position: relative; 
     display: flex;
     justify-content: space-between;
     align-items: center;
     padding: 0 25px;
+    height: 50px; 
+    width: 100%;
+    box-sizing: border-box;
 }
 
+/* Cüzdan sayfasında arka plan olmadığı için, Dinamik Ada payını kendisi almalı */
 .bank-header-light {
+    position: relative; 
     display: flex;
     justify-content: space-between;
     align-items: center;
-    padding: calc(env(safe-area-inset-top) + 20px) 25px 10px 25px;
-    background: #ffffff;
-    color: #333;
-    flex-shrink: 0;
-    width: 100% !important;
+    padding: 0 25px;
+    height: 50px; 
+    width: 100%;
+    box-sizing: border-box;
+    /* DİNAMİK ADA KURTARICI KODU: Barı aşağı iter ve Ana Sayfa ile milimetrik eşitler */
+    margin-top: calc(env(safe-area-inset-top, 20px) + 20px) !important; 
 }
 
 /* Bakiye Alanı */
@@ -7257,21 +7264,16 @@ body.polis-theme {
    ========================================== */
 .bank-center-logo {
     position: absolute;
-    /* Soldaki ve sağdaki butonlardan bağımsız tam ortaya asılır */
     top: 50%;
     left: 50%;
     transform: translate(-50%, -50%);
-    width: 44px;
-    height: 44px;
-    object-fit: cover;
-
-    /* Resmin siyah köşelerini kesip atar, sadece logoyu bırakır */
+    width: 46px;
+    height: 46px;
     border-radius: 50%;
-
-    /* Uygulamadan hafifçe dışarı çıkıyormuş hissi (3D) */
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
-    border: 1px solid rgba(255, 255, 255, 0.15);
-    z-index: 1;
+    object-fit: cover;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+    border: 2px solid rgba(255, 255, 255, 0.8);
+    z-index: 10;
 }
 
 /* ==========================================
@@ -7575,7 +7577,7 @@ body {
 
 .hub-greeting {
     margin-top: auto !important;
-    margin-bottom: 35px !important; /* Karşılama yazısını çok daha belirgin şekilde yukarı aldık */
+    margin-bottom: -25px !important; /* Karşılama yazısını çok daha belirgin şekilde yukarı aldık */
 }
 
 /* Alt Menü İçerik Payı (Diğer İç Sayfalar İçin Geçerli Olan) */
