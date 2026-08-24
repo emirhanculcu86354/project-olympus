@@ -7456,7 +7456,7 @@ body.polis-theme {
     font-size: 13px;
 }
 /* =========================================================
-   iOS SAFARI — GERÇEK EDGE-TO-EDGE ÇÖZÜMÜ
+   🍏 iOS SAFARI — EDGE-TO-EDGE & YÜZEN MENÜ KUSURSUZ ÇÖZÜM
    ========================================================= */
 
 html {
@@ -7485,68 +7485,92 @@ body {
 }
 
 /* =========================================================
-   ANA ALT MENÜ
+   📱 1. ANA ALT MENÜ (YÜZEN CAM EFEKTİ GERİ GELDİ)
    ========================================================= */
-
 .bottom-nav {
     position: fixed !important;
-
-    top: auto !important;
-    bottom: 0 !important;
-    left: 10px !important;
-    right: 10px !important;
-
-    width: calc(100% - 20px) !important;
-    height: calc(65px + env(safe-area-inset-bottom)) !important;
-
-    padding-top: 0 !important;
-    padding-right: 0 !important;
-    padding-left: 0 !important;
-    padding-bottom: env(safe-area-inset-bottom) !important;
-
+    bottom: calc(env(safe-area-inset-bottom, 15px) + 15px) !important; /* Ekrandan 15px yukarıda yüzer */
+    left: 15px !important;
+    right: 15px !important;
+    width: calc(100% - 30px) !important;
+    height: 65px !important;
+    
+    padding: 0 !important; /* Ortalamayı bozmasın diye sıfırlandı */
     box-sizing: border-box !important;
+    
+    border-radius: 25px !important; /* Yuvarlak hap tasarımı geri geldi */
+    border: 1px solid rgba(255, 255, 255, 0.08) !important;
 
-    border-radius: 25px 25px 0 0 !important;
-
-    background: rgba(10, 10, 10, 0.92) !important;
+    background: rgba(15, 15, 15, 0.85) !important;
+    backdrop-filter: blur(25px) !important;
+    -webkit-backdrop-filter: blur(25px) !important;
 
     z-index: 99999 !important;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5) !important;
 }
 
 /* =========================================================
-   BANKA ALT MENÜ
+   💳 2. BANKA ALT MENÜ (YÜZEN CAM EFEKTİ GERİ GELDİ)
    ========================================================= */
-
 .bank-bottom-nav {
     position: fixed !important;
-
-    top: auto !important;
-    bottom: 0 !important;
-    left: 0 !important;
-    right: 0 !important;
-
-    width: 100% !important;
-    height: calc(65px + env(safe-area-inset-bottom)) !important;
-
-    padding-top: 0 !important;
-    padding-right: 0 !important;
-    padding-left: 0 !important;
-    padding-bottom: env(safe-area-inset-bottom) !important;
-
+    bottom: calc(env(safe-area-inset-bottom, 15px) + 15px) !important;
+    left: 15px !important;
+    right: 15px !important;
+    width: calc(100% - 30px) !important;
+    height: 65px !important;
+    
+    padding: 0 !important;
     box-sizing: border-box !important;
+    
+    border-radius: 25px !important;
+    border-top: 1px solid rgba(255, 255, 255, 0.4) !important;
 
-    border-radius: 0 !important;
-
-    background: rgba(255,255,255,0.92) !important;
+    background: rgba(255, 255, 255, 0.85) !important;
+    backdrop-filter: blur(25px) !important;
+    -webkit-backdrop-filter: blur(25px) !important;
 
     z-index: 10050 !important;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1) !important;
 }
-/* =========================================================
-   ALT MENÜ İÇERİK PAYI
-   ========================================================= */
 
+/* =========================================================
+   🤖 3. OLY YAPAY ZEKA SOHBETİ (MENÜNÜN ÜSTÜNE ALINDI)
+   ========================================================= */
+#oly-chat-window {
+    z-index: 100100 !important; /* Tüm menüleri ve FAB butonunu geçer */
+}
+#oly-chat-window.open {
+    bottom: 0 !important; /* Tam ekranın dibine sıfırlanarak açılır */
+}
+
+/* =========================================================
+   ➕ 4. FAB BUTONU (BİRAZ YUKARI ALINDI)
+   ========================================================= */
+.fab-container {
+    bottom: calc(env(safe-area-inset-bottom, 15px) + 105px) !important; /* Menüyle çarpışmasın diye yukarı alındı */
+    right: 20px !important;
+    z-index: 99998 !important; /* Alt menünün altında, Oly'nin arkasında durur */
+}
+
+/* =========================================================
+   🌟 5. HUB EKRANI DÜZENLEMELERİ (BOŞLUKLAR VE KARŞILAMA)
+   ========================================================= */
+.hub-widget-wrap {
+    margin: 20px 16px 20px 16px !important; /* Widget ile butonlar arasına nefes alma boşluğu eklendi */
+}
+
+.hub-content {
+    gap: 24px !important; /* Hub içindeki tüm ögelerin aralığı ferahlatıldı */
+    padding-bottom: calc(65px + env(safe-area-inset-bottom, 15px) + 40px) !important; /* En alttaki kaydırma payı */
+}
+
+.hub-greeting {
+    margin-top: auto !important;
+    margin-bottom: 30px !important; /* Karşılama yazısı alt menünün üstüne doğru itildi */
+}
+
+/* Alt Menü İçerik Payı (Diğer Sayfalar İçin) */
 .content {
-    padding-bottom: calc(
-        65px + env(safe-area-inset-bottom) + 20px
-    ) !important;
+    padding-bottom: calc(65px + env(safe-area-inset-bottom, 15px) + 30px) !important;
 }
