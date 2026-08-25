@@ -30,6 +30,10 @@
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
     <!-- 3D MODEL GÖRÜNTÜLEYİCİ MOTORU -->
     <script type="module" src="https://ajax.googleapis.com/ajax/libs/model-viewer/3.4.0/model-viewer.min.js"></script>
+    <!-- 🎮 3D OYUN MOTORU (THREE.JS & GLTF LOADER) -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/loaders/GLTFLoader.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/loaders/DRACOLoader.js"></script>
 
 </head>
 
@@ -4174,6 +4178,11 @@
                     <span style="font-size: 18px;">🔎</span> PİYASAYI YOKLA (SAHİBİNDEN)
                 </button>
             </div>
+            <div style="margin-bottom: 35px;">
+                <button onclick="openOlympusRacer()" style="width: 100%; background: linear-gradient(90deg, #ff4a00, #e62e00); color: #fff; border: none; padding: 16px; border-radius: 12px; font-weight: 900; font-size: 15px; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 10px; box-shadow: 0 8px 25px rgba(255, 74, 0, 0.4); transition: transform 0.2s;">
+                    <span style="font-size: 20px;">🏁</span> OLYMPUS HIGHWAY - SÜRÜŞE BAŞLA
+                </button>
+            </div>
 
             <!-- ⚙️ GERÇEK TEKNİK VERİLER -->
             <h3 style="color: #fff; font-size: 14px; margin-bottom: 15px; text-transform: uppercase; letter-spacing: 1px;">Teknik Şartname</h3>
@@ -4260,6 +4269,119 @@
                 <button onclick="saveEminevimSettings()" class="save-btn" style="width: 100%; background: linear-gradient(135deg, #f39c12, #d35400); color: #fff; font-weight: 900; margin: 0; border: none; padding: 15px; border-radius: 10px; font-size: 15px; cursor: pointer; box-shadow: 0 5px 15px rgba(243, 156, 18, 0.4);">SİSTEME KAYDET</button>
             </div>
         </div>
+    </div>
+    <!-- ==========================================
+         🏎️ OLYMPUS HIGHWAY (3D TRAFFIC RACER - YATAY & 4 ŞERİT)
+         ========================================== -->
+    <div id="racer-screen" class="hidden" style="position: fixed; top: 0; left: 0; width: 100vw; height: 100dvh; background: #050505; z-index: 100500; display: none; flex-direction: column; overflow: hidden; font-family: 'Montserrat', sans-serif;">
+        
+        <!-- 1. AÇILIŞ SİNEMATİĞİ (SPLASH) -->
+        <div id="racer-splash" style="position: absolute; width: 100%; height: 100%; background: #000; z-index: 50; display: flex; flex-direction: column; justify-content: center; align-items: center; transition: opacity 0.5s ease;">
+            <h1 style="color: #ff4a00; font-weight: 900; font-size: 32px; font-style: italic; letter-spacing: 2px; text-shadow: 0 0 20px #ff4a00;">OLYMPUS</h1>
+            <h2 style="color: #fff; font-weight: 900; font-size: 40px; letter-spacing: 5px;">HIGHWAY</h2>
+            <div style="width: 60px; height: 4px; background: #ff4a00; margin-top: 20px; box-shadow: 0 0 10px #ff4a00;"></div>
+            <p id="racer-loading-text" style="color: #888; font-size: 12px; margin-top: 30px; letter-spacing: 2px; animation: pulse 1s infinite;">YATAY MOD BAŞLATILIYOR...</p>
+        </div>
+
+        <!-- 2. ARAÇ SEÇİM EKRANI -->
+        <div id="racer-select-screen" style="position: absolute; width: 100%; height: 100%; background: linear-gradient(180deg, #111, #000); z-index: 40; display: none; flex-direction: column; padding: 20px;">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+                <h3 style="color: #fff; margin: 0; font-size: 20px;">GARAJDAN ARAÇ SEÇ</h3>
+                <button onclick="quitRacerGame()" style="background: rgba(255,68,68,0.2); border: 1px solid #ff4444; color: #ff4444; padding: 8px 16px; border-radius: 6px; font-weight: bold; cursor: pointer;">Garaja Dön</button>
+            </div>
+            
+            <div style="flex: 1; display: flex; justify-content: center; align-items: center; gap: 30px;">
+                <!-- Megane Seçeneği -->
+                <div onclick="startRacerEngine('megane')" style="background: rgba(243, 156, 18, 0.1); border: 2px solid #f39c12; border-radius: 16px; padding: 30px; text-align: center; cursor: pointer; transition: transform 0.2s; width: 250px;">
+                    <h2 style="color: #f39c12; margin: 0 0 5px 0;">Megane 4</h2>
+                    <p style="color: #aaa; font-size: 12px; margin: 0;">1.3 TCe Icon</p>
+                    <div style="font-size: 50px; margin-top: 15px; filter: drop-shadow(0 0 10px #f39c12);">🚗</div>
+                </div>
+
+                <!-- BMW Seçeneği -->
+                <div onclick="startRacerEngine('bmw')" style="background: rgba(0, 210, 255, 0.1); border: 2px solid #00d2ff; border-radius: 16px; padding: 30px; text-align: center; cursor: pointer; transition: transform 0.2s; width: 250px;">
+                    <h2 style="color: #00d2ff; margin: 0 0 5px 0;">BMW G20</h2>
+                    <p style="color: #aaa; font-size: 12px; margin: 0;">320i M Sport</p>
+                    <div style="font-size: 50px; margin-top: 15px; filter: drop-shadow(0 0 10px #00d2ff);">🏎️</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 3. OYUN EKRANI (CANVAS & HUD) -->
+        <div id="racer-game-screen" style="position: absolute; width: 100%; height: 100%; z-index: 30; display: none;">
+            
+            <div id="racer-3d-container" style="position: absolute; top: 0; left: 0; width: 100%; height: 100%;"></div>
+            
+            <!-- HUD (Göstergeler) -->
+            <div style="position: absolute; top: 20px; left: 30px; display: flex; flex-direction: column;">
+                <span style="color: #ff4a00; font-size: 14px; font-weight: 900; letter-spacing: 1px; text-shadow: 1px 1px 2px #000;">SKOR</span>
+                <span id="racer-score" style="color: #fff; font-size: 32px; font-weight: 900; text-shadow: 2px 2px 4px #000;">0</span>
+            </div>
+
+            <div style="position: absolute; top: 20px; right: 90px; display: flex; flex-direction: column; align-items: flex-end;">
+                <span style="color: #fff; font-size: 14px; font-weight: 900; letter-spacing: 1px; text-shadow: 1px 1px 2px #000;">HIZ (KM/H)</span>
+                <span id="racer-speed" style="color: #f39c12; font-size: 36px; font-weight: 900; text-shadow: 2px 2px 4px #000;">120</span>
+            </div>
+
+            <button onclick="pauseRacerGame()" style="position: absolute; top: 20px; right: 20px; background: rgba(0,0,0,0.6); border: 1px solid #fff; color: #fff; width: 45px; height: 45px; border-radius: 12px; font-size: 24px; display: flex; justify-content: center; align-items: center; cursor: pointer; z-index: 100; backdrop-filter: blur(5px);">⚙️</button>
+
+            <!-- AKILLI KONTROLLER (DİNAMİK YERLEŞİM) -->
+            <div id="racer-controls-container" style="position: absolute; bottom: calc(env(safe-area-inset-bottom, 0px) + 20px); left: 0; width: 100%; height: 90px; pointer-events: none; z-index: 100;">
+                
+                <!-- YÖN TUŞLARI -->
+                <div id="racer-steer-controls" style="position: absolute; left: 30px; bottom: 0; display: flex; gap: 15px; pointer-events: auto;">
+                    <button id="racer-btn-left" style="width: 70px; height: 70px; background: rgba(0,0,0,0.4); border: 2px solid rgba(255,255,255,0.3); border-radius: 50%; color: #fff; font-size: 25px; display: flex; justify-content: center; align-items: center; backdrop-filter: blur(10px); user-select: none; -webkit-user-select: none; touch-action: none; cursor: pointer;">◀</button>
+                    <button id="racer-btn-right" style="width: 70px; height: 70px; background: rgba(0,0,0,0.4); border: 2px solid rgba(255,255,255,0.3); border-radius: 50%; color: #fff; font-size: 25px; display: flex; justify-content: center; align-items: center; backdrop-filter: blur(10px); user-select: none; -webkit-user-select: none; touch-action: none; cursor: pointer;">▶</button>
+                </div>
+
+                <!-- FREN BUTONU (Dinamik Konum: Normalde sağda, Jiroskopta en solda) -->
+                <button id="racer-btn-brake" style="position: absolute; right: 130px; bottom: 0; width: 80px; height: 70px; background: rgba(231, 76, 60, 0.4); border: 2px solid rgba(231, 76, 60, 0.8); border-radius: 12px; color: #fff; font-size: 16px; font-weight: bold; backdrop-filter: blur(10px); user-select: none; -webkit-user-select: none; touch-action: none; box-shadow: 0 5px 0 #c0392b; pointer-events: auto; transition: right 0.3s ease, left 0.3s ease; cursor: pointer;">🛑 FREN</button>
+
+                <!-- GAZ BUTONU (Her zaman en sağda) -->
+                <button id="racer-btn-gas" style="position: absolute; right: 30px; bottom: 0; width: 80px; height: 90px; background: rgba(39, 174, 96, 0.4); border: 2px solid rgba(39, 174, 96, 0.8); border-radius: 12px; color: #fff; font-size: 16px; font-weight: bold; transform: translateY(-10px); backdrop-filter: blur(10px); user-select: none; -webkit-user-select: none; touch-action: none; box-shadow: 0 5px 0 #1e8449; pointer-events: auto; cursor: pointer;">🔥 GAZ</button>
+            </div>
+            
+            <!-- AYARLAR MENÜSÜ MODALI (SAĞ YAN PANEL) -->
+            <div id="racer-settings-modal" style="display: none; position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.1); z-index: 200;">
+                
+                <!-- Sadece Sağ Tarafı Kaplayan Ayar Paneli -->
+                <div style="position: absolute; right: 0; top: 0; width: 350px; height: 100%; background: rgba(5,5,5,0.9); border-left: 2px solid #f39c12; padding: 20px; display: flex; flex-direction: column; gap: 15px; backdrop-filter: blur(15px); overflow-y: auto;">
+                    <h2 style="color: #f39c12; margin-bottom: 0; font-size: 24px; letter-spacing: 1px; text-shadow: 0 0 10px #f39c12;">AYARLAR</h2>
+                    
+                    <!-- CANLI ARAÇ KALİBRASYONU -->
+                    <div style="background: rgba(255,255,255,0.05); padding: 15px; border-radius: 12px; display: flex; flex-direction: column; gap: 8px; border: 1px solid rgba(255,255,255,0.1);">
+                        <h4 style="color: #00d2ff; margin: 0 0 5px 0; text-align: center; font-size: 13px;">🛠️ Canlı Kalibrasyon</h4>
+                        
+                        <label style="color: #aaa; font-size: 11px; display: flex; justify-content: space-between;"><span>Yön (Rotasyon):</span> <span id="val-rot" style="color:#fff; font-weight:bold;">0°</span></label>
+                        <input type="range" id="slider-rot" min="-180" max="180" value="0" oninput="updateCarCalibration()" style="accent-color: #f39c12;">
+
+                        <label style="color: #aaa; font-size: 11px; display: flex; justify-content: space-between;"><span>Büyüklük (Ölçek):</span> <span id="val-scale" style="color:#fff; font-weight:bold;">0.6</span></label>
+                        <input type="range" id="slider-scale" min="0.1" max="5.0" step="0.1" value="0.6" oninput="updateCarCalibration()" style="accent-color: #00d2ff;">
+
+                        <label style="color: #aaa; font-size: 11px; display: flex; justify-content: space-between;"><span>Yükseklik (Y-Ekseni):</span> <span id="val-posy" style="color:#fff; font-weight:bold;">0.1</span></label>
+                        <input type="range" id="slider-posy" min="-2.0" max="5.0" step="0.1" value="0.1" oninput="updateCarCalibration()" style="accent-color: #27ae60;">
+                    </div>
+
+                    <button onclick="resumeRacerGame()" style="padding: 12px; background: #27ae60; color: #fff; border-radius: 12px; font-weight: bold; font-size: 13px; border: none; cursor: pointer; box-shadow: 0 4px 10px rgba(39, 174, 96, 0.4);">▶ Oyuna Devam Et</button>
+                    <button id="btn-control-toggle" onclick="toggleRacerControls()" style="padding: 12px; background: #9b59b6; color: #fff; border-radius: 12px; font-weight: bold; font-size: 13px; border: none; cursor: pointer; box-shadow: 0 4px 10px rgba(155, 89, 182, 0.4);">🎮 Kontrol: Tuşlar</button>
+                    <button onclick="backToRacerSelection()" style="padding: 12px; background: #00d2ff; color: #000; border-radius: 12px; font-weight: bold; font-size: 13px; border: none; cursor: pointer; box-shadow: 0 4px 10px rgba(0, 210, 255, 0.4);">🚗 Araç Seçimi</button>
+                    <button onclick="quitRacerGame()" style="padding: 12px; background: #ff4444; color: #fff; border-radius: 12px; font-weight: bold; font-size: 13px; border: none; cursor: pointer; box-shadow: 0 4px 10px rgba(255, 68, 68, 0.4);">🚪 Garaja Dön</button>
+                </div>
+            </div>
+        </div>
+        <!-- KAZA / GAME OVER MODALI -->
+        <div id="racer-crash-modal" style="display: none; position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: rgba(200, 0, 0, 0.4); z-index: 300; justify-content: center; align-items: center; flex-direction: column; gap: 20px; backdrop-filter: blur(8px);">
+            <div style="background: rgba(10,10,10,0.9); padding: 40px; border-radius: 20px; border: 2px solid #ff4444; text-align: center; box-shadow: 0 0 50px rgba(255, 0, 0, 0.5);">
+                <h1 style="color: #ff4444; margin: 0; font-size: 40px; font-weight: 900; letter-spacing: 2px;">KAZA YAPTIN! 💥</h1>
+                <p style="color: #aaa; font-size: 16px; margin-top: 10px;">Son Skorun: <strong id="crash-final-score" style="color: #fff; font-size: 24px;">0</strong></p>
+                    
+                <div style="display: flex; gap: 15px; margin-top: 30px;">
+                    <button onclick="restartRacerGame()" style="padding: 15px 30px; background: #27ae60; color: #fff; border-radius: 12px; font-weight: bold; font-size: 16px; border: none; cursor: pointer; flex: 1;">🔄 Tekrar Oyna</button>
+                    <button onclick="quitRacerGame()" style="padding: 15px 30px; background: #333; color: #fff; border-radius: 12px; font-weight: bold; font-size: 16px; border: 1px solid #555; cursor: pointer; flex: 1;">🚪 Çıkış</button>
+                </div>
+            </div>
+        </div>
+
     </div>
 
     <script src="script.js"></script>

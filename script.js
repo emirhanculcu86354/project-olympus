@@ -11313,3 +11313,500 @@ window.openSahibindenMegane = function() {
     const sahibindenUrl = "https://www.sahibinden.com/renault-megane?a5_min=2020";
     window.open(sahibindenUrl, '_blank');
 };
+// ==========================================
+// 🏎️ OLYMPUS HIGHWAY (GERÇEK FİZİK, KALİBRASYON, DRACO)
+// ==========================================
+
+let racerScene, racerCamera, racerRenderer;
+let playerCar = null;
+let roadTexture, roadMaterial;
+let racerAnimationId;
+let gameSpeed = 0.0; // ARTIK DURARAK BAŞLAR!
+let carSpeed = 0; 
+let racerScore = 0;
+let isRacerPlaying = false;
+
+// KONTROLLER (HATA ÇÖZÜLDÜ: Obje içinde tutarak erişim sorunu giderildi)
+const racerInput = { left: false, right: false, gas: false, brake: false };
+
+let controlMode = 'touch'; 
+let gyroTilt = 0;
+
+// Araç Hafızası
+window.activeGameCarType = '';
+window.baseCarRotationY = 0;
+
+async function lockLandscape() {
+    try {
+        if (document.documentElement.requestFullscreen) await document.documentElement.requestFullscreen();
+        if (screen.orientation && screen.orientation.lock) await screen.orientation.lock('landscape');
+    } catch (e) { }
+}
+
+async function unlockLandscape() {
+    try {
+        if (document.exitFullscreen && document.fullscreenElement) await document.exitFullscreen();
+        if (screen.orientation && screen.orientation.unlock) screen.orientation.unlock();
+    } catch (e) {}
+}
+
+window.openOlympusRacer = function() {
+    const racerScreen = document.getElementById('racer-screen');
+    racerScreen.classList.remove('hidden');
+    racerScreen.style.display = 'flex';
+    
+    document.getElementById('racer-splash').style.display = 'flex';
+    document.getElementById('racer-splash').style.opacity = '1';
+    document.getElementById('racer-select-screen').style.display = 'none';
+    document.getElementById('racer-game-screen').style.display = 'none';
+    
+    lockLandscape();
+
+    if (navigator.vibrate) navigator.vibrate([30, 50, 30]);
+
+    setTimeout(() => {
+        document.getElementById('racer-splash').style.opacity = '0';
+        setTimeout(() => {
+            document.getElementById('racer-splash').style.display = 'none';
+            document.getElementById('racer-select-screen').style.display = 'flex';
+        }, 500);
+    }, 2000);
+};
+
+window.quitRacerGame = function() {
+    isRacerPlaying = false;
+    cancelAnimationFrame(racerAnimationId);
+    document.getElementById('racer-3d-container').innerHTML = '';
+    const racerScreen = document.getElementById('racer-screen');
+    racerScreen.classList.add('hidden');
+    racerScreen.style.display = 'none';
+    document.getElementById('racer-settings-modal').style.display = 'none';
+    
+    if(controlMode === 'gyro') window.removeEventListener('deviceorientation', handleGyro);
+    unlockLandscape();
+};
+
+window.startRacerEngine = function(carType) {
+    if (navigator.vibrate) navigator.vibrate(50);
+    document.getElementById('racer-select-screen').style.display = 'none';
+    document.getElementById('racer-game-screen').style.display = 'block';
+    document.getElementById('racer-settings-modal').style.display = 'none';
+
+    let glbFile = carType === 'megane' ? 'megane.glb' : 'bmw_g20.glb';
+    initThreeJSGame(glbFile, carType);
+};
+
+window.pauseRacerGame = function() {
+    isRacerPlaying = false; 
+    document.getElementById('racer-settings-modal').style.display = 'flex';
+};
+
+window.resumeRacerGame = function() {
+    isRacerPlaying = true; 
+    document.getElementById('racer-settings-modal').style.display = 'none';
+    gameLoop(); 
+};
+
+window.backToRacerSelection = function() {
+    isRacerPlaying = false;
+    cancelAnimationFrame(racerAnimationId);
+    document.getElementById('racer-3d-container').innerHTML = ''; 
+    document.getElementById('racer-settings-modal').style.display = 'none';
+    document.getElementById('racer-game-screen').style.display = 'none';
+    document.getElementById('racer-select-screen').style.display = 'flex';
+};
+
+window.toggleRacerControls = function() {
+    controlMode = controlMode === 'touch' ? 'gyro' : 'touch';
+    document.getElementById('btn-control-toggle').innerText = controlMode === 'touch' ? "🎮 Yön Kontrol: Tuşlar" : "📱 Yön Kontrol: Jiroskop (Sensör)";
+    
+    const steerCtrl = document.getElementById('racer-steer-controls');
+    const brakeBtn = document.getElementById('racer-btn-brake');
+
+    if (controlMode === 'gyro') {
+        steerCtrl.style.display = 'none'; // Yön tuşlarını yok et
+        brakeBtn.style.right = 'auto';    // Sağdan bağını kopar
+        brakeBtn.style.left = '30px';     // Ekranın en soluna sabitle (Konsol düzeni)
+        
+        if (typeof DeviceOrientationEvent !== 'undefined' && typeof DeviceOrientationEvent.requestPermission === 'function') {
+            DeviceOrientationEvent.requestPermission().then(response => {
+                if (response === 'granted') window.addEventListener('deviceorientation', handleGyro);
+            }).catch(console.error);
+        } else {
+            window.addEventListener('deviceorientation', handleGyro);
+        }
+    } else {
+        steerCtrl.style.display = 'flex'; // Yön tuşlarını geri getir
+        brakeBtn.style.left = 'auto';     // Soldan bağını kopar
+        brakeBtn.style.right = '130px';   // Eski yerine (Gazın yanına) al
+        
+        window.removeEventListener('deviceorientation', handleGyro);
+        gyroTilt = 0;
+    }
+};
+
+function handleGyro(event) {
+    let tilt = event.beta; 
+    if(tilt > 45) tilt = 45;
+    if(tilt < -45) tilt = -45;
+    gyroTilt = tilt / 45; 
+}
+
+window.updateCarCalibration = function() {
+    if(!playerCar) return;
+    let rotDeg = parseFloat(document.getElementById('slider-rot').value);
+    let scale = parseFloat(document.getElementById('slider-scale').value);
+    let posY = parseFloat(document.getElementById('slider-posy').value);
+
+    document.getElementById('val-rot').innerText = rotDeg + "°";
+    document.getElementById('val-scale').innerText = scale;
+    document.getElementById('val-posy').innerText = posY;
+
+    let rad = rotDeg * (Math.PI / 180);
+    window.baseCarRotationY = rad; 
+    playerCar.rotation.y = rad;
+    
+    playerCar.scale.set(scale, scale, scale);
+    playerCar.position.y = posY;
+
+    // Araca özel kalıcı hafızaya al
+    localStorage.setItem(`calib_rot_${window.activeGameCarType}`, rotDeg);
+    localStorage.setItem(`calib_scale_${window.activeGameCarType}`, scale);
+    localStorage.setItem(`calib_posy_${window.activeGameCarType}`, posY);
+
+    // MUCİZE KOD: Oyun duraklatılmış olsa bile kameraya zorla yeni görüntüyü çizdir!
+    if (!isRacerPlaying && racerRenderer && racerScene && racerCamera) {
+        racerRenderer.render(racerScene, racerCamera);
+    }
+};
+
+// Trafik ve Bariyer Değişkenleri
+window.trafficCars = [];
+window.trafficSpawnTimer = 0;
+let barrierTexture;
+
+// RASTGELE TRAFİK ARACI ÜRETME MOTORU
+function spawnTrafficCar() {
+    // 4 Şeridin X koordinatları (Sol dış, Sol iç, Sağ iç, Sağ dış)
+    const lanes = [-8, -3, 3, 8];
+    const targetLane = lanes[Math.floor(Math.random() * lanes.length)];
+    
+    // Trafik araçları için renk paleti (Sivil araçlar)
+    const colors = [0xffffff, 0xe74c3c, 0x3498db, 0x95a5a6, 0xf1c40f, 0x2c3e50];
+    const carColor = colors[Math.floor(Math.random() * colors.length)];
+    
+    // Performans için Trafik araçlarını basit 3D Box'lardan (Low-Poly) yapıyoruz
+    const carGroup = new THREE.Group();
+    
+    // Alt Kasa
+    const bodyGeo = new THREE.BoxGeometry(2.4, 1.2, 5.5);
+    const bodyMat = new THREE.MeshStandardMaterial({ color: carColor, roughness: 0.6 });
+    const body = new THREE.Mesh(bodyGeo, bodyMat);
+    body.position.y = 0.6;
+    body.castShadow = true;
+    carGroup.add(body);
+    
+    // Camlar (Kabin)
+    const cabinGeo = new THREE.BoxGeometry(2.0, 0.8, 3.0);
+    const cabinMat = new THREE.MeshStandardMaterial({ color: 0x111111, roughness: 0.2 });
+    const cabin = new THREE.Mesh(cabinGeo, cabinMat);
+    cabin.position.y = 1.6;
+    cabin.position.z = -0.5;
+    cabin.castShadow = true;
+    carGroup.add(cabin);
+
+    // Trafik aracı taa ufuktan (-150'den) gelsin
+    carGroup.position.set(targetLane, 0.1, -150);
+    
+    // Rastgele bir hız verelim ki hepsi aynı hızda gitmesin
+    carGroup.userData.speed = 0.3 + (Math.random() * 0.4); 
+    
+    racerScene.add(carGroup);
+    window.trafficCars.push(carGroup);
+}
+
+// KAZA TETİKLEYİCİ
+function triggerCrash() {
+    isRacerPlaying = false; // Oyunu anında durdur
+    gameSpeed = 0;
+    
+    if (navigator.vibrate) navigator.vibrate([100, 50, 100, 50, 300]); // Şiddetli titreşim
+    
+    document.getElementById('crash-final-score').innerText = Math.floor(racerScore);
+    document.getElementById('racer-crash-modal').style.display = 'flex';
+}
+
+window.restartRacerGame = function() {
+    document.getElementById('racer-crash-modal').style.display = 'none';
+    
+    // Eski trafik araçlarını temizle
+    window.trafficCars.forEach(car => racerScene.remove(car));
+    window.trafficCars = [];
+    window.trafficSpawnTimer = 0;
+    
+    racerScore = 0;
+    gameSpeed = 0;
+    document.getElementById('racer-score').innerText = "0";
+    
+    // Arabayı merkeze al
+    if(playerCar) {
+        playerCar.position.x = 0;
+        playerCar.rotation.z = 0;
+        playerCar.rotation.x = 0;
+    }
+    
+    isRacerPlaying = true;
+    gameLoop();
+};
+
+function initThreeJSGame(modelFile, carType) {
+    const container = document.getElementById('racer-3d-container');
+    container.innerHTML = ''; 
+    window.activeGameCarType = carType;
+    window.trafficCars = []; // Yeni oyunda trafiği sıfırla
+
+    let getRot = localStorage.getItem(`calib_rot_${carType}`);
+    let getScale = localStorage.getItem(`calib_scale_${carType}`);
+    let getPosY = localStorage.getItem(`calib_posy_${carType}`);
+
+    let savedRot = getRot !== null ? parseFloat(getRot) : 0;
+    let savedScale = getScale !== null ? parseFloat(getScale) : 0.6;
+    let savedPosY = getPosY !== null ? parseFloat(getPosY) : 0.1;
+
+    document.getElementById('slider-rot').value = savedRot;
+    document.getElementById('val-rot').innerText = savedRot + "°";
+    document.getElementById('slider-scale').value = savedScale;
+    document.getElementById('val-scale').innerText = savedScale;
+    document.getElementById('slider-posy').value = savedPosY;
+    document.getElementById('val-posy').innerText = savedPosY;
+
+    window.baseCarRotationY = savedRot * (Math.PI / 180);
+
+    racerScene = new THREE.Scene();
+    racerScene.background = new THREE.Color(0x87CEEB); 
+    racerScene.fog = new THREE.Fog(0x87CEEB, 20, 120); // Sisi ufka çektik
+
+    racerCamera = new THREE.PerspectiveCamera(50, window.innerWidth / window.innerHeight, 0.1, 1000);
+    racerCamera.position.set(0, 7, 12); 
+    racerCamera.lookAt(0, 0, -10); 
+
+    racerRenderer = new THREE.WebGLRenderer({ antialias: true });
+    racerRenderer.setSize(window.innerWidth, window.innerHeight);
+    racerRenderer.shadowMap.enabled = true;
+    container.appendChild(racerRenderer.domElement);
+
+    const ambientLight = new THREE.AmbientLight(0xffffff, 0.8);
+    racerScene.add(ambientLight);
+    const dirLight = new THREE.DirectionalLight(0xffffff, 1.0);
+    dirLight.position.set(10, 20, 10);
+    dirLight.castShadow = true;
+    racerScene.add(dirLight);
+
+    // ==========================================
+    // ASFALT VE YENİ ÇELİK BARİYERLER
+    // ==========================================
+    const canvasTex = document.createElement('canvas');
+    canvasTex.width = 512; canvasTex.height = 1024;
+    const ctx = canvasTex.getContext('2d');
+    ctx.fillStyle = '#2c2c2c'; ctx.fillRect(0, 0, 512, 1024);
+    ctx.fillStyle = '#f39c12'; ctx.fillRect(250, 0, 4, 1024); ctx.fillRect(258, 0, 4, 1024);
+    ctx.fillStyle = '#ffffff';
+    ctx.fillRect(124, 0, 8, 400); ctx.fillRect(124, 600, 8, 400);
+    ctx.fillRect(380, 0, 8, 400); ctx.fillRect(380, 600, 8, 400);
+    
+    roadTexture = new THREE.CanvasTexture(canvasTex);
+    roadTexture.wrapS = THREE.RepeatWrapping; roadTexture.wrapT = THREE.RepeatWrapping;
+    roadTexture.repeat.set(1, 15); 
+    const roadMaterial = new THREE.MeshStandardMaterial({ map: roadTexture, roughness: 0.9 });
+    const roadGeometry = new THREE.PlaneGeometry(24, 300);
+    const road = new THREE.Mesh(roadGeometry, roadMaterial);
+    road.rotation.x = -Math.PI / 2; road.position.z = -100; road.receiveShadow = true;
+    racerScene.add(road);
+
+    // YENİ: Çelik Bariyer Kaplaması (Şeritli)
+    const bTexCanvas = document.createElement('canvas');
+    bTexCanvas.width = 64; bTexCanvas.height = 256;
+    const bCtx = bTexCanvas.getContext('2d');
+    bCtx.fillStyle = '#95a5a6'; bCtx.fillRect(0,0,64,256); // Çelik Gri
+    bCtx.fillStyle = '#e74c3c'; bCtx.fillRect(0,0,64,128); // Kırmızı Uyarı Şeridi
+    barrierTexture = new THREE.CanvasTexture(bTexCanvas);
+    barrierTexture.wrapS = THREE.RepeatWrapping; barrierTexture.wrapT = THREE.RepeatWrapping;
+    barrierTexture.repeat.set(1, 40);
+
+    const barrierGeo = new THREE.BoxGeometry(1, 1.5, 300);
+    const barrierMat = new THREE.MeshStandardMaterial({ map: barrierTexture, roughness: 0.4, metalness: 0.6 });
+    
+    const leftBarrier = new THREE.Mesh(barrierGeo, barrierMat);
+    leftBarrier.position.set(-12.5, 0.75, -100);
+    leftBarrier.castShadow = true;
+    racerScene.add(leftBarrier);
+
+    const rightBarrier = new THREE.Mesh(barrierGeo, barrierMat);
+    rightBarrier.position.set(12.5, 0.75, -100);
+    rightBarrier.castShadow = true;
+    racerScene.add(rightBarrier);
+
+    // OYUNCU ARABASINI YÜKLE
+    const loader = new THREE.GLTFLoader();
+    const dracoLoader = new THREE.DRACOLoader();
+    dracoLoader.setDecoderPath('https://www.gstatic.com/draco/versioned/decoders/1.4.1/');
+    loader.setDRACOLoader(dracoLoader);
+
+    document.getElementById('racer-score').innerText = "YÜKLENİYOR...";
+
+    loader.load(modelFile, function(gltf) {
+        playerCar = gltf.scene;
+        playerCar.scale.set(savedScale, savedScale, savedScale); 
+        playerCar.position.set(0, savedPosY, -1); // Z: -1
+        playerCar.rotation.y = window.baseCarRotationY; 
+        
+        playerCar.traverse(function(child) {
+            if (child.isMesh) child.castShadow = true;
+        });
+
+        racerScene.add(playerCar);
+        
+        racerScore = 0;
+        gameSpeed = 0.0; 
+        isRacerPlaying = true;
+        document.getElementById('racer-score').innerText = "0";
+        document.getElementById('racer-speed').innerText = "0";
+        gameLoop();
+    }, undefined, function(error) {
+        alert("3D Model yüklenemedi!");
+        quitRacerGame();
+    });
+
+    const bindBtn = (id, actionKey) => {
+        const btn = document.getElementById(id);
+        const press = (e) => { e.preventDefault(); racerInput[actionKey] = true; btn.style.transform = 'scale(0.9)'; };
+        const release = (e) => { e.preventDefault(); racerInput[actionKey] = false; btn.style.transform = (id==='racer-btn-gas' ? 'translateY(-20px)' : 'scale(1)'); };
+        btn.onmousedown = press; btn.onmouseup = release; btn.onmouseleave = release;
+        btn.ontouchstart = press; btn.ontouchend = release;
+    };
+
+    bindBtn('racer-btn-left', 'left'); bindBtn('racer-btn-right', 'right');
+    bindBtn('racer-btn-gas', 'gas'); bindBtn('racer-btn-brake', 'brake');
+}
+
+function gameLoop() {
+    if (!isRacerPlaying) return; 
+    
+    const physics = carPhysics[window.activeGameCarType] || carPhysics['megane'];
+    const creepSpeed = 0.4; 
+    
+    if(racerInput.gas) {
+        gameSpeed += physics.accel; 
+        if(gameSpeed > physics.maxSpeed) gameSpeed = physics.maxSpeed;
+    } else if(racerInput.brake) {
+        gameSpeed -= physics.brake; 
+        if(gameSpeed < 0) gameSpeed = 0; 
+    } else {
+        if(gameSpeed > creepSpeed + 0.05) gameSpeed -= physics.friction; 
+        else if (gameSpeed < creepSpeed - 0.05) gameSpeed += physics.friction; 
+        else gameSpeed = creepSpeed; 
+    }
+
+    // YOL VE BARİYER AKIŞI
+    roadTexture.offset.y += 0.05 * gameSpeed;
+    if(barrierTexture) barrierTexture.offset.y += 0.05 * gameSpeed; // Bariyerler de aksın
+
+    if (playerCar && gameSpeed > 0) {
+        let steerAmount = 0;
+        if (controlMode === 'touch') {
+            if (racerInput.left) steerAmount = -0.12; 
+            if (racerInput.right) steerAmount = 0.12;
+        } else {
+            steerAmount = gyroTilt * 0.25; 
+        }
+
+        playerCar.position.x += steerAmount * (gameSpeed * 0.7);
+
+        // Bariyer Sınırları (Taşmayı Engelle)
+        if (playerCar.position.x < -11) playerCar.position.x = -11;
+        if (playerCar.position.x > 11) playerCar.position.x = 11;
+
+        playerCar.rotation.z = 0; 
+        playerCar.rotation.x = steerAmount * 0.6; 
+        playerCar.rotation.y = window.baseCarRotationY - (steerAmount * 0.25); 
+    } else if (playerCar && gameSpeed === 0) {
+        playerCar.rotation.z = 0; 
+        playerCar.rotation.x += (0 - playerCar.rotation.x) * 0.1;
+        playerCar.rotation.y += (window.baseCarRotationY - playerCar.rotation.y) * 0.2;
+    }
+
+    // ==========================================
+    // 🚦 YAPAY ZEKA TRAFİK VE ÇARPIŞMA (COLLISION) MOTORU
+    // ==========================================
+    if (gameSpeed > 0.5) { // Sadece belli bir hızın üstündeyken trafik aksın
+        window.trafficSpawnTimer += gameSpeed;
+        if (window.trafficSpawnTimer > 80) { // Araç çıkma sıklığı
+            window.trafficSpawnTimer = 0;
+            spawnTrafficCar();
+        }
+    }
+
+    if (playerCar) {
+        // Çarpışma kutumuzu hazırlayalım (Arabamızın etrafında görünmez bir sınır)
+        const playerBox = new THREE.Box3().setFromObject(playerCar);
+        playerBox.expandByScalar(-0.4); // Çarpışmayı biraz daha toleranslı yap (Kenardan sıyırabilsin)
+
+        for (let i = window.trafficCars.length - 1; i >= 0; i--) {
+            let tCar = window.trafficCars[i];
+            
+            // Trafik aracı oyuncuya doğru yaklaşır (Göreceli hız = Bizim Hızımız + Trafik Hızı)
+            tCar.position.z += (gameSpeed * 0.5) + tCar.userData.speed; 
+            
+            // Çarpışma Kontrolü
+            const tCarBox = new THREE.Box3().setFromObject(tCar);
+            tCarBox.expandByScalar(-0.2); // Karşı aracın kutusu
+
+            if (playerBox.intersectsBox(tCarBox)) {
+                triggerCrash(); // 💥 GÜM!
+                return; // Döngüyü kır, kaza oldu.
+            }
+
+            // Araç kameranın arkasına düştüyse (Bizi geçip gittiyse) sahneden sil, RAM'i temizle
+            if (tCar.position.z > 20) {
+                racerScene.remove(tCar);
+                window.trafficCars.splice(i, 1);
+            }
+        }
+    }
+
+    // SKOR
+    racerScore += 0.1 * gameSpeed;
+    document.getElementById('racer-score').innerText = Math.floor(racerScore);
+    carSpeed = Math.floor(gameSpeed * 60); 
+    document.getElementById('racer-speed').innerText = carSpeed;
+
+    racerRenderer.render(racerScene, racerCamera);
+    racerAnimationId = requestAnimationFrame(gameLoop);
+}
+
+// ==========================================
+// 🏎️ ARAÇLARA ÖZEL FİZİK MOTORU VERİTABANI
+// ==========================================
+const carPhysics = {
+    megane: { 
+        maxSpeed: 3.5,      // Maksimum ~210 km/h
+        accel: 0.005,       // 1.3 TCe tatlı ve pürüzsüz hızlanma
+        brake: 0.015,       // Standart disk fren (Yavaş ve güvenli duruş)
+        friction: 0.003     // Rüzgar ve yol sürtünmesi
+    },
+    bmw: { 
+        maxSpeed: 4.3,      // Maksimum ~258 km/h
+        accel: 0.009,       // 320i agresif ivmelenme (Gaza daha hızlı tepki)
+        brake: 0.025,       // M Sport performans frenleri (Daha kısa mesafede duruş)
+        friction: 0.004     // Yere daha sağlam basan aerodinamik sürtünme
+    }
+};
+
+
+window.addEventListener('resize', () => {
+    if (racerCamera && racerRenderer) {
+        racerCamera.aspect = window.innerWidth / window.innerHeight;
+        racerCamera.updateProjectionMatrix();
+        racerRenderer.setSize(window.innerWidth, window.innerHeight);
+    }
+});
