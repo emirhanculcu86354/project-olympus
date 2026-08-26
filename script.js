@@ -11376,6 +11376,12 @@ window.openOlympusRacer = function() {
 window.quitRacerGame = function() {
     isRacerPlaying = false;
     cancelAnimationFrame(racerAnimationId);
+    
+    bgMusic.pause();
+    bgMusic.currentTime = 0;
+    engineSound.pause();
+    engineSound.volume = 0;
+    
     document.getElementById('racer-3d-container').innerHTML = '';
     const racerScreen = document.getElementById('racer-screen');
     racerScreen.classList.add('hidden');
@@ -11385,12 +11391,22 @@ window.quitRacerGame = function() {
     if(controlMode === 'gyro') window.removeEventListener('deviceorientation', handleGyro);
     unlockLandscape();
 };
-
 window.startRacerEngine = function(carType) {
     if (navigator.vibrate) navigator.vibrate(50);
     document.getElementById('racer-select-screen').style.display = 'none';
     document.getElementById('racer-game-screen').style.display = 'block';
     document.getElementById('racer-settings-modal').style.display = 'none';
+
+    // UI Buton İsimlerini Hafızaya Göre Yaz
+    document.getElementById('btn-toggle-music').innerText = isMusicOn ? "Müzik: AÇIK" : "Müzik: KAPALI";
+    document.getElementById('btn-toggle-engine').innerText = isEngineOn ? "Motor: AÇIK" : "Motor: KAPALI";
+
+    // Müzik ve Motor sesini başlat (Kullanıcı tıkladığı için tarayıcı izin verir)
+    if(isMusicOn) bgMusic.play().catch(e=>console.log("Müzik çalınamadı:", e));
+    if(isEngineOn) {
+        engineSound.volume = 0;
+        engineSound.play().catch(e=>console.log("Motor sesi çalınamadı:", e));
+    }
 
     let glbFile = carType === 'megane' ? 'megane.glb' : 'bmw_g20.glb';
     initThreeJSGame(glbFile, carType);
@@ -11398,11 +11414,14 @@ window.startRacerEngine = function(carType) {
 
 window.pauseRacerGame = function() {
     isRacerPlaying = false; 
+    bgMusic.pause();
+    engineSound.volume = 0;
     document.getElementById('racer-settings-modal').style.display = 'flex';
 };
 
 window.resumeRacerGame = function() {
     isRacerPlaying = true; 
+    if(isMusicOn) bgMusic.play();
     document.getElementById('racer-settings-modal').style.display = 'none';
     gameLoop(); 
 };
@@ -11677,13 +11696,30 @@ function initThreeJSGame(modelFile, carType) {
         quitRacerGame();
     });
 
+    // KUSURSUZ BUTON BAĞLAYICI (Tüm Tuş Hatalarını Çözer)
     const bindBtn = (id, actionKey) => {
         const btn = document.getElementById(id);
-        const press = (e) => { e.preventDefault(); racerInput[actionKey] = true; btn.style.transform = 'scale(0.9)'; };
-        const release = (e) => { e.preventDefault(); racerInput[actionKey] = false; btn.style.transform = (id==='racer-btn-gas' ? 'translateY(-20px)' : 'scale(1)'); };
+        if(!btn) return; // Buton HTML'de yoksa oyunun çökmesini engeller!
+        
+        const press = (e) => { 
+            e.preventDefault(); 
+            racerInput[actionKey] = true; 
+            btn.style.transform = (id==='racer-btn-gas' || id==='racer-btn-brake') ? 'translateY(-10px) scale(0.95)' : 'scale(0.8)';
+        };
+        const release = (e) => { 
+            e.preventDefault(); 
+            racerInput[actionKey] = false; 
+            btn.style.transform = (id==='racer-btn-gas' || id==='racer-btn-brake') ? 'translateY(-10px) scale(1)' : 'scale(1)';
+        };
+        
         btn.onmousedown = press; btn.onmouseup = release; btn.onmouseleave = release;
-        btn.ontouchstart = press; btn.ontouchend = release;
+        btn.ontouchstart = press; btn.ontouchend = release; btn.ontouchcancel = release;
     };
+
+    bindBtn('racer-btn-left', 'left'); 
+    bindBtn('racer-btn-right', 'right');
+    bindBtn('racer-btn-gas', 'gas'); 
+    bindBtn('racer-btn-brake', 'brake');
 
     bindBtn('racer-btn-left', 'left'); bindBtn('racer-btn-right', 'right');
     bindBtn('racer-btn-gas', 'gas'); bindBtn('racer-btn-brake', 'brake');
@@ -11705,6 +11741,25 @@ function gameLoop() {
         if(gameSpeed > creepSpeed + 0.05) gameSpeed -= physics.friction; 
         else if (gameSpeed < creepSpeed - 0.05) gameSpeed += physics.friction; 
         else gameSpeed = creepSpeed; 
+    }
+    // 🛠️ YENİ: DİNAMİK MOTOR SESİ FİZİĞİ
+    // SES FİZİĞİ (Gaza basınca bağırır, çekince boğulur)
+    if (typeof isEngineOn !== 'undefined' && isEngineOn && engineSound.readyState >= 2) {
+        if (racerInput.gas) {
+            if (engineSound.paused) engineSound.play().catch(e=>{});
+            // Motor kükremesi
+            engineSound.volume = Math.min(0.5 + (gameSpeed * 0.2), 1.0); 
+            engineSound.playbackRate = 0.8 + (gameSpeed * 0.25); 
+        } else {
+            // Gazdan çekilince devir düşer
+            if (gameSpeed > 0.5) {
+                engineSound.volume = Math.max(engineSound.volume - 0.05, 0.3);
+                engineSound.playbackRate = Math.max(engineSound.playbackRate - 0.02, 0.7);
+            } else {
+                engineSound.volume = 0; 
+                engineSound.pause();
+            }
+        }
     }
 
     // YOL VE BARİYER AKIŞI
@@ -11810,3 +11865,41 @@ window.addEventListener('resize', () => {
         racerRenderer.setSize(window.innerWidth, window.innerHeight);
     }
 });
+const bgMusic = new Audio('music.mp3');
+bgMusic.loop = true;
+bgMusic.volume = 0.15; // Müzik kısıldı (Arka fon)
+
+const engineSound = new Audio('engine.mp3');
+engineSound.loop = true;
+engineSound.volume = 0; // Başlangıçta sessiz
+
+let isMusicOn = localStorage.getItem('racer_music') !== 'false';
+let isEngineOn = localStorage.getItem('racer_engine') !== 'false';
+
+window.toggleRacerMusic = function() {
+    isMusicOn = !isMusicOn;
+    localStorage.setItem('racer_music', isMusicOn);
+    document.getElementById('btn-toggle-music').innerText = isMusicOn ? "Müzik: AÇIK" : "Müzik: KAPALI";
+    if(isMusicOn && isRacerPlaying) bgMusic.play().catch(e=>{});
+    else bgMusic.pause();
+};
+
+window.toggleRacerEngineSound = function() {
+    isEngineOn = !isEngineOn;
+    localStorage.setItem('racer_engine', isEngineOn);
+    document.getElementById('btn-toggle-engine').innerText = isEngineOn ? "Motor: AÇIK" : "Motor: KAPALI";
+    if(!isEngineOn) { engineSound.volume = 0; engineSound.pause(); }
+};
+
+function handleGyro(event) {
+    let tilt = event.beta; 
+    // 5 Derecelik Ölü Nokta (Telefon düzken araba sapmaz)
+    if (Math.abs(tilt) < 5) {
+        gyroTilt = 0;
+    } else {
+        if(tilt > 45) tilt = 45;
+        if(tilt < -45) tilt = -45;
+        // 5 dereceyi yok sayarak dönüşü daha pürüzsüz hesapla
+        gyroTilt = (tilt > 0 ? tilt - 5 : tilt + 5) / 40; 
+    }
+}

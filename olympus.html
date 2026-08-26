@@ -4361,6 +4361,14 @@
                         <label style="color: #aaa; font-size: 11px; display: flex; justify-content: space-between;"><span>Yükseklik (Y-Ekseni):</span> <span id="val-posy" style="color:#fff; font-weight:bold;">0.1</span></label>
                         <input type="range" id="slider-posy" min="-2.0" max="5.0" step="0.1" value="0.1" oninput="updateCarCalibration()" style="accent-color: #27ae60;">
                     </div>
+                    <!-- YENİ: SES AYARLARI -->
+                    <div style="background: rgba(255,255,255,0.05); padding: 15px; border-radius: 12px; display: flex; flex-direction: column; gap: 10px; border: 1px solid rgba(255,255,255,0.1); margin-bottom: 10px;">
+                        <h4 style="color: #e74c3c; margin: 0 0 5px 0; text-align: center; font-size: 13px;">🎵 Ses & Müzik</h4>
+                        <div style="display: flex; gap: 10px;">
+                            <button id="btn-toggle-music" onclick="toggleRacerMusic()" style="flex: 1; padding: 10px; background: rgba(0,0,0,0.5); color: #fff; border: 1px solid #e74c3c; border-radius: 8px; font-weight: bold; font-size: 11px; cursor: pointer; transition: 0.2s;">Müzik: AÇIK</button>
+                            <button id="btn-toggle-engine" onclick="toggleRacerEngineSound()" style="flex: 1; padding: 10px; background: rgba(0,0,0,0.5); color: #fff; border: 1px solid #e74c3c; border-radius: 8px; font-weight: bold; font-size: 11px; cursor: pointer; transition: 0.2s;">Motor: AÇIK</button>
+                        </div>
+                    </div>
 
                     <button onclick="resumeRacerGame()" style="padding: 12px; background: #27ae60; color: #fff; border-radius: 12px; font-weight: bold; font-size: 13px; border: none; cursor: pointer; box-shadow: 0 4px 10px rgba(39, 174, 96, 0.4);">▶ Oyuna Devam Et</button>
                     <button id="btn-control-toggle" onclick="toggleRacerControls()" style="padding: 12px; background: #9b59b6; color: #fff; border-radius: 12px; font-weight: bold; font-size: 13px; border: none; cursor: pointer; box-shadow: 0 4px 10px rgba(155, 89, 182, 0.4);">🎮 Kontrol: Tuşlar</button>
