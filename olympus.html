@@ -230,16 +230,14 @@
                                     style="color:#f39c12; filter: drop-shadow(0 0 5px rgba(243, 156, 18, 0.5));">🏎️
                                 </div>
                             </div>
-                            <div class="hub-card"
-                                style="background: #111 !important; border-color: #333 !important; opacity:0.5; pointer-events:none;">
-                                <span class="hub-card-kicker" style="color:#555;">SOON</span>
-                                <h3
-                                    style="color:#888 !important; margin-top:7px; font-size:17px; font-weight:800; letter-spacing:-0.35px;">
-                                    Modül 7</h3>
-                                <p style="color:#9e9e9e !important; font-size:10px; margin-top:5px;">Yakında Eklenecek
-                                </p>
+                            <!-- ⚽ YENİ: OLYSCORE KARTI -->
+                            <div class="hub-card" onclick="openOlyScore()"
+                                style="background: linear-gradient(145deg, #1f1433, #050505) !important; border-color: #8a2be2 !important;">
+                                <span class="hub-card-kicker" style="color:#c084fc;">SPORTS</span>
+                                <h3>OlyScore</h3>
+                                <p>Galatasaray Canlı Merkezi</p>
                                 <div class="hub-card-icon"
-                                    style="filter:grayscale(1); font-size:30px; margin-top:auto; text-align:right;">🔒
+                                    style="color:#c084fc; filter: drop-shadow(0 0 5px rgba(192, 132, 252, 0.5));">🦁
                                 </div>
                             </div>
                             <div class="hub-card"
@@ -2926,6 +2924,9 @@
     <!-- 🎵 İDMAN ARKA PLAN MOTORU (Kilit Ekranında Medya Oynatıcı İçin) -->
     <audio id="workout-bg-audio" loop playsinline
         src="data:audio/mp3;base64,//OExAAAAANIAAAAAExBTUUzLjEwMKqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqq"></audio>
+    <!-- 🏁 RACER OYUNU SAFARİ SES MOTORU -->
+    <audio id="racer-bg-audio" loop preload="auto" src="music.mp3"></audio>
+    <audio id="racer-engine-audio" loop preload="auto" src="engine.mp3"></audio>
 
     <!-- ==========================================
          📚 KPSS AKADEMİ (ÇALIŞMA MERKEZİ) - V3.0 PRO
@@ -4087,219 +4088,297 @@
         </div>
     </div>
     <!-- 🎬 YENİ: GARAJ AÇILIŞ SİNEMATİĞİ (BMW SELEKTÖR EFEKTİ) -->
-    <div id="garage-intro-overlay" class="hidden" style="position: fixed; top: 0; left: 0; width: 100vw; height: 100dvh; background: #050505; z-index: 100100; display: none; justify-content: center; align-items: center; overflow: hidden;">
-        
+    <div id="garage-intro-overlay" class="hidden"
+        style="position: fixed; top: 0; left: 0; width: 100vw; height: 100dvh; background: #050505; z-index: 100100; display: none; justify-content: center; align-items: center; overflow: hidden;">
+
         <!-- Karanlıkta Beliren Agresif BMW Görseli -->
-        <img id="bmw-headlight-img" src="bmw.png" style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; object-fit: cover; opacity: 0; transform: scale(1.1); z-index: 1;">
-        
+        <img id="bmw-headlight-img" src="bmw.png"
+            style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; object-fit: cover; opacity: 0; transform: scale(1.1); z-index: 1;">
+
         <!-- Far Parlaması (BMW Farının Konumuna Göre: top 52%, left 45%) -->
-        <div id="headlight-glare" style="position: absolute; top: 52%; left: 45%; width: 120px; height: 40px; background: #fff; border-radius: 50%; filter: blur(15px); transform: translate(-50%, -50%) scale(0); opacity: 0; pointer-events: none; box-shadow: 0 0 80px 40px #fff, 0 0 120px 60px #00d2ff; z-index: 2;"></div>
+        <div id="headlight-glare"
+            style="position: absolute; top: 52%; left: 45%; width: 120px; height: 40px; background: #fff; border-radius: 50%; filter: blur(15px); transform: translate(-50%, -50%) scale(0); opacity: 0; pointer-events: none; box-shadow: 0 0 80px 40px #fff, 0 0 120px 60px #00d2ff; z-index: 2;">
+        </div>
 
         <!-- Ekranı Yutan Bembeyaz Flaş Patlaması -->
-        <div id="garage-flash" style="position: absolute; top: 52%; left: 45%; width: 30px; height: 30px; background: #fff; border-radius: 50%; transform: translate(-50%, -50%) scale(0); opacity: 0; pointer-events: none; box-shadow: 0 0 60px 60px #fff; z-index: 3;"></div>
+        <div id="garage-flash"
+            style="position: absolute; top: 52%; left: 45%; width: 30px; height: 30px; background: #fff; border-radius: 50%; transform: translate(-50%, -50%) scale(0); opacity: 0; pointer-events: none; box-shadow: 0 0 60px 60px #fff; z-index: 3;">
+        </div>
     </div>
     <!-- ==========================================
          🏎️ OLYMPUS GARAGE (MEGANE 4 & BMW G20 HAYAL KÖŞESİ)
          ========================================== -->
-    <div id="garage-screen" class="hidden" style="position: fixed; top: 0; left: 0; width: 100vw; height: 100dvh; background: #050505; z-index: 10000; display: block; overflow-y: auto; padding-bottom: 80px; -webkit-overflow-scrolling: touch;">
-        
+    <div id="garage-screen" class="hidden"
+        style="position: fixed; top: 0; left: 0; width: 100vw; height: 100dvh; background: #050505; z-index: 10000; display: block; overflow-y: auto; padding-bottom: 80px; -webkit-overflow-scrolling: touch;">
+
         <!-- ÜST BAR -->
-        <div style="width:100%; padding: calc(env(safe-area-inset-top, 20px) + 15px) 20px 15px 20px; background: rgba(5, 5, 5, 0.85); backdrop-filter: blur(25px); -webkit-backdrop-filter: blur(25px); border-bottom: 1px solid rgba(255,255,255,0.05); display: flex; justify-content: space-between; align-items: center; position: sticky; top: 0; z-index: 100;">
-            <h2 style="color:#f39c12; font-family:'Montserrat', sans-serif; font-weight:900; margin:0; letter-spacing: 2px; text-transform:uppercase; text-shadow: 0 0 15px rgba(243, 156, 18, 0.4);">GARAGE</h2>
-            <button onclick="closeGarageScreen()" style="background: transparent; border: 1px solid #ff4444; border-radius: 6px; padding: 6px 12px; color:#ff4444; font-size:11px; font-weight: bold; cursor: pointer;">Geri Dön</button>
+        <div
+            style="width:100%; padding: calc(env(safe-area-inset-top, 20px) + 15px) 20px 15px 20px; background: rgba(5, 5, 5, 0.85); backdrop-filter: blur(25px); -webkit-backdrop-filter: blur(25px); border-bottom: 1px solid rgba(255,255,255,0.05); display: flex; justify-content: space-between; align-items: center; position: sticky; top: 0; z-index: 100;">
+            <h2
+                style="color:#f39c12; font-family:'Montserrat', sans-serif; font-weight:900; margin:0; letter-spacing: 2px; text-transform:uppercase; text-shadow: 0 0 15px rgba(243, 156, 18, 0.4);">
+                GARAGE</h2>
+            <button onclick="closeGarageScreen()"
+                style="background: transparent; border: 1px solid #ff4444; border-radius: 6px; padding: 6px 12px; color:#ff4444; font-size:11px; font-weight: bold; cursor: pointer;">Geri
+                Dön</button>
         </div>
 
         <!-- 🔄 YENİ: ARAÇ SEÇİCİ (GARAJ SEKME MENÜSÜ) -->
-        <div style="display: flex; justify-content: center; gap: 10px; padding: 15px 20px; background: #0a0a0a; border-bottom: 1px solid #222;">
-            <button id="tab-megane" onclick="switchGarageCar('megane')" style="flex: 1; padding: 12px; border-radius: 8px; border: 1px solid #f39c12; background: rgba(243, 156, 18, 0.1); color: #f39c12; font-weight: bold; cursor: pointer; transition: 0.3s; font-size: 13px;">Hedef: Megane 4</button>
-            <button id="tab-bmw" onclick="switchGarageCar('bmw')" style="flex: 1; padding: 12px; border-radius: 8px; border: 1px solid #333; background: #111; color: #888; font-weight: bold; cursor: pointer; transition: 0.3s; font-size: 13px;">Nihai Hayal: G20</button>
+        <div
+            style="display: flex; justify-content: center; gap: 10px; padding: 15px 20px; background: #0a0a0a; border-bottom: 1px solid #222;">
+            <button id="tab-megane" onclick="switchGarageCar('megane')"
+                style="flex: 1; padding: 12px; border-radius: 8px; border: 1px solid #f39c12; background: rgba(243, 156, 18, 0.1); color: #f39c12; font-weight: bold; cursor: pointer; transition: 0.3s; font-size: 13px;">Hedef:
+                Megane 4</button>
+            <button id="tab-bmw" onclick="switchGarageCar('bmw')"
+                style="flex: 1; padding: 12px; border-radius: 8px; border: 1px solid #333; background: #111; color: #888; font-weight: bold; cursor: pointer; transition: 0.3s; font-size: 13px;">Nihai
+                Hayal: G20</button>
         </div>
 
         <!-- 3D SHOWROOM (PODYUM) -->
-        <div style="width: 100%; height: 35vh; position: relative; background: radial-gradient(circle at center, #1a1a1a 0%, #000 70%); border-bottom: 1px solid #333;">
-            <div id="gar-light-glow" style="position: absolute; top: 60%; left: 50%; transform: translate(-50%, -50%); width: 70%; height: 30px; background: rgba(243, 156, 18, 0.15); filter: blur(20px); border-radius: 50%; transition: background 0.5s;"></div>
-            
-            <p style="text-align: center; color: rgba(255,255,255,0.3); font-size: 10px; margin-bottom: 0; position: absolute; top: 15px; width: 100%; z-index: 10; font-weight: bold; letter-spacing: 1px;">360° İNCELEME İÇİN SÜRÜKLE</p>
+        <div
+            style="width: 100%; height: 35vh; position: relative; background: radial-gradient(circle at center, #1a1a1a 0%, #000 70%); border-bottom: 1px solid #333;">
+            <div id="gar-light-glow"
+                style="position: absolute; top: 60%; left: 50%; transform: translate(-50%, -50%); width: 70%; height: 30px; background: rgba(243, 156, 18, 0.15); filter: blur(20px); border-radius: 50%; transition: background 0.5s;">
+            </div>
 
-            <model-viewer id="gar-model-viewer" 
-                          src="megane.glb" 
-                          alt="3D Araba" 
-                          auto-rotate 
-                          camera-controls 
-                          shadow-intensity="2" 
-                          environment-image="neutral" 
-                          exposure="1" 
-                          style="width: 100%; height: 100%; outline: none; z-index: 5;">
+            <p
+                style="text-align: center; color: rgba(255,255,255,0.3); font-size: 10px; margin-bottom: 0; position: absolute; top: 15px; width: 100%; z-index: 10; font-weight: bold; letter-spacing: 1px;">
+                360° İNCELEME İÇİN SÜRÜKLE</p>
+
+            <model-viewer id="gar-model-viewer" src="megane.glb" alt="3D Araba" auto-rotate camera-controls
+                shadow-intensity="2" environment-image="neutral" exposure="1"
+                style="width: 100%; height: 100%; outline: none; z-index: 5;">
             </model-viewer>
         </div>
 
         <!-- İÇERİK ALANI -->
         <div style="padding: 25px 20px;">
-            
+
             <!-- ARAÇ BAŞLIĞI VE ÖZETİ -->
             <div style="text-align: center; margin-bottom: 30px;">
-                <h1 id="gar-car-title" style="color: #fff; font-size: 26px; font-weight: 900; margin: 0; letter-spacing: 1px;">RENAULT MEGANE 4</h1>
-                <p id="gar-car-sub" style="color: #f39c12; font-size: 14px; font-weight: bold; margin: 5px 0 0 0;">1.3 TCe EDC Icon (2020+)</p>
-                <span id="gar-car-info" style="display: inline-block; background: #111; border: 1px solid #333; color: #aaa; font-size: 11px; padding: 4px 10px; border-radius: 12px; margin-top: 10px; font-weight: bold;">~120.000 KM | Makyajlı Kasa</span>
+                <h1 id="gar-car-title"
+                    style="color: #fff; font-size: 26px; font-weight: 900; margin: 0; letter-spacing: 1px;">RENAULT
+                    MEGANE 4</h1>
+                <p id="gar-car-sub" style="color: #f39c12; font-size: 14px; font-weight: bold; margin: 5px 0 0 0;">1.3
+                    TCe EDC Icon (2020+)</p>
+                <span id="gar-car-info"
+                    style="display: inline-block; background: #111; border: 1px solid #333; color: #aaa; font-size: 11px; padding: 4px 10px; border-radius: 12px; margin-top: 10px; font-weight: bold;">~120.000
+                    KM | Makyajlı Kasa</span>
             </div>
 
             <!-- 💼 EMİNEVİM FİNANSMAN BARI -->
-            <div style="background: linear-gradient(145deg, #111, #050505); border: 1px solid #2a2a2a; border-radius: 16px; padding: 20px; margin-bottom: 30px; box-shadow: 0 10px 25px rgba(0,0,0,0.5);">
-                <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #222; padding-bottom: 12px; margin-bottom: 15px;">
+            <div
+                style="background: linear-gradient(145deg, #111, #050505); border: 1px solid #2a2a2a; border-radius: 16px; padding: 20px; margin-bottom: 30px; box-shadow: 0 10px 25px rgba(0,0,0,0.5);">
+                <div
+                    style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #222; padding-bottom: 12px; margin-bottom: 15px;">
                     <div style="display: flex; align-items: center; gap: 8px;">
                         <span style="font-size: 20px;">🏦</span>
                         <h3 style="color:#fff; margin:0; font-size:15px; font-weight: 800;">Eminevim Finansmanı</h3>
                     </div>
-                    <button onclick="editEminevimSettings()" style="background:transparent; border:1px solid #555; color:#aaa; border-radius:6px; padding:6px 12px; font-size:11px; font-weight: bold; cursor: pointer;">⚙️ Ayarlar</button>
+                    <button onclick="editEminevimSettings()"
+                        style="background:transparent; border:1px solid #555; color:#aaa; border-radius:6px; padding:6px 12px; font-size:11px; font-weight: bold; cursor: pointer;">⚙️
+                        Ayarlar</button>
                 </div>
-                
+
                 <div style="display:flex; justify-content:space-between; margin-bottom:8px;">
-                    <span style="color:#888; font-size:11px; font-weight: bold;">Araç Değeri: <strong id="gar-price" style="color:#fff; font-size:13px;">₺0</strong></span>
-                    <span style="color:#888; font-size:11px; font-weight: bold;">Biriken: <strong id="gar-paid" style="color:#27ae60; font-size:13px;">₺0</strong></span>
+                    <span style="color:#888; font-size:11px; font-weight: bold;">Araç Değeri: <strong id="gar-price"
+                            style="color:#fff; font-size:13px;">₺0</strong></span>
+                    <span style="color:#888; font-size:11px; font-weight: bold;">Biriken: <strong id="gar-paid"
+                            style="color:#27ae60; font-size:13px;">₺0</strong></span>
                 </div>
-                
-                <div style="width:100%; height:10px; background:#000; border-radius:5px; margin-bottom:12px; overflow:hidden; border: 1px solid #333; box-shadow: inset 0 2px 4px rgba(0,0,0,0.8);">
-                    <div id="gar-bar" style="width:0%; height:100%; background:linear-gradient(90deg, #f39c12, #f1c40f); transition: width 0.8s cubic-bezier(0.2, 0.8, 0.2, 1); box-shadow: 0 0 10px rgba(243, 156, 18, 0.5);"></div>
+
+                <div
+                    style="width:100%; height:10px; background:#000; border-radius:5px; margin-bottom:12px; overflow:hidden; border: 1px solid #333; box-shadow: inset 0 2px 4px rgba(0,0,0,0.8);">
+                    <div id="gar-bar"
+                        style="width:0%; height:100%; background:linear-gradient(90deg, #f39c12, #f1c40f); transition: width 0.8s cubic-bezier(0.2, 0.8, 0.2, 1); box-shadow: 0 0 10px rgba(243, 156, 18, 0.5);">
+                    </div>
                 </div>
-                
+
                 <div style="display:flex; justify-content:space-between; align-items: center; margin-bottom: 15px;">
                     <span id="gar-pct" style="color:#f39c12; font-size:13px; font-weight:900;">%0 Tamamlandı</span>
                     <span id="gar-rem-month" style="color:#aaa; font-size:11px;">Kalan: 0 Ay</span>
                 </div>
 
-                <button onclick="payEminevimInstallment()" style="width:100%; background:rgba(243, 156, 18, 0.1); color:#f39c12; border:1px dashed #f39c12; padding:14px; border-radius:10px; font-weight:900; font-size: 13px; cursor: pointer; transition: 0.2s;" id="gar-pay-btn">
+                <button onclick="payEminevimInstallment()"
+                    style="width:100%; background:rgba(243, 156, 18, 0.1); color:#f39c12; border:1px dashed #f39c12; padding:14px; border-radius:10px; font-weight:900; font-size: 13px; cursor: pointer; transition: 0.2s;"
+                    id="gar-pay-btn">
                     + AYLIK TAKSİTİ ÖDE (<span id="gar-month-amount">₺0</span>)
                 </button>
             </div>
 
             <!-- 🔎 SAHİBİNDEN AKILLI ARAMA BUTONU -->
             <div style="margin-bottom: 35px;">
-                <button onclick="openSahibinden()" style="width: 100%; background: #ffe800; color: #333; border: none; padding: 16px; border-radius: 12px; font-weight: 900; font-size: 14px; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 10px; box-shadow: 0 8px 20px rgba(255, 232, 0, 0.15); transition: transform 0.2s;">
+                <button onclick="openSahibinden()"
+                    style="width: 100%; background: #ffe800; color: #333; border: none; padding: 16px; border-radius: 12px; font-weight: 900; font-size: 14px; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 10px; box-shadow: 0 8px 20px rgba(255, 232, 0, 0.15); transition: transform 0.2s;">
                     <span style="font-size: 18px;">🔎</span> PİYASAYI YOKLA (SAHİBİNDEN)
                 </button>
             </div>
             <div style="margin-bottom: 35px;">
-                <button onclick="openOlympusRacer()" style="width: 100%; background: linear-gradient(90deg, #ff4a00, #e62e00); color: #fff; border: none; padding: 16px; border-radius: 12px; font-weight: 900; font-size: 15px; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 10px; box-shadow: 0 8px 25px rgba(255, 74, 0, 0.4); transition: transform 0.2s;">
+                <button onclick="openOlympusRacer()"
+                    style="width: 100%; background: linear-gradient(90deg, #ff4a00, #e62e00); color: #fff; border: none; padding: 16px; border-radius: 12px; font-weight: 900; font-size: 15px; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 10px; box-shadow: 0 8px 25px rgba(255, 74, 0, 0.4); transition: transform 0.2s;">
                     <span style="font-size: 20px;">🏁</span> OLYMPUS HIGHWAY - SÜRÜŞE BAŞLA
                 </button>
             </div>
 
             <!-- ⚙️ GERÇEK TEKNİK VERİLER -->
-            <h3 style="color: #fff; font-size: 14px; margin-bottom: 15px; text-transform: uppercase; letter-spacing: 1px;">Teknik Şartname</h3>
+            <h3
+                style="color: #fff; font-size: 14px; margin-bottom: 15px; text-transform: uppercase; letter-spacing: 1px;">
+                Teknik Şartname</h3>
             <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px; margin-bottom: 35px;">
-                <div style="background: linear-gradient(145deg, #181818, #0f0f0f); border: 1px solid #2a2a2a; padding: 15px; border-radius: 12px; display: flex; align-items: center; gap: 12px;">
+                <div
+                    style="background: linear-gradient(145deg, #181818, #0f0f0f); border: 1px solid #2a2a2a; padding: 15px; border-radius: 12px; display: flex; align-items: center; gap: 12px;">
                     <span style="font-size: 24px; filter: drop-shadow(0 2px 4px rgba(0,0,0,0.5));">🐎</span>
                     <div>
-                        <span style="color:#888; font-size:9px; font-weight:bold; letter-spacing:1px; display:block;">GÜÇ</span>
+                        <span
+                            style="color:#888; font-size:9px; font-weight:bold; letter-spacing:1px; display:block;">GÜÇ</span>
                         <strong id="gar-spec-hp" style="color:#fff; font-size:14px;">140 HP</strong>
                     </div>
                 </div>
-                <div style="background: linear-gradient(145deg, #181818, #0f0f0f); border: 1px solid #2a2a2a; padding: 15px; border-radius: 12px; display: flex; align-items: center; gap: 12px;">
+                <div
+                    style="background: linear-gradient(145deg, #181818, #0f0f0f); border: 1px solid #2a2a2a; padding: 15px; border-radius: 12px; display: flex; align-items: center; gap: 12px;">
                     <span style="font-size: 24px; filter: drop-shadow(0 2px 4px rgba(0,0,0,0.5));">⚙️</span>
                     <div>
-                        <span style="color:#888; font-size:9px; font-weight:bold; letter-spacing:1px; display:block;">TORK</span>
+                        <span
+                            style="color:#888; font-size:9px; font-weight:bold; letter-spacing:1px; display:block;">TORK</span>
                         <strong id="gar-spec-tork" style="color:#fff; font-size:14px;">240 Nm</strong>
                     </div>
                 </div>
-                <div style="background: linear-gradient(145deg, #181818, #0f0f0f); border: 1px solid #2a2a2a; padding: 15px; border-radius: 12px; display: flex; align-items: center; gap: 12px;">
+                <div
+                    style="background: linear-gradient(145deg, #181818, #0f0f0f); border: 1px solid #2a2a2a; padding: 15px; border-radius: 12px; display: flex; align-items: center; gap: 12px;">
                     <span style="font-size: 24px; filter: drop-shadow(0 2px 4px rgba(0,0,0,0.5));">🕹️</span>
                     <div>
-                        <span style="color:#888; font-size:9px; font-weight:bold; letter-spacing:1px; display:block;">ŞANZIMAN</span>
+                        <span
+                            style="color:#888; font-size:9px; font-weight:bold; letter-spacing:1px; display:block;">ŞANZIMAN</span>
                         <strong id="gar-spec-gear" style="color:#fff; font-size:14px;">7 İleri EDC</strong>
                     </div>
                 </div>
-                <div style="background: linear-gradient(145deg, #181818, #0f0f0f); border: 1px solid #2a2a2a; padding: 15px; border-radius: 12px; display: flex; align-items: center; gap: 12px;">
+                <div
+                    style="background: linear-gradient(145deg, #181818, #0f0f0f); border: 1px solid #2a2a2a; padding: 15px; border-radius: 12px; display: flex; align-items: center; gap: 12px;">
                     <span style="font-size: 24px; filter: drop-shadow(0 2px 4px rgba(0,0,0,0.5));">⏱️</span>
                     <div>
-                        <span style="color:#888; font-size:9px; font-weight:bold; letter-spacing:1px; display:block;">0-100 KM/S</span>
+                        <span
+                            style="color:#888; font-size:9px; font-weight:bold; letter-spacing:1px; display:block;">0-100
+                            KM/S</span>
                         <strong id="gar-spec-0100" style="color:#fff; font-size:14px;">9.7 Saniye</strong>
                     </div>
                 </div>
-                <div style="background: linear-gradient(145deg, #181818, #0f0f0f); border: 1px solid #2a2a2a; padding: 15px; border-radius: 12px; display: flex; align-items: center; gap: 12px; grid-column: span 2;">
+                <div
+                    style="background: linear-gradient(145deg, #181818, #0f0f0f); border: 1px solid #2a2a2a; padding: 15px; border-radius: 12px; display: flex; align-items: center; gap: 12px; grid-column: span 2;">
                     <span style="font-size: 24px; filter: drop-shadow(0 2px 4px rgba(0,0,0,0.5));">⛽</span>
                     <div>
-                        <span style="color:#888; font-size:9px; font-weight:bold; letter-spacing:1px; display:block;">ORT. TÜKETİM (FABRİKA)</span>
+                        <span
+                            style="color:#888; font-size:9px; font-weight:bold; letter-spacing:1px; display:block;">ORT.
+                            TÜKETİM (FABRİKA)</span>
                         <strong id="gar-spec-fuel" style="color:#fff; font-size:14px;">5.4 Litre / 100 km</strong>
                     </div>
                 </div>
             </div>
 
             <!-- FOTOĞRAF GALERİSİ -->
-            <div style="display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 15px; border-bottom: 1px solid #333; padding-bottom: 5px;">
-                <h3 style="color: #fff; font-size: 14px; margin: 0; text-transform: uppercase; letter-spacing: 1px;">İlham Galerisi</h3>
+            <div
+                style="display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 15px; border-bottom: 1px solid #333; padding-bottom: 5px;">
+                <h3 style="color: #fff; font-size: 14px; margin: 0; text-transform: uppercase; letter-spacing: 1px;">
+                    İlham Galerisi</h3>
                 <span style="color: #888; font-size: 10px;">Kaydır ➔</span>
             </div>
-            
-            <div style="display: flex; gap: 15px; overflow-x: auto; padding-bottom: 15px; scroll-snap-type: x mandatory; scrollbar-width: none;">
-                <img id="gar-img-1" src="" style="width: 250px; height: 160px; object-fit: cover; border-radius: 12px; scroll-snap-align: start; flex-shrink: 0; border: 1px solid #333; box-shadow: 0 5px 15px rgba(0,0,0,0.5);">
-                <img id="gar-img-2" src="" style="width: 250px; height: 160px; object-fit: cover; border-radius: 12px; scroll-snap-align: start; flex-shrink: 0; border: 1px solid #333; box-shadow: 0 5px 15px rgba(0,0,0,0.5);">
-                <img id="gar-img-3" src="" style="width: 250px; height: 160px; object-fit: cover; border-radius: 12px; scroll-snap-align: start; flex-shrink: 0; border: 1px solid #333; box-shadow: 0 5px 15px rgba(0,0,0,0.5);">
-                <img id="gar-img-4" src="" style="width: 250px; height: 160px; object-fit: cover; border-radius: 12px; scroll-snap-align: start; flex-shrink: 0; border: 1px solid #333; box-shadow: 0 5px 15px rgba(0,0,0,0.5);">
+
+            <div
+                style="display: flex; gap: 15px; overflow-x: auto; padding-bottom: 15px; scroll-snap-type: x mandatory; scrollbar-width: none;">
+                <img id="gar-img-1" src=""
+                    style="width: 250px; height: 160px; object-fit: cover; border-radius: 12px; scroll-snap-align: start; flex-shrink: 0; border: 1px solid #333; box-shadow: 0 5px 15px rgba(0,0,0,0.5);">
+                <img id="gar-img-2" src=""
+                    style="width: 250px; height: 160px; object-fit: cover; border-radius: 12px; scroll-snap-align: start; flex-shrink: 0; border: 1px solid #333; box-shadow: 0 5px 15px rgba(0,0,0,0.5);">
+                <img id="gar-img-3" src=""
+                    style="width: 250px; height: 160px; object-fit: cover; border-radius: 12px; scroll-snap-align: start; flex-shrink: 0; border: 1px solid #333; box-shadow: 0 5px 15px rgba(0,0,0,0.5);">
+                <img id="gar-img-4" src=""
+                    style="width: 250px; height: 160px; object-fit: cover; border-radius: 12px; scroll-snap-align: start; flex-shrink: 0; border: 1px solid #333; box-shadow: 0 5px 15px rgba(0,0,0,0.5);">
             </div>
         </div>
 
         <!-- ⚙️ EMİNEVİM FİNANSMAN AYARLARI MODALI -->
         <div id="eminevim-settings-modal" class="modal" style="z-index: 10050;">
-            <div class="modal-content" style="max-width: 400px; background: #0a0a0a; border: 1px solid #f39c12; padding: 25px; box-shadow: 0 10px 40px rgba(243, 156, 18, 0.2);">
-                <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #333; padding-bottom: 15px; margin-bottom: 20px;">
-                    <h3 id="emi-modal-title" style="color: #f39c12; margin: 0; font-size: 16px; text-transform: uppercase; letter-spacing: 1px;">🏦 Finansman Planı</h3>
-                    <button onclick="document.getElementById('eminevim-settings-modal').style.display='none'" style="background: transparent; border: none; color: #ff4444; font-size: 20px; font-weight: bold; cursor: pointer;">✕</button>
+            <div class="modal-content"
+                style="max-width: 400px; background: #0a0a0a; border: 1px solid #f39c12; padding: 25px; box-shadow: 0 10px 40px rgba(243, 156, 18, 0.2);">
+                <div
+                    style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #333; padding-bottom: 15px; margin-bottom: 20px;">
+                    <h3 id="emi-modal-title"
+                        style="color: #f39c12; margin: 0; font-size: 16px; text-transform: uppercase; letter-spacing: 1px;">
+                        🏦 Finansman Planı</h3>
+                    <button onclick="document.getElementById('eminevim-settings-modal').style.display='none'"
+                        style="background: transparent; border: none; color: #ff4444; font-size: 20px; font-weight: bold; cursor: pointer;">✕</button>
                 </div>
-                
+
                 <div class="input-group" style="margin-bottom: 15px;">
                     <label style="color:#aaa; font-size:12px; font-weight: bold;">Aracın Güncel Fiyatı (₺)</label>
-                    <input type="number" id="emi-price" style="width:100%; padding:12px; background:#000; color:#fff; border:1px solid #333; border-radius:8px; outline:none; font-size: 14px;">
+                    <input type="number" id="emi-price"
+                        style="width:100%; padding:12px; background:#000; color:#fff; border:1px solid #333; border-radius:8px; outline:none; font-size: 14px;">
                 </div>
 
                 <div class="input-group" style="margin-bottom: 15px;">
                     <label style="color:#aaa; font-size:12px; font-weight: bold;">Yatırılan Peşinat (₺)</label>
-                    <input type="number" id="emi-downpayment" style="width:100%; padding:12px; background:#000; color:#fff; border:1px solid #333; border-radius:8px; outline:none; font-size: 14px;">
+                    <input type="number" id="emi-downpayment"
+                        style="width:100%; padding:12px; background:#000; color:#fff; border:1px solid #333; border-radius:8px; outline:none; font-size: 14px;">
                 </div>
 
                 <div class="input-group" style="margin-bottom: 15px;">
                     <label style="color:#aaa; font-size:12px; font-weight: bold;">Ödenen Taksit Toplamı (₺)</label>
-                    <input type="number" id="emi-paid-installments" style="width:100%; padding:12px; background:#000; color:#fff; border:1px solid #333; border-radius:8px; outline:none; font-size: 14px;">
+                    <input type="number" id="emi-paid-installments"
+                        style="width:100%; padding:12px; background:#000; color:#fff; border:1px solid #333; border-radius:8px; outline:none; font-size: 14px;">
                 </div>
 
                 <div class="input-group" style="margin-bottom: 25px;">
                     <label style="color:#aaa; font-size:12px; font-weight: bold;">Aylık Taksit Tutarı (₺)</label>
-                    <input type="number" id="emi-monthly" style="width:100%; padding:12px; background:#000; color:#fff; border:1px solid #333; border-radius:8px; outline:none; font-size: 14px; color: #f39c12;">
+                    <input type="number" id="emi-monthly"
+                        style="width:100%; padding:12px; background:#000; color:#fff; border:1px solid #333; border-radius:8px; outline:none; font-size: 14px; color: #f39c12;">
                 </div>
 
-                <button onclick="saveEminevimSettings()" class="save-btn" style="width: 100%; background: linear-gradient(135deg, #f39c12, #d35400); color: #fff; font-weight: 900; margin: 0; border: none; padding: 15px; border-radius: 10px; font-size: 15px; cursor: pointer; box-shadow: 0 5px 15px rgba(243, 156, 18, 0.4);">SİSTEME KAYDET</button>
+                <button onclick="saveEminevimSettings()" class="save-btn"
+                    style="width: 100%; background: linear-gradient(135deg, #f39c12, #d35400); color: #fff; font-weight: 900; margin: 0; border: none; padding: 15px; border-radius: 10px; font-size: 15px; cursor: pointer; box-shadow: 0 5px 15px rgba(243, 156, 18, 0.4);">SİSTEME
+                    KAYDET</button>
             </div>
         </div>
     </div>
     <!-- ==========================================
          🏎️ OLYMPUS HIGHWAY (3D TRAFFIC RACER - YATAY & 4 ŞERİT)
          ========================================== -->
-    <div id="racer-screen" class="hidden" style="position: fixed; top: 0; left: 0; width: 100vw; height: 100dvh; background: #050505; z-index: 100500; display: none; flex-direction: column; overflow: hidden; font-family: 'Montserrat', sans-serif;">
-        
+    <div id="racer-screen" class="hidden"
+        style="position: fixed; top: 0; left: 0; width: 100vw; height: 100dvh; background: #050505; z-index: 100500; display: none; flex-direction: column; overflow: hidden; font-family: 'Montserrat', sans-serif;">
+
         <!-- 1. AÇILIŞ SİNEMATİĞİ (SPLASH) -->
-        <div id="racer-splash" style="position: absolute; width: 100%; height: 100%; background: #000; z-index: 50; display: flex; flex-direction: column; justify-content: center; align-items: center; transition: opacity 0.5s ease;">
-            <h1 style="color: #ff4a00; font-weight: 900; font-size: 32px; font-style: italic; letter-spacing: 2px; text-shadow: 0 0 20px #ff4a00;">OLYMPUS</h1>
+        <div id="racer-splash"
+            style="position: absolute; width: 100%; height: 100%; background: #000; z-index: 50; display: flex; flex-direction: column; justify-content: center; align-items: center; transition: opacity 0.5s ease;">
+            <h1
+                style="color: #ff4a00; font-weight: 900; font-size: 32px; font-style: italic; letter-spacing: 2px; text-shadow: 0 0 20px #ff4a00;">
+                OLYMPUS</h1>
             <h2 style="color: #fff; font-weight: 900; font-size: 40px; letter-spacing: 5px;">HIGHWAY</h2>
-            <div style="width: 60px; height: 4px; background: #ff4a00; margin-top: 20px; box-shadow: 0 0 10px #ff4a00;"></div>
-            <p id="racer-loading-text" style="color: #888; font-size: 12px; margin-top: 30px; letter-spacing: 2px; animation: pulse 1s infinite;">YATAY MOD BAŞLATILIYOR...</p>
+            <div style="width: 60px; height: 4px; background: #ff4a00; margin-top: 20px; box-shadow: 0 0 10px #ff4a00;">
+            </div>
+            <p id="racer-loading-text"
+                style="color: #888; font-size: 12px; margin-top: 30px; letter-spacing: 2px; animation: pulse 1s infinite;">
+                YATAY MOD BAŞLATILIYOR...</p>
         </div>
 
         <!-- 2. ARAÇ SEÇİM EKRANI -->
-        <div id="racer-select-screen" style="position: absolute; width: 100%; height: 100%; background: linear-gradient(180deg, #111, #000); z-index: 40; display: none; flex-direction: column; padding: 20px;">
+        <div id="racer-select-screen"
+            style="position: absolute; width: 100%; height: 100%; background: linear-gradient(180deg, #111, #000); z-index: 40; display: none; flex-direction: column; padding: 20px;">
             <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
                 <h3 style="color: #fff; margin: 0; font-size: 20px;">GARAJDAN ARAÇ SEÇ</h3>
-                <button onclick="quitRacerGame()" style="background: rgba(255,68,68,0.2); border: 1px solid #ff4444; color: #ff4444; padding: 8px 16px; border-radius: 6px; font-weight: bold; cursor: pointer;">Garaja Dön</button>
+                <button onclick="quitRacerGame()"
+                    style="background: rgba(255,68,68,0.2); border: 1px solid #ff4444; color: #ff4444; padding: 8px 16px; border-radius: 6px; font-weight: bold; cursor: pointer;">Garaja
+                    Dön</button>
             </div>
-            
+
             <div style="flex: 1; display: flex; justify-content: center; align-items: center; gap: 30px;">
                 <!-- Megane Seçeneği -->
-                <div onclick="startRacerEngine('megane')" style="background: rgba(243, 156, 18, 0.1); border: 2px solid #f39c12; border-radius: 16px; padding: 30px; text-align: center; cursor: pointer; transition: transform 0.2s; width: 250px;">
+                <div onclick="startRacerEngine('megane')"
+                    style="background: rgba(243, 156, 18, 0.1); border: 2px solid #f39c12; border-radius: 16px; padding: 30px; text-align: center; cursor: pointer; transition: transform 0.2s; width: 250px;">
                     <h2 style="color: #f39c12; margin: 0 0 5px 0;">Megane 4</h2>
                     <p style="color: #aaa; font-size: 12px; margin: 0;">1.3 TCe Icon</p>
                     <div style="font-size: 50px; margin-top: 15px; filter: drop-shadow(0 0 10px #f39c12);">🚗</div>
                 </div>
 
                 <!-- BMW Seçeneği -->
-                <div onclick="startRacerEngine('bmw')" style="background: rgba(0, 210, 255, 0.1); border: 2px solid #00d2ff; border-radius: 16px; padding: 30px; text-align: center; cursor: pointer; transition: transform 0.2s; width: 250px;">
+                <div onclick="startRacerEngine('bmw')"
+                    style="background: rgba(0, 210, 255, 0.1); border: 2px solid #00d2ff; border-radius: 16px; padding: 30px; text-align: center; cursor: pointer; transition: transform 0.2s; width: 250px;">
                     <h2 style="color: #00d2ff; margin: 0 0 5px 0;">BMW G20</h2>
                     <p style="color: #aaa; font-size: 12px; margin: 0;">320i M Sport</p>
                     <div style="font-size: 50px; margin-top: 15px; filter: drop-shadow(0 0 10px #00d2ff);">🏎️</div>
@@ -4309,87 +4388,565 @@
 
         <!-- 3. OYUN EKRANI (CANVAS & HUD) -->
         <div id="racer-game-screen" style="position: absolute; width: 100%; height: 100%; z-index: 30; display: none;">
-            
+
             <div id="racer-3d-container" style="position: absolute; top: 0; left: 0; width: 100%; height: 100%;"></div>
-            
+
             <!-- HUD (Göstergeler) -->
             <div style="position: absolute; top: 20px; left: 30px; display: flex; flex-direction: column;">
-                <span style="color: #ff4a00; font-size: 14px; font-weight: 900; letter-spacing: 1px; text-shadow: 1px 1px 2px #000;">SKOR</span>
-                <span id="racer-score" style="color: #fff; font-size: 32px; font-weight: 900; text-shadow: 2px 2px 4px #000;">0</span>
+                <span
+                    style="color: #ff4a00; font-size: 14px; font-weight: 900; letter-spacing: 1px; text-shadow: 1px 1px 2px #000;">SKOR</span>
+                <span id="racer-score"
+                    style="color: #fff; font-size: 32px; font-weight: 900; text-shadow: 2px 2px 4px #000;">0</span>
             </div>
 
-            <div style="position: absolute; top: 20px; right: 90px; display: flex; flex-direction: column; align-items: flex-end;">
-                <span style="color: #fff; font-size: 14px; font-weight: 900; letter-spacing: 1px; text-shadow: 1px 1px 2px #000;">HIZ (KM/H)</span>
-                <span id="racer-speed" style="color: #f39c12; font-size: 36px; font-weight: 900; text-shadow: 2px 2px 4px #000;">120</span>
+            <div
+                style="position: absolute; top: 20px; right: 90px; display: flex; flex-direction: column; align-items: flex-end;">
+                <span
+                    style="color: #fff; font-size: 14px; font-weight: 900; letter-spacing: 1px; text-shadow: 1px 1px 2px #000;">HIZ
+                    (KM/H)</span>
+                <span id="racer-speed"
+                    style="color: #f39c12; font-size: 36px; font-weight: 900; text-shadow: 2px 2px 4px #000;">120</span>
             </div>
 
-            <button onclick="pauseRacerGame()" style="position: absolute; top: 20px; right: 20px; background: rgba(0,0,0,0.6); border: 1px solid #fff; color: #fff; width: 45px; height: 45px; border-radius: 12px; font-size: 24px; display: flex; justify-content: center; align-items: center; cursor: pointer; z-index: 100; backdrop-filter: blur(5px);">⚙️</button>
+            <button onclick="pauseRacerGame()"
+                style="position: absolute; top: 20px; right: 20px; background: rgba(0,0,0,0.6); border: 1px solid #fff; color: #fff; width: 45px; height: 45px; border-radius: 12px; font-size: 24px; display: flex; justify-content: center; align-items: center; cursor: pointer; z-index: 100; backdrop-filter: blur(5px);">⚙️</button>
 
             <!-- AKILLI KONTROLLER (DİNAMİK YERLEŞİM) -->
-            <div id="racer-controls-container" style="position: absolute; bottom: calc(env(safe-area-inset-bottom, 0px) + 20px); left: 0; width: 100%; height: 90px; pointer-events: none; z-index: 100;">
-                
+            <div id="racer-controls-container"
+                style="position: absolute; bottom: calc(env(safe-area-inset-bottom, 0px) + 20px); left: 0; width: 100%; height: 90px; pointer-events: none; z-index: 100;">
+
                 <!-- YÖN TUŞLARI -->
-                <div id="racer-steer-controls" style="position: absolute; left: 30px; bottom: 0; display: flex; gap: 15px; pointer-events: auto;">
-                    <button id="racer-btn-left" style="width: 70px; height: 70px; background: rgba(0,0,0,0.4); border: 2px solid rgba(255,255,255,0.3); border-radius: 50%; color: #fff; font-size: 25px; display: flex; justify-content: center; align-items: center; backdrop-filter: blur(10px); user-select: none; -webkit-user-select: none; touch-action: none; cursor: pointer;">◀</button>
-                    <button id="racer-btn-right" style="width: 70px; height: 70px; background: rgba(0,0,0,0.4); border: 2px solid rgba(255,255,255,0.3); border-radius: 50%; color: #fff; font-size: 25px; display: flex; justify-content: center; align-items: center; backdrop-filter: blur(10px); user-select: none; -webkit-user-select: none; touch-action: none; cursor: pointer;">▶</button>
+                <div id="racer-steer-controls"
+                    style="position: absolute; left: 30px; bottom: 0; display: flex; gap: 15px; pointer-events: auto;">
+                    <button id="racer-btn-left"
+                        style="width: 70px; height: 70px; background: rgba(0,0,0,0.4); border: 2px solid rgba(255,255,255,0.3); border-radius: 50%; color: #fff; font-size: 25px; display: flex; justify-content: center; align-items: center; backdrop-filter: blur(10px); user-select: none; -webkit-user-select: none; touch-action: none; -webkit-tap-highlight-color: transparent; cursor: pointer;">◀</button>
+                    <button id="racer-btn-right"
+                        style="width: 70px; height: 70px; background: rgba(0,0,0,0.4); border: 2px solid rgba(255,255,255,0.3); border-radius: 50%; color: #fff; font-size: 25px; display: flex; justify-content: center; align-items: center; backdrop-filter: blur(10px); user-select: none; -webkit-user-select: none; touch-action: none; -webkit-tap-highlight-color: transparent; cursor: pointer;">▶</button>
                 </div>
 
-                <!-- FREN BUTONU (Dinamik Konum: Normalde sağda, Jiroskopta en solda) -->
-                <button id="racer-btn-brake" style="position: absolute; right: 130px; bottom: 0; width: 80px; height: 70px; background: rgba(231, 76, 60, 0.4); border: 2px solid rgba(231, 76, 60, 0.8); border-radius: 12px; color: #fff; font-size: 16px; font-weight: bold; backdrop-filter: blur(10px); user-select: none; -webkit-user-select: none; touch-action: none; box-shadow: 0 5px 0 #c0392b; pointer-events: auto; transition: right 0.3s ease, left 0.3s ease; cursor: pointer;">🛑 FREN</button>
+                <!-- FREN BUTONU -->
+                <button id="racer-btn-brake"
+                    style="position: absolute; right: 130px; bottom: 0; width: 80px; height: 70px; background: rgba(231, 76, 60, 0.4); border: 2px solid rgba(231, 76, 60, 0.8); border-radius: 12px; color: #fff; font-size: 16px; font-weight: bold; backdrop-filter: blur(10px); user-select: none; -webkit-user-select: none; touch-action: none; -webkit-tap-highlight-color: transparent; box-shadow: 0 5px 0 #c0392b; pointer-events: auto; transition: right 0.3s ease, left 0.3s ease; cursor: pointer;">🛑
+                    FREN</button>
 
-                <!-- GAZ BUTONU (Her zaman en sağda) -->
-                <button id="racer-btn-gas" style="position: absolute; right: 30px; bottom: 0; width: 80px; height: 90px; background: rgba(39, 174, 96, 0.4); border: 2px solid rgba(39, 174, 96, 0.8); border-radius: 12px; color: #fff; font-size: 16px; font-weight: bold; transform: translateY(-10px); backdrop-filter: blur(10px); user-select: none; -webkit-user-select: none; touch-action: none; box-shadow: 0 5px 0 #1e8449; pointer-events: auto; cursor: pointer;">🔥 GAZ</button>
+                <!-- GAZ BUTONU -->
+                <button id="racer-btn-gas"
+                    style="position: absolute; right: 30px; bottom: 0; width: 80px; height: 90px; background: rgba(39, 174, 96, 0.4); border: 2px solid rgba(39, 174, 96, 0.8); border-radius: 12px; color: #fff; font-size: 16px; font-weight: bold; transform: translateY(-10px); backdrop-filter: blur(10px); user-select: none; -webkit-user-select: none; touch-action: none; -webkit-tap-highlight-color: transparent; box-shadow: 0 5px 0 #1e8449; pointer-events: auto; cursor: pointer;">🔥
+                    GAZ</button>
             </div>
-            
+
             <!-- AYARLAR MENÜSÜ MODALI (SAĞ YAN PANEL) -->
-            <div id="racer-settings-modal" style="display: none; position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.1); z-index: 200;">
-                
+            <div id="racer-settings-modal"
+                style="display: none; position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.1); z-index: 200;">
+
                 <!-- Sadece Sağ Tarafı Kaplayan Ayar Paneli -->
-                <div style="position: absolute; right: 0; top: 0; width: 350px; height: 100%; background: rgba(5,5,5,0.9); border-left: 2px solid #f39c12; padding: 20px; display: flex; flex-direction: column; gap: 15px; backdrop-filter: blur(15px); overflow-y: auto;">
-                    <h2 style="color: #f39c12; margin-bottom: 0; font-size: 24px; letter-spacing: 1px; text-shadow: 0 0 10px #f39c12;">AYARLAR</h2>
-                    
+                <div
+                    style="position: absolute; right: 0; top: 0; width: 350px; height: 100%; background: rgba(5,5,5,0.9); border-left: 2px solid #f39c12; padding: 20px; display: flex; flex-direction: column; gap: 15px; backdrop-filter: blur(15px); overflow-y: auto;">
+                    <h2
+                        style="color: #f39c12; margin-bottom: 0; font-size: 24px; letter-spacing: 1px; text-shadow: 0 0 10px #f39c12;">
+                        AYARLAR</h2>
+
                     <!-- CANLI ARAÇ KALİBRASYONU -->
-                    <div style="background: rgba(255,255,255,0.05); padding: 15px; border-radius: 12px; display: flex; flex-direction: column; gap: 8px; border: 1px solid rgba(255,255,255,0.1);">
-                        <h4 style="color: #00d2ff; margin: 0 0 5px 0; text-align: center; font-size: 13px;">🛠️ Canlı Kalibrasyon</h4>
-                        
-                        <label style="color: #aaa; font-size: 11px; display: flex; justify-content: space-between;"><span>Yön (Rotasyon):</span> <span id="val-rot" style="color:#fff; font-weight:bold;">0°</span></label>
-                        <input type="range" id="slider-rot" min="-180" max="180" value="0" oninput="updateCarCalibration()" style="accent-color: #f39c12;">
+                    <div
+                        style="background: rgba(255,255,255,0.05); padding: 15px; border-radius: 12px; display: flex; flex-direction: column; gap: 8px; border: 1px solid rgba(255,255,255,0.1);">
+                        <h4 style="color: #00d2ff; margin: 0 0 5px 0; text-align: center; font-size: 13px;">🛠️ Canlı
+                            Kalibrasyon</h4>
 
-                        <label style="color: #aaa; font-size: 11px; display: flex; justify-content: space-between;"><span>Büyüklük (Ölçek):</span> <span id="val-scale" style="color:#fff; font-weight:bold;">0.6</span></label>
-                        <input type="range" id="slider-scale" min="0.1" max="5.0" step="0.1" value="0.6" oninput="updateCarCalibration()" style="accent-color: #00d2ff;">
+                        <label
+                            style="color: #aaa; font-size: 11px; display: flex; justify-content: space-between;"><span>Yön
+                                (Rotasyon):</span> <span id="val-rot"
+                                style="color:#fff; font-weight:bold;">0°</span></label>
+                        <input type="range" id="slider-rot" min="-180" max="180" value="0"
+                            oninput="updateCarCalibration()" style="accent-color: #f39c12;">
 
-                        <label style="color: #aaa; font-size: 11px; display: flex; justify-content: space-between;"><span>Yükseklik (Y-Ekseni):</span> <span id="val-posy" style="color:#fff; font-weight:bold;">0.1</span></label>
-                        <input type="range" id="slider-posy" min="-2.0" max="5.0" step="0.1" value="0.1" oninput="updateCarCalibration()" style="accent-color: #27ae60;">
+                        <label
+                            style="color: #aaa; font-size: 11px; display: flex; justify-content: space-between;"><span>Büyüklük
+                                (Ölçek):</span> <span id="val-scale"
+                                style="color:#fff; font-weight:bold;">0.6</span></label>
+                        <input type="range" id="slider-scale" min="0.1" max="5.0" step="0.1" value="0.6"
+                            oninput="updateCarCalibration()" style="accent-color: #00d2ff;">
+
+                        <label
+                            style="color: #aaa; font-size: 11px; display: flex; justify-content: space-between;"><span>Yükseklik
+                                (Y-Ekseni):</span> <span id="val-posy"
+                                style="color:#fff; font-weight:bold;">0.1</span></label>
+                        <input type="range" id="slider-posy" min="-2.0" max="5.0" step="0.1" value="0.1"
+                            oninput="updateCarCalibration()" style="accent-color: #27ae60;">
                     </div>
                     <!-- YENİ: SES AYARLARI -->
-                    <div style="background: rgba(255,255,255,0.05); padding: 15px; border-radius: 12px; display: flex; flex-direction: column; gap: 10px; border: 1px solid rgba(255,255,255,0.1); margin-bottom: 10px;">
-                        <h4 style="color: #e74c3c; margin: 0 0 5px 0; text-align: center; font-size: 13px;">🎵 Ses & Müzik</h4>
+                    <div
+                        style="background: rgba(255,255,255,0.05); padding: 15px; border-radius: 12px; display: flex; flex-direction: column; gap: 10px; border: 1px solid rgba(255,255,255,0.1); margin-bottom: 10px;">
+                        <h4 style="color: #e74c3c; margin: 0 0 5px 0; text-align: center; font-size: 13px;">🎵 Ses &
+                            Müzik</h4>
                         <div style="display: flex; gap: 10px;">
-                            <button id="btn-toggle-music" onclick="toggleRacerMusic()" style="flex: 1; padding: 10px; background: rgba(0,0,0,0.5); color: #fff; border: 1px solid #e74c3c; border-radius: 8px; font-weight: bold; font-size: 11px; cursor: pointer; transition: 0.2s;">Müzik: AÇIK</button>
-                            <button id="btn-toggle-engine" onclick="toggleRacerEngineSound()" style="flex: 1; padding: 10px; background: rgba(0,0,0,0.5); color: #fff; border: 1px solid #e74c3c; border-radius: 8px; font-weight: bold; font-size: 11px; cursor: pointer; transition: 0.2s;">Motor: AÇIK</button>
+                            <button id="btn-toggle-music" onclick="toggleRacerMusic()"
+                                style="flex: 1; padding: 10px; background: rgba(0,0,0,0.5); color: #fff; border: 1px solid #e74c3c; border-radius: 8px; font-weight: bold; font-size: 11px; cursor: pointer; transition: 0.2s;">Müzik:
+                                AÇIK</button>
+                            <button id="btn-toggle-engine" onclick="toggleRacerEngineSound()"
+                                style="flex: 1; padding: 10px; background: rgba(0,0,0,0.5); color: #fff; border: 1px solid #e74c3c; border-radius: 8px; font-weight: bold; font-size: 11px; cursor: pointer; transition: 0.2s;">Motor:
+                                AÇIK</button>
                         </div>
                     </div>
 
-                    <button onclick="resumeRacerGame()" style="padding: 12px; background: #27ae60; color: #fff; border-radius: 12px; font-weight: bold; font-size: 13px; border: none; cursor: pointer; box-shadow: 0 4px 10px rgba(39, 174, 96, 0.4);">▶ Oyuna Devam Et</button>
-                    <button id="btn-control-toggle" onclick="toggleRacerControls()" style="padding: 12px; background: #9b59b6; color: #fff; border-radius: 12px; font-weight: bold; font-size: 13px; border: none; cursor: pointer; box-shadow: 0 4px 10px rgba(155, 89, 182, 0.4);">🎮 Kontrol: Tuşlar</button>
-                    <button onclick="backToRacerSelection()" style="padding: 12px; background: #00d2ff; color: #000; border-radius: 12px; font-weight: bold; font-size: 13px; border: none; cursor: pointer; box-shadow: 0 4px 10px rgba(0, 210, 255, 0.4);">🚗 Araç Seçimi</button>
-                    <button onclick="quitRacerGame()" style="padding: 12px; background: #ff4444; color: #fff; border-radius: 12px; font-weight: bold; font-size: 13px; border: none; cursor: pointer; box-shadow: 0 4px 10px rgba(255, 68, 68, 0.4);">🚪 Garaja Dön</button>
+                    <button onclick="resumeRacerGame()"
+                        style="padding: 12px; background: #27ae60; color: #fff; border-radius: 12px; font-weight: bold; font-size: 13px; border: none; cursor: pointer; box-shadow: 0 4px 10px rgba(39, 174, 96, 0.4);">▶
+                        Oyuna Devam Et</button>
+                    <button id="btn-control-toggle" onclick="toggleRacerControls()"
+                        style="padding: 12px; background: #9b59b6; color: #fff; border-radius: 12px; font-weight: bold; font-size: 13px; border: none; cursor: pointer; box-shadow: 0 4px 10px rgba(155, 89, 182, 0.4);">🎮
+                        Kontrol: Tuşlar</button>
+                    <button onclick="backToRacerSelection()"
+                        style="padding: 12px; background: #00d2ff; color: #000; border-radius: 12px; font-weight: bold; font-size: 13px; border: none; cursor: pointer; box-shadow: 0 4px 10px rgba(0, 210, 255, 0.4);">🚗
+                        Araç Seçimi</button>
+                    <button onclick="quitRacerGame()"
+                        style="padding: 12px; background: #ff4444; color: #fff; border-radius: 12px; font-weight: bold; font-size: 13px; border: none; cursor: pointer; box-shadow: 0 4px 10px rgba(255, 68, 68, 0.4);">🚪
+                        Garaja Dön</button>
                 </div>
             </div>
         </div>
         <!-- KAZA / GAME OVER MODALI -->
-        <div id="racer-crash-modal" style="display: none; position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: rgba(200, 0, 0, 0.4); z-index: 300; justify-content: center; align-items: center; flex-direction: column; gap: 20px; backdrop-filter: blur(8px);">
-            <div style="background: rgba(10,10,10,0.9); padding: 40px; border-radius: 20px; border: 2px solid #ff4444; text-align: center; box-shadow: 0 0 50px rgba(255, 0, 0, 0.5);">
-                <h1 style="color: #ff4444; margin: 0; font-size: 40px; font-weight: 900; letter-spacing: 2px;">KAZA YAPTIN! 💥</h1>
-                <p style="color: #aaa; font-size: 16px; margin-top: 10px;">Son Skorun: <strong id="crash-final-score" style="color: #fff; font-size: 24px;">0</strong></p>
-                    
+        <div id="racer-crash-modal"
+            style="display: none; position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: rgba(200, 0, 0, 0.4); z-index: 300; justify-content: center; align-items: center; flex-direction: column; gap: 20px; backdrop-filter: blur(8px);">
+            <div
+                style="background: rgba(10,10,10,0.9); padding: 40px; border-radius: 20px; border: 2px solid #ff4444; text-align: center; box-shadow: 0 0 50px rgba(255, 0, 0, 0.5);">
+                <h1 style="color: #ff4444; margin: 0; font-size: 40px; font-weight: 900; letter-spacing: 2px;">KAZA
+                    YAPTIN! 💥</h1>
+                <p style="color: #aaa; font-size: 16px; margin-top: 10px;">Son Skorun: <strong id="crash-final-score"
+                        style="color: #fff; font-size: 24px;">0</strong></p>
+
                 <div style="display: flex; gap: 15px; margin-top: 30px;">
-                    <button onclick="restartRacerGame()" style="padding: 15px 30px; background: #27ae60; color: #fff; border-radius: 12px; font-weight: bold; font-size: 16px; border: none; cursor: pointer; flex: 1;">🔄 Tekrar Oyna</button>
-                    <button onclick="quitRacerGame()" style="padding: 15px 30px; background: #333; color: #fff; border-radius: 12px; font-weight: bold; font-size: 16px; border: 1px solid #555; cursor: pointer; flex: 1;">🚪 Çıkış</button>
+                    <button onclick="restartRacerGame()"
+                        style="padding: 15px 30px; background: #27ae60; color: #fff; border-radius: 12px; font-weight: bold; font-size: 16px; border: none; cursor: pointer; flex: 1;">🔄
+                        Tekrar Oyna</button>
+                    <button onclick="quitRacerGame()"
+                        style="padding: 15px 30px; background: #333; color: #fff; border-radius: 12px; font-weight: bold; font-size: 16px; border: 1px solid #555; cursor: pointer; flex: 1;">🚪
+                        Çıkış</button>
                 </div>
             </div>
         </div>
 
+    </div>
+    <!-- ==========================================
+         🦁 OLYSCORE: GALATASARAY CANLI MAÇ MERKEZİ
+         ========================================== -->
+    <div id="olyscore-screen" class="full-screen-overlay hidden" style="z-index: 11000; background: linear-gradient(180deg, #1f1433 0%, #0d0c14 40%, #050505 100%); flex-direction: column; justify-content: flex-start; overflow: hidden; position: relative;">
+        
+        <div id="olyscore-splash" style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: #050505; z-index: 12000; display: flex; flex-direction: column; justify-content: center; align-items: center; transition: opacity 0.5s ease;">
+            <img src="https://assets.football-logos.cc/logos/turkey/512x512/galatasaray.beadfca5.png" style="width: 100px; height: 100px; margin-bottom: 20px; filter: drop-shadow(0 0 25px rgba(246, 192, 0, 0.4)); animation: pulse 2s infinite;">
+            <!-- Soldan Sağa Dolan Premium Yazı Efekti -->
+            <h1 class="oly-loading-text">GALATASARAY</h1>
+            <p style="color: #555; font-size: 10px; margin-top: 15px; letter-spacing: 2px; font-weight: bold;">VERİLER ÇEKİLİYOR...</p>
+        </div>
+
+        <!-- ÜST BAR -->
+        <div style="width: 100%; display: flex; justify-content: space-between; align-items: center; padding: calc(env(safe-area-inset-top) + 15px) 20px 10px 20px; flex-shrink: 0;">
+            <div style="border: 1px solid rgba(255,255,255,0.2); border-radius: 8px; padding: 4px 8px; display: flex; flex-direction: column; align-items: center; justify-content: center; background: rgba(0,0,0,0.3);">
+                <span style="font-size: 9px; color: #fff; font-weight: 900; letter-spacing: 1px;">OLY</span>
+                <span style="font-size: 9px; color: #c084fc; font-weight: 900; letter-spacing: 1px;">SCORE</span>
+            </div>
+            <h2 id="oly-header-title" style="color: #fff; font-size: 16px; margin: 0; font-weight: bold; letter-spacing: 0.5px;">Ana Sayfa</h2>
+            <button onclick="closeOlyScore()" style="background: transparent; border: none; color: #fff; font-size: 22px; cursor: pointer;">✕</button>
+        </div>
+
+        <!-- İÇERİK ALANLARI (SAYFALAR) -->
+        <div style="flex: 1; overflow-y: auto; padding: 10px 15px 100px 15px; -webkit-overflow-scrolling: touch; display: flex; flex-direction: column; width: 100%; box-sizing: border-box;">
+            
+            <!-- 1. SAYFA: ANA SAYFA (HOME) -->
+            <div id="oly-page-home" class="oly-page-content" style="display: flex; flex-direction: column; gap: 20px;">
+                <div class="oly-hero-card">
+                    <img src="https://assets.goal.com/images/v3/bltb037e2ab76b009e5/Mauro_Icardi_Galatasaray_2023-24.jpg" class="oly-hero-bg" alt="Icardi">
+                    <div class="oly-hero-content">
+                        <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 10px;">
+                            <img src="https://upload.wikimedia.org/wikipedia/tr/5/5e/Trendyol-super-lig-dikey-logo.png" style="height: 25px; object-fit: contain;">
+                            <span id="oly-hero-league" style="color: #fff; font-size: 12px; font-weight: bold;">Süper Lig</span>
+                        </div>
+                        <h1 style="color: #fff; font-size: 38px; font-weight: 900; font-style: italic; line-height: 1.1; margin: 0; text-shadow: 0 4px 10px rgba(0,0,0,0.8);">MATCH<br>DAY<br>LIVE</h1>
+                        <p style="color: #00d2ff; font-size: 10px; font-weight: 800; margin-top: 8px; letter-spacing: 1px; text-transform: uppercase;">Catch the thrill - Live on OlyScore</p>
+                        
+                        <div style="display: flex; justify-content: space-between; align-items: flex-end; margin-top: 25px;">
+                            <div style="display: flex; align-items: center; gap: 8px; background: rgba(20,20,30,0.6); border: 1px solid rgba(255,255,255,0.1); padding: 8px 12px; border-radius: 12px; backdrop-filter: blur(10px);">
+                                <img id="oly-hero-home-img" src="" style="width: 28px; height: 28px; object-fit: contain;">
+                                <span style="color: #fff; font-style: italic; font-weight: bold; font-size: 12px; opacity: 0.5;">V/S</span>
+                                <img id="oly-hero-away-img" src="" style="width: 28px; height: 28px; object-fit: contain;">
+                            </div>
+                            <div style="text-align: right;">
+                                <div id="oly-hero-date" style="color: rgba(255,255,255,0.7); font-size: 11px; font-weight: bold;">Yükleniyor...</div>
+                                <div id="oly-hero-time" style="color: #fff; font-size: 16px; font-weight: 900;">--:--</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div style="display: flex; justify-content: space-between; align-items: center; padding: 0 5px;">
+                    <span style="color: #fff; font-size: 15px; font-weight: 900;">Sonuçlar & Fikstür</span>
+                </div>
+                <div id="oly-match-list-container" class="oly-match-list"></div>
+            </div>
+
+            <!-- 2. SAYFA: GENİŞ PUAN DURUMU -->
+            <div id="oly-page-stats" class="oly-page-content hidden" style="display: none; flex-direction: column; width: 100%;">
+                <!-- Padding'i kaldırdık, tam ekran genişliğine yaydık -->
+                <div style="background:#12121a; border-radius:16px; border:1px solid rgba(255,255,255,0.05); overflow: hidden;">
+                    <div style="padding: 15px; border-bottom: 1px solid rgba(255,255,255,0.05); display: flex; align-items: center; gap: 10px;">
+                        <span style="font-size: 20px;">🏆</span>
+                        <h3 style="color: #fff; margin:0;">Süper Lig Puan Durumu</h3>
+                    </div>
+                    <!-- Tabloyu tam genişlikte sarmalayan kutu -->
+                    <div id="oly-standings-table" style="width: 100%; overflow-x: auto;"></div>
+                </div>
+            </div>
+
+            <!-- 3. SAYFA: TRANSFERMARKT HABERLER -->
+            <div id="oly-page-news" class="oly-page-content hidden" style="display: none; flex-direction: column; gap: 15px;">
+                <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 5px; padding: 0 5px;">
+                    <h3 style="color: #fff; margin:0; font-size: 16px;">📰 Transfermarkt & Haberler</h3>
+                </div>
+
+                <!-- Haber Kartı 1 -->
+                <div style="background: #111; border-radius: 12px; overflow: hidden; border: 1px solid #333; display: flex; flex-direction: column;">
+                    <img src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRgplvN4D1lWUA9HsNMcx7zUrB1m4ud8Pl57-NJNPgtL1dNhtgVU94LVAc&s=10" style="width: 100%; height: 160px; object-fit: cover; border-bottom: 2px solid var(--goldnova);">
+                    <div style="padding: 15px;">
+                        <span style="color: var(--goldnova); font-size: 10px; font-weight: bold; text-transform: uppercase; letter-spacing: 1px;">FLAŞ TRANSFER</span>
+                        <h4 style="color: #fff; margin: 5px 0; font-size: 14px;">Osimhen'den Galatasaray'a yeşil ışık! Avrupa basını çalkalanıyor.</h4>
+                        <p style="color: #888; font-size: 11px; margin: 0;">Piyasa değeri 100 Milyon Euro olan Nijeryalı yıldızın kiralık sözleşmesindeki detaylar belli oldu...</p>
+                    </div>
+                </div>
+
+                <!-- Haber Kartı 2 -->
+                <div style="background: #111; border-radius: 12px; padding: 12px; border: 1px solid #333; display: flex; gap: 15px; align-items: center;">
+                    <img src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSx7Cboo1O5NrgjsjyObM9baBe4YyMnZm5agO8IM3mwQg&s=10" style="width: 80px; height: 80px; border-radius: 8px; object-fit: cover;">
+                    <div style="flex: 1;">
+                        <span style="color: #00d2ff; font-size: 9px; font-weight: bold; text-transform: uppercase;">TEKNİK HEYET</span>
+                        <h4 style="color: #fff; margin: 4px 0; font-size: 12px;">Okan Buruk'tan derbi öncesi rotasyon sinyali!</h4>
+                        <span style="color: #555; font-size: 10px;">2 Saat Önce</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 4. SAYFA: KADRO VE DİZİLİŞ (LINEUP) -->
+            <div id="oly-page-lineup" class="oly-page-content hidden" style="display: none; flex-direction: column; align-items: center;">
+                <div style="width: 100%; display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; padding: 0 5px;">
+                    <h3 style="color: #fff; margin:0; font-size: 16px;">📋 Güncel İlk 11 & Diziliş</h3>
+                    <span style="color: var(--goldnova); font-size: 12px; font-weight: bold; background: rgba(246,192,0,0.1); padding: 4px 8px; border-radius: 6px; border: 1px solid var(--goldnova);">4-2-3-1</span>
+                </div>
+
+                <!-- Futbol Sahası UI (GERÇEK 2026 KADROSU) -->
+                <div style="width: 100%; max-width: 350px; height: 480px; background: repeating-linear-gradient(0deg, #1b4d22, #1b4d22 10%, #17421d 10%, #17421d 20%); border: 2px solid #fff; border-radius: 8px; position: relative; box-shadow: 0 10px 20px rgba(0,0,0,0.5);">
+                    
+                    <!-- Saha Çizgileri -->
+                    <div style="position: absolute; top: 50%; left: 0; width: 100%; height: 2px; background: rgba(255,255,255,0.5); transform: translateY(-50%);"></div>
+                    <div style="position: absolute; top: 50%; left: 50%; width: 70px; height: 70px; border: 2px solid rgba(255,255,255,0.5); border-radius: 50%; transform: translate(-50%, -50%);"></div>
+                    <div style="position: absolute; bottom: 0; left: 25%; width: 50%; height: 15%; border: 2px solid rgba(255,255,255,0.5); border-bottom: none;"></div>
+                    <div style="position: absolute; bottom: 0; left: 35%; width: 30%; height: 6%; border: 2px solid rgba(255,255,255,0.5); border-bottom: none;"></div>
+                    
+                    <!-- GS Oyuncuları (GERÇEK FOTOĞRAFLAR) -->
+                    <!-- Kaleci -->
+                    <div class="lineup-player" style="bottom: 4%; left: 50%;">
+                        <img src="https://img.a.transfermarkt.technology/portrait/medium/292199-1756290095.png?lm=4711" alt="Muslera">
+                        <small>1 Uğurcan Çakır</small>
+                    </div>
+                    
+                    <!-- Defans -->
+                    <div class="lineup-player" style="bottom: 22%; left: 15%;">
+                        <img src="https://img.a.transfermarkt.technology/portrait/medium/375137-1779995347.png?lm=4711" alt="Jakobs">
+                        <small>4 Jakobs</small>
+                    </div>
+                    <div class="lineup-player" style="bottom: 18%; left: 35%;">
+                        <img src="https://img.a.transfermarkt.technology/portrait/medium/199316-1781169010.jpg?lm=4711" alt="Abdülkerim">
+                        <small>42 Abdülkerim</small>
+                    </div>
+                    <div class="lineup-player" style="bottom: 18%; left: 65%;">
+                        <img src="https://img.a.transfermarkt.technology/portrait/medium/341429-1779992459.png?lm=4711" alt="Davinson">
+                        <small>6 Davinson</small>
+                    </div>
+                    <div class="lineup-player" style="bottom: 22%; left: 85%;">
+                        <img src="https://img.a.transfermarkt.technology/portrait/medium/119031-1742638125.jpeg?lm=4711" alt="Kaan">
+                        <small>23 Kaan</small>
+                    </div>
+                    
+                    <!-- Orta Saha (Ön Libero) -->
+                    <div class="lineup-player" style="bottom: 40%; left: 35%;">
+                        <img src="https://img.a.transfermarkt.technology/portrait/medium/318077-1671110829.png?lm=4711" alt="Torreira">
+                        <small>34 Torreira</small>
+                    </div>
+                    <div class="lineup-player" style="bottom: 40%; left: 65%;">
+                        <img src="https://img.a.transfermarkt.technology/portrait/medium/553469-1779994043.png?lm=4711" alt="Sara">
+                        <small>20 Sara</small>
+                    </div>
+                    
+                    <!-- Orta Saha (Hücum / Kanat) -->
+                    <div class="lineup-player" style="bottom: 60%; left: 15%;">
+                        <img src="https://img.a.transfermarkt.technology/portrait/medium/396908-1781169458.jpg?lm=4711" alt="Yunus">
+                        <small>11 Yunus</small>
+                    </div>
+                    <div class="lineup-player" style="bottom: 65%; left: 50%;">
+                        <img src="https://img.a.transfermarkt.technology/portrait/medium/720286-1721715848.png?lm=4711" alt="Batrakov">
+                        <small>83 Batrakov</small>
+                    </div>
+                    <div class="lineup-player" style="bottom: 60%; left: 85%;">
+                        <img src="https://img.a.transfermarkt.technology/portrait/medium/541537-1781169266.jpg?lm=4711" alt="Barış">
+                        <small>53 Barış A.</small>
+                    </div>
+                    
+                    <!-- Forvet -->
+                    <div class="lineup-player" style="bottom: 84%; left: 50%;">
+                        <img src="https://img.a.transfermarkt.technology/portrait/medium/401923-1779987631.png?lm=4711" alt="Osimhen">
+                        <small>45 Osimhen</small>
+                    </div>
+                </div>
+
+                <!-- 2026 GÜNCEL TÜM KADRO LİSTESİ (PREMIUM UI) -->
+                <div class="oly-squad-container">
+                    
+                    <!-- KALECİLER -->
+                    <div class="oly-squad-header">Kaleciler</div>
+                    
+                    <div class="oly-squad-item">
+                        <img src="https://img.a.transfermarkt.technology/portrait/medium/292199-1756290095.png?lm=4711" class="oly-squad-photo" alt="Uğurcan">
+                        <div class="oly-squad-info">
+                            <div class="oly-squad-name-row">
+                                <span class="oly-squad-name">Uğurcan Çakır</span>
+                                <span class="oly-squad-number">#1</span>
+                            </div>
+                            <div class="oly-squad-nation">
+                                <img src="https://flagcdn.com/w40/tr.png" class="oly-squad-flag" alt="Türkiye">
+                                <span>Türkiye</span>
+                            </div>
+                        </div>
+                        <div class="oly-squad-age">30</div>
+                    </div>
+
+                    <div class="oly-squad-item">
+                        <img src="https://tmssl.akamaized.net/images/portrait/header/144723-1725455324.jpg" class="oly-squad-photo" alt="Günay">
+                        <div class="oly-squad-info">
+                            <div class="oly-squad-name-row">
+                                <span class="oly-squad-name">Günay Güvenç</span>
+                                <span class="oly-squad-number">#19</span>
+                            </div>
+                            <div class="oly-squad-nation">
+                                <img src="https://flagcdn.com/w40/tr.png" class="oly-squad-flag" alt="Türkiye">
+                                <span>Türkiye</span>
+                            </div>
+                        </div>
+                        <div class="oly-squad-age">35</div>
+                    </div>
+                    
+                    <div class="oly-squad-item">
+                        <img src="https://tmssl.akamaized.net/images/portrait/header/883445-1694701297.jpg" class="oly-squad-photo" alt="Jankat">
+                        <div class="oly-squad-info">
+                            <div class="oly-squad-name-row">
+                                <span class="oly-squad-name">Jankat Yılmaz</span>
+                                <span class="oly-squad-number">#24</span>
+                            </div>
+                            <div class="oly-squad-nation">
+                                <img src="https://flagcdn.com/w40/tr.png" class="oly-squad-flag" alt="Türkiye">
+                                <span>Türkiye</span>
+                            </div>
+                        </div>
+                        <div class="oly-squad-age">22</div>
+                    </div>
+
+                    <!-- DEFANS -->
+                    <div class="oly-squad-header">Defans</div>
+                    
+                    <div class="oly-squad-item">
+                        <img src="https://img.a.transfermarkt.technology/portrait/medium/199316-1781169010.jpg?lm=4711" class="oly-squad-photo" alt="Abdülkerim">
+                        <div class="oly-squad-info">
+                            <div class="oly-squad-name-row">
+                                <span class="oly-squad-name">Abdülkerim Bardakcı</span>
+                                <span class="oly-squad-number">#42</span>
+                            </div>
+                            <div class="oly-squad-nation">
+                                <img src="https://flagcdn.com/w40/tr.png" class="oly-squad-flag" alt="Türkiye">
+                                <span>Türkiye</span>
+                            </div>
+                        </div>
+                        <div class="oly-squad-age">32</div>
+                    </div>
+
+                    <div class="oly-squad-item">
+                        <img src="https://img.a.transfermarkt.technology/portrait/medium/341429-1779992459.png?lm=4711" class="oly-squad-photo" alt="Sanchez">
+                        <div class="oly-squad-info">
+                            <div class="oly-squad-name-row">
+                                <span class="oly-squad-name">Davinson Sánchez</span>
+                                <span class="oly-squad-number">#6</span>
+                            </div>
+                            <div class="oly-squad-nation">
+                                <img src="https://flagcdn.com/w40/co.png" class="oly-squad-flag" alt="Kolombiya">
+                                <span>Kolombiya</span>
+                            </div>
+                        </div>
+                        <div class="oly-squad-age">30</div>
+                    </div>
+                    
+                    <div class="oly-squad-item">
+                        <img src="https://tmssl.akamaized.net/images/portrait/header/515668-1718873619.jpg" class="oly-squad-photo" alt="Nelsson">
+                        <div class="oly-squad-info">
+                            <div class="oly-squad-name-row">
+                                <span class="oly-squad-name">Victor Nelsson</span>
+                                <span class="oly-squad-number">#25</span>
+                            </div>
+                            <div class="oly-squad-nation">
+                                <img src="https://flagcdn.com/w40/dk.png" class="oly-squad-flag" alt="Danimarka">
+                                <span>Danimarka</span>
+                            </div>
+                        </div>
+                        <div class="oly-squad-age">27</div>
+                    </div>
+                    
+                    <div class="oly-squad-item">
+                        <img src="https://tmssl.akamaized.net/images/portrait/header/669227-1694701380.jpg" class="oly-squad-photo" alt="Metehan">
+                        <div class="oly-squad-info">
+                            <div class="oly-squad-name-row">
+                                <span class="oly-squad-name">Metehan Baltacı</span>
+                                <span class="oly-squad-number">#90</span>
+                            </div>
+                            <div class="oly-squad-nation">
+                                <img src="https://flagcdn.com/w40/tr.png" class="oly-squad-flag" alt="Türkiye">
+                                <span>Türkiye</span>
+                            </div>
+                        </div>
+                        <div class="oly-squad-age">23</div>
+                    </div>
+                    
+                    <div class="oly-squad-item">
+                        <img src="https://img.a.transfermarkt.technology/portrait/medium/375137-1779995347.png?lm=4711" class="oly-squad-photo" alt="Jakobs">
+                        <div class="oly-squad-info">
+                            <div class="oly-squad-name-row">
+                                <span class="oly-squad-name">Ismail Jakobs</span>
+                                <span class="oly-squad-number">#4</span>
+                            </div>
+                            <div class="oly-squad-nation">
+                                <img src="https://flagcdn.com/w40/sn.png" class="oly-squad-flag" alt="Senegal">
+                                <span>Senegal</span>
+                            </div>
+                        </div>
+                        <div class="oly-squad-age">27</div>
+                    </div>
+
+                    <!-- ORTA SAHA -->
+                    <div class="oly-squad-header">Orta Saha</div>
+
+                    <div class="oly-squad-item">
+                        <img src="https://img.a.transfermarkt.technology/portrait/medium/318077-1671110829.png?lm=4711" class="oly-squad-photo" alt="Torreira">
+                        <div class="oly-squad-info">
+                            <div class="oly-squad-name-row">
+                                <span class="oly-squad-name">Lucas Torreira</span>
+                                <span class="oly-squad-number">#34</span>
+                            </div>
+                            <div class="oly-squad-nation">
+                                <img src="https://flagcdn.com/w40/uy.png" class="oly-squad-flag" alt="Uruguay">
+                                <span>Uruguay</span>
+                            </div>
+                        </div>
+                        <div class="oly-squad-age">30</div>
+                    </div>
+
+                    <div class="oly-squad-item">
+                        <img src="https://img.a.transfermarkt.technology/portrait/medium/553469-1779994043.png?lm=4711" class="oly-squad-photo" alt="Sara">
+                        <div class="oly-squad-info">
+                            <div class="oly-squad-name-row">
+                                <span class="oly-squad-name">Gabriel Sara</span>
+                                <span class="oly-squad-number">#20</span>
+                            </div>
+                            <div class="oly-squad-nation">
+                                <img src="https://flagcdn.com/w40/br.png" class="oly-squad-flag" alt="Brezilya">
+                                <span>Brezilya</span>
+                            </div>
+                        </div>
+                        <div class="oly-squad-age">27</div>
+                    </div>
+                    
+                    <div class="oly-squad-item">
+                        <img src="https://img.a.transfermarkt.technology/portrait/medium/720286-1721715848.png?lm=4711" class="oly-squad-photo" alt="Batrakov">
+                        <div class="oly-squad-info">
+                            <div class="oly-squad-name-row">
+                                <span class="oly-squad-name">Aleksey Batrakov</span>
+                                <span class="oly-squad-number">#83</span>
+                            </div>
+                            <div class="oly-squad-nation">
+                                <img src="https://flagcdn.com/w40/ru.png" class="oly-squad-flag" alt="Rusya">
+                                <span>Rusya</span>
+                            </div>
+                        </div>
+                        <div class="oly-squad-age">21</div>
+                    </div>
+
+                    <!-- HÜCUM -->
+                    <div class="oly-squad-header">Hücum</div>
+
+                    <div class="oly-squad-item">
+                        <img src="https://img.a.transfermarkt.technology/portrait/medium/401923-1779987631.png?lm=4711" class="oly-squad-photo" alt="Osimhen">
+                        <div class="oly-squad-info">
+                            <div class="oly-squad-name-row">
+                                <span class="oly-squad-name">Victor Osimhen</span>
+                                <span class="oly-squad-number">#45</span>
+                            </div>
+                            <div class="oly-squad-nation">
+                                <img src="https://flagcdn.com/w40/ng.png" class="oly-squad-flag" alt="Nijerya">
+                                <span>Nijerya</span>
+                            </div>
+                        </div>
+                        <div class="oly-squad-age">27</div>
+                    </div>
+                    
+                    <div class="oly-squad-item">
+                        <img src="https://tmssl.akamaized.net/images/portrait/header/177456-1718873266.jpg" class="oly-squad-photo" alt="Batshuayi">
+                        <div class="oly-squad-info">
+                            <div class="oly-squad-name-row">
+                                <span class="oly-squad-name">Michy Batshuayi</span>
+                                <span class="oly-squad-number">#44</span>
+                            </div>
+                            <div class="oly-squad-nation">
+                                <img src="https://flagcdn.com/w40/be.png" class="oly-squad-flag" alt="Belçika">
+                                <span>Belçika</span>
+                            </div>
+                        </div>
+                        <div class="oly-squad-age">32</div>
+                    </div>
+                    
+                    <div class="oly-squad-item">
+                        <img src="https://img.a.transfermarkt.technology/portrait/medium/541537-1781169266.jpg?lm=4711" class="oly-squad-photo" alt="Barış">
+                        <div class="oly-squad-info">
+                            <div class="oly-squad-name-row">
+                                <span class="oly-squad-name">Barış Alper Yılmaz</span>
+                                <span class="oly-squad-number">#53</span>
+                            </div>
+                            <div class="oly-squad-nation">
+                                <img src="https://flagcdn.com/w40/tr.png" class="oly-squad-flag" alt="Türkiye">
+                                <span>Türkiye</span>
+                            </div>
+                        </div>
+                        <div class="oly-squad-age">26</div>
+                    </div>
+                    
+                    <div class="oly-squad-item">
+                        <img src="https://img.a.transfermarkt.technology/portrait/medium/396908-1781169458.jpg?lm=4711" class="oly-squad-photo" alt="Yunus">
+                        <div class="oly-squad-info">
+                            <div class="oly-squad-name-row">
+                                <span class="oly-squad-name">Yunus Akgün</span>
+                                <span class="oly-squad-number">#11</span>
+                            </div>
+                            <div class="oly-squad-nation">
+                                <img src="https://flagcdn.com/w40/tr.png" class="oly-squad-flag" alt="Türkiye">
+                                <span>Türkiye</span>
+                            </div>
+                        </div>
+                        <div class="oly-squad-age">26</div>
+                    </div>
+
+                </div>
+            </div>
+
+        <!-- ALT MENÜ -->
+        <div class="oly-bottom-nav">
+            <button class="oly-nav-item active" onclick="switchOlyNav('home', this)">⊞</button>
+            <button class="oly-nav-item" onclick="switchOlyNav('stats', this)">🏆</button>
+            <button class="oly-nav-item" onclick="switchOlyNav('news', this)">📄</button>
+            <!-- Sağdaki GS logolu profil butonu (LINEUP açar) -->
+            <button class="oly-nav-item oly-shield-btn" onclick="switchOlyNav('lineup', this)">
+                <img src="https://assets.football-logos.cc/logos/turkey/512x512/galatasaray.beadfca5.png" style="width: 22px; filter: drop-shadow(0 0 2px rgba(0,0,0,0.5));">
+            </button>
+        </div>
     </div>
 
     <script src="script.js"></script>

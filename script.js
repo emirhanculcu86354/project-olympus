@@ -11314,27 +11314,57 @@ window.openSahibindenMegane = function() {
     window.open(sahibindenUrl, '_blank');
 };
 // ==========================================
-// 🏎️ OLYMPUS HIGHWAY (GERÇEK FİZİK, KALİBRASYON, DRACO)
+// 🏎️ OLYMPUS HIGHWAY (SAFARİ & PERFORMANS MOTORU)
 // ==========================================
+
+// Safari Uyumlu Ses Tanımlamaları (HTML'den çekilir)
+const bgMusic = document.getElementById('racer-bg-audio');
+if (bgMusic) bgMusic.volume = 0.15; 
+
+const engineSound = document.getElementById('racer-engine-audio');
+if (engineSound) engineSound.volume = 0; 
+
+let isMusicOn = localStorage.getItem('racer_music') !== 'false';
+let isEngineOn = localStorage.getItem('racer_engine') !== 'false';
 
 let racerScene, racerCamera, racerRenderer;
 let playerCar = null;
-let roadTexture, roadMaterial;
+let roadTexture, barrierTexture;
 let racerAnimationId;
-let gameSpeed = 0.0; // ARTIK DURARAK BAŞLAR!
+let gameSpeed = 0.0; 
 let carSpeed = 0; 
 let racerScore = 0;
 let isRacerPlaying = false;
 
-// KONTROLLER (HATA ÇÖZÜLDÜ: Obje içinde tutarak erişim sorunu giderildi)
 const racerInput = { left: false, right: false, gas: false, brake: false };
-
 let controlMode = 'touch'; 
 let gyroTilt = 0;
 
-// Araç Hafızası
 window.activeGameCarType = '';
 window.baseCarRotationY = 0;
+window.currentSteer = 0; 
+window.trafficCars = [];
+window.trafficSpawnTimer = 0;
+
+const carPhysics = {
+    megane: { maxSpeed: 3.5, accel: 0.005, brake: 0.015, friction: 0.003, handling: 0.08 },
+    bmw: { maxSpeed: 4.3, accel: 0.009, brake: 0.025, friction: 0.004, handling: 0.12 }
+};
+
+window.toggleRacerMusic = function() {
+    isMusicOn = !isMusicOn;
+    localStorage.setItem('racer_music', isMusicOn);
+    document.getElementById('btn-toggle-music').innerText = isMusicOn ? "Müzik: AÇIK" : "Müzik: KAPALI";
+    if(isMusicOn && isRacerPlaying && bgMusic) bgMusic.play().catch(e=>{});
+    else if(bgMusic) bgMusic.pause();
+};
+
+window.toggleRacerEngineSound = function() {
+    isEngineOn = !isEngineOn;
+    localStorage.setItem('racer_engine', isEngineOn);
+    document.getElementById('btn-toggle-engine').innerText = isEngineOn ? "Motor: AÇIK" : "Motor: KAPALI";
+    if(!isEngineOn && engineSound) { engineSound.volume = 0; engineSound.pause(); }
+};
 
 async function lockLandscape() {
     try {
@@ -11361,7 +11391,6 @@ window.openOlympusRacer = function() {
     document.getElementById('racer-game-screen').style.display = 'none';
     
     lockLandscape();
-
     if (navigator.vibrate) navigator.vibrate([30, 50, 30]);
 
     setTimeout(() => {
@@ -11377,36 +11406,32 @@ window.quitRacerGame = function() {
     isRacerPlaying = false;
     cancelAnimationFrame(racerAnimationId);
     
-    bgMusic.pause();
-    bgMusic.currentTime = 0;
-    engineSound.pause();
-    engineSound.volume = 0;
+    if(bgMusic) { bgMusic.pause(); bgMusic.currentTime = 0; }
+    if(engineSound) { engineSound.pause(); engineSound.volume = 0; }
     
     document.getElementById('racer-3d-container').innerHTML = '';
     const racerScreen = document.getElementById('racer-screen');
     racerScreen.classList.add('hidden');
     racerScreen.style.display = 'none';
     document.getElementById('racer-settings-modal').style.display = 'none';
+    document.getElementById('racer-crash-modal').style.display = 'none';
     
     if(controlMode === 'gyro') window.removeEventListener('deviceorientation', handleGyro);
     unlockLandscape();
 };
+
 window.startRacerEngine = function(carType) {
     if (navigator.vibrate) navigator.vibrate(50);
     document.getElementById('racer-select-screen').style.display = 'none';
     document.getElementById('racer-game-screen').style.display = 'block';
     document.getElementById('racer-settings-modal').style.display = 'none';
 
-    // UI Buton İsimlerini Hafızaya Göre Yaz
     document.getElementById('btn-toggle-music').innerText = isMusicOn ? "Müzik: AÇIK" : "Müzik: KAPALI";
     document.getElementById('btn-toggle-engine').innerText = isEngineOn ? "Motor: AÇIK" : "Motor: KAPALI";
 
-    // Müzik ve Motor sesini başlat (Kullanıcı tıkladığı için tarayıcı izin verir)
-    if(isMusicOn) bgMusic.play().catch(e=>console.log("Müzik çalınamadı:", e));
-    if(isEngineOn) {
-        engineSound.volume = 0;
-        engineSound.play().catch(e=>console.log("Motor sesi çalınamadı:", e));
-    }
+    // Safari ses politikasını aşmak için kullanıcı butona bastığı an sesi sessizce başlatıyoruz
+    if(isMusicOn && bgMusic) bgMusic.play().catch(e=>{});
+    if(isEngineOn && engineSound) { engineSound.volume = 0; engineSound.play().catch(e=>{}); }
 
     let glbFile = carType === 'megane' ? 'megane.glb' : 'bmw_g20.glb';
     initThreeJSGame(glbFile, carType);
@@ -11414,14 +11439,14 @@ window.startRacerEngine = function(carType) {
 
 window.pauseRacerGame = function() {
     isRacerPlaying = false; 
-    bgMusic.pause();
-    engineSound.volume = 0;
+    if(bgMusic) bgMusic.pause();
+    if(engineSound) engineSound.pause();
     document.getElementById('racer-settings-modal').style.display = 'flex';
 };
 
 window.resumeRacerGame = function() {
     isRacerPlaying = true; 
-    if(isMusicOn) bgMusic.play();
+    if(isMusicOn && bgMusic) bgMusic.play();
     document.getElementById('racer-settings-modal').style.display = 'none';
     gameLoop(); 
 };
@@ -11429,6 +11454,8 @@ window.resumeRacerGame = function() {
 window.backToRacerSelection = function() {
     isRacerPlaying = false;
     cancelAnimationFrame(racerAnimationId);
+    if(bgMusic) bgMusic.pause();
+    if(engineSound) engineSound.pause();
     document.getElementById('racer-3d-container').innerHTML = ''; 
     document.getElementById('racer-settings-modal').style.display = 'none';
     document.getElementById('racer-game-screen').style.display = 'none';
@@ -11437,27 +11464,27 @@ window.backToRacerSelection = function() {
 
 window.toggleRacerControls = function() {
     controlMode = controlMode === 'touch' ? 'gyro' : 'touch';
-    document.getElementById('btn-control-toggle').innerText = controlMode === 'touch' ? "🎮 Yön Kontrol: Tuşlar" : "📱 Yön Kontrol: Jiroskop (Sensör)";
+    document.getElementById('btn-control-toggle').innerText = controlMode === 'touch' ? "🎮 Kontrol: Tuşlar" : "📱 Kontrol: Jiroskop";
     
     const steerCtrl = document.getElementById('racer-steer-controls');
     const brakeBtn = document.getElementById('racer-btn-brake');
 
     if (controlMode === 'gyro') {
-        steerCtrl.style.display = 'none'; // Yön tuşlarını yok et
-        brakeBtn.style.right = 'auto';    // Sağdan bağını kopar
-        brakeBtn.style.left = '30px';     // Ekranın en soluna sabitle (Konsol düzeni)
+        steerCtrl.style.display = 'none'; 
+        brakeBtn.style.right = 'auto';    
+        brakeBtn.style.left = '30px';     
         
         if (typeof DeviceOrientationEvent !== 'undefined' && typeof DeviceOrientationEvent.requestPermission === 'function') {
             DeviceOrientationEvent.requestPermission().then(response => {
                 if (response === 'granted') window.addEventListener('deviceorientation', handleGyro);
-            }).catch(console.error);
+            }).catch(e=>{});
         } else {
             window.addEventListener('deviceorientation', handleGyro);
         }
     } else {
-        steerCtrl.style.display = 'flex'; // Yön tuşlarını geri getir
-        brakeBtn.style.left = 'auto';     // Soldan bağını kopar
-        brakeBtn.style.right = '130px';   // Eski yerine (Gazın yanına) al
+        steerCtrl.style.display = 'flex'; 
+        brakeBtn.style.left = 'auto';     
+        brakeBtn.style.right = '130px';   
         
         window.removeEventListener('deviceorientation', handleGyro);
         gyroTilt = 0;
@@ -11466,9 +11493,13 @@ window.toggleRacerControls = function() {
 
 function handleGyro(event) {
     let tilt = event.beta; 
-    if(tilt > 45) tilt = 45;
-    if(tilt < -45) tilt = -45;
-    gyroTilt = tilt / 45; 
+    if (Math.abs(tilt) < 5) {
+        gyroTilt = 0;
+    } else {
+        if(tilt > 45) tilt = 45;
+        if(tilt < -45) tilt = -45;
+        gyroTilt = (tilt > 0 ? tilt - 5 : tilt + 5) / 40; 
+    }
 }
 
 window.updateCarCalibration = function() {
@@ -11484,96 +11515,72 @@ window.updateCarCalibration = function() {
     let rad = rotDeg * (Math.PI / 180);
     window.baseCarRotationY = rad; 
     playerCar.rotation.y = rad;
-    
     playerCar.scale.set(scale, scale, scale);
     playerCar.position.y = posY;
 
-    // Araca özel kalıcı hafızaya al
     localStorage.setItem(`calib_rot_${window.activeGameCarType}`, rotDeg);
     localStorage.setItem(`calib_scale_${window.activeGameCarType}`, scale);
     localStorage.setItem(`calib_posy_${window.activeGameCarType}`, posY);
 
-    // MUCİZE KOD: Oyun duraklatılmış olsa bile kameraya zorla yeni görüntüyü çizdir!
     if (!isRacerPlaying && racerRenderer && racerScene && racerCamera) {
         racerRenderer.render(racerScene, racerCamera);
     }
 };
 
-// Trafik ve Bariyer Değişkenleri
-window.trafficCars = [];
-window.trafficSpawnTimer = 0;
-let barrierTexture;
-
-// RASTGELE TRAFİK ARACI ÜRETME MOTORU
 function spawnTrafficCar() {
-    // 4 Şeridin X koordinatları (Sol dış, Sol iç, Sağ iç, Sağ dış)
     const lanes = [-8, -3, 3, 8];
     const targetLane = lanes[Math.floor(Math.random() * lanes.length)];
-    
-    // Trafik araçları için renk paleti (Sivil araçlar)
     const colors = [0xffffff, 0xe74c3c, 0x3498db, 0x95a5a6, 0xf1c40f, 0x2c3e50];
     const carColor = colors[Math.floor(Math.random() * colors.length)];
     
-    // Performans için Trafik araçlarını basit 3D Box'lardan (Low-Poly) yapıyoruz
+    // Performans İyileştirmesi: Çok fazla mesh yaratmak Safari'yi kasar. 
+    // Traffic araçlarının detay seviyesini kıstık.
     const carGroup = new THREE.Group();
-    
-    // Alt Kasa
+    const bodyMat = new THREE.MeshBasicMaterial({ color: carColor }); // BasicMaterial daha hafiftir
     const bodyGeo = new THREE.BoxGeometry(2.4, 1.2, 5.5);
-    const bodyMat = new THREE.MeshStandardMaterial({ color: carColor, roughness: 0.6 });
     const body = new THREE.Mesh(bodyGeo, bodyMat);
-    body.position.y = 0.6;
-    body.castShadow = true;
+    body.position.y = 0.6; 
     carGroup.add(body);
     
-    // Camlar (Kabin)
+    const cabinMat = new THREE.MeshBasicMaterial({ color: 0x111111 });
     const cabinGeo = new THREE.BoxGeometry(2.0, 0.8, 3.0);
-    const cabinMat = new THREE.MeshStandardMaterial({ color: 0x111111, roughness: 0.2 });
     const cabin = new THREE.Mesh(cabinGeo, cabinMat);
-    cabin.position.y = 1.6;
-    cabin.position.z = -0.5;
-    cabin.castShadow = true;
+    cabin.position.y = 1.6; cabin.position.z = -0.5; 
     carGroup.add(cabin);
 
-    // Trafik aracı taa ufuktan (-150'den) gelsin
     carGroup.position.set(targetLane, 0.1, -150);
-    
-    // Rastgele bir hız verelim ki hepsi aynı hızda gitmesin
     carGroup.userData.speed = 0.3 + (Math.random() * 0.4); 
     
     racerScene.add(carGroup);
     window.trafficCars.push(carGroup);
 }
 
-// KAZA TETİKLEYİCİ
 function triggerCrash() {
-    isRacerPlaying = false; // Oyunu anında durdur
+    isRacerPlaying = false; 
     gameSpeed = 0;
-    
-    if (navigator.vibrate) navigator.vibrate([100, 50, 100, 50, 300]); // Şiddetli titreşim
-    
+    if(engineSound) engineSound.pause();
+    if (navigator.vibrate) navigator.vibrate([100, 50, 100, 50, 300]); 
     document.getElementById('crash-final-score').innerText = Math.floor(racerScore);
     document.getElementById('racer-crash-modal').style.display = 'flex';
 }
 
 window.restartRacerGame = function() {
     document.getElementById('racer-crash-modal').style.display = 'none';
-    
-    // Eski trafik araçlarını temizle
     window.trafficCars.forEach(car => racerScene.remove(car));
     window.trafficCars = [];
     window.trafficSpawnTimer = 0;
-    
     racerScore = 0;
     gameSpeed = 0;
+    window.currentSteer = 0; 
     document.getElementById('racer-score').innerText = "0";
     
-    // Arabayı merkeze al
     if(playerCar) {
         playerCar.position.x = 0;
         playerCar.rotation.z = 0;
         playerCar.rotation.x = 0;
     }
     
+    if(isEngineOn && engineSound) engineSound.play().catch(e=>{});
     isRacerPlaying = true;
     gameLoop();
 };
@@ -11582,15 +11589,14 @@ function initThreeJSGame(modelFile, carType) {
     const container = document.getElementById('racer-3d-container');
     container.innerHTML = ''; 
     window.activeGameCarType = carType;
-    window.trafficCars = []; // Yeni oyunda trafiği sıfırla
+    window.trafficCars = []; 
+    window.currentSteer = 0; 
+    
+    racerInput.left = false; racerInput.right = false; racerInput.gas = false; racerInput.brake = false;
 
-    let getRot = localStorage.getItem(`calib_rot_${carType}`);
-    let getScale = localStorage.getItem(`calib_scale_${carType}`);
-    let getPosY = localStorage.getItem(`calib_posy_${carType}`);
-
-    let savedRot = getRot !== null ? parseFloat(getRot) : 0;
-    let savedScale = getScale !== null ? parseFloat(getScale) : 0.6;
-    let savedPosY = getPosY !== null ? parseFloat(getPosY) : 0.1;
+    let savedRot = parseFloat(localStorage.getItem(`calib_rot_${carType}`)) || 0;
+    let savedScale = parseFloat(localStorage.getItem(`calib_scale_${carType}`)) || 0.6;
+    let savedPosY = parseFloat(localStorage.getItem(`calib_posy_${carType}`)) || 0.1;
 
     document.getElementById('slider-rot').value = savedRot;
     document.getElementById('val-rot').innerText = savedRot + "°";
@@ -11603,27 +11609,25 @@ function initThreeJSGame(modelFile, carType) {
 
     racerScene = new THREE.Scene();
     racerScene.background = new THREE.Color(0x87CEEB); 
-    racerScene.fog = new THREE.Fog(0x87CEEB, 20, 120); // Sisi ufka çektik
+    racerScene.fog = new THREE.Fog(0x87CEEB, 20, 120); 
 
     racerCamera = new THREE.PerspectiveCamera(50, window.innerWidth / window.innerHeight, 0.1, 1000);
     racerCamera.position.set(0, 7, 12); 
     racerCamera.lookAt(0, 0, -10); 
 
-    racerRenderer = new THREE.WebGLRenderer({ antialias: true });
+    // Safari Performans Artırıcı: Antialias'ı false yaptık, dpr'ı sabitledik
+    racerRenderer = new THREE.WebGLRenderer({ antialias: false, powerPreference: "high-performance" });
+    racerRenderer.setPixelRatio(Math.min(window.devicePixelRatio, 2)); // Aşırı piksel yoğunluğunu kısıtlar
     racerRenderer.setSize(window.innerWidth, window.innerHeight);
-    racerRenderer.shadowMap.enabled = true;
+    racerRenderer.shadowMap.enabled = false; // Gölgeler Safari'yi çok kasar, kapattık
     container.appendChild(racerRenderer.domElement);
 
     const ambientLight = new THREE.AmbientLight(0xffffff, 0.8);
     racerScene.add(ambientLight);
     const dirLight = new THREE.DirectionalLight(0xffffff, 1.0);
     dirLight.position.set(10, 20, 10);
-    dirLight.castShadow = true;
     racerScene.add(dirLight);
 
-    // ==========================================
-    // ASFALT VE YENİ ÇELİK BARİYERLER
-    // ==========================================
     const canvasTex = document.createElement('canvas');
     canvasTex.width = 512; canvasTex.height = 1024;
     const ctx = canvasTex.getContext('2d');
@@ -11636,36 +11640,32 @@ function initThreeJSGame(modelFile, carType) {
     roadTexture = new THREE.CanvasTexture(canvasTex);
     roadTexture.wrapS = THREE.RepeatWrapping; roadTexture.wrapT = THREE.RepeatWrapping;
     roadTexture.repeat.set(1, 15); 
-    const roadMaterial = new THREE.MeshStandardMaterial({ map: roadTexture, roughness: 0.9 });
+    const roadMaterial = new THREE.MeshBasicMaterial({ map: roadTexture }); // StandardMaterial yerine BasicMaterial kullandık
     const roadGeometry = new THREE.PlaneGeometry(24, 300);
     const road = new THREE.Mesh(roadGeometry, roadMaterial);
-    road.rotation.x = -Math.PI / 2; road.position.z = -100; road.receiveShadow = true;
+    road.rotation.x = -Math.PI / 2; road.position.z = -100;
     racerScene.add(road);
 
-    // YENİ: Çelik Bariyer Kaplaması (Şeritli)
     const bTexCanvas = document.createElement('canvas');
-    bTexCanvas.width = 64; bTexCanvas.height = 256;
+    bTexCanvas.width = 256; bTexCanvas.height = 128;
     const bCtx = bTexCanvas.getContext('2d');
-    bCtx.fillStyle = '#95a5a6'; bCtx.fillRect(0,0,64,256); // Çelik Gri
-    bCtx.fillStyle = '#e74c3c'; bCtx.fillRect(0,0,64,128); // Kırmızı Uyarı Şeridi
+    bCtx.fillStyle = '#636e72'; bCtx.fillRect(0,0,256,128); 
+    bCtx.fillStyle = '#2d3436'; bCtx.fillRect(0, 0, 4, 128); 
+    bCtx.fillStyle = '#f1c40f'; bCtx.fillRect(0, 60, 256, 12); 
+    
     barrierTexture = new THREE.CanvasTexture(bTexCanvas);
     barrierTexture.wrapS = THREE.RepeatWrapping; barrierTexture.wrapT = THREE.RepeatWrapping;
-    barrierTexture.repeat.set(1, 40);
+    barrierTexture.repeat.set(40, 1); 
 
-    const barrierGeo = new THREE.BoxGeometry(1, 1.5, 300);
-    const barrierMat = new THREE.MeshStandardMaterial({ map: barrierTexture, roughness: 0.4, metalness: 0.6 });
+    const barrierGeo = new THREE.BoxGeometry(0.6, 3.5, 300);
+    const barrierMat = new THREE.MeshBasicMaterial({ map: barrierTexture });
     
     const leftBarrier = new THREE.Mesh(barrierGeo, barrierMat);
-    leftBarrier.position.set(-12.5, 0.75, -100);
-    leftBarrier.castShadow = true;
-    racerScene.add(leftBarrier);
+    leftBarrier.position.set(-12.3, 1.75, -100); racerScene.add(leftBarrier);
 
     const rightBarrier = new THREE.Mesh(barrierGeo, barrierMat);
-    rightBarrier.position.set(12.5, 0.75, -100);
-    rightBarrier.castShadow = true;
-    racerScene.add(rightBarrier);
+    rightBarrier.position.set(12.3, 1.75, -100); racerScene.add(rightBarrier);
 
-    // OYUNCU ARABASINI YÜKLE
     const loader = new THREE.GLTFLoader();
     const dracoLoader = new THREE.DRACOLoader();
     dracoLoader.setDecoderPath('https://www.gstatic.com/draco/versioned/decoders/1.4.1/');
@@ -11676,31 +11676,23 @@ function initThreeJSGame(modelFile, carType) {
     loader.load(modelFile, function(gltf) {
         playerCar = gltf.scene;
         playerCar.scale.set(savedScale, savedScale, savedScale); 
-        playerCar.position.set(0, savedPosY, -1); // Z: -1
+        playerCar.position.set(0, savedPosY, -1); 
         playerCar.rotation.y = window.baseCarRotationY; 
         
-        playerCar.traverse(function(child) {
-            if (child.isMesh) child.castShadow = true;
-        });
-
         racerScene.add(playerCar);
         
-        racerScore = 0;
-        gameSpeed = 0.0; 
-        isRacerPlaying = true;
+        racerScore = 0; gameSpeed = 0.0; isRacerPlaying = true;
         document.getElementById('racer-score').innerText = "0";
         document.getElementById('racer-speed').innerText = "0";
         gameLoop();
     }, undefined, function(error) {
-        alert("3D Model yüklenemedi!");
-        quitRacerGame();
+        alert("3D Model yüklenemedi!"); quitRacerGame();
     });
 
-    // KUSURSUZ BUTON BAĞLAYICI (Tüm Tuş Hatalarını Çözer)
+    // MUCİZE KOD: Safari için 'pointer' (dokunma/tıklama) birleştirici kullanıldı.
     const bindBtn = (id, actionKey) => {
         const btn = document.getElementById(id);
-        if(!btn) return; // Buton HTML'de yoksa oyunun çökmesini engeller!
-        
+        if(!btn) return;
         const press = (e) => { 
             e.preventDefault(); 
             racerInput[actionKey] = true; 
@@ -11712,14 +11704,15 @@ function initThreeJSGame(modelFile, carType) {
             btn.style.transform = (id==='racer-btn-gas' || id==='racer-btn-brake') ? 'translateY(-10px) scale(1)' : 'scale(1)';
         };
         
-        btn.onmousedown = press; btn.onmouseup = release; btn.onmouseleave = release;
-        btn.ontouchstart = press; btn.ontouchend = release; btn.ontouchcancel = release;
+        btn.onpointerdown = press; 
+        btn.onpointerup = release; 
+        btn.onpointercancel = release;
+        btn.onpointerleave = release;
+        
+        // Safari Hata Önleyici
+        btn.addEventListener('touchstart', (e) => { e.preventDefault(); press(e); }, {passive: false});
+        btn.addEventListener('touchend', (e) => { e.preventDefault(); release(e); }, {passive: false});
     };
-
-    bindBtn('racer-btn-left', 'left'); 
-    bindBtn('racer-btn-right', 'right');
-    bindBtn('racer-btn-gas', 'gas'); 
-    bindBtn('racer-btn-brake', 'brake');
 
     bindBtn('racer-btn-left', 'left'); bindBtn('racer-btn-right', 'right');
     bindBtn('racer-btn-gas', 'gas'); bindBtn('racer-btn-brake', 'brake');
@@ -11730,6 +11723,22 @@ function gameLoop() {
     
     const physics = carPhysics[window.activeGameCarType] || carPhysics['megane'];
     const creepSpeed = 0.4; 
+    
+    // SAFARİ İÇİN SES OYNATMA KONTROLÜ (DOM'da varsa çalıştırır)
+    if (isEngineOn && engineSound) {
+        if (racerInput.gas) {
+            if (engineSound.paused) engineSound.play().catch(e=>{});
+            engineSound.volume = Math.min(0.5 + (gameSpeed * 0.2), 1.0); 
+            engineSound.playbackRate = 0.8 + (gameSpeed * 0.25); 
+        } else {
+            if (gameSpeed > 0.5) {
+                engineSound.volume = Math.max(engineSound.volume - 0.05, 0.3);
+                engineSound.playbackRate = Math.max(engineSound.playbackRate - 0.02, 0.7);
+            } else {
+                engineSound.volume = 0; engineSound.pause();
+            }
+        }
+    }
     
     if(racerInput.gas) {
         gameSpeed += physics.accel; 
@@ -11742,94 +11751,58 @@ function gameLoop() {
         else if (gameSpeed < creepSpeed - 0.05) gameSpeed += physics.friction; 
         else gameSpeed = creepSpeed; 
     }
-    // 🛠️ YENİ: DİNAMİK MOTOR SESİ FİZİĞİ
-    // SES FİZİĞİ (Gaza basınca bağırır, çekince boğulur)
-    if (typeof isEngineOn !== 'undefined' && isEngineOn && engineSound.readyState >= 2) {
-        if (racerInput.gas) {
-            if (engineSound.paused) engineSound.play().catch(e=>{});
-            // Motor kükremesi
-            engineSound.volume = Math.min(0.5 + (gameSpeed * 0.2), 1.0); 
-            engineSound.playbackRate = 0.8 + (gameSpeed * 0.25); 
-        } else {
-            // Gazdan çekilince devir düşer
-            if (gameSpeed > 0.5) {
-                engineSound.volume = Math.max(engineSound.volume - 0.05, 0.3);
-                engineSound.playbackRate = Math.max(engineSound.playbackRate - 0.02, 0.7);
-            } else {
-                engineSound.volume = 0; 
-                engineSound.pause();
-            }
-        }
-    }
 
-    // YOL VE BARİYER AKIŞI
     roadTexture.offset.y += 0.05 * gameSpeed;
-    if(barrierTexture) barrierTexture.offset.y += 0.05 * gameSpeed; // Bariyerler de aksın
+    if(barrierTexture) barrierTexture.offset.x -= 0.05 * gameSpeed; 
 
     if (playerCar && gameSpeed > 0) {
-        let steerAmount = 0;
+        let targetSteer = 0;
         if (controlMode === 'touch') {
-            if (racerInput.left) steerAmount = -0.12; 
-            if (racerInput.right) steerAmount = 0.12;
+            if (racerInput.left) targetSteer = -1; 
+            if (racerInput.right) targetSteer = 1; 
         } else {
-            steerAmount = gyroTilt * 0.25; 
+            targetSteer = gyroTilt; 
         }
 
-        playerCar.position.x += steerAmount * (gameSpeed * 0.7);
+        window.currentSteer += (targetSteer - window.currentSteer) * 0.08;
+        playerCar.position.x += window.currentSteer * (gameSpeed * physics.handling);
 
-        // Bariyer Sınırları (Taşmayı Engelle)
-        if (playerCar.position.x < -11) playerCar.position.x = -11;
-        if (playerCar.position.x > 11) playerCar.position.x = 11;
+        if (playerCar.position.x < -11.5) playerCar.position.x = -11.5;
+        if (playerCar.position.x > 11.5) playerCar.position.x = 11.5;
 
         playerCar.rotation.z = 0; 
-        playerCar.rotation.x = steerAmount * 0.6; 
-        playerCar.rotation.y = window.baseCarRotationY - (steerAmount * 0.25); 
+        playerCar.rotation.x = window.currentSteer * 0.4; 
+        playerCar.rotation.y = window.baseCarRotationY - (window.currentSteer * 0.15); 
     } else if (playerCar && gameSpeed === 0) {
         playerCar.rotation.z = 0; 
         playerCar.rotation.x += (0 - playerCar.rotation.x) * 0.1;
         playerCar.rotation.y += (window.baseCarRotationY - playerCar.rotation.y) * 0.2;
     }
 
-    // ==========================================
-    // 🚦 YAPAY ZEKA TRAFİK VE ÇARPIŞMA (COLLISION) MOTORU
-    // ==========================================
-    if (gameSpeed > 0.5) { // Sadece belli bir hızın üstündeyken trafik aksın
+    if (gameSpeed > 0.5) { 
         window.trafficSpawnTimer += gameSpeed;
-        if (window.trafficSpawnTimer > 80) { // Araç çıkma sıklığı
+        if (window.trafficSpawnTimer > 80) { 
             window.trafficSpawnTimer = 0;
             spawnTrafficCar();
         }
     }
 
     if (playerCar) {
-        // Çarpışma kutumuzu hazırlayalım (Arabamızın etrafında görünmez bir sınır)
         const playerBox = new THREE.Box3().setFromObject(playerCar);
-        playerBox.expandByScalar(-0.4); // Çarpışmayı biraz daha toleranslı yap (Kenardan sıyırabilsin)
+        playerBox.expandByScalar(-0.4); 
 
         for (let i = window.trafficCars.length - 1; i >= 0; i--) {
             let tCar = window.trafficCars[i];
-            
-            // Trafik aracı oyuncuya doğru yaklaşır (Göreceli hız = Bizim Hızımız + Trafik Hızı)
             tCar.position.z += (gameSpeed * 0.5) + tCar.userData.speed; 
             
-            // Çarpışma Kontrolü
             const tCarBox = new THREE.Box3().setFromObject(tCar);
-            tCarBox.expandByScalar(-0.2); // Karşı aracın kutusu
+            tCarBox.expandByScalar(-0.2); 
 
-            if (playerBox.intersectsBox(tCarBox)) {
-                triggerCrash(); // 💥 GÜM!
-                return; // Döngüyü kır, kaza oldu.
-            }
-
-            // Araç kameranın arkasına düştüyse (Bizi geçip gittiyse) sahneden sil, RAM'i temizle
-            if (tCar.position.z > 20) {
-                racerScene.remove(tCar);
-                window.trafficCars.splice(i, 1);
-            }
+            if (playerBox.intersectsBox(tCarBox)) { triggerCrash(); return; }
+            if (tCar.position.z > 20) { racerScene.remove(tCar); window.trafficCars.splice(i, 1); }
         }
     }
 
-    // SKOR
     racerScore += 0.1 * gameSpeed;
     document.getElementById('racer-score').innerText = Math.floor(racerScore);
     carSpeed = Math.floor(gameSpeed * 60); 
@@ -11839,25 +11812,6 @@ function gameLoop() {
     racerAnimationId = requestAnimationFrame(gameLoop);
 }
 
-// ==========================================
-// 🏎️ ARAÇLARA ÖZEL FİZİK MOTORU VERİTABANI
-// ==========================================
-const carPhysics = {
-    megane: { 
-        maxSpeed: 3.5,      // Maksimum ~210 km/h
-        accel: 0.005,       // 1.3 TCe tatlı ve pürüzsüz hızlanma
-        brake: 0.015,       // Standart disk fren (Yavaş ve güvenli duruş)
-        friction: 0.003     // Rüzgar ve yol sürtünmesi
-    },
-    bmw: { 
-        maxSpeed: 4.3,      // Maksimum ~258 km/h
-        accel: 0.009,       // 320i agresif ivmelenme (Gaza daha hızlı tepki)
-        brake: 0.025,       // M Sport performans frenleri (Daha kısa mesafede duruş)
-        friction: 0.004     // Yere daha sağlam basan aerodinamik sürtünme
-    }
-};
-
-
 window.addEventListener('resize', () => {
     if (racerCamera && racerRenderer) {
         racerCamera.aspect = window.innerWidth / window.innerHeight;
@@ -11865,41 +11819,371 @@ window.addEventListener('resize', () => {
         racerRenderer.setSize(window.innerWidth, window.innerHeight);
     }
 });
-const bgMusic = new Audio('music.mp3');
-bgMusic.loop = true;
-bgMusic.volume = 0.15; // Müzik kısıldı (Arka fon)
 
-const engineSound = new Audio('engine.mp3');
-engineSound.loop = true;
-engineSound.volume = 0; // Başlangıçta sessiz
-
-let isMusicOn = localStorage.getItem('racer_music') !== 'false';
-let isEngineOn = localStorage.getItem('racer_engine') !== 'false';
-
-window.toggleRacerMusic = function() {
-    isMusicOn = !isMusicOn;
-    localStorage.setItem('racer_music', isMusicOn);
-    document.getElementById('btn-toggle-music').innerText = isMusicOn ? "Müzik: AÇIK" : "Müzik: KAPALI";
-    if(isMusicOn && isRacerPlaying) bgMusic.play().catch(e=>{});
-    else bgMusic.pause();
+// OLYSCORE SEKMELERİ (ÜST)
+window.switchOlyTab = function(tabName, btnElement) {
+    // Aktif rengi sıfırla
+    document.querySelectorAll('.oly-tab').forEach(b => b.classList.remove('active'));
+    // Tıklanana aktif rengini ver
+    btnElement.classList.add('active');
+    
+    if (navigator.vibrate) navigator.vibrate(15);
 };
 
-window.toggleRacerEngineSound = function() {
-    isEngineOn = !isEngineOn;
-    localStorage.setItem('racer_engine', isEngineOn);
-    document.getElementById('btn-toggle-engine').innerText = isEngineOn ? "Motor: AÇIK" : "Motor: KAPALI";
-    if(!isEngineOn) { engineSound.volume = 0; engineSound.pause(); }
+// OLYSCORE ALT MENÜ (SAYFA GEÇİŞ MOTORU)
+window.switchOlyNav = function(btnElement, targetPageId) {
+    // 1. Tüm butonların aktifliğini kaldır
+    document.querySelectorAll('.oly-nav-item').forEach(b => {
+        b.classList.remove('active');
+        b.style.transform = 'translateY(0)';
+    });
+    
+    // 2. Tıklanan butonu aktif et
+    btnElement.classList.add('active');
+    btnElement.style.transform = 'translateY(-3px)';
+    
+    // 3. Tüm sayfaları gizle
+    document.querySelectorAll('.oly-page-content').forEach(page => {
+        page.style.display = 'none';
+        page.classList.add('hidden');
+    });
+    
+    // 4. Hedef sayfayı göster
+    if (targetPageId) {
+        const targetPage = document.getElementById(targetPageId);
+        if (targetPage) {
+            targetPage.style.display = 'flex';
+            targetPage.classList.remove('hidden');
+        }
+    }
+    
+    if (navigator.vibrate) navigator.vibrate(20);
 };
 
-function handleGyro(event) {
-    let tilt = event.beta; 
-    // 5 Derecelik Ölü Nokta (Telefon düzken araba sapmaz)
-    if (Math.abs(tilt) < 5) {
-        gyroTilt = 0;
-    } else {
-        if(tilt > 45) tilt = 45;
-        if(tilt < -45) tilt = -45;
-        // 5 dereceyi yok sayarak dönüşü daha pürüzsüz hesapla
-        gyroTilt = (tilt > 0 ? tilt - 5 : tilt + 5) / 40; 
+// AÇMA/KAPATMA
+window.openOlyScore = function() {
+    const hub = document.getElementById('hub-screen');
+    if (hub) { hub.classList.add('hidden'); hub.style.display = 'none'; }
+    
+    document.getElementById('olyscore-screen').classList.remove('hidden');
+    document.getElementById('olyscore-screen').style.display = 'flex';
+    if (navigator.vibrate) navigator.vibrate(30);
+};
+
+window.closeOlyScore = function() {
+    document.getElementById('olyscore-screen').classList.add('hidden');
+    document.getElementById('olyscore-screen').style.display = 'none';
+    if (typeof returnToHub === 'function') returnToHub();
+};
+// ==========================================
+// 🦁 OLYSCORE: SOFASCORE GERÇEK ZAMANLI VERİ & PUAN DURUMU MOTORU
+// ==========================================
+
+const OLYSCORE_API_KEY = "b74d702108mshf7146018499d41fp1ffc70jsnfbae0f23777e"; // Sofascore API Şifren
+const GS_TEAM_ID = "3061"; // Galatasaray'ın Sofascore ID'si
+
+// --- SÜPER LİG MANUEL LOGO SÖZLÜĞÜ ---
+// Ekranda takımın adı nasıl yazıyorsa, buraya BÜYÜK HARFLERLE adını ve karşısına linkini yapıştır.
+const customTeamLogos = {
+    "GALATASARAY": "https://assets.football-logos.cc/logos/turkey/512x512/galatasaray.beadfca5.png",
+    "FENERBAHÇE": "https://assets.football-logos.cc/logos/turkey/512x512/fenerbahce.145fa73f.png",
+    "BEŞIKTAŞ JK": "https://assets.football-logos.cc/logos/turkey/512x512/besiktas.0ec1a299.png",
+    "TRABZONSPOR": "https://assets.football-logos.cc/logos/turkey/512x512/trabzonspor.32812ba8.png",
+    "BAŞAKŞEHIR FK": "https://assets.football-logos.cc/logos/turkey/512x512/basaksehir.49a7c330.png",
+    "KASIMPAŞA": "https://assets.football-logos.cc/logos/turkey/512x512/kasimpasa.af12d95a.png", // Örnek olarak ekledim, linki değiştirebilirsin
+    "GÖZTEPE": "https://assets.football-logos.cc/logos/turkey/512x512/goztepe-izmir.d56025de.png",
+    "KOCAELISPOR": "https://assets.football-logos.cc/logos/turkey/512x512/kocaelispor.67438278.png",
+    "GENÇLERBIRLIĞI": "https://assets.football-logos.cc/logos/turkey/512x512/genclerbirligi.5f34f7a5.png",
+    "SAMSUNSPOR": "https://assets.football-logos.cc/logos/turkey/512x512/samsunspor.d9c02d9f.png",
+    "ALANYASPOR": "https://assets.football-logos.cc/logos/turkey/512x512/alanyaspor.c7dab604.png",
+    "GAZIANTEP FK": "https://assets.football-logos.cc/logos/turkey/512x512/gaziantep.46eb63e9.png",
+    "ÇAYKUR RIZESPOR": "https://assets.football-logos.cc/logos/turkey/512x512/rizespor.91844f4d.png",
+    "ÇORUM FK": "https://assets.football-logos.cc/logos/turkey/512x512/corum.48e6a97a.png",
+    "EYÜPSPOR": "https://assets.football-logos.cc/logos/turkey/512x512/eyupspor.a6f59ece.png",
+    "KONYASPOR": "https://assets.football-logos.cc/logos/turkey/512x512/konyaspor.7fb1c091.png",
+    "ERZURUMSPOR FK": "https://assets.football-logos.cc/logos/turkey/512x512/erzurumspor.1de456f6.png"
+    
+};
+
+// --- GÜVENLİ LOGO JENERATÖRÜ (Manuel Liste Destekli) ---
+function getSafeLogo(teamId, teamName) {
+    // Gelen ismi BÜYÜK harfe çevirip sağındaki solundaki boşlukları temizliyoruz
+    const nameUpper = teamName.toUpperCase().trim(); 
+
+    // 🕵️‍♂️ İŞTE SİHİRLİ KOD: Tarayıcı konsoluna (F12) API'nin verdiği tam isimleri yazdırır!
+    console.log(`API'DEN GELEN TAKIM: "${nameUpper}"`);
+
+    // 1. Önce bizim manuel "customTeamLogos" sözlüğümüze bak
+    if (customTeamLogos[nameUpper]) {
+        return customTeamLogos[nameUpper]; // Eğer varsa bizim koyduğumuz linki ver
+    }
+    
+    // 2. Eğer bizim listede yoksa harfli logoyu yapıştır
+    return `https://ui-avatars.com/api/?name=${encodeURIComponent(teamName)}&background=random&color=fff&bold=true&rounded=true`;
+}
+
+// --- SAYFA GEÇİŞ MOTORU ---
+window.switchOlyNav = function(pageId, btnElement) {
+    document.querySelectorAll('.oly-nav-item').forEach(b => {
+        b.classList.remove('active');
+        b.style.transform = 'translateY(0)';
+    });
+    
+    if (btnElement) {
+        btnElement.classList.add('active');
+        btnElement.style.transform = 'translateY(-3px)';
+    }
+    
+    document.querySelectorAll('.oly-page-content').forEach(page => {
+        page.style.display = 'none';
+        page.classList.add('hidden');
+    });
+    
+    const targetPage = document.getElementById('oly-page-' + pageId);
+    if (targetPage) {
+        targetPage.style.display = 'flex';
+        targetPage.classList.remove('hidden');
+    }
+
+    const headerTitle = document.getElementById('oly-header-title');
+    if(pageId === 'home') headerTitle.innerText = "Ana Sayfa";
+    else if(pageId === 'stats') headerTitle.innerText = "İstatistik & Puan Durumu";
+    else if(pageId === 'news') headerTitle.innerText = "Takım Haberleri";
+    
+    if (navigator.vibrate) navigator.vibrate(20);
+};
+
+window.switchOlyTab = function(tabName, btnElement) {
+    document.querySelectorAll('.oly-tab').forEach(b => b.classList.remove('active'));
+    btnElement.classList.add('active');
+    if (navigator.vibrate) navigator.vibrate(15);
+};
+// --- AÇMA VE VERİ ÇEKME MOTORU (YENİ SİSTEM) ---
+const originalOpenOlyScore = window.openOlyScore;
+window.openOlyScore = function() {
+    const hub = document.getElementById('hub-screen');
+    if (hub) { hub.classList.add('hidden'); hub.style.display = 'none'; }
+    
+    const olyScreen = document.getElementById('olyscore-screen');
+    olyScreen.classList.remove('hidden');
+    olyScreen.style.display = 'flex';
+    
+    // 1. Splash Ekranını (Animasyonu) Aç
+    const splash = document.getElementById('olyscore-splash');
+    splash.style.opacity = '1';
+    splash.style.pointerEvents = 'auto';
+
+    // 2. Ana Sayfaya (Home) ayarla
+    const firstNavBtn = document.querySelector('.oly-bottom-nav .oly-nav-item');
+    switchOlyNav('home', firstNavBtn);
+
+    // 3. Verileri çekmeye başla
+    fetchGalatasarayData(); 
+    
+    if (navigator.vibrate) navigator.vibrate(30);
+};
+
+window.closeOlyScore = function() {
+    document.getElementById('olyscore-screen').classList.add('hidden');
+    document.getElementById('olyscore-screen').style.display = 'none';
+    if (typeof returnToHub === 'function') returnToHub();
+};
+
+// --- SOFASCORE API BAĞLANTISI (AKILLI GECİKMELİ) ---
+async function fetchGalatasarayData() {
+    const listContainer = document.getElementById('oly-match-list-container');
+    const standingsContainer = document.getElementById('oly-standings-table');
+    
+    listContainer.innerHTML = '<p style="color:var(--goldnova); text-align:center; font-size:12px;">Maçlar çekiliyor (1/3)...</p>';
+    standingsContainer.innerHTML = '<p style="color:var(--goldnova); text-align:center; font-size:12px;">Sistem bekleniyor...</p>';
+
+    const options = {
+        method: 'GET',
+        headers: {
+            'x-rapidapi-key': OLYSCORE_API_KEY,
+            'x-rapidapi-host': 'sofascore.p.rapidapi.com'
+        }
+    };
+
+    let allEvents = [];
+    let tournamentId = 52; // Varsayılan Süper Lig ID
+    let seasonId = 61764; // Varsayılan Sezon
+
+    try {
+        // 1. İSTEK: GELECEK MAÇLAR
+        const nextRes = await fetch(`https://sofascore.p.rapidapi.com/teams/get-next-matches?teamId=${GS_TEAM_ID}`, options);
+        const nextData = await nextRes.json();
+        
+        if (nextData && nextData.events) {
+            allEvents = allEvents.concat(nextData.events);
+            // Puan durumu için ligin evrensel ID'sini güncel maçtan çalıyoruz (Ekstra API isteği atmamak için!)
+            if(nextData.events[0]) {
+                tournamentId = nextData.events[0].tournament.uniqueTournament.id;
+                seasonId = nextData.events[0].season.id;
+            }
+        }
+
+        // 🛑 MUCİZE KORUMA: Saniyede 1 istek kuralını ihlal etmemek için 1.5 saniye mola ver!
+        listContainer.innerHTML = '<p style="color:var(--goldnova); text-align:center; font-size:12px;">Geçmiş maçlar çekiliyor (2/3)...</p>';
+        await new Promise(resolve => setTimeout(resolve, 1500));
+
+        // 2. İSTEK: GEÇMİŞ MAÇLAR
+        const lastRes = await fetch(`https://sofascore.p.rapidapi.com/teams/get-last-matches?teamId=${GS_TEAM_ID}`, options);
+        const lastData = await lastRes.json();
+        
+        if (lastData && lastData.events) allEvents = allEvents.concat(lastData.events);
+
+        if(allEvents.length > 0) {
+            processAndRenderOlyMatches(allEvents);
+        } else {
+            listContainer.innerHTML = '<p style="color:#888; text-align:center;">Maç verisi bulunamadı.</p>';
+        }
+
+        // 🛑 YİNE MOLA: Puan durumunu çekmeden önce 1.5 saniye bekle
+        standingsContainer.innerHTML = '<p style="color:var(--goldnova); text-align:center; font-size:12px;">Canlı Puan Durumu Çekiliyor (3/3)...</p>';
+        await new Promise(resolve => setTimeout(resolve, 1500));
+
+        // 3. İSTEK: SÜPER LİG CANLI PUAN DURUMU
+        const stRes = await fetch(`https://sofascore.p.rapidapi.com/tournaments/get-standings?tournamentId=${tournamentId}&seasonId=${seasonId}&type=total`, options);
+        const stData = await stRes.json();
+
+        if (stData && stData.standings && stData.standings[0]) {
+            renderStandings(stData.standings[0].rows);
+        } else {
+            standingsContainer.innerHTML = '<p style="color:#ff4444; text-align:center;">Puan durumu verisi alınamadı.</p>';
+        }
+
+    } catch (err) {
+        console.error("Sofascore Ağ Hatası:", err);
+        listContainer.innerHTML = '<p style="color:#ff4444; text-align:center;">API Kotası doldu veya ağ hatası oluştu.</p>';
+        standingsContainer.innerHTML = '<p style="color:#ff4444; text-align:center;">API Kotası doldu.</p>';
+    }
+}
+
+// Çekilen Maç Verisini OlyScore Arayüzüne Giydirme Fonksiyonu
+function processAndRenderOlyMatches(allMatches) {
+    const listContainer = document.getElementById('oly-match-list-container');
+    listContainer.innerHTML = '';
+    
+    const nowSec = Math.floor(Date.now() / 1000);
+
+    let pastMatches = allMatches.filter(m => m.startTimestamp <= nowSec);
+    let upcomingMatches = allMatches.filter(m => m.startTimestamp > nowSec);
+
+    upcomingMatches.sort((a, b) => a.startTimestamp - b.startTimestamp);
+    pastMatches.sort((a, b) => b.startTimestamp - a.startTimestamp);
+
+    let displayMatches = [];
+    displayMatches.push(...upcomingMatches.slice(0, 3).reverse()); 
+    displayMatches.push(...pastMatches.slice(0, 7)); 
+    displayMatches.sort((a, b) => b.startTimestamp - a.startTimestamp);
+
+    const heroMatch = upcomingMatches.length > 0 ? upcomingMatches[0] : pastMatches[0];
+
+    if(heroMatch) {
+        document.getElementById('oly-hero-league').innerText = heroMatch.tournament.name;
+        
+        document.getElementById('oly-hero-home-img').src = getSafeLogo(heroMatch.homeTeam.id, heroMatch.homeTeam.name);
+        document.getElementById('oly-hero-away-img').src = getSafeLogo(heroMatch.awayTeam.id, heroMatch.awayTeam.name);
+        
+        const mDate = new Date(heroMatch.startTimestamp * 1000);
+        document.getElementById('oly-hero-date').innerText = mDate.toLocaleDateString('tr-TR', { day: 'numeric', month: 'long', year: 'numeric' });
+        document.getElementById('oly-hero-time').innerHTML = `${mDate.toLocaleTimeString('tr-TR', {hour:'2-digit', minute:'2-digit'})} <span style="font-size: 9px; font-weight: normal; color: rgba(255,255,255,0.5);">LOKAL</span>`;
+    }
+
+    displayMatches.forEach(m => {
+        const isLive = m.status.type === 'inprogress';
+        const mDate = new Date(m.startTimestamp * 1000);
+        
+        const homeScore = m.homeScore && m.homeScore.display !== undefined ? m.homeScore.display : '-';
+        const awayScore = m.awayScore && m.awayScore.display !== undefined ? m.awayScore.display : '-';
+
+        listContainer.innerHTML += `
+            <div class="oly-match-item">
+                <div class="oly-team-row">
+                    <div style="display: flex; align-items: center; gap: 12px;">
+                        <img src="${getSafeLogo(m.homeTeam.id, m.homeTeam.name)}" style="width:22px; height:22px; object-fit:contain; border-radius:50%;">
+                        <span style="color: #fff; font-size: 15px; font-weight: 900;">${m.homeTeam.name.toUpperCase()}</span>
+                    </div>
+                    <span style="color: #fff; font-size: 18px; font-weight: 900;">${homeScore}</span>
+                </div>
+                
+                <div class="oly-team-row" style="margin-top: 15px;">
+                    <div style="display: flex; align-items: center; gap: 12px;">
+                        <img src="${getSafeLogo(m.awayTeam.id, m.awayTeam.name)}" style="width:22px; height:22px; object-fit:contain; border-radius:50%;">
+                        <span style="color: #888; font-size: 15px; font-weight: 900;">${m.awayTeam.name.toUpperCase()}</span>
+                    </div>
+                    <span style="color: #888; font-size: 18px; font-weight: 900;">${awayScore}</span>
+                </div>
+                
+                <div class="oly-match-footer">
+                    <span style="color: #888;">${mDate.toLocaleDateString('tr-TR')}</span>
+                    <span style="color: #555;">|</span>
+                    <span style="color: #888;">${m.status.description}</span>
+                    <span style="color: #555;">|</span>
+                    <span style="color: ${isLive ? '#ff4444' : '#888'}; font-weight: bold; display: flex; align-items: center; gap: 6px;">
+                        ${isLive ? '<span class="live-dot"></span> Canlı' : m.tournament.name}
+                    </span>
+                </div>
+            </div>
+        `;
+    });
+}
+
+// Çekilen Puan Durumu Verisini OlyScore Arayüzüne Giydirme Fonksiyonu
+function renderStandings(rows) {
+    const tableContainer = document.getElementById('oly-standings-table');
+    
+    let html = `
+        <table style="width: 100%; border-collapse: collapse; color: #fff; text-align: left;">
+            <thead>
+                <tr style="border-bottom: 1px solid rgba(255,255,255,0.1); color: #888; font-size: 10px;">
+                    <th style="padding: 10px 4px;">#</th>
+                    <th style="padding: 10px 4px;">TAKIM</th>
+                    <th style="padding: 10px 4px; text-align: center;">O</th>
+                    <th style="padding: 10px 4px; text-align: center;">G</th>
+                    <th style="padding: 10px 4px; text-align: center;">B</th>
+                    <th style="padding: 10px 4px; text-align: center;">M</th>
+                    <th style="padding: 10px 4px; text-align: center; color: var(--goldnova);">P</th>
+                </tr>
+            </thead>
+            <tbody>
+    `;
+
+    rows.forEach(row => {
+        const t = row.team;
+        const isGS = t.id.toString() === "3061";
+        
+        const rowStyle = isGS ? 'background: rgba(246, 192, 0, 0.1); border-left: 3px solid var(--goldnova);' : 'border-bottom: 1px solid rgba(255,255,255,0.05);';
+        const nameColor = isGS ? 'var(--goldnova)' : '#fff';
+        const rankColor = row.position <= 4 ? '#27ae60' : (row.position >= 16 ? '#ff4444' : '#888'); 
+        
+        const logoUrl = getSafeLogo(t.id, t.name);
+
+        // Tabloyu daralttık (AV sütununu silip G, B, M koyduk)
+        html += `
+            <tr style="${rowStyle}">
+                <td style="padding: 12px 4px; font-weight: bold; color: ${rankColor};">${row.position}</td>
+                <td style="padding: 12px 4px; display: flex; align-items: center; gap: 6px;">
+                    <img src="${logoUrl}" style="width: 18px; height: 18px; object-fit: contain; border-radius:50%; background:#fff; padding:1px;">
+                    <span class="standings-team-name" style="color: ${nameColor}; font-weight: bold;">${t.name}</span>
+                </td>
+                <td style="padding: 12px 4px; text-align: center; color: #aaa;">${row.matches}</td>
+                <td style="padding: 12px 4px; text-align: center; color: #aaa;">${row.wins}</td>
+                <td style="padding: 12px 4px; text-align: center; color: #aaa;">${row.draws}</td>
+                <td style="padding: 12px 4px; text-align: center; color: #aaa;">${row.losses}</td>
+                <td style="padding: 12px 4px; text-align: center; font-weight: 900; font-size: 14px; color: ${isGS ? 'var(--goldnova)' : '#fff'};">${row.points}</td>
+            </tr>
+        `;
+    });
+
+    html += `</tbody></table>`;
+    tableContainer.innerHTML = html;
+
+    // 🛑 MUCİZE DOKUNUŞ: Veriler çekilip tablo basıldıktan sonra Splash Ekranını (Animasyonu) gizle!
+    const splash = document.getElementById('olyscore-splash');
+    if(splash) {
+        splash.style.opacity = '0';
+        setTimeout(() => { splash.style.pointerEvents = 'none'; }, 500); // Tıklamaları alta geçir
     }
 }
