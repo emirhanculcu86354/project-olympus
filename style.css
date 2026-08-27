@@ -7752,21 +7752,24 @@ body {
     font-weight: 900;
     margin: 0;
     letter-spacing: 4px;
-    /* Arka planın %50'si Sarı, %50'si Silik Beyaz. 200% boyutla soldan sağa kaydıracağız */
-    background: linear-gradient(to right, var(--goldnova) 50%, rgba(255, 255, 255, 0.1) 50%);
-    background-size: 200% 100%;
-    background-position: 100% 0;
+    
+    /* Arka planı ikiye bölüyoruz: Yarısı Sarı, Yarısı Silik Beyaz */
+    background: linear-gradient(to right, var(--goldnova) 50%, rgba(255, 255, 255, 0.15) 50%);
+    background-size: 200% auto;
+    
+    /* SARI HATA ÇÖZÜMÜ: Standart ve Webkit komutlarını alt alta yazıyoruz */
+    background-clip: text;
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
-    color: transparent;
-    animation: textFillAnim 1.8s infinite linear;
+    
+    animation: textFillAnim 1.5s infinite linear;
 }
 
+/* Kusursuz Dolum Animasyonu */
 @keyframes textFillAnim {
-    0% { background-position: 100% 0; }
-    100% { background-position: -100% 0; }
+    0% { background-position: 100% center; }
+    100% { background-position: -100% center; }
 }
-
 /* 📋 Kadro (Lineup) Sahası Futbolcu Noktaları ve Fotoğraflar */
 .lineup-player {
     position: absolute;
@@ -7921,4 +7924,682 @@ body {
     font-size: 16px;
     font-weight: 600;
     margin-left: 10px;
+}
+/* ==========================================
+   🌐 OLYSOCIAL: BEYAZ/PREMIUM TEMA STİLLERİ
+   ========================================== */
+
+/* Genel Sayfa Yapısı */
+.social-page-content {
+    animation: fadeInSocial 0.3s ease;
+}
+@keyframes fadeInSocial {
+    from { opacity: 0; transform: translateY(10px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+/* Hikayeler (Stories) */
+.social-stories-container {
+    display: flex;
+    gap: 15px;
+    padding: 10px 20px 20px 20px;
+    overflow-x: auto;
+    scrollbar-width: none;
+    -webkit-overflow-scrolling: touch;
+    border-bottom: 1px solid #f0f0f0;
+}
+.social-stories-container::-webkit-scrollbar { display: none; }
+
+.social-story-item {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 8px;
+    cursor: pointer;
+}
+.social-story-ring {
+    width: 65px;
+    height: 65px;
+    border-radius: 50%;
+    padding: 3px; /* Halka kalınlığı */
+    background: #e0e0e0; /* Varsayılan gri (okunmuş) */
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+.social-story-ring.active {
+    background: linear-gradient(45deg, #00d2ff, #c084fc, #ff4069); /* Renkli degrade halka */
+}
+.social-story-ring.add-story {
+    background: #fff;
+    border: 2px dashed #ccc;
+    padding: 0;
+}
+.social-story-ring img {
+    width: 100%;
+    height: 100%;
+    border-radius: 50%;
+    object-fit: cover;
+    border: 2px solid #fff; /* İçerideki beyaz boşluk */
+}
+.social-story-name {
+    font-size: 11px;
+    color: #555;
+    font-weight: 600;
+}
+
+/* Feed Post Kartı */
+.social-post-card-light {
+    background: #fff;
+    border-radius: 20px;
+    box-shadow: 0 4px 20px rgba(0,0,0,0.06);
+    border: 1px solid #f5f5f5;
+    overflow: hidden;
+}
+.social-post-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 15px;
+}
+.social-post-img {
+    width: 100%;
+    max-height: 350px;
+    object-fit: cover;
+}
+.social-post-body {
+    padding: 15px;
+}
+
+/* Explore Sayfası */
+.social-search-bar {
+    display: flex;
+    align-items: center;
+    background: #f0f2f5;
+    padding: 12px 15px;
+    border-radius: 12px;
+    gap: 10px;
+}
+.social-search-bar input {
+    border: none;
+    background: transparent;
+    width: 100%;
+    font-size: 14px;
+    color: #111;
+    outline: none;
+}
+.social-search-bar input::placeholder { color: #999; }
+
+.social-explore-tabs {
+    display: flex;
+    justify-content: space-between;
+    padding: 0 20px;
+    margin-bottom: 15px;
+    border-bottom: 1px solid #f0f0f0;
+}
+.social-explore-tabs span {
+    font-size: 13px;
+    color: #888;
+    font-weight: 600;
+    padding-bottom: 10px;
+    position: relative;
+    cursor: pointer;
+}
+.social-explore-tabs span.active {
+    color: #007BFF;
+}
+.social-explore-tabs span.active::after {
+    content: '';
+    position: absolute;
+    bottom: -1px;
+    left: 0;
+    width: 100%;
+    height: 2px;
+    background: #007BFF;
+    border-radius: 2px;
+}
+
+/* Masonry Grid (Pinterest Tarzı) */
+.social-masonry-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 15px;
+}
+.masonry-col {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+}
+.masonry-col img {
+    width: 100%;
+    border-radius: 16px;
+    object-fit: cover;
+}
+.social-masonry-quote {
+    background: #fff;
+    padding: 15px;
+    border-radius: 16px;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.05);
+    border: 1px solid #f5f5f5;
+}
+.social-masonry-quote p {
+    font-size: 12px;
+    color: #333;
+    font-weight: 600;
+    line-height: 1.5;
+    margin: 0;
+}
+
+/* Profile Sayfası */
+.social-profile-cover {
+    width: 100%;
+    height: 180px;
+    background-size: cover;
+    background-position: center;
+    position: relative;
+}
+.social-profile-info {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 0 20px;
+    margin-top: -45px;
+}
+.social-profile-avatar {
+    width: 90px;
+    height: 90px;
+    border-radius: 50%;
+    border: 4px solid #fff;
+    object-fit: cover;
+    background: #fff;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+}
+.social-profile-tags {
+    display: flex;
+    gap: 10px;
+    margin-top: 10px;
+}
+.social-profile-tags span {
+    background: #f0f2f5;
+    color: #555;
+    font-size: 11px;
+    font-weight: 600;
+    padding: 4px 10px;
+    border-radius: 12px;
+}
+.social-profile-stats {
+    display: flex;
+    justify-content: space-around;
+    width: 100%;
+    margin-top: 25px;
+    margin-bottom: 25px;
+}
+.social-profile-stats div {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+.social-profile-stats strong {
+    color: #111;
+    font-size: 18px;
+    font-weight: 900;
+}
+.social-profile-stats span {
+    color: #888;
+    font-size: 11px;
+    font-weight: 600;
+    margin-top: 2px;
+}
+
+.social-profile-photo-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    grid-template-rows: 100px 100px;
+    gap: 10px;
+}
+.social-profile-photo-grid img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    border-radius: 12px;
+}
+.more-photos-overlay {
+    position: relative;
+    border-radius: 12px;
+    overflow: hidden;
+}
+.more-photos-overlay span {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0,0,0,0.4);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    color: #fff;
+    font-size: 18px;
+    font-weight: 800;
+}
+
+/* Alt Navigasyon (Beyaz Tema, Yuvarlak) */
+.social-bottom-nav {
+    position: fixed;
+    bottom: calc(env(safe-area-inset-bottom, 15px) + 15px);
+    left: 20px;
+    right: 20px;
+    background: rgba(255,255,255,0.9);
+    backdrop-filter: blur(15px);
+    border-radius: 30px;
+    height: 65px;
+    display: flex;
+    justify-content: space-around;
+    align-items: center;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.08);
+    z-index: 12050;
+    border: 1px solid #f0f0f0;
+}
+.social-nav-btn {
+    background: transparent;
+    border: none;
+    color: #999;
+    font-size: 24px;
+    cursor: pointer;
+    transition: 0.2s;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+.social-nav-btn.active {
+    color: #007BFF;
+}
+.social-nav-btn.add-btn {
+    width: 50px;
+    height: 50px;
+    background: #007BFF;
+    color: #fff;
+    border-radius: 16px;
+    box-shadow: 0 4px 15px rgba(0, 123, 255, 0.3);
+}
+.social-nav-btn.add-btn span {
+    font-size: 28px;
+    font-weight: 300;
+    margin-top: -4px;
+}
+/* ==========================================
+   🌐 OLYSOCIAL: PREMIUM UI (BEYAZ TEMA & UIZARD)
+   ========================================== */
+
+/* Genel Görünüm ve Inputlar */
+.social-input-group {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+.social-input-group label {
+    color: #666;
+    font-size: 13px;
+    font-weight: 600;
+}
+.social-input-wrapper {
+    position: relative;
+}
+.social-input-icon {
+    position: absolute;
+    left: 15px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: #888;
+    font-size: 16px;
+}
+.social-input-wrapper input {
+    width: 100%;
+    padding: 16px 15px 16px 45px;
+    border: 1px solid #e0e0e0;
+    border-radius: 14px;
+    background: #f8f9fa;
+    color: #111;
+    font-size: 14px;
+    box-sizing: border-box;
+    outline: none;
+}
+.social-primary-btn {
+    width: 100%;
+    background: #4b6bfb;
+    color: #fff;
+    border: none;
+    padding: 16px;
+    border-radius: 14px;
+    font-size: 16px;
+    font-weight: bold;
+    cursor: pointer;
+    box-shadow: 0 4px 15px rgba(75, 107, 251, 0.3);
+    transition: 0.2s;
+}
+.social-primary-btn:active { transform: scale(0.98); }
+
+/* Topbar ve Hikayeler */
+.social-topbar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: calc(env(safe-area-inset-top) + 15px) 20px 10px;
+    background: #fff;
+}
+.social-stories-list {
+    display: flex;
+    gap: 18px;
+    padding: 15px 20px;
+    overflow-x: auto;
+    scrollbar-width: none;
+    border-bottom: 1px solid #f0f0f0;
+}
+.social-stories-list::-webkit-scrollbar { display: none; }
+.social-story-node {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 6px;
+    position: relative;
+    cursor: pointer;
+}
+.story-ring {
+    width: 60px;
+    height: 60px;
+    border-radius: 50%;
+    padding: 2px;
+    background: #e0e0e0;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+.story-ring.active {
+    background: linear-gradient(45deg, #00d2ff, #4b6bfb, #ff4069);
+}
+.story-ring.add {
+    background: #fff;
+    border: 2px dashed #ccc;
+    color: #aaa;
+    font-size: 24px;
+    padding: 0;
+}
+.story-ring img {
+    width: 100%;
+    height: 100%;
+    border-radius: 50%;
+    object-fit: cover;
+    border: 2px solid #fff;
+}
+.story-name {
+    font-size: 11px;
+    color: #333;
+    font-weight: 600;
+}
+.online-dot {
+    position: absolute;
+    bottom: 20px;
+    right: 2px;
+    width: 12px;
+    height: 12px;
+    background: #27ae60;
+    border: 2px solid #fff;
+    border-radius: 50%;
+}
+
+/* Feed & Search */
+.social-feed-card {
+    background: #fff;
+    border-radius: 16px;
+    box-shadow: 0 4px 20px rgba(0,0,0,0.06);
+    border: 1px solid #f5f5f5;
+    overflow: hidden;
+}
+.feed-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 15px;
+}
+.feed-user-info {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-weight: 700;
+    font-size: 14px;
+}
+.feed-user-info img {
+    width: 34px;
+    height: 34px;
+    border-radius: 50%;
+}
+.feed-options { color: #888; font-weight: bold; letter-spacing: 2px; }
+.feed-image { width: 100%; max-height: 350px; object-fit: cover; }
+.feed-footer { padding: 15px; }
+.feed-footer p { margin: 0 0 10px 0; font-size: 13px; color: #333; line-height: 1.5; }
+.feed-interactions { display: flex; justify-content: space-between; font-size: 12px; color: #888; font-weight: 600; }
+
+.social-search-box {
+    display: flex;
+    align-items: center;
+    background: #f0f2f5;
+    padding: 12px 16px;
+    border-radius: 12px;
+    gap: 10px;
+}
+.social-search-box input {
+    border: none;
+    background: transparent;
+    width: 100%;
+    font-size: 14px;
+    color: #111;
+    outline: none;
+}
+
+/* Post Filters & Sliders */
+.social-filters {
+    display: flex;
+    justify-content: space-between;
+    margin-top: 20px;
+    padding: 0 10px;
+}
+.filter-item {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 8px;
+    color: #888;
+    font-size: 11px;
+    font-weight: 600;
+    cursor: pointer;
+}
+.filter-item.active { color: #111; }
+.filter-icon { font-size: 24px; }
+.social-slider {
+    width: 100%;
+    margin-top: 30px;
+    accent-color: #111;
+}
+
+/* Inbox / Chat List */
+.social-toggle-tabs {
+    display: flex;
+    background: #f0f2f5;
+    border-radius: 12px;
+    padding: 4px;
+    margin-bottom: 20px;
+}
+.social-toggle-tabs button {
+    flex: 1;
+    padding: 10px;
+    border: none;
+    border-radius: 10px;
+    background: transparent;
+    color: #888;
+    font-weight: bold;
+    font-size: 14px;
+    cursor: pointer;
+}
+.social-toggle-tabs button.active {
+    background: #111;
+    color: #fff;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+}
+.social-chat-list { display: flex; flex-direction: column; gap: 15px; }
+.social-chat-item {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    padding: 10px;
+    background: #fff;
+    border-radius: 12px;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.03);
+    border: 1px solid #f9f9f9;
+}
+.social-chat-item img {
+    width: 50px;
+    height: 50px;
+    border-radius: 50%;
+}
+.chat-info { flex: 1; }
+.chat-info h4 { margin: 0 0 5px 0; font-size: 14px; color: #111; }
+.chat-info p { margin: 0; font-size: 12px; color: #888; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 200px; }
+.chat-info .time { font-size: 10px; color: #aaa; font-weight: bold; }
+
+/* Profile View */
+.profile-cover-img {
+    width: 100%;
+    height: 180px;
+    background-size: cover;
+    background-position: center;
+}
+.profile-details-section {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 0 20px;
+    margin-top: -45px;
+}
+.profile-avatar-img {
+    width: 90px;
+    height: 90px;
+    border-radius: 50%;
+    border: 4px solid #fff;
+    object-fit: cover;
+    background: #fff;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+}
+.profile-fullname { margin: 10px 0 2px 0; font-size: 22px; font-weight: 800; color: #111; }
+.profile-username { color: #666; font-size: 13px; font-weight: 600; }
+.profile-tags-row { display: flex; gap: 10px; margin-top: 10px; }
+.profile-tags-row span { background: #f0f2f5; color: #555; font-size: 11px; font-weight: 600; padding: 4px 10px; border-radius: 12px; }
+.profile-edit-btn { flex: 1; padding: 12px; border-radius: 8px; border: 1px solid #ddd; background: #fff; font-weight: 700; color: #111; font-size: 13px; }
+.profile-settings-btn { padding: 12px; border-radius: 8px; border: 1px solid #ddd; background: #fff; font-size: 16px; }
+.profile-stats-row { display: flex; justify-content: space-around; width: 100%; margin: 25px 0; }
+.stat-box { display: flex; flex-direction: column; align-items: center; }
+.stat-box strong { color: #111; font-size: 18px; font-weight: 900; }
+.stat-box span { color: #888; font-size: 11px; font-weight: 600; margin-top: 2px; }
+
+.profile-photo-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    grid-template-rows: 100px 100px;
+    gap: 10px;
+}
+.profile-photo-grid img { width: 100%; height: 100%; object-fit: cover; border-radius: 12px; }
+.more-photos-box { position: relative; border-radius: 12px; overflow: hidden; }
+.more-photos-box span { position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.4); display: flex; justify-content: center; align-items: center; color: #fff; font-size: 18px; font-weight: 800; }
+
+/* 📱 BEMBEYAZ ALT MENÜ (UIZARD STİLİ) */
+.social-white-bottom-nav {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    height: 70px;
+    background: #fff;
+    display: flex;
+    justify-content: space-around;
+    align-items: center;
+    border-top: 1px solid #f0f0f0;
+    z-index: 12050;
+    padding-bottom: env(safe-area-inset-bottom);
+}
+.social-nav-item {
+    background: transparent;
+    border: none;
+    color: #ccc;
+    cursor: pointer;
+    transition: 0.2s;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+.social-nav-item.active {
+    color: #111; /* Aktif ikon simsiyah */
+}
+.social-nav-add {
+    width: 50px;
+    height: 50px;
+    background: #f8f9fa;
+    color: #111;
+    border-radius: 50%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-size: 28px;
+    font-weight: 300;
+    cursor: pointer;
+    border: 1px solid #eee;
+    transform: translateY(-15px); /* Ortadan yukarı taşar */
+    box-shadow: 0 4px 15px rgba(0,0,0,0.05);
+}
+/* ==========================================
+   🌐 OLYSOCIAL: ETKİLEŞİM VE MODAL STİLLERİ
+   ========================================== */
+
+/* Mesajlaşma Odası Sola Kayma Animasyonu */
+.social-chat-slide-in {
+    transform: translateX(0) !important;
+}
+
+.social-chat-bubble {
+    max-width: 75%;
+    padding: 12px 16px;
+    border-radius: 18px;
+    font-size: 14px;
+    line-height: 1.4;
+    word-wrap: break-word;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+}
+
+.social-chat-received {
+    background: #fff;
+    color: #111;
+    align-self: flex-start;
+    border: 1px solid #f0f0f0;
+    border-bottom-left-radius: 4px;
+}
+
+.social-chat-sent {
+    background: #4b6bfb;
+    color: #fff;
+    align-self: flex-end;
+    border-bottom-right-radius: 4px;
+}
+
+/* Hikaye İlerleme Çubuğu Animasyonu */
+@keyframes progressFill {
+    0% { width: 0%; }
+    100% { width: 100%; }
+}
+
+/* Beğeni Butonu Tıklama Efekti */
+.like-icon.liked {
+    transform: scale(1.3);
+}
+
+@keyframes slideUp {
+    from { transform: translateY(100%); }
+    to { transform: translateY(0); }
 }
