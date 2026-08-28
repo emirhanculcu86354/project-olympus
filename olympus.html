@@ -251,12 +251,24 @@
                             </div>
                         </div>
                     </div>
+                    <div class="hub-page">
+                        <div class="hub-grid">
+                            <!-- 📱 DEV OLYOS KARTI -->
+                            <div class="hub-card" onclick="enterAppFromHub('olyos-screen', 'OLYOS')" style="background: linear-gradient(145deg, #0f2027, #203a43, #2c5364) !important; border-color: #00d2ff !important; grid-column: span 2;">
+                                <span class="hub-card-kicker" style="color:#00d2ff;">SYSTEM</span>
+                                <h3 style="color:#fff !important; font-size: 22px !important;">OlyOS</h3>
+                                <p style="color:#888 !important;">Araçlar, Müzik & Dosya Yönetimi</p>
+                                <div class="hub-card-icon" style="color:#00d2ff; filter: drop-shadow(0 0 10px rgba(0, 210, 255, 0.6)); font-size: 40px; margin-top: 10px;">📱</div>
+                            </div>
+                        </div>
+                    </div>
 
                 </div>
 
                 <!-- Sayfa Noktaları (Pagination Dots) -->
                 <div class="hub-pagination">
                     <span class="hub-dot active"></span>
+                    <span class="hub-dot"></span>
                     <span class="hub-dot"></span>
                 </div>
             </div>
@@ -5585,6 +5597,241 @@
                 </div>
             </div>
         </div>
+    </div>
+    <!-- ==========================================
+         📱 OLY-OS: PREMIUM İŞLETİM SİSTEMİ EKRANI
+         ========================================== -->
+    <div id="olyos-screen" class="full-screen-overlay hidden" style="z-index: 10000; background: #050505; flex-direction: column; justify-content: flex-start; overflow-y: auto;">
+        
+        <!-- 📱 PREMIUM iOS STİLİ ÜST BAR -->
+        <div style="width: 100%; padding: calc(env(safe-area-inset-top, 20px) + 15px) 20px 15px 20px; background: rgba(10, 10, 10, 0.75); backdrop-filter: blur(25px); -webkit-backdrop-filter: blur(25px); border-bottom: 1px solid rgba(255,255,255,0.05); display: flex; justify-content: space-between; align-items: center; position: sticky; top: 0; z-index: 100; box-shadow: 0 4px 20px rgba(0,0,0,0.4);">
+            <div style="display: flex; align-items: center; gap: 10px;">
+                <span style="font-size: 22px; filter: drop-shadow(0 2px 4px rgba(0,0,0,0.8));">🧰</span>
+                <h2 style="color: #fff; font-size: 22px; font-weight: 800; margin: 0; letter-spacing: 0.5px;">Araçlar</h2>
+            </div>
+            
+            <button onclick="returnToHub(); document.getElementById('olyos-screen').classList.add('hidden');" style="background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.1); border-radius: 16px; padding: 8px 16px; color: #fff; font-size: 13px; font-weight: bold; cursor: pointer; transition: 0.2s; box-shadow: 0 4px 10px rgba(0,0,0,0.2); display: flex; align-items: center; justify-content: center;" onmousedown="this.style.transform='scale(0.95)'" onmouseup="this.style.transform='scale(1)'">
+                Bitti
+            </button>
+        </div>
+
+        <div style="padding: 20px; display: flex; flex-direction: column; gap: 20px; padding-bottom: 50px;">
+            
+            <!-- UYGULAMALAR (GRID) -->
+            <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 15px;">
+                
+                <!-- 🎵 Spotify (Doğrudan Web'e Gider) -->
+                <div class="track-card spec-track-card" onclick="window.open('https://open.spotify.com/', '_blank')" style="background: linear-gradient(145deg, #0a1f0f, #050505); border-color: #1DB954;">
+                    <div class="track-icon" style="color: #1DB954; font-size:28px;">🎵</div>
+                    <h4 style="color:#fff;">Spotify Web</h4>
+                    <p>Müzik & Podcast</p>
+                </div>
+
+                <!-- 📁 Dosyalar -->
+                <div class="track-card spec-track-card" onclick="openOlyOSModal('olyos-files')" style="background: linear-gradient(145deg, #051a2c, #050505); border-color: #00d2ff;">
+                    <div class="track-icon" style="color: #00d2ff; font-size:28px;">📁</div>
+                    <h4 style="color:#fff;">Dosyalar</h4>
+                    <p>Sistem Arşivi</p>
+                </div>
+
+                <!-- ⛅ Hava Durumu -->
+                <div class="track-card spec-track-card" onclick="openOlyOSModal('olyos-weather')" style="background: linear-gradient(145deg, #2c1a05, #050505); border-color: #f39c12;">
+                    <div class="track-icon" style="color: #f39c12; font-size:28px;">⛅</div>
+                    <h4 style="color:#fff;">Hava Durumu</h4>
+                    <p>Canlı Radar</p>
+                </div>
+
+                <!-- 🧮 Hesap Makinesi -->
+                <div class="track-card spec-track-card" onclick="openOlyOSModal('olyos-calc')" style="background: linear-gradient(145deg, #1a1a1a, #050505); border-color: #aaa;">
+                    <div class="track-icon" style="color: #aaa; font-size:28px;">🧮</div>
+                    <h4 style="color:#fff;">Hesap M.</h4>
+                    <p>Hızlı İşlem</p>
+                </div>
+
+                <!-- 📝 Notlar -->
+                <div class="track-card spec-track-card" onclick="openOlyOSModal('olyos-notes')" style="background: linear-gradient(145deg, #2c2505, #050505); border-color: #f6e58d;">
+                    <div class="track-icon" style="color: #f6e58d; font-size:28px;">📝</div>
+                    <h4 style="color:#fff;">Notlar</h4>
+                    <p>Taslaklar</p>
+                </div>
+
+                <!-- 🌍 Çeviri -->
+                <div class="track-card spec-track-card" onclick="openOlyOSModal('olyos-translate')" style="background: linear-gradient(145deg, #0a0a2a, #050505); border-color: #4b6bfb;">
+                    <div class="track-icon" style="color: #4b6bfb; font-size:28px;">🌍</div>
+                    <h4 style="color:#fff;">Çeviri</h4>
+                    <p>Dil Motoru</p>
+                </div>
+
+                <!-- ⏱️ Sayaç -->
+                <div class="track-card spec-track-card" onclick="openOlyOSModal('olyos-timer')" style="background: linear-gradient(145deg, #2a0a0a, #050505); border-color: #ff4444;">
+                    <div class="track-icon" style="color: #ff4444; font-size:28px;">⏱️</div>
+                    <h4 style="color:#fff;">Kronometre</h4>
+                    <p>Zaman Tutucu</p>
+                </div>
+
+                <!-- ❤️ Sağlık -->
+                <div class="track-card spec-track-card" onclick="closeOlyOSAndGoToTracking()" style="background: linear-gradient(145deg, #2a0510, #050505); border-color: #ff4069;">
+                    <div class="track-icon" style="color: #ff4069; font-size:28px;">❤️</div>
+                    <h4 style="color:#fff;">Sağlık</h4>
+                    <p>Vücut Verileri</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- ==========================================
+             MODALLAR (UYGULAMA PENCERELERİ) 
+             ========================================== -->
+
+        <!-- 📁 Dosyalar -->
+        <div id="olyos-files" class="modal" style="z-index: 10050;">
+            <div class="modal-content" style="max-width: 400px; background: #111; border: 1px solid #00d2ff; padding: 20px;">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+                    <h3 style="color:#00d2ff; margin:0;">📁 Dosya Yöneticisi</h3>
+                    <button onclick="closeOlyOSModal('olyos-files')" style="background:transparent; border:none; color:#ff4444; font-size:18px; cursor:pointer;">✕</button>
+                </div>
+                <div style="display: flex; flex-direction: column; gap: 10px;">
+                    <div style="background:#1a1a1a; padding:15px; border-radius:8px; display:flex; justify-content:space-between; align-items:center; border:1px solid #333;">
+                        <div style="display:flex; align-items:center; gap:10px;"><span style="font-size:20px;">📄</span><span style="color:#fff; font-size:13px;">CULbase_EPlan_CLC1926.pdf</span></div>
+                        <span style="color:#888; font-size:11px;">1.2 MB</span>
+                    </div>
+                    <div style="background:#1a1a1a; padding:15px; border-radius:8px; display:flex; justify-content:space-between; align-items:center; border:1px solid #333;">
+                        <div style="display:flex; align-items:center; gap:10px;"><span style="font-size:20px;">🖼️</span><span style="color:#fff; font-size:13px;">idman_gelisim.jpg</span></div>
+                        <span style="color:#888; font-size:11px;">3.4 MB</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ⛅ Hava Durumu -->
+        <div id="olyos-weather" class="modal" style="z-index: 10050;">
+            <div class="modal-content" style="max-width: 320px; background: linear-gradient(180deg, #1e3c72, #2a5298); border: 1px solid #4b7be5; text-align:center; padding: 30px 20px;">
+                <button onclick="closeOlyOSModal('olyos-weather')" style="position:absolute; top:15px; right:20px; background:transparent; border:none; color:#fff; font-size:18px; cursor:pointer;">✕</button>
+                <span style="color:#82ccdd; font-size:12px; font-weight:bold; letter-spacing:1px; display:block; margin-bottom:10px;">ANLIK DURUM</span>
+                <h2 style="font-size: 28px; font-weight: 500; margin: 0; color:#fff;">Sakarya</h2>
+                <h1 style="font-size: 70px; font-weight: 200; margin: 10px 0; line-height: 1; color:#fff;">24°</h1>
+                <p style="font-size: 16px; font-weight: 600; margin: 0 0 10px 0; color:#dcdde1;">Çoğunlukla Güneşli</p>
+                <div style="display:flex; justify-content:center; gap:15px; font-size:14px; font-weight:bold; color:#fff;">
+                    <span>Y: 28°</span><span>D: 15°</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- 🧮 Hesap Makinesi -->
+        <div id="olyos-calc" class="modal" style="z-index: 10050;">
+            <div class="modal-content" style="background: #000; border: 1px solid #333; padding: 0; max-width: 320px; border-radius: 20px; overflow: hidden;">
+                <div style="display:flex; justify-content:space-between; align-items:center; padding: 15px 20px; border-bottom: 1px solid #1a1a1a;">
+                    <h3 style="color:#00d2ff; margin:0; font-size:14px; font-weight:bold; letter-spacing:1px;">HESAP MAKİNESİ</h3>
+                    <button onclick="closeOlyOSModal('olyos-calc')" style="background:transparent; border:none; color:#ff4444; font-size:20px; font-weight:bold; cursor:pointer;">✕</button>
+                </div>
+                
+                <div style="padding: 20px;">
+                    <div id="olyos-calc-display" style="width:100%; text-align:right; font-size:55px; color:#fff; font-weight:300; margin-bottom:20px; overflow-x:auto; scrollbar-width:none; letter-spacing: 1px;">0</div>
+                    <div class="os-calc-grid">
+                        <button class="calc-btn btn-gray" onclick="olyCalcInput('AC')">AC</button>
+                        <button class="calc-btn btn-gray" onclick="olyCalcInput('+/-')">+/-</button>
+                        <button class="calc-btn btn-gray" onclick="olyCalcInput('%')">%</button>
+                        <button class="calc-btn btn-orange" onclick="olyCalcInput('/')">÷</button>
+                        
+                        <button class="calc-btn btn-dark" onclick="olyCalcInput('7')">7</button>
+                        <button class="calc-btn btn-dark" onclick="olyCalcInput('8')">8</button>
+                        <button class="calc-btn btn-dark" onclick="olyCalcInput('9')">9</button>
+                        <button class="calc-btn btn-orange" onclick="olyCalcInput('*')">×</button>
+                        
+                        <button class="calc-btn btn-dark" onclick="olyCalcInput('4')">4</button>
+                        <button class="calc-btn btn-dark" onclick="olyCalcInput('5')">5</button>
+                        <button class="calc-btn btn-dark" onclick="olyCalcInput('6')">6</button>
+                        <button class="calc-btn btn-orange" onclick="olyCalcInput('-')">-</button>
+                        
+                        <button class="calc-btn btn-dark" onclick="olyCalcInput('1')">1</button>
+                        <button class="calc-btn btn-dark" onclick="olyCalcInput('2')">2</button>
+                        <button class="calc-btn btn-dark" onclick="olyCalcInput('3')">3</button>
+                        <button class="calc-btn btn-orange" onclick="olyCalcInput('+')">+</button>
+                        
+                        <!-- Sıfır butonu geniş (span 2) ama tasarımı oval kalsın -->
+                        <button class="calc-btn btn-dark" style="grid-column: span 2; border-radius: 40px; text-align: left; padding-left: 25px;" onclick="olyCalcInput('0')">0</button>
+                        <button class="calc-btn btn-dark" onclick="olyCalcInput('.')">,</button>
+                        <button class="calc-btn btn-orange" onclick="olyCalcInput('=')">=</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 📝 Notlar -->
+        <div id="olyos-notes" class="modal" style="z-index: 10050;">
+            <div class="modal-content" style="max-width: 400px; background: #111; border: 1px solid #f6e58d; padding: 20px;">
+                <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:15px;">
+                    <h3 style="color:#f6e58d; margin:0; font-size:16px;">📝 Hızlı Notlar</h3>
+                    <button onclick="closeOlyOSModal('olyos-notes')" style="background:transparent; border:none; color:#ff4444; font-size:18px; cursor:pointer;">✕</button>
+                </div>
+                <textarea placeholder="Fikirlerini buraya yaz..." style="width:100%; height:250px; background:#1a1a1a; border:1px solid #333; color:#fff; padding:15px; border-radius:8px; resize:none; outline:none; font-family:monospace;"></textarea>
+            </div>
+        </div>
+
+        <!-- 🌍 Çeviri -->
+        <div id="olyos-translate" class="modal" style="z-index: 10050;">
+            <div class="modal-content" style="max-width: 400px; background: #111; border: 1px solid #4b6bfb; padding: 20px;">
+                <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:15px;">
+                    <h3 style="color:#4b6bfb; margin:0; font-size:16px;">🌍 Çeviri</h3>
+                    <button onclick="closeOlyOSModal('olyos-translate')" style="background:transparent; border:none; color:#ff4444; font-size:18px; cursor:pointer;">✕</button>
+                </div>
+                <div style="display:flex; justify-content:space-between; background:#1a1a1a; padding:10px; border-radius:8px; margin-bottom:10px; border:1px solid #333;">
+                    <span style="color:#fff; font-size:12px;">İngilizce</span><span style="color:#4b6bfb;">⇄</span><span style="color:#fff; font-size:12px;">Türkçe</span>
+                </div>
+                <textarea placeholder="Metin girin..." style="width:100%; height:100px; background:#1a1a1a; border:1px solid #333; color:#fff; padding:10px; border-radius:8px; resize:none; outline:none; margin-bottom:10px;"></textarea>
+                <div style="width:100%; height:100px; background:#0a1020; border:1px solid #4b6bfb; color:#888; padding:10px; border-radius:8px;">Çeviri bekleniyor...</div>
+            </div>
+        </div>
+
+        <!-- ⏱️ KRONOMETRE & SAYAÇ (Tam Ekran, Simsiyah, Mat) -->
+        <div id="olyos-timer" class="modal" style="z-index: 10050; padding: 0;">
+            <div class="modal-content" style="background: #000; border: none; padding: 0; max-width: none; width: 100vw; height: 100dvh; border-radius: 0; overflow: hidden; position: relative; display: flex; flex-direction: column; justify-content: center; align-items: center;">
+                
+                <!-- Sağ Üst Kapat Butonu -->
+                <button onclick="closeOlyOSModal('olyos-timer')" style="position:absolute; top:calc(env(safe-area-inset-top) + 20px); right:20px; background:transparent; border:none; color:#ff4444; font-size:24px; font-weight:bold; cursor:pointer; z-index:10; filter: drop-shadow(0 0 5px rgba(0,0,0,0.8));">✕</button>
+
+                <!-- KRONOMETRE MODU -->
+                <div id="stopwatch-view" style="display:flex; flex-direction:column; align-items:center; width: 100%;">
+                    <h1 id="olyos-stopwatch-display" style="font-size: 80px; font-weight: 200; font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; color: #fff; margin-bottom: 60px; font-variant-numeric: tabular-nums; letter-spacing: 2px;">00:00.00</h1>
+                    
+                    <div style="display:flex; gap:40px; width:100%; justify-content:center;">
+                        <button onclick="resetOlyOsStopwatch()" style="width:80px; height:80px; border-radius:50%; background:#222; color:#fff; border:none; font-size:16px; font-weight:bold; cursor:pointer; transition:0.2s;" onmousedown="this.style.transform='scale(0.9)'" onmouseup="this.style.transform='scale(1)'">Sıfırla</button>
+                        <button id="olyos-sw-start" onclick="toggleOlyOsStopwatch()" style="width:80px; height:80px; border-radius:50%; background:rgba(39, 174, 96, 0.15); color:#27ae60; border:2px solid #27ae60; font-size:16px; font-weight:bold; cursor:pointer; transition:0.2s;" onmousedown="this.style.transform='scale(0.9)'" onmouseup="this.style.transform='scale(1)'">Başlat</button>
+                    </div>
+                </div>
+
+                <!-- GERİ SAYIM (COUNTDOWN) MODU -->
+                <div id="countdown-view" style="display:none; flex-direction:column; align-items:center; width: 100%;">
+                    
+                    <!-- Süre Ayarlama Alanı -->
+                    <div id="countdown-setup" style="display:flex; gap:15px; margin-bottom: 60px; align-items:center;">
+                        <div style="display:flex; flex-direction:column; align-items:center;">
+                            <input type="number" id="cd-m" placeholder="00" min="0" max="99" class="cd-input">
+                            <span style="color:#666; font-size:12px; font-weight:bold; margin-top:5px;">DAKİKA</span>
+                        </div>
+                        <span style="font-size:45px; color:#333; font-weight:200; transform: translateY(-10px);">:</span>
+                        <div style="display:flex; flex-direction:column; align-items:center;">
+                            <input type="number" id="cd-s" placeholder="00" min="0" max="59" class="cd-input">
+                            <span style="color:#666; font-size:12px; font-weight:bold; margin-top:5px;">SANİYE</span>
+                        </div>
+                    </div>
+
+                    <!-- Çalışan Geri Sayım Göstergesi -->
+                    <h1 id="olyos-countdown-display" style="display:none; font-size: 85px; font-weight: 200; font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; color: #f39c12; margin-bottom: 60px; font-variant-numeric: tabular-nums; letter-spacing: 2px;">00:00</h1>
+                    
+                    <div style="display:flex; gap:40px; width:100%; justify-content:center;">
+                        <button onclick="resetOlyOsCountdown()" style="width:80px; height:80px; border-radius:50%; background:#222; color:#fff; border:none; font-size:16px; font-weight:bold; cursor:pointer; transition:0.2s;" onmousedown="this.style.transform='scale(0.9)'" onmouseup="this.style.transform='scale(1)'">İptal</button>
+                        <button id="olyos-cd-start" onclick="toggleOlyOsCountdown()" style="width:80px; height:80px; border-radius:50%; background:rgba(243, 156, 18, 0.15); color:#f39c12; border:2px solid #f39c12; font-size:16px; font-weight:bold; cursor:pointer; transition:0.2s;" onmousedown="this.style.transform='scale(0.9)'" onmouseup="this.style.transform='scale(1)'">Başlat</button>
+                    </div>
+                </div>
+
+                <!-- ALT MOD DEĞİŞTİRİCİ (Kronometre / Sayaç) -->
+                <div style="position:absolute; bottom:calc(env(safe-area-inset-bottom, 15px) + 30px); display:flex; gap:10px; background:#111; padding:8px; border-radius:30px;">
+                    <button id="tab-sw" onclick="switchTimerMode('sw')" style="background:#333; border:none; color:#fff; font-size:13px; font-weight:bold; cursor:pointer; padding:10px 20px; border-radius:20px; transition:0.2s;">Kronometre</button>
+                    <button id="tab-cd" onclick="switchTimerMode('cd')" style="background:transparent; border:none; color:#888; font-size:13px; font-weight:bold; cursor:pointer; padding:10px 20px; border-radius:20px; transition:0.2s;">Sayaç</button>
+                </div>
+            </div>
+        </div>
+
     </div>
 
     <script src="script.js"></script>

@@ -8603,3 +8603,201 @@ body {
     from { transform: translateY(100%); }
     to { transform: translateY(0); }
 }
+/* ==========================================
+   📱 OLY-OS: PREMIUM İŞLETİM SİSTEMİ STİLLERİ
+   ========================================== */
+
+/* OS İkon Tasarımları (Apple Squircle Tarzı) */
+.os-app-wrapper {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 6px;
+    cursor: pointer;
+    transition: transform 0.2s;
+}
+.os-app-wrapper:active {
+    transform: scale(0.9);
+}
+
+.os-icon {
+    width: 65px;
+    height: 65px;
+    border-radius: 18px; /* Tam yuvarlak değil, şık köşeli (squircle) */
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-size: 32px;
+    color: #fff;
+    border: 1px solid rgba(255,255,255,0.15);
+}
+
+.os-icon-label {
+    color: #fff;
+    font-size: 11px;
+    font-weight: 600;
+    text-shadow: 0 1px 3px rgba(0,0,0,0.8);
+}
+
+/* OlyOS Dock (Alt Bar) */
+.os-dock {
+    width: 100%;
+    height: 90px;
+    background: rgba(255,255,255,0.15);
+    backdrop-filter: blur(25px);
+    -webkit-backdrop-filter: blur(25px);
+    border-radius: 35px;
+    border: 1px solid rgba(255,255,255,0.2);
+    display: flex;
+    justify-content: space-around;
+    align-items: center;
+    padding: 0 10px;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+}
+
+.os-dock .os-icon {
+    width: 60px;
+    height: 60px;
+}
+.os-dock .os-icon-label { display: none; } /* Dock'ta isim yazmaz */
+
+/* MİNİ UYGULAMA PENCERELERİ (Aşağıdan Yukarı Kayarak Açılır) */
+.os-app-window {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    z-index: 100;
+    display: flex;
+    flex-direction: column;
+    transition: transform 0.4s cubic-bezier(0.25, 0.8, 0.25, 1);
+    transform: translateY(100%); /* Varsayılan olarak ekranın altında gizli */
+}
+
+.os-app-window.active {
+    transform: translateY(0); /* Ekrana girer */
+}
+
+.os-app-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: calc(env(safe-area-inset-top) + 15px) 20px 15px 20px;
+    background: #111;
+    color: #fff;
+    border-bottom: 1px solid #222;
+}
+
+.os-app-close {
+    background: transparent;
+    border: none;
+    color: #00d2ff;
+    font-size: 16px;
+    font-weight: bold;
+    cursor: pointer;
+}
+
+/* ==========================================
+   🧮 HESAP MAKİNESİ (KUSURSUZ YUVARLAK STİL)
+   ========================================== */
+.os-calc-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 12px;
+}
+
+.calc-btn {
+    width: 100%;
+    /* Butonların her zaman kare (ve border-radius ile yuvarlak) kalmasını zorlar */
+    aspect-ratio: 1 / 1; 
+    border-radius: 50%;
+    border: none;
+    font-size: 26px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: filter 0.2s, transform 0.1s;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 0;
+}
+
+.calc-btn:active { 
+    filter: brightness(1.4); 
+    transform: scale(0.95);
+}
+
+.btn-gray { 
+    background: #a5a5a5; 
+    color: #000; 
+}
+
+.btn-dark { 
+    background: #333333; 
+    color: #fff; 
+}
+
+.btn-orange { 
+    background: #ff9f0a; 
+    color: #fff; 
+}
+
+/* Sıfır butonu yatayda 2 birim kaplar, aspect-ratio'yu ezeriz ki oval olsun */
+.calc-btn[style*="span 2"] {
+    aspect-ratio: auto !important;
+    height: 100%;
+    justify-content: flex-start;
+}
+/* DOSYALAR UYGULAMASI */
+.os-file-row {
+    display: flex;
+    align-items: center;
+    padding: 15px 20px;
+    border-bottom: 1px solid #eee;
+    font-weight: bold;
+    font-size: 15px;
+}
+.os-file-icon { font-size: 22px; margin-right: 15px; }
+.os-folder {
+    background: #fff;
+    border-radius: 12px;
+    padding: 15px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    border: 1px solid #eee;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.02);
+}
+/* Geri Sayım Giriş Kutuları */
+.cd-input {
+    width: 90px;
+    height: 90px;
+    background: #111;
+    border: none;
+    color: #fff;
+    font-size: 45px;
+    text-align: center;
+    border-radius: 20px;
+    font-weight: 200;
+    font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+    outline: none;
+    transition: 0.2s;
+}
+
+.cd-input:focus {
+    background: #1a1a1a;
+    box-shadow: 0 0 15px rgba(243, 156, 18, 0.2);
+}
+
+/* Tarayıcı oklarını (spinner) gizler */
+.cd-input::-webkit-outer-spin-button,
+.cd-input::-webkit-inner-spin-button {
+    -webkit-appearance: none;
+    margin: 0;
+}
+.cd-input[type="number"] {
+    appearance: textfield;
+    -moz-appearance: textfield;
+}

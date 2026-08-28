@@ -12878,3 +12878,207 @@ document.addEventListener("DOMContentLoaded", () => {
         });
     }
 });
+window.openOlyOSModal = function(id) {
+    document.getElementById(id).style.display = 'flex';
+    if (navigator.vibrate) navigator.vibrate(15);
+};
+
+window.closeOlyOSModal = function(id) {
+    document.getElementById(id).style.display = 'none';
+    if (navigator.vibrate) navigator.vibrate(10);
+};
+
+window.closeOlyOSAndGoToTracking = function() {
+    document.getElementById('olyos-screen').classList.add('hidden');
+    returnToHub();
+    // Go to tracking screen
+    setTimeout(() => {
+        document.querySelector('[data-target="tracking-sec"]').click();
+    }, 300);
+};
+
+// Hesap Makinesi
+let olyCalcExpression = "";
+window.olyCalcInput = function(val) {
+    const display = document.getElementById('olyos-calc-display');
+    if (val === 'AC') {
+        olyCalcExpression = "";
+        display.innerText = "0";
+    } else if (val === '=') {
+        try {
+            let cleanExpr = olyCalcExpression.replace(/[^0-9+\-*/.]/g, '');
+            let result = eval(cleanExpr);
+            if (result.toString().length > 8) result = parseFloat(result.toFixed(5));
+            display.innerText = result;
+            olyCalcExpression = result.toString();
+        } catch (e) {
+            display.innerText = "Hata";
+            olyCalcExpression = "";
+        }
+    } else if (val === '+/-') {
+        if (olyCalcExpression.startsWith('-')) olyCalcExpression = olyCalcExpression.substring(1);
+        else olyCalcExpression = '-' + olyCalcExpression;
+        display.innerText = olyCalcExpression || "0";
+    } else if (val === '%') {
+        try {
+            let result = eval(olyCalcExpression) / 100;
+            display.innerText = result;
+            olyCalcExpression = result.toString();
+        } catch(e) { }
+    } else {
+        olyCalcExpression += val;
+        display.innerText = olyCalcExpression;
+    }
+    if (navigator.vibrate) navigator.vibrate(10);
+};
+
+// Kronometre
+let olyOsStopwatchTimer = null;
+let olyOsStopwatchTime = 0; 
+let isOlyOsStopwatchRunning = false;
+
+window.toggleOlyOsStopwatch = function() {
+    const btn = document.getElementById('olyos-sw-start');
+    if (isOlyOsStopwatchRunning) {
+        clearInterval(olyOsStopwatchTimer);
+        btn.innerText = "Başlat";
+        btn.style.color = "#27ae60";
+        btn.style.borderColor = "#27ae60";
+        btn.style.background = "rgba(39, 174, 96, 0.2)";
+    } else {
+        olyOsStopwatchTimer = setInterval(updateOlyOsStopwatch, 10);
+        btn.innerText = "Durdur";
+        btn.style.color = "#ff4444";
+        btn.style.borderColor = "#ff4444";
+        btn.style.background = "rgba(255, 68, 68, 0.2)";
+    }
+    isOlyOsStopwatchRunning = !isOlyOsStopwatchRunning;
+    if (navigator.vibrate) navigator.vibrate(15);
+};
+
+window.resetOlyOsStopwatch = function() {
+    clearInterval(olyOsStopwatchTimer);
+    olyOsStopwatchTime = 0;
+    isOlyOsStopwatchRunning = false;
+    document.getElementById('olyos-stopwatch-display').innerText = "00:00.00";
+    const btn = document.getElementById('olyos-sw-start');
+    btn.innerText = "Başlat";
+    btn.style.color = "#27ae60";
+    btn.style.borderColor = "#27ae60";
+    btn.style.background = "rgba(39, 174, 96, 0.2)";
+    if (navigator.vibrate) navigator.vibrate(15);
+};
+
+function updateOlyOsStopwatch() {
+    olyOsStopwatchTime++;
+    let ms = olyOsStopwatchTime % 100;
+    let totalSec = Math.floor(olyOsStopwatchTime / 100);
+    let s = totalSec % 60;
+    let m = Math.floor(totalSec / 60);
+    let displayStr = `${m.toString().padStart(2, '0')}:${s.toString().padStart(2, '0')}.${ms.toString().padStart(2, '0')}`;
+    document.getElementById('olyos-stopwatch-display').innerText = displayStr;
+}
+// ==========================================
+// ⏱️ ZAMANLAYICI SEKME DEĞİŞTİRME MOTORU
+// ==========================================
+window.switchTimerMode = function(mode) {
+    const swView = document.getElementById('stopwatch-view');
+    const cdView = document.getElementById('countdown-view');
+    const tabSw = document.getElementById('tab-sw');
+    const tabCd = document.getElementById('tab-cd');
+
+    if (mode === 'sw') {
+        swView.style.display = 'flex';
+        cdView.style.display = 'none';
+        tabSw.style.background = '#333'; tabSw.style.color = '#fff';
+        tabCd.style.background = 'transparent'; tabCd.style.color = '#888';
+    } else {
+        swView.style.display = 'none';
+        cdView.style.display = 'flex';
+        tabCd.style.background = '#333'; tabCd.style.color = '#fff';
+        tabSw.style.background = 'transparent'; tabSw.style.color = '#888';
+    }
+    if (navigator.vibrate) navigator.vibrate(10);
+};
+
+// ==========================================
+// ⏳ GERİ SAYIM (COUNTDOWN) MOTORU
+// ==========================================
+let olyOsCountdownTimer = null;
+let olyOsCountdownTime = 0; // Toplam saniye
+let isOlyOsCountdownRunning = false;
+
+window.toggleOlyOsCountdown = function() {
+    const btn = document.getElementById('olyos-cd-start');
+    const setupDiv = document.getElementById('countdown-setup');
+    const displayDiv = document.getElementById('olyos-countdown-display');
+    
+    if (isOlyOsCountdownRunning) {
+        // Duraklat
+        clearInterval(olyOsCountdownTimer);
+        btn.innerText = "Devam";
+        btn.style.color = "#27ae60";
+        btn.style.borderColor = "#27ae60";
+        btn.style.background = "rgba(39, 174, 96, 0.15)";
+    } else {
+        // İlk kez başlatılıyorsa girdileri oku
+        if (olyOsCountdownTime === 0) {
+            let m = parseInt(document.getElementById('cd-m').value) || 0;
+            let s = parseInt(document.getElementById('cd-s').value) || 0;
+            olyOsCountdownTime = (m * 60) + s;
+            
+            if (olyOsCountdownTime <= 0) return; // Süre yoksa başlama
+            
+            setupDiv.style.display = 'none';
+            displayDiv.style.display = 'block';
+            updateCountdownDisplay();
+        }
+
+        // Başlat
+        olyOsCountdownTimer = setInterval(() => {
+            olyOsCountdownTime--;
+            updateCountdownDisplay();
+            
+            if (olyOsCountdownTime <= 0) {
+                clearInterval(olyOsCountdownTimer);
+                isOlyOsCountdownRunning = false;
+                displayDiv.innerText = "00:00";
+                
+                // Güçlü alarm titreşimi
+                if (navigator.vibrate) navigator.vibrate([500, 200, 500, 200, 500]);
+                alert("⏰ Süre Doldu!");
+                resetOlyOsCountdown();
+            }
+        }, 1000);
+        
+        btn.innerText = "Durdur";
+        btn.style.color = "#f39c12";
+        btn.style.borderColor = "#f39c12";
+        btn.style.background = "rgba(243, 156, 18, 0.15)";
+    }
+    isOlyOsCountdownRunning = !isOlyOsCountdownRunning;
+    if (navigator.vibrate) navigator.vibrate(15);
+};
+
+window.resetOlyOsCountdown = function() {
+    clearInterval(olyOsCountdownTimer);
+    isOlyOsCountdownRunning = false;
+    olyOsCountdownTime = 0;
+    
+    // Ekranı kurulum moduna döndür
+    document.getElementById('countdown-setup').style.display = 'flex';
+    document.getElementById('olyos-countdown-display').style.display = 'none';
+    
+    const btn = document.getElementById('olyos-cd-start');
+    btn.innerText = "Başlat";
+    btn.style.color = "#f39c12";
+    btn.style.borderColor = "#f39c12";
+    btn.style.background = "rgba(243, 156, 18, 0.15)";
+    if (navigator.vibrate) navigator.vibrate(15);
+};
+
+function updateCountdownDisplay() {
+    let m = Math.floor(olyOsCountdownTime / 60);
+    let s = olyOsCountdownTime % 60;
+    document.getElementById('olyos-countdown-display').innerText = `${m.toString().padStart(2, '0')}:${s.toString().padStart(2, '0')}`;
+}
