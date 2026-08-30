@@ -13082,3 +13082,106 @@ function updateCountdownDisplay() {
     let s = olyOsCountdownTime % 60;
     document.getElementById('olyos-countdown-display').innerText = `${m.toString().padStart(2, '0')}:${s.toString().padStart(2, '0')}`;
 }
+// ==========================================
+// 🔐 PREMIUM GİRİŞ, KAYIT VE MİSAFİR MOTORU
+// ==========================================
+
+let guestTimeoutTimer = null;
+
+// Ekranlar arası geçiş (Giriş <-> Kayıt)
+window.toggleAuthView = function(view) {
+    if (navigator.vibrate) navigator.vibrate(15);
+    if (view === 'register') {
+        document.getElementById('login-form-view').style.display = 'none';
+        document.getElementById('register-form-view').style.display = 'block';
+    } else {
+        document.getElementById('register-form-view').style.display = 'none';
+        document.getElementById('login-form-view').style.display = 'block';
+    }
+};
+
+// 1. E-Posta ile Normal Giriş
+window.loginWithEmail = function() {
+    const email = document.getElementById('login-email').value;
+    const pass = document.getElementById('login-password').value;
+    
+    if(!email || !pass) {
+        alert("Lütfen e-posta ve şifrenizi girin.");
+        return;
+    }
+    
+    if (navigator.vibrate) navigator.vibrate(20);
+    auth.signInWithEmailAndPassword(email, pass).catch(err => {
+        alert("Giriş başarısız. Lütfen bilgilerinizi kontrol edin.\n(" + err.message + ")");
+    });
+};
+
+// 2. Yeni Hesap Oluşturma
+window.registerWithEmail = function() {
+    const name = document.getElementById('reg-name').value;
+    const email = document.getElementById('reg-email').value;
+    const pass = document.getElementById('reg-password').value;
+    
+    if(!name || !email || !pass) {
+        alert("Lütfen tüm alanları doldurun.");
+        return;
+    }
+    
+    if(pass.length < 6) {
+        alert("Şifre en az 6 karakter olmalıdır.");
+        return;
+    }
+
+    if (navigator.vibrate) navigator.vibrate(20);
+
+    auth.createUserWithEmailAndPassword(email, pass).then((userCredential) => {
+        // Kayıt başarılı olduğunda kullanıcının ismini Firebase'e kaydet
+        return userCredential.user.updateProfile({
+            displayName: name
+        });
+    }).then(() => {
+        // İsim güncellendikten sonra sistem (auth.onAuthStateChanged) otomatik olarak Hub ekranına yönlendirecektir.
+    }).catch(err => {
+        alert("Kayıt oluşturulamadı.\n(" + err.message + ")");
+    });
+};
+
+// 3. Misafir Girişi (2 Dakika Zaman Sınırlı)
+window.guestLogin = function() {
+    if (navigator.vibrate) navigator.vibrate([30, 50]);
+    
+    // Firebase "Anonymous" girişini kullanır (Veritabanını güvenle inceleyebilir)
+    auth.signInAnonymously().then(() => {
+        alert("👋 Misafir girişi yapıldı!\n\nUygulamayı incelemeniz için 2 dakikalık süreniz başlamıştır.");
+        
+        // Mevcut bir zamanlayıcı varsa sıfırla
+        if (guestTimeoutTimer) clearTimeout(guestTimeoutTimer);
+        
+        // 120.000 ms (2 Dakika) sonra sistemi zorla kapatan motor
+        guestTimeoutTimer = setTimeout(() => {
+            auth.signOut().then(() => {
+                if (navigator.vibrate) navigator.vibrate([500, 200, 500]);
+                alert("⏱️ Misafir süreniz doldu!\nUygulamayı kullanmaya devam etmek için lütfen ücretsiz kayıt olun.");
+                window.location.reload(); // Sayfayı tamamen yenileyerek giriş ekranına zorla
+            });
+        }, 120000);
+
+    }).catch((error) => {
+        alert("Misafir girişi başarısız oldu. Lütfen Firebase konsolundan 'Anonymous' girişini aktif edin.");
+        console.error(error);
+    });
+};
+
+// GÜVENLİK DÜZELTMESİ: Çıkış yapıldığında veya normal hesaba girildiğinde misafir sayacını iptal et
+auth.onAuthStateChanged(user => {
+    if (user) {
+        // Eğer giren kişi misafir DEĞİLSE sayacı iptal et (gerçek hesaptaysa atmasın)
+        if (!user.isAnonymous && guestTimeoutTimer) {
+            clearTimeout(guestTimeoutTimer);
+            guestTimeoutTimer = null;
+        }
+    } else {
+        // Biri çıkış yaptıysa sayacı iptal et
+        if (guestTimeoutTimer) clearTimeout(guestTimeoutTimer);
+    }
+});
