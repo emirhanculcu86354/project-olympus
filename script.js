@@ -18,27 +18,41 @@ let presenceConnectionRef = null;
 
 db.settings({ cacheSizeBytes: firebase.firestore.CACHE_SIZE_UNLIMITED });
 
+// EmailJS Başlatma (Kendi Public Key'ini Emailjs.com'dan alıp buraya yazacaksın)
+emailjs.init("Id219wUMMGoBxc3Jh");
+
+// 🌍 Kullanıcının IP Adresinden Konumunu Bulan Fonksiyon
+async function getUserLocation() {
+    try {
+        let response = await fetch('https://ipapi.co/json/');
+        let data = await response.json();
+        return `${data.city}, ${data.country_name} (IP: ${data.ip})`;
+    } catch (error) {
+        return "Bilinmeyen Konum";
+    }
+}
+
 // YÜKLEME EKRANI KONTROLÜ İÇİN DEĞİŞKEN
 let isAppInitialized = false;
 
 auth.onAuthStateChanged(user => {
     if (user) {
         setupRealtimePresence(user.uid);
-        // 1. DURUM: KULLANICI ZATEN GİRİŞ YAPMIŞ
+        
+        // Arka planda login ekranını gizle ki animasyon bitince Hub çıksın
+        document.getElementById('login-screen').style.display = 'none';
         document.getElementById('login-screen').classList.add('hidden');
 
-        // Eğer uygulama ilk kez yükleniyorsa daktilo animasyonunu başlat
         if (!isAppInitialized) {
+            isAppInitialized = true; // Bayrağı hemen çek
             playSplashAnimation(() => {
-                // Animasyon bitince ARTIK APP DEĞİL, HUB (MERKEZ ÜS) AÇILACAK!
                 document.getElementById('hub-screen').classList.remove('hidden');
                 document.getElementById('hub-screen').style.display = 'flex';
                 document.getElementById('app-content').classList.add('hidden');
                 initHubCarousel();
             });
-            isAppInitialized = true;
         } else {
-            // Animasyon zaten oynadıysa direkt HUB göster
+            // Zaten çalışıyorsa (sayfa yenilenmediyse) direkt Hub'a geç
             document.getElementById('hub-screen').classList.remove('hidden');
             document.getElementById('hub-screen').style.display = 'flex';
             document.getElementById('app-content').classList.add('hidden');
@@ -61,24 +75,52 @@ auth.onAuthStateChanged(user => {
 
         loadDataFromCloud(user.uid);
         listenForNotifications();
+        updateProfileFollowStats();
 
     } else {
         if (presenceConnectionRef) presenceConnectionRef.off();
-        // 2. DURUM: KULLANICI GİRİŞ YAPMAMIŞ (SADECE LOGIN EKRANI GÖSTERİLMELİ)
-        const loadingScreen = document.getElementById('loading-screen');
-        if (loadingScreen) loadingScreen.style.display = 'none'; // Animasyonu iptal et
-
-        document.getElementById('login-screen').classList.remove('hidden');
-        document.getElementById('app-content').classList.add('hidden');
+        
+        // Arka planda Hub'ı gizle
         document.getElementById('hub-screen').classList.add('hidden');
-        isAppInitialized = true;
+        document.getElementById('app-content').classList.add('hidden');
+
+        if (!isAppInitialized) {
+            isAppInitialized = true; // Bayrağı hemen çek
+            // Eskiden burada animasyonu iptal edip login ekranını açıyordu. ŞİMDİ ÖNCE ANİMASYON OYNAYACAK!
+            playSplashAnimation(() => {
+                document.getElementById('login-screen').classList.remove('hidden');
+                document.getElementById('login-screen').style.display = 'flex';
+            });
+        } else {
+            document.getElementById('login-screen').classList.remove('hidden');
+            document.getElementById('login-screen').style.display = 'flex';
+        }
     }
-    updateProfileFollowStats();
 });
 
-document.getElementById('google-login-btn').addEventListener('click', () => {
+document.getElementById('google-login-btn').addEventListener('click', async () => {
+    if (navigator.vibrate) navigator.vibrate(20);
     const provider = new firebase.auth.GoogleAuthProvider();
-    auth.signInWithPopup(provider).catch(err => alert("Giriş Hatası: " + err.message));
+    
+    try {
+        const result = await auth.signInWithPopup(provider);
+        const user = result.user;
+        
+        // 🌍 Konumu bul ve Mail at
+        const location = await getUserLocation();
+        const time = new Date().toLocaleString('tr-TR');
+
+        emailjs.send("SENIN_SERVICE_ID", "SENIN_TEMPLATE_ID_GUVENLIK", {
+            to_name: user.displayName,
+            to_email: user.email,
+            login_time: time,
+            login_location: location,
+            message: `Hesabınıza ${time} tarihinde ${location} konumundan yeni bir giriş yapıldı. Eğer bu siz değilseniz hemen şifrenizi değiştirin.`
+        });
+        
+    } catch (err) {
+        alert("Giriş Hatası: " + err.message);
+    }
 });
 
 window.logout = function () { auth.signOut(); }
@@ -2233,24 +2275,23 @@ window.closeOlyChat = function () {
 function playSplashAnimation(onCompleteCallback) {
     const loadingScreen = document.getElementById('loading-screen');
 
-    // Eğer HTML'de yükleme ekranı yoksa direkt uygulamaya geç
     if (!loadingScreen) {
         if (onCompleteCallback) onCompleteCallback();
         return;
     }
 
-    // Logonun ekranda kalma süresi (Şu an 2500 milisaniye = 2.5 Saniye)
+    // 10 Saniye bekle (10000 milisaniye)
     setTimeout(() => {
         // Ekranı CSS ile yukarı kaydır (Perde açılışı)
         loadingScreen.classList.add('slide-up-animation');
 
-        // CSS animasyon süresi dolunca arkaplandan tamamen sil ve Hub'ı göster
+        // CSS animasyon süresi dolunca arkaplandan tamamen sil ve yönlendir
         setTimeout(() => {
             loadingScreen.style.display = 'none';
             if (onCompleteCallback) onCompleteCallback(); 
         }, 800);
 
-    }, 10000); // Logonun animasyon süresi uzunsa burayı 3000 veya 4000 yapabilirsin
+    }, 10000); // <-- Süreyi 10 Saniye Yaptık
 }
 
 window.cameFromSocialToArena = false; // Hafıza Değişkeni
@@ -13125,7 +13166,12 @@ window.registerWithEmail = function() {
             displayName: name
         });
     }).then(() => {
-        // İsim güncellendikten sonra sistem (auth.onAuthStateChanged) otomatik olarak Hub ekranına yönlendirecektir.
+        // 🔥 YENİ: HOŞ GELDİN MAİLİ GÖNDER!
+        emailjs.send("service_8a342ow", "template_ec7zmcb", {
+            to_name: name,
+            to_email: email,
+            message: "Project Olympus'a hoş geldin şampiyon! Sınırlarını aşmaya ve en iyi versiyonuna ulaşmaya hazır mısın?"
+        }).then(() => console.log("Hoş geldin maili gitti!"));
     }).catch(err => {
         alert("Kayıt oluşturulamadı.\n(" + err.message + ")");
     });
@@ -13154,6 +13200,49 @@ window.guestLogin = function() {
     }).catch((error) => {
         alert("Misafir girişi başarısız oldu. Lütfen Firebase konsolundan 'Anonymous' girişini aktif edin.");
         console.error(error);
+    });
+};
+// 4. Şifre Sıfırlama E-postası Gönderme Motoru
+window.sendPasswordResetEmail = function() {
+    const email = document.getElementById('login-email').value.trim();
+    
+    if (!email) {
+        alert("Lütfen şifresini sıfırlamak istediğiniz e-posta adresini üstteki kutuya yazın ve 'Şifremi Unuttum' yazısına tekrar tıklayın.");
+        return;
+    }
+
+    if (navigator.vibrate) navigator.vibrate(20);
+    
+    // Firebase üzerinden şifre sıfırlama mailini ateşle
+    auth.sendPasswordResetEmail(email)
+        .then(() => {
+            alert("📬 Şifre sıfırlama bağlantısı gönderildi!\n\nLütfen e-posta kutunuzu (ve Spam klasörünü) kontrol edin.");
+        })
+        .catch((error) => {
+            // Eğer kullanıcı kayıtlı değilse Firebase uyarı verir
+            if(error.code === 'auth/user-not-found') {
+                alert("Bu e-posta adresiyle kayıtlı bir sporcu bulunamadı.");
+            } else {
+                alert("Hata: " + error.message);
+            }
+        });
+};
+
+// 5. Apple Girişi (Premium)
+window.appleLogin = function() {
+    if (navigator.vibrate) navigator.vibrate(15);
+    const provider = new firebase.auth.OAuthProvider('apple.com');
+    auth.signInWithPopup(provider).catch(err => {
+        alert("Apple Girişi şu an aktif değil. Lütfen Firebase konsolundan Apple'ı etkinleştirin.");
+    });
+};
+
+// 6. GitHub Girişi (Geliştiriciler İçin)
+window.githubLogin = function() {
+    if (navigator.vibrate) navigator.vibrate(15);
+    const provider = new firebase.auth.GithubAuthProvider();
+    auth.signInWithPopup(provider).catch(err => {
+        alert("GitHub Girişi şu an aktif değil. Lütfen Firebase konsolundan GitHub'ı etkinleştirin.");
     });
 };
 

@@ -34,6 +34,8 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/loaders/GLTFLoader.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/loaders/DRACOLoader.js"></script>
+    <!-- EMAILJS E-POSTA MOTORU -->
+    <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/@emailjs/browser@3/dist/email.min.js"></script>
 
 </head>
 
@@ -58,7 +60,11 @@
                     <input type="email" id="login-email" placeholder="ornek@mail.com" style="width:100%; padding:14px; background:#111; color:#fff; border:1px solid #333; border-radius:10px; outline:none; font-size:14px; transition: border 0.3s;" onfocus="this.style.borderColor='var(--goldnova)'" onblur="this.style.borderColor='#333'">
                 </div>
                 <div class="input-group" style="margin-bottom: 20px; text-align: left;">
-                    <label style="color:#aaa; font-size:11px; margin-bottom:5px; display:block; font-weight:bold;">Şifre</label>
+                    <div style="display: flex; justify-content: space-between;">
+                        <label style="color:#aaa; font-size:11px; margin-bottom:5px; display:block; font-weight:bold;">Şifre</label>
+                        <!-- YENİ: Şifre Sıfırlama Maili Gönderme Butonu -->
+                        <a href="javascript:void(0)" onclick="sendPasswordResetEmail()" style="color: #4b6bfb; font-size: 11px; text-decoration: none; font-weight: bold;">Şifremi Unuttum?</a>
+                    </div>
                     <input type="password" id="login-password" placeholder="••••••••" style="width:100%; padding:14px; background:#111; color:#fff; border:1px solid #333; border-radius:10px; outline:none; font-size:14px; transition: border 0.3s;" onfocus="this.style.borderColor='var(--goldnova)'" onblur="this.style.borderColor='#333'">
                 </div>
                 
@@ -70,9 +76,22 @@
                     <div style="flex:1; height:1px; background:#333;"></div>
                 </div>
 
+                <!-- Google Butonu -->
                 <button id="google-login-btn" class="edit-btn" style="display:flex; justify-content:center; align-items:center; gap:10px; width: 100%; padding: 12px; margin-bottom: 10px; border-color: #555; color: #fff; border-radius: 10px;">
                     <img src="https://upload.wikimedia.org/wikipedia/commons/c/c1/Google_%22G%22_logo.svg" alt="G" style="width:18px;"> Google ile Devam Et
                 </button>
+
+                <!-- YENİ: Apple ve GitHub Butonları (Yan Yana) -->
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 10px;">
+                    <button onclick="appleLogin()" class="edit-btn" style="display:flex; justify-content:center; align-items:center; gap:8px; padding: 12px; border-color: #555; color: #fff; border-radius: 10px;">
+                        <img src="https://images.seeklogo.com/logo-png/15/1/apple-logo-png_seeklogo-158010.png" style="width:18px; filter: invert(1);"> GitHub
+                    </button>
+                    <button onclick="githubLogin()" class="edit-btn" style="display:flex; justify-content:center; align-items:center; gap:8px; padding: 12px; border-color: #555; color: #fff; border-radius: 10px;">
+                        <img src="https://github.githubassets.com/images/modules/logos_page/GitHub-Mark.png" style="width:18px; filter: invert(1);"> GitHub
+                    </button>
+                </div>
+
+                <!-- Misafir Butonu -->
                 <button onclick="guestLogin()" class="edit-btn" style="width: 100%; padding: 12px; border-color: #00d2ff; color: #00d2ff; margin-bottom: 25px; border-radius: 10px;">👤 Misafir Olarak İncele (2 Dk)</button>
 
                 <p style="font-size:12px; color:#888; margin:0;">Hesabın yok mu? <span onclick="toggleAuthView('register')" style="color:var(--goldnova); font-weight:bold; cursor:pointer;">Kayıt Ol</span></p>
