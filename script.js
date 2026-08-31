@@ -2228,44 +2228,29 @@ window.closeOlyChat = function () {
     document.getElementById('oly-avatar').style.transform = 'scale(1)'; // Avatarı geri getir
 };
 // ==========================================
-// YÜKLEME (SPLASH) EKRANI ANİMASYONU
+// 🎬 YÜKLEME (SPLASH) EKRANI ANİMASYONU
 // ==========================================
 function playSplashAnimation(onCompleteCallback) {
-    const textElement = document.getElementById('loading-text');
     const loadingScreen = document.getElementById('loading-screen');
 
     // Eğer HTML'de yükleme ekranı yoksa direkt uygulamaya geç
-    if (!textElement || !loadingScreen) {
+    if (!loadingScreen) {
         if (onCompleteCallback) onCompleteCallback();
         return;
     }
 
-    const targetText = "PROJECT OLYMPUS";
-    let charIndex = 0;
-    textElement.textContent = "";
+    // Logonun ekranda kalma süresi (Şu an 2500 milisaniye = 2.5 Saniye)
+    setTimeout(() => {
+        // Ekranı CSS ile yukarı kaydır (Perde açılışı)
+        loadingScreen.classList.add('slide-up-animation');
 
-    // Daktilo efekti: Harfleri sırayla yazdır
-    const typingInterval = setInterval(() => {
-        if (charIndex < targetText.length) {
-            textElement.textContent += targetText.charAt(charIndex);
-            charIndex++;
-        } else {
-            clearInterval(typingInterval); // Yazım bitti
+        // CSS animasyon süresi dolunca arkaplandan tamamen sil ve Hub'ı göster
+        setTimeout(() => {
+            loadingScreen.style.display = 'none';
+            if (onCompleteCallback) onCompleteCallback(); 
+        }, 800);
 
-            // Yazı tam olarak ekranda belirdikten sonra yarım saniye bekle
-            setTimeout(() => {
-                // Ekranı CSS ile yukarı kaydır
-                loadingScreen.classList.add('slide-up-animation');
-
-                // CSS animasyon süresi (0.8s) dolunca arkaplandan sil ve ana sayfayı göster
-                setTimeout(() => {
-                    loadingScreen.style.display = 'none';
-                    if (onCompleteCallback) onCompleteCallback(); // Ana sayfayı açan tetikleyici
-                }, 800);
-
-            }, 600);
-        }
-    }, 120); // Harf çıkış hızı
+    }, 10000); // Logonun animasyon süresi uzunsa burayı 3000 veya 4000 yapabilirsin
 }
 
 window.cameFromSocialToArena = false; // Hafıza Değişkeni
