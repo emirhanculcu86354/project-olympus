@@ -3603,7 +3603,7 @@ input:checked+.ios-slider:before {
     flex-direction: column;
     gap: 16px;
     overflow-y: auto;
-    padding: 18px 16px max(18px, );
+    padding: 18px 16px max(18px, env(safe-area-inset-bottom));
     -webkit-overflow-scrolling: touch;
 }
 
@@ -4195,7 +4195,7 @@ input:checked+.ios-slider:before {
 @media (max-width: 600px) {
     .progress-viewer-nav {
         top: auto;
-        bottom: max(28px, );
+        bottom: max(28px, env(safe-area-inset-bottom));
         width: 50px;
         height: 44px;
         border-radius: 12px;
@@ -8802,4 +8802,155 @@ body {
 .cd-input[type="number"] {
     appearance: textfield;
     -moz-appearance: textfield;
+}
+/* ==========================================
+   🛠️ OLY-MAINTAIN V2 STİLLERİ (REACT KLON)
+   ========================================== */
+:root {
+    --m-ink: #1C2B39;
+    --m-muted: #5B6B78;
+    --m-line: #E1E5E8;
+    --m-bg: #F5F6F7;
+    --m-surface: #FFFFFF;
+    --m-blue: #2B6CB0;
+    --m-amber: #B4750C;
+    --m-red: #B91C1C;
+    --m-green: #1F7A4D;
+}
+
+/* Alt Menü Butonları */
+.maint-nav-btn {
+    flex: 1;
+    border: none;
+    background: none;
+    cursor: pointer;
+    padding: 10px 2px 8px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 4px;
+    color: #8B98A3;
+    transition: 0.2s;
+}
+.maint-nav-btn.active {
+    color: var(--m-blue);
+}
+.maint-nav-btn svg {
+    stroke-width: 1.8;
+}
+.maint-nav-btn.active svg {
+    stroke-width: 2.4;
+}
+.maint-nav-btn span {
+    font-size: 10px;
+    font-weight: 500;
+}
+.maint-nav-btn.active span {
+    font-weight: 700;
+}
+
+/* Bölüm Başlıkları */
+.maint-section-title {
+    width: 100%;
+    box-sizing: border-box;
+    font-size: 12.5px;
+    font-weight: 700;
+    color: var(--m-muted);
+    padding: 20px 16px 8px;
+    text-transform: uppercase;
+}
+
+/* İş Emri Kartı (Satır Yapısı) */
+.maint-wo-row {
+    width: 100%;
+    box-sizing: border-box;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 14px 16px;
+    border-bottom: 1px solid var(--m-line);
+    background: var(--m-surface);
+    cursor: pointer;
+    transition: background 0.2s;
+}
+.maint-wo-row:active {
+    background: #f0f2f5;
+}
+.maint-wo-prio-bar {
+    width: 4px;
+    align-self: stretch;
+    border-radius: 4px;
+    flex-shrink: 0;
+}
+.maint-pill {
+    font-size: 11px;
+    padding: 3px 8px;
+    border-radius: 4px;
+    color: #fff;
+    white-space: nowrap;
+    font-weight: 600;
+}
+/* ==========================================
+   🧹 2026-10 DÜZENLEME KATMANI
+   ========================================== */
+
+/* Oly asistanı sadece Hub ve Olympus'ta görünür; kendi arayüzü olan modüllerde içeriğin üstüne binmesin */
+body:has(#arcade-screen:not(.hidden)) #oly-avatar,
+body:has(#finance-screen:not(.hidden)) #oly-avatar,
+body:has(#garage-screen:not(.hidden)) #oly-avatar,
+body:has(#racer-screen:not(.hidden)) #oly-avatar,
+body:has(#olyscore-screen:not(.hidden)) #oly-avatar,
+body:has(#olysocial-screen:not(.hidden)) #oly-avatar,
+body:has(#olyos-screen:not(.hidden)) #oly-avatar,
+body:has(#maintain-screen:not(.hidden)) #oly-avatar,
+body:has(#active-workout-screen:not(.hidden)) #oly-avatar {
+    display: none !important;
+}
+
+/* Hub kartları: tüm modüller aynı kart sistemini (kicker rengi + köşe parıltısı) kullanır */
+.hub-card-kpss { --hub-glow: rgba(52, 211, 153, .22); }
+.hub-card-kpss .hub-card-kicker { color: #34d399; }
+
+.hub-card-finance { --hub-glow: rgba(0, 210, 255, .24); }
+.hub-card-finance .hub-card-kicker { color: #00d2ff; }
+
+.hub-card-garage { --hub-glow: rgba(243, 156, 18, .26); }
+.hub-card-garage .hub-card-kicker { color: #f39c12; }
+
+.hub-card-score { --hub-glow: rgba(192, 132, 252, .26); }
+.hub-card-score .hub-card-kicker { color: #c084fc; }
+
+.hub-card-social { --hub-glow: rgba(59, 130, 246, .28); }
+.hub-card-social .hub-card-kicker { color: #60a5fa; }
+
+.hub-card-olyos { --hub-glow: rgba(0, 210, 255, .3); }
+.hub-card-olyos .hub-card-kicker { color: #00d2ff; }
+
+.hub-card-maintain { --hub-glow: rgba(243, 156, 18, .28); }
+.hub-card-maintain .hub-card-kicker { color: #f39c12; }
+
+/* Geniş kart: ikonu sağa alarak yatay düzen */
+.hub-card-wide {
+    grid-column: span 2;
+    min-height: 120px !important;
+}
+.hub-card-wide .hub-card-icon {
+    position: absolute;
+    right: 18px;
+    top: 50%;
+    transform: translateY(-50%);
+    font-size: 40px;
+    margin: 0;
+}
+
+/* Oly asistanı: kenara yaslı daha ince sekme; içerik kartlarının üstünü daha az kapatır */
+#oly-avatar:not(.dragging) {
+    width: 34px;
+    height: 64px;
+    padding-right: 5px;
+    opacity: .9;
+}
+#oly-avatar:not(.dragging):hover,
+#oly-avatar:not(.dragging):active {
+    opacity: 1;
 }

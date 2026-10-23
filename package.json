@@ -1,0 +1,20 @@
+{
+  "name": "project_olympus",
+  "version": "1.0.0",
+  "description": "Project Olympus - kişisel süper uygulama (spor, KPSS, finans, garaj, sosyal, araçlar)",
+  "main": "olympus.html",
+  "scripts": {
+    "start": "python -m http.server 5500",
+    "build": "node scripts/build-www.js",
+    "android": "npm run build && npx cap sync android && npx cap open android"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "commonjs",
+  "dependencies": {
+    "@capacitor/android": "^8.5.0",
+    "@capacitor/cli": "^8.5.0",
+    "@capacitor/core": "^8.5.0"
+  }
+}

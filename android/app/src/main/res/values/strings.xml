@@ -1,0 +1,7 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="app_name">project_olympus</string>
+    <string name="title_activity_main">project_olympus</string>
+    <string name="package_name">com.project.olympus</string>
+    <string name="custom_url_scheme">com.project.olympus</string>
+</resources>

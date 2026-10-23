@@ -1,0 +1,27 @@
+# Bağımlılıklar
+node_modules/
+
+# Yerel yedekler
+_yedek_*/
+
+# Üretilen dosyalar (npm run build ile www/, cap sync ile Android assets oluşur)
+www/
+android/app/src/main/assets/public/
+android/app/src/main/assets/capacitor.config.json
+android/app/src/main/assets/capacitor.plugins.json
+
+# Android Studio / Gradle
+android/.gradle/
+android/.idea/
+android/build/
+android/app/build/
+android/capacitor-cordova-android-plugins/build/
+android/local.properties
+*.apk
+*.aab
+
+# Editör / araç ayarları
+.claude/
+.vscode/
+.DS_Store
+Thumbs.db
