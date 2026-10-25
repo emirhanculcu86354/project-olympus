@@ -120,13 +120,13 @@
     // Sıra önemli: daha özel kalıplar önce
     const MUSCLE_RULES = [
         [/calf/i, 'calves'],
-        [/leg curl|romanian|\brdl\b|deadlift|hamstring|good morning/i, 'hamstrings'],
+        [/leg curl|nordic|romanian|\brdl\b|deadlift|hamstring|good morning/i, 'hamstrings'],
         [/hip thrust|glute|kickback/i, 'glutes'],
         [/squat|leg press|lunge|leg extension|hack|step.?up/i, 'quads'],
         [/plank|crunch|leg raise|sit.?up|\bab\b|core|russian/i, 'core'],
         [/curl/i, 'biceps'],
         [/pushdown|triceps|overhead.*ext|skull|close grip|kickback|^dips$|dips(?! \(chest)/i, 'triceps'],
-        [/lateral|military|shoulder press|overhead press|\bohp\b|rear delt|face pull|arnold|upright/i, 'shoulders'],
+        [/lateral|military|shoulder press|overhead press|pike|\bohp\b|rear delt|face pull|arnold|upright/i, 'shoulders'],
         [/chest press|chest fly|pec deck|machine chest/i, 'chest'],
         [/pull.?up|pulldown|\brows?\b|\blat\b|shrug|\bchin/i, 'back'],
         [/bench|press|fly|chest|pec|dips|push.?up/i, 'chest']
@@ -324,6 +324,10 @@
         const lastWDate = lastW && O2.parseDate(lastW.date);
         if (!lastWDate || (Date.now() - lastWDate) / DAY_MS > 10) out.push('10 günü aşkın süredir tartılmadın. Sabah aç karnına tek ölçüm, trendi netleştirir.');
 
+        // Plato tespiti: aynı ana harekette son 3 seans tahmini 1RM artmadıysa deload öner
+        const plateau = O2.plateau();
+        if (plateau) out.push(`${plateau} son 3 seansta ilerlemiyor. Bu hafta ağırlığı %10-15 düşürüp (deload) tekniğe odaklan; sonra daha güçlü dönersin.`);
+
         const recentPR = sessions.slice(-3).flatMap(s => s.prs || []);
         if (recentPR.length) out.push(`Son seanslarda ${recentPR.length} kişisel rekor kırdın. Momentum seninle.`);
 
@@ -332,6 +336,20 @@
 
         if (!out.length) out.push('Her şey yolunda. Planına sadık kal; tutarlılık her zaman yoğunluğu yener.');
         return out;
+    };
+
+    O2.plateau = () => {
+        const byEx = {};
+        O2.sessions().slice(-30).forEach(s => (s.exercises || []).forEach(e => {
+            const best = Math.max(0, ...(e.sets || []).map(st => O2.e1rm(st.w, st.r)));
+            if (best) (byEx[e.name] = byEx[e.name] || []).push(best);
+        }));
+        for (const [name, list] of Object.entries(byEx)) {
+            if (list.length < 3) continue;
+            const [a, b, c] = list.slice(-3);
+            if (c <= b && b <= a && O2.muscleOf(name) !== 'core') return name;
+        }
+        return null;
     };
 
     // ==========================================

@@ -396,7 +396,13 @@
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M15 18 9 12l6-6"/></svg>
             </button>
             <div class="o2-brand"><b>OLYMPUS</b> TRAINING</div>
-            <button class="o2-avatar" onclick="O2.settingsSheet()" aria-label="Ayarlar"><img id="o2-avatar-img" src="icon.png" alt=""></button>
+            <div style="display:flex;align-items:center;gap:10px">
+                <button class="o2-icon-btn" style="position:relative" onclick="O2.openNotifications()" aria-label="Bildirimler">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M6 8a6 6 0 1 1 12 0c0 7 3 9 3 9H3s3-2 3-9"/><path d="M10.3 21a1.9 1.9 0 0 0 3.4 0"/></svg>
+                    <span id="o2-notif-badge" class="o2-notif-badge hidden"></span>
+                </button>
+                <button class="o2-avatar" onclick="O2.settingsSheet()" aria-label="Ayarlar"><img id="o2-avatar-img" src="icon.png" alt=""></button>
+            </div>
         </header>
         <main id="o2-view" class="o2-view"></main>
         <div id="o2-live-pill" class="o2-live-pill hidden" onclick="O2.resumeSession()" role="button"></div>
@@ -423,6 +429,8 @@
             <div class="header-top">
                 <h1 class="brand-title"><span id="secret-trigger" style="cursor:pointer;">PROJECT OLYMPUS</span></h1>
                 <div class="header-right">
+                    <!-- Olympus 2.0'a geri dönüş -->
+                    <button onclick="O2.openFromClassic()" class="o2-classic-switch" aria-label="Olympus 2.0'a geç">✦ 2.0</button>
                     <!-- YENİ BİLDİRİM BUTONU -->
                     <button onclick="openNotifications()" class="edit-btn"
                         style="border:none; font-size:22px; padding: 0 5px; position:relative; background:transparent;">
@@ -6096,6 +6104,7 @@
     <script src="js/30-olympus2-cekirdek.js"></script>
     <script src="js/31-olympus2-ekranlar.js"></script>
     <script src="js/32-olympus2-oynatici.js"></script>
+    <script src="js/33-olympus2-programlar.js"></script>
 </body>
 
 </html>

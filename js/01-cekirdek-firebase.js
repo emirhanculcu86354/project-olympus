@@ -24,22 +24,29 @@ db.settings({ cacheSizeBytes: firebase.firestore.CACHE_SIZE_UNLIMITED, merge: tr
 // ==========================================
 // ✉️ EMAILJS E-POSTA MOTORU
 // ==========================================
-// Panel: dashboard.emailjs.com — Gmail servisi + "Olympus Bildirim" şablonu.
+// Panel: dashboard.emailjs.com — CULBASE Google Workspace servisi (emirhan@culbase.com) + "Olympus Bildirim" şablonu.
 // Şablon değişkenleri: to_email, to_name, subject, preheader, eyebrow, headline, message, {{{content_html}}}
 // Ücretsiz planda ayda 200 gönderim hakkı var; bu yüzden e-postalar sadece anlamlı anlarda atılır.
 emailjs.init("Id219wUMMGoBxc3Jh");
-const EMAILJS_SERVICE_ID = "service_8a342ow";
+const EMAILJS_SERVICE_ID = "service_culbase";        // emirhan@culbase.com
+const EMAILJS_FALLBACK_SERVICE_ID = "service_8a342ow"; // eski kişisel Gmail; ana servis hata verirse kullanılır
 const EMAILJS_NOTIFY_TEMPLATE_ID = "template_s3u8pzd";
 
 function sendOlympusMail({ to_email, to_name, subject, preheader = '', eyebrow = '', headline, message = '', content_html = '' }) {
     if (!to_email) return Promise.resolve(null);
-    return emailjs.send(EMAILJS_SERVICE_ID, EMAILJS_NOTIFY_TEMPLATE_ID, {
+    const params = {
         to_email, to_name: to_name || 'Sporcu', subject, preheader: preheader || subject,
         eyebrow, headline, message, content_html
-    }).catch(err => {
-        console.warn('E-posta gönderilemedi:', err);
-        return null;
-    });
+    };
+    return emailjs.send(EMAILJS_SERVICE_ID, EMAILJS_NOTIFY_TEMPLATE_ID, params)
+        .catch(err => {
+            console.warn('Ana e-posta servisi başarısız, yedek servis deneniyor:', err);
+            return emailjs.send(EMAILJS_FALLBACK_SERVICE_ID, EMAILJS_NOTIFY_TEMPLATE_ID, params);
+        })
+        .catch(err => {
+            console.warn('E-posta gönderilemedi:', err);
+            return null;
+        });
 }
 
 // E-posta içi bilgi tablosu (etiket / değer satırları) — e-posta istemcileri için inline stil

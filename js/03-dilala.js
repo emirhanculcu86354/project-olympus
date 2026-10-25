@@ -11,19 +11,29 @@ const specialDates = [
     { name: "Emoç Doğum Günü", month: 2, day: 3, icon: "🎂" }
 ];
 
+// Klasik profildeki onay kutusu bu fonksiyonu çağırır
 window.toggleDilalaMode = function () {
     const checkbox = document.getElementById('dilala-toggle-checkbox');
-    const isDilala = checkbox.checked;
+    const ok = setDilalaMode(checkbox.checked);
+    checkbox.checked = document.body.classList.contains('dilala-mode');
+    return ok;
+};
 
-    if (isDilala) {
+// Hem klasik hem Olympus 2.0 ekranından kullanılan ortak aç/kapat motoru
+window.setDilalaMode = function (on) {
+    const checkbox = document.getElementById('dilala-toggle-checkbox');
+    const btnContainer = document.getElementById('profile-dilala-btn-container');
+
+    if (on) {
         let pass = prompt("🌸 Dilala Moduna giriş için şifreyi giriniz:");
 
         if (pass === "19.11.2025" || pass === "19112025") {
             document.body.classList.add('dilala-mode');
             localStorage.setItem('olympus_dilala_mode', 'true');
+            if (checkbox) checkbox.checked = true;
 
             // 1. Yeni Dilala Dashboard'u Göster
-            document.getElementById('profile-dilala-btn-container').classList.remove('hidden');
+            if (btnContainer) btnContainer.classList.remove('hidden');
             startDilalaTimer();
 
             // 2. Görevleri Değiştir (Kendi görevlerini yedeğe al)
@@ -37,31 +47,39 @@ window.toggleDilalaMode = function () {
 
             if (navigator.vibrate) navigator.vibrate([100, 50, 100]);
             alert("Hoşgeldin Aşguuuummm! 🌸💕\n\nSenin için özel kuralların ve programın yüklendi!");
-        } else {
-            alert("Hatalı şifre! Sadece özel kişiler girebilir. 🔒");
-            checkbox.checked = false;
-            return;
+            refreshDilalaViews();
+            return true;
         }
-    } else {
-        document.body.classList.remove('dilala-mode');
-        localStorage.setItem('olympus_dilala_mode', 'false');
-
-        // Dashboard'u Gizle ve Görevleri Geri Yükle
-        document.getElementById('profile-dilala-btn-container').classList.add('hidden');
-        if (dilalaTimerInterval) clearInterval(dilalaTimerInterval);
-
-        let backupActs = JSON.parse(localStorage.getItem('olympus_acts_backup'));
-        if (backupActs) {
-            activities = backupActs;
-            saveAndRenderActivities();
-        }
-
-        if (navigator.vibrate) navigator.vibrate(30);
+        if (pass !== null) alert("Hatalı şifre! Sadece özel kişiler girebilir. 🔒");
+        if (checkbox) checkbox.checked = false;
+        return false;
     }
 
+    document.body.classList.remove('dilala-mode');
+    localStorage.setItem('olympus_dilala_mode', 'false');
+    if (checkbox) checkbox.checked = false;
+
+    // Dashboard'u Gizle ve Görevleri Geri Yükle
+    if (btnContainer) btnContainer.classList.add('hidden');
+    if (dilalaTimerInterval) clearInterval(dilalaTimerInterval);
+
+    let backupActs = JSON.parse(localStorage.getItem('olympus_acts_backup'));
+    if (backupActs) {
+        activities = backupActs;
+        saveAndRenderActivities();
+    }
+
+    if (navigator.vibrate) navigator.vibrate(30);
+    refreshDilalaViews();
+    return true;
+};
+
+// Program ve diyet Dilala moduna göre değiştiği için iki ekranı da yenile
+function refreshDilalaViews() {
     renderWorkouts();
     renderDiet();
-};
+    if (window.O2 && O2.render && !document.getElementById('oly2-screen').classList.contains('hidden')) O2.render();
+}
 
 let dilalaTimerInterval;
 function startDilalaTimer() {

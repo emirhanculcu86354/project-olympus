@@ -67,3 +67,25 @@ Derin siyah zemin, ince grafit yüzeyler, sadece vurgu için şampanya-altın gr
 - Panelde yeni **"Olympus Bildirim"** şablonu oluşturuldu (`template_s3u8pzd`): koyu/altın premium HTML tasarım, değişkenler: `subject, preheader, eyebrow, headline, message, {{{content_html}}}, to_name, to_email`.
 - `sendOlympusMail()` ortak motoru: **yeni cihazdan giriş uyarısı** (tüm giriş yöntemleri; aynı cihazda bir kez), **hoş geldin e-postası** (kayıtta), **haftalık performans raporu** (yeni haftanın ilk açılışında, ayarlardan kapatılabilir; İlerleme'den elle de gönderilebilir).
 - Eski "Welcome" şablonu (`template_ec7zmcb`) yedek olarak duruyor. Ücretsiz plan: ayda 200 e-posta.
+
+---
+
+# Olympus 2.0 · Güncelleme 2 (2026-10-25)
+
+## Mod geçişleri
+- **Klasik ↔ 2.0:** Klasik ekranın başlığına altın **"✦ 2.0"** düğmesi eklendi; artık klasiğe geçip geri gelebiliyorsun. Arena ve Sporlar gibi klasik ekranda yaşayan bölümler 2.0'dan açıldığında, kapatınca otomatik olarak 2.0'a dönülüyor.
+- **Dilala modu:** Ortak `setDilalaMode()` motoru; 2.0'da **Ayarlar → Dilala modu** anahtarıyla açılıp kapanıyor (şifre sorulur). Açıkken tüm arayüz altından gül tonlarına döner, "Bizim Alanımız" kartı görünür, Dilala programı/diyeti/görevleri yüklenir.
+
+## Program oluşturucu (yeni)
+- **Yapay zekâ ile:** Hedef, gün sayısı, seviye, süre, ekipman, öncelikli bölge ve not seçilir. Gemini anahtarı varsa gerçek 7 günlük program üretilir; yoksa ya da yanıt bozuksa Olympus akıllı şablonu (PPL / Üst-Alt / Tüm vücut, ekipmana göre hareket seçimi, hedefe göre set-tekrar-tempo-RPE) devreye girer. Eski sihirbaz sadece ayarları kaydediyordu, program üretmiyordu.
+- **Manuel:** Gün ekle/sil, dinlenme günü, hareket ara/ekle (özel ad da yazılabilir), set-tempo-RPE düzenle, sırala. Taslak otomatik saklanır.
+- Kaydedilen program **aktif program olur** ve Antrenman sekmesindeki "Programlarım"dan düzenlenip silinebilir.
+
+## Eklenen özellikler
+- Günlük görevler (klasikle ortak), Keşfet (Arena, Sohbet, Sporlar, Kardiyo, Kamp, Rozetler, Zen, Mini oyun), bildirim zili, rozet koleksiyonu.
+- Tüm kayıtlar: nabız, adım, aktif kalori, ölçüler, takviye stoğu. Beslenme'de FatSecret kısayolu.
+- **Ekspres antrenman** (ilk 4 hareket, en fazla 2'şer set), Oly Koç'ta **plato/deload uyarısı**, "Oly'ye sor" sohbeti.
+
+## E-posta: emirhan@culbase.com
+- EmailJS'e Google Workspace servisi bağlandı: `service_culbase` (emirhan@culbase.com). Tüm uygulama e-postaları buradan gider; hata olursa eski kişisel Gmail servisi (`service_8a342ow`) otomatik yedek.
+- "Olympus Bildirim" şablonu: gönderen adı "Project Olympus · CULBASE", yanıt adresi emirhan@culbase.com.

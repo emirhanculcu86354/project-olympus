@@ -30,7 +30,8 @@
         O2.startSession(0);
     };
 
-    O2.startSession = (offset = 0) => {
+    // opts.express: az vakit varsa ilk 4 hareket, hareket başına en fazla 2 set
+    O2.startSession = (offset = 0, opts = {}) => {
         const existing = O2.activeSession();
         if (existing && !confirm(`"${existing.title}" seansı hâlâ devam ediyor.\nYeni antrenman başlatılırsa o seans silinecek. Devam edilsin mi?`)) {
             return O2.resumeSession();
@@ -39,16 +40,19 @@
         const plan = O2.dayPlan(offset, program);
         if (plan.isRest) { O2.toast('Seçili gün dinlenme günü', 'moon'); return; }
 
+        const exList = opts.express ? plan.ex.slice(0, 4) : plan.ex;
         S = {
             id: 'o2_' + Date.now(),
-            title: plan.title,
+            title: plan.title + (opts.express ? ' · Ekspres' : ''),
+            express: !!opts.express,
             programId: program.id,
             startedAt: Date.now(),
             cur: 0,
             rest: null,
             prs: [],
-            exercises: plan.ex.map(e => {
+            exercises: exList.map(e => {
                 const target = O2.parseScheme(e.scheme);
+                if (opts.express) target.sets = Math.min(target.sets, 2);
                 const sug = O2.suggest(e);
                 const last = O2.lastPerformance(e.name);
                 return {
@@ -225,7 +229,7 @@
             <div class="o2-eyebrow" style="letter-spacing:4px">Dinlen</div>
             <div class="o2-ring-wrap" style="width:${size}px;height:${size}px">
                 <svg viewBox="0 0 ${size} ${size}">
-                    <defs><linearGradient id="o2RestG" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#f6dea0"/><stop offset="1" stop-color="#b9842c"/></linearGradient></defs>
+                    <defs><linearGradient id="o2RestG" x1="0" y1="0" x2="1" y2="1"><stop offset="0" style="stop-color:var(--o2-g1)"/><stop offset="1" style="stop-color:var(--o2-g3)"/></linearGradient></defs>
                     <circle class="o2-ring-track" cx="${size / 2}" cy="${size / 2}" r="${r}" stroke-width="${stroke}"/>
                     <circle id="o2-rest-bar" class="o2-ring-bar" style="transition:stroke-dashoffset .25s linear" cx="${size / 2}" cy="${size / 2}" r="${r}" stroke-width="${stroke}" stroke="url(#o2RestG)" stroke-dasharray="${c}" stroke-dashoffset="${c * (1 - left / S.rest.total)}"/>
                 </svg>

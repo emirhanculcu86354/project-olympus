@@ -46,6 +46,14 @@
         shield: '<path d="M12 3 4 6v6c0 4.5 3.4 8.2 8 9 4.6-.8 8-4.5 8-9V6Z"/>',
         grid: '<rect x="3" y="3" width="7" height="7" rx="2"/><rect x="14" y="3" width="7" height="7" rx="2"/><rect x="3" y="14" width="7" height="7" rx="2"/><rect x="14" y="14" width="7" height="7" rx="2"/>',
         calc: '<rect x="5" y="3" width="14" height="18" rx="3"/><path d="M8.5 7h7M8.5 12h.01M12 12h.01M15.5 12h.01M8.5 16h.01M12 16h.01M15.5 16h.01"/>',
+        chat: '<path d="M21 12a8 8 0 0 1-11.6 7.1L4 20.5l1.4-4.6A8 8 0 1 1 21 12Z"/>',
+        ball: '<circle cx="12" cy="12" r="9"/><path d="m12 7 4 3-1.5 5h-5L8 10Z"/><path d="M12 3v4M21 10.5 16 10M18 19l-3.5-4M6 19l3.5-4M3 10.5 8 10"/>',
+        tent: '<path d="M3 20 12 4l9 16Z"/><path d="M12 4v16M9 20l3-5 3 5"/>',
+        leaf: '<path d="M5 19c0-8 5-14 15-15-1 10-7 15-15 15Z"/><path d="M5 19 13 11"/>',
+        game: '<rect x="2.5" y="7" width="19" height="11" rx="5"/><path d="M7 11v3M5.5 12.5h3M15.5 12h.01M18 13.5h.01"/>',
+        medal: '<circle cx="12" cy="15" r="5"/><path d="m8.5 11.5-3-8.5h4l2.5 6M15.5 11.5l3-8.5h-4L12 9"/>',
+        swords: '<path d="m14.5 17.5 6-6V5h-6.5l-6 6M13 19l6-6M16 16l4 4M19 21l2-2"/><path d="M9.5 6.5 3.5 12.5V19H10l6-6"/>',
+        bell: '<path d="M6 8a6 6 0 1 1 12 0c0 7 3 9 3 9H3s3-2 3-9"/><path d="M10.3 21a1.9 1.9 0 0 0 3.4 0"/>',
         ruler: '<path d="M3 17 17 3l4 4L7 21Z"/><path d="m7 13 2 2M10 10l2 2M13 7l2 2"/>'
     };
     O2.icon = (name, cls = '') => `<svg class="${cls}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round">${P[name] || ''}</svg>`;
@@ -59,7 +67,7 @@
         return `
         <div class="o2-ring-wrap" style="width:${size}px;height:${size}px" ${id ? `id="${id}"` : ''}>
             <svg viewBox="0 0 ${size} ${size}">
-                <defs><linearGradient id="o2Gold" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#f6dea0"/><stop offset=".45" stop-color="#e6c374"/><stop offset="1" stop-color="#b9842c"/></linearGradient></defs>
+                <defs><linearGradient id="o2Gold" x1="0" y1="0" x2="1" y2="1"><stop offset="0" style="stop-color:var(--o2-g1)"/><stop offset=".45" style="stop-color:var(--o2-g2)"/><stop offset="1" style="stop-color:var(--o2-g3)"/></linearGradient></defs>
                 <circle class="o2-ring-track" cx="${size / 2}" cy="${size / 2}" r="${r}" stroke-width="${stroke}"/>
                 <circle class="o2-ring-bar" cx="${size / 2}" cy="${size / 2}" r="${r}" stroke-width="${stroke}" stroke="${color}"
                     stroke-dasharray="${c}" stroke-dashoffset="${c}" data-off="${off}"/>
@@ -99,7 +107,7 @@
     // fillFor(muscle) → renk
     O2.figure = (side, fillFor) => `
         <svg viewBox="0 0 100 205" xmlns="http://www.w3.org/2000/svg">
-            <defs><linearGradient id="o2FigGold" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#f6dea0"/><stop offset="1" stop-color="#c9973a"/></linearGradient></defs>
+            <defs><linearGradient id="o2FigGold" x1="0" y1="0" x2="0" y2="1"><stop offset="0" style="stop-color:var(--o2-g1)"/><stop offset="1" style="stop-color:var(--o2-g3)"/></linearGradient></defs>
             ${FIG[side].map(([m, shapes]) => `<g class="${m === 'base' ? 'o2-body-base' : 'o2-muscle'}" ${m === 'base' ? '' : `style="fill:${fillFor(m)}"`}>${shapes}</g>`).join('')}
         </svg>`;
 
@@ -112,6 +120,8 @@
         const screen = $('oly2-screen');
         screen.classList.remove('hidden');
         syncAvatar();
+        O2.syncNotifBadge();
+        if (O2.ui.tab === 'builder' && !localStorage.getItem('oly2_builder_draft')) O2.ui.tab = 'train';
         O2.go(O2.ui.tab || 'today', true);
         O2.refreshLivePill();
         if (typeof saveLastScreen === 'function') saveLastScreen('olympus2');
@@ -158,7 +168,7 @@
         O2.ui.charts.forEach(c => { try { c.destroy(); } catch (e) { } });
         O2.ui.charts = [];
         const view = $('o2-view');
-        const renderers = { today: renderToday, train: renderTrain, fuel: renderFuel, progress: renderProgress };
+        const renderers = { today: renderToday, train: renderTrain, fuel: renderFuel, progress: renderProgress, builder: () => O2.renderBuilder() };
         view.innerHTML = `<div class="o2-page">${renderers[O2.ui.tab]()}</div>`;
         animateRings(view);
         if (O2.ui.tab === 'progress') drawProgressCharts();
@@ -264,7 +274,12 @@
             <div class="o2-section-head"><h3>Bu hafta</h3><span class="o2-link" style="color:var(--o2-text-3)">${week.sessions} seans · ${O2.fmtNum(week.volume)} kg</span></div>
             <div class="o2-card" style="padding:12px;">${weekStrip()}</div>
 
-            <div class="o2-section-head"><h3>Hızlı kayıt</h3></div>
+            ${document.body.classList.contains('dilala-mode') ? `
+            <div class="o2-card is-tap o2-dilala-card" onclick="O2.openDilalaSpace()" style="margin-top:12px">
+                <div class="o2-coach"><div class="o2-coach-orb">${I('heart')}</div><div style="flex:1"><h4>Bizim Alanımız</h4><p>Kavuşma sayacı, mektuplar ve anılar</p></div>${I('chev', 'chev')}</div>
+            </div>` : ''}
+
+            <div class="o2-section-head"><h3>Hızlı kayıt</h3><button class="o2-link" onclick="O2.moreLogsSheet()">Tümü</button></div>
             <div class="o2-quick">
                 <button onclick="O2.quickWater()"><i style="background:rgba(90,200,250,.12);color:var(--o2-blue)">${I('drop')}</i>+250 ml</button>
                 <button onclick="O2.logSheet('weight')"><i style="background:rgba(230,195,116,.12);color:var(--o2-gold)">${I('scale')}</i>Kilo</button>
@@ -272,8 +287,14 @@
                 <button onclick="O2.openCardio()"><i style="background:rgba(255,122,69,.12);color:var(--o2-orange)">${I('run')}</i>Kardiyo</button>
             </div>
 
+            <div class="o2-section-head"><h3>Günlük görevler</h3><span class="o2-link" style="color:var(--o2-text-3)">${tasksDone()}</span></div>
+            ${tasksCard()}
+
             <div class="o2-section-head"><h3>Oly Koç</h3>${typeof askGeminiAI === 'function' ? `<button class="o2-link" onclick="O2.aiCoach()">Derin analiz</button>` : ''}</div>
             ${coachCard()}
+
+            <div class="o2-section-head"><h3>Keşfet</h3></div>
+            ${exploreGrid()}
         </div>`;
     }
 
@@ -310,7 +331,10 @@
                     <span>${I('bolt')}${totalSets} set</span>
                 </div>
                 <div class="o2-chips" style="margin-bottom:18px;">${muscles.slice(0, 4).map(m => `<span class="o2-chip">${O2.MUSCLES[m]}</span>`).join('')}</div>
-                <button class="o2-btn o2-btn-gold" onclick="event.stopPropagation(); O2.startSession(${offset})">${I('play')}Başlat</button>
+                <div style="display:flex;gap:8px;flex-wrap:wrap">
+                    <button class="o2-btn o2-btn-gold" onclick="event.stopPropagation(); O2.startSession(${offset})">${I('play')}Başlat</button>
+                    <button class="o2-btn o2-btn-ghost o2-btn-sm" style="height:50px" onclick="event.stopPropagation(); O2.startSession(${offset}, { express: true })" title="Az vaktin varsa: ana hareketler, daha az set">${I('bolt')}Ekspres</button>
+                </div>
             </div>
         </div>`;
     }
@@ -373,6 +397,7 @@
                 <div style="flex:1"><h4>Günün önerisi</h4><p>${esc(tips[0])}</p></div>
             </div>
             ${tips.length > 1 ? `<ul class="o2-coach-list">${tips.slice(1, 4).map(t => `<li>${esc(t)}</li>`).join('')}</ul>` : ''}
+            ${typeof openOlyChat === 'function' ? `<button class="o2-btn o2-btn-ghost o2-btn-sm" style="margin-top:14px" onclick="openOlyChat()">${I('spark')}Oly'ye sor</button>` : ''}
         </div>`;
     }
 
@@ -460,6 +485,8 @@
                 <div class="o2-card is-tap" onclick="O2.logSheet('1rm')"><span style="color:var(--o2-gold)">${I('calc')}</span><h4 style="margin:10px 0 2px;font-size:15px;">1RM hesapla</h4><p style="margin:0;font-size:12px;color:var(--o2-text-3)">Maksimum gücünü tahmin et</p></div>
                 <div class="o2-card is-tap" onclick="O2.openCardio()" style="margin-top:0"><span style="color:var(--o2-orange)">${I('run')}</span><h4 style="margin:10px 0 2px;font-size:15px;">Kardiyo</h4><p style="margin:0;font-size:12px;color:var(--o2-text-3)">GPS ile koşu & bisiklet</p></div>
             </div>
+
+            ${O2.programsSection()}
 
             <div class="o2-section-head"><h3>Son seanslar</h3></div>
             ${historyList()}
@@ -575,6 +602,8 @@
                 </div>
                 <button class="o2-check ${eaten.includes(i) ? 'on' : ''}" onclick="O2.toggleMeal('${key}', ${i})" aria-label="Yendi olarak işaretle">${I('check')}</button>
             </div>`).join('')}
+
+            ${typeof openFatSecretApp === 'function' ? `<button class="o2-btn o2-btn-ghost o2-btn-block" style="margin-top:12px" onclick="openFatSecretApp()">${I('fuel')}FatSecret'te kalori kaydet</button>` : ''}
 
             <div class="o2-section-head"><h3>Hidrasyon</h3><button class="o2-link" onclick="O2.logSheet('waterGoal')">Hedef</button></div>
             <div class="o2-card o2-water">
@@ -935,6 +964,11 @@
             </div>
             <button class="o2-btn o2-btn-gold o2-btn-block" style="margin-top:18px" onclick="O2.saveSettingsSheet()">Kaydet</button>
 
+            <div class="o2-toggle-row" onclick="O2.toggleDilala()">
+                <div><h5>🌸 Dilala modu</h5><p>Özel program, diyet ve görevler. Açarken şifre sorulur.</p></div>
+                <span class="o2-switch ${document.body.classList.contains('dilala-mode') ? 'on' : ''}"></span>
+            </div>
+
             <div class="o2-section-head" style="margin-top:26px"><h3>Akademi modu</h3></div>
             <div class="o2-grid-2">
                 <button class="o2-btn o2-btn-ghost" onclick="O2.openAcademy('polis')">${I('shield')}POMEM</button>
@@ -963,6 +997,186 @@
         O2.closeSheet(true);
         window.securityReturnScreen = 'oly2-screen';
         if (typeof triggerSecurityMode === 'function') triggerSecurityMode(mode);
+    };
+
+    // ==========================================
+    // ✅ GÜNLÜK GÖREVLER (klasik ekranla ortak: olympus_acts)
+    // ==========================================
+    function tasksDone() {
+        if (typeof activities === 'undefined') return '';
+        return `${activities.filter(a => a.done).length}/${activities.length}`;
+    }
+    function tasksCard() {
+        if (typeof activities === 'undefined') return '';
+        return `
+        <div class="o2-card" style="padding:4px 18px 14px">
+            <div class="o2-list">${activities.map(a => `
+                <div class="o2-row">
+                    <button class="o2-check ${a.done ? 'on' : ''}" onclick="O2.toggleTask(${a.id})" aria-label="Görevi işaretle">${I('check')}</button>
+                    <div class="o2-row-main" onclick="O2.toggleTask(${a.id})" style="cursor:pointer"><h5 style="${a.done ? 'opacity:.45;text-decoration:line-through' : ''}">${esc(a.text)}</h5></div>
+                    <button class="o2-icon-btn" style="width:32px;height:32px;border:0;background:none" onclick="O2.removeTask(${a.id})" aria-label="Görevi sil">${I('close')}</button>
+                </div>`).join('')}</div>
+            <div style="display:flex;gap:8px;margin-top:10px">
+                <input class="o2-input" id="o2-task-input" placeholder="Yeni görev ekle" style="height:44px;font-size:14px" onkeydown="if(event.key==='Enter')O2.addTask()">
+                <button class="o2-btn o2-btn-ghost o2-btn-sm" style="height:44px" onclick="O2.addTask()" aria-label="Ekle">${I('plus')}</button>
+            </div>
+        </div>`;
+    }
+    O2.toggleTask = (id) => {
+        const t = activities.find(a => a.id === id);
+        if (!t) return;
+        toggleAct(id, !t.done);
+        if (t.done) haptic([10, 40, 10]);
+        if (activities.length && activities.every(a => a.done)) {
+            O2.toast('Kusursuz gün · tüm görevler tamam', 'trophy');
+            if (typeof confetti === 'function') confetti({ particleCount: 90, spread: 70, colors: ['#f6dea0', '#e6c374', '#ffffff'] });
+        }
+        O2.render();
+    };
+    O2.addTask = () => {
+        const input = $('o2-task-input');
+        const text = input && input.value.trim();
+        if (!text) return;
+        activities.push({ id: Date.now(), text: text.slice(0, 60), done: false });
+        saveAndRenderActivities();
+        haptic(10);
+        O2.render();
+    };
+    O2.removeTask = (id) => { deleteAct(id); O2.render(); };
+
+    // ==========================================
+    // 🧭 KEŞFET: diğer Olympus özellikleri
+    // ==========================================
+    function exploreGrid() {
+        const tiles = [
+            ['swords', 'Arena', 'Liderlik & akış', 'var(--o2-gold)', "O2.openClassicSection('openArenaScreen')", 'openArenaScreen'],
+            ['chat', 'Sohbet', 'Sporcu mesajları', 'var(--o2-blue)', 'openChatListModal()', 'openChatListModal'],
+            ['ball', 'Sporlar', 'Halı saha & FUT', 'var(--o2-green)', "O2.openClassicSection('openSportsScreen')", 'openSportsScreen'],
+            ['run', 'Kardiyo', 'GPS koşu & bisiklet', 'var(--o2-orange)', 'O2.openCardio()', 'openCardioHub'],
+            ['tent', 'Kamp', 'Doğa günlüğü', '#c4a37a', 'openCampBook()', 'openCampBook'],
+            ['medal', 'Rozetler', 'Başarımların', 'var(--o2-gold)', 'O2.badgesSheet()', null],
+            ['leaf', 'Zen', '4-7-8 nefes', 'var(--o2-green)', 'O2.openZen()', 'startZenMode'],
+            ['game', 'Mini oyun', 'Olympus Catch', 'var(--o2-violet)', 'openMiniGame()', 'openMiniGame']
+        ].filter(t => !t[5] || typeof window[t[5]] === 'function');
+        return `<div class="o2-explore">${tiles.map(([icon, title, sub, color, fn]) => `
+            <button class="o2-card is-tap" onclick="${fn}">
+                <i style="color:${color};background:color-mix(in srgb, ${color} 14%, transparent)">${I(icon)}</i>
+                <h4>${title}</h4><p>${sub}</p>
+            </button>`).join('')}</div>`;
+    }
+
+    // Arena ve Sporlar eski ekranın içinde yaşıyor: oraya geçip kapanınca buraya geri dönülür
+    O2.openClassicSection = (fnName) => {
+        window.o2ClassicBridge = true;
+        O2.closeSheet(true);
+        $('oly2-screen').classList.add('hidden');
+        const app = $('app-content');
+        app.classList.remove('hidden');
+        app.style.display = 'flex';
+        window[fnName]();
+    };
+    ['closeArenaScreen', 'closeSportsScreen'].forEach(name => {
+        const original = window[name];
+        if (typeof original !== 'function') return;
+        window[name] = function (...args) {
+            const result = original.apply(this, args);
+            if (window.o2ClassicBridge) {
+                window.o2ClassicBridge = false;
+                O2.openFromClassic();
+            }
+            return result;
+        };
+    });
+
+    // Klasik ekrandan Olympus 2.0'a geçiş (klasik başlıktaki "2.0" düğmesi)
+    O2.openFromClassic = () => {
+        window.o2ClassicBridge = false;
+        const app = $('app-content');
+        app.classList.add('hidden');
+        app.style.display = '';
+        $('oly2-screen').classList.remove('hidden');
+        O2.open();
+    };
+
+    O2.badgesSheet = () => {
+        if (typeof badgesData === 'undefined') return;
+        const list = badgesData.map(b => ({ ...b, earned: (() => { try { return !!b.req(); } catch (e) { return false; } })() }));
+        const earned = list.filter(b => b.earned).length;
+        O2.sheet('Rozetler', `
+            <div class="o2-card" style="text-align:center;margin-bottom:12px">
+                <div class="o2-eyebrow">Koleksiyon</div>
+                <div style="font-size:34px;font-weight:800;letter-spacing:-1px;margin-top:4px">${earned}<span style="font-size:16px;color:var(--o2-text-3)"> / ${list.length}</span></div>
+                <div class="o2-bar" style="margin-top:10px"><i data-w="${Math.round(earned / list.length * 100)}%" style="width:0;background:var(--o2-gold-grad)"></i></div>
+            </div>
+            <div class="o2-badges">${list.map(b => `
+                <div class="o2-badge ${b.earned ? 'earned' : ''}">
+                    <span>${b.icon}</span><h5>${esc(b.title)}</h5><p>${esc(b.desc)}</p>
+                </div>`).join('')}</div>`);
+    };
+
+    O2.openDilalaSpace = () => { if (typeof openDilalaScreen === 'function') openDilalaScreen(); };
+    O2.toggleDilala = () => {
+        if (typeof setDilalaMode !== 'function') return;
+        const on = document.body.classList.contains('dilala-mode');
+        O2.closeSheet(true);
+        setDilalaMode(!on);
+        O2.render();
+        O2.toast(document.body.classList.contains('dilala-mode') ? 'Dilala modu açık 🌸' : 'Dilala modu kapalı', 'heart');
+    };
+
+    // ==========================================
+    // 📝 EK KAYITLAR (nabız, adım, takviye stoğu)
+    // ==========================================
+    O2.moreLogsSheet = () => {
+        const supp = LS.get('olympus_supp_stock', null) || { whey: 0, creatine: 0, carnitine: 0, electro: 0 };
+        const lastOf = (key) => { const h = LS.get(key, []) || []; return h.length ? h[h.length - 1].val : null; };
+        O2.sheet('Tüm kayıtlar', `
+            <div class="o2-list">
+                <div class="o2-row is-tap" onclick="O2.logSheet('weight')"><div class="o2-row-idx" style="color:var(--o2-gold)">${I('scale')}</div><div class="o2-row-main"><h5>Kilo</h5><p>Sabah, aç karnına</p></div>${I('chev', 'chev')}</div>
+                <div class="o2-row is-tap" onclick="O2.logSheet('sleep')"><div class="o2-row-idx" style="color:var(--o2-violet)">${I('moon')}</div><div class="o2-row-main"><h5>Uyku</h5><p>${lastOf('olympus_sleep_history') ? `Son: ${lastOf('olympus_sleep_history')} saat` : 'Henüz kayıt yok'}</p></div>${I('chev', 'chev')}</div>
+                <div class="o2-row is-tap" onclick="O2.logSheet('kcal')"><div class="o2-row-idx" style="color:var(--o2-orange)">${I('flame')}</div><div class="o2-row-main"><h5>Aktif kalori</h5><p>Saat / telefon verisi</p></div>${I('chev', 'chev')}</div>
+                <div class="o2-row is-tap" onclick="O2.logSheet('measure')"><div class="o2-row-idx" style="color:var(--o2-blue)">${I('ruler')}</div><div class="o2-row-main"><h5>Vücut ölçüleri</h5><p>Bel, göğüs, kol…</p></div>${I('chev', 'chev')}</div>
+            </div>
+            <div class="o2-grid-2" style="margin-top:8px">
+                <div class="o2-field"><label>Dinlenik nabız (bpm)</label>${stepper('o2-in-bpm', lastOf('olympus_bpm_history') || 60, 1)}</div>
+                <div class="o2-field"><label>Adım</label>${stepper('o2-in-steps', lastOf('olympus_cardio_history') || 8000, 500)}</div>
+            </div>
+            <div class="o2-field"><label>Takviye stoğu (servis)</label>
+                <div class="o2-grid-2">
+                    ${[['whey', 'Whey'], ['creatine', 'Kreatin'], ['carnitine', 'Karnitin'], ['electro', 'Elektrolit']].map(([k, l]) => `<div><div style="font-size:12px;font-weight:700;color:var(--o2-text-2);margin-bottom:6px">${l}</div>${stepper('o2-in-supp-' + k, supp[k] || 0, 1)}</div>`).join('')}
+                </div>
+            </div>
+            <button class="o2-btn o2-btn-gold o2-btn-block" style="margin-top:20px" onclick="O2.saveMoreLogs()">Kaydet</button>`);
+    };
+    O2.saveMoreLogs = () => {
+        const today = O2.trDate();
+        const push = (key, val) => {
+            if (!val) return;
+            const h = LS.get(key, []) || [];
+            if (h.length && h[h.length - 1].date === today) h[h.length - 1].val = String(val);
+            else h.push({ date: today, val: String(val) });
+            LS.set(key, h);
+        };
+        push('olympus_bpm_history', parseInt($('o2-in-bpm').value));
+        push('olympus_cardio_history', parseInt($('o2-in-steps').value));
+        const supp = {};
+        ['whey', 'creatine', 'carnitine', 'electro'].forEach(k => { supp[k] = String(Math.max(0, parseInt($('o2-in-supp-' + k).value) || 0)); });
+        LS.set('olympus_supp_stock', supp);
+        O2.closeSheet(); O2.render(); O2.toast('Kayıtlar güncellendi', 'check');
+    };
+
+    // Bildirim zili: klasik başlıktaki rozet sayısını yansıtır
+    O2.openNotifications = () => {
+        if (typeof openNotifications === 'function') openNotifications();
+        const b = $('o2-notif-badge');
+        if (b) b.classList.add('hidden');
+    };
+    O2.syncNotifBadge = () => {
+        const src = $('notif-badge'), dst = $('o2-notif-badge');
+        if (!src || !dst) return;
+        const n = src.innerText.trim();
+        dst.classList.toggle('hidden', src.style.display === 'none' || !n || n === '0');
+        dst.textContent = n;
     };
 
     // Önceki tasarım: eski Olympus ekranı yedek olarak korunuyor
