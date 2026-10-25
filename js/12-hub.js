@@ -198,6 +198,7 @@ window.enterAppFromHub = function (targetId, textString) {
             }
             // Modüle özel açılış kancası (Oly avatarını gizleme vb.)
             if (targetId === 'arcade-screen') openArcadeTerminal();
+            if (targetId === 'oly2-screen') O2.open();
             window.scrollTo(0, 0);
         }
     }, 1200);
@@ -208,7 +209,7 @@ window.enterAppFromHub = function (targetId, textString) {
 const HUB_MODULE_SCREENS = [
     'app-content', 'arcade-screen', 'business-screen', 'finance-screen', 'garage-screen',
     'racer-screen', 'kpss-screen', 'security-screen', 'olyscore-screen', 'olysocial-screen',
-    'olyos-screen', 'maintain-screen'
+    'olyos-screen', 'maintain-screen', 'oly2-screen'
 ];
 
 window.returnToHub = function () {
@@ -254,6 +255,7 @@ window.returnToHub = function () {
 const BACK_CLOSERS = [
     ['racer-screen', () => quitRacerGame()],
     ['security-screen', () => closeSecurityMode()],
+    ['oly2-screen', () => O2.back()],
     ['kpss-screen', () => closeKPSSCenter()],
     ['arcade-screen', () => closeArcadeTerminal()],
     ['olyscore-screen', () => closeOlyScore()],

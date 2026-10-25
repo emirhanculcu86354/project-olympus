@@ -52,6 +52,8 @@ window.registerWithEmail = function() {
 
     if (navigator.vibrate) navigator.vibrate(20);
 
+    // Yeni kayıtta "yeni cihaz" uyarısı yerine sadece hoş geldin maili gitsin
+    window.isRegisteringNewAccount = true;
     auth.createUserWithEmailAndPassword(email, pass).then((userCredential) => {
         // Kayıt başarılı olduğunda kullanıcının ismini Firebase'e kaydet
         return userCredential.user.updateProfile({
@@ -59,12 +61,17 @@ window.registerWithEmail = function() {
         });
     }).then(() => {
         // 🔥 YENİ: HOŞ GELDİN MAİLİ GÖNDER!
-        emailjs.send(EMAILJS_SERVICE_ID, "template_ec7zmcb", {
-            to_name: name,
+        sendOlympusMail({
             to_email: email,
-            message: "Project Olympus'a hoş geldin şampiyon! Sınırlarını aşmaya ve en iyi versiyonuna ulaşmaya hazır mısın?"
-        }).then(() => console.log("Hoş geldin maili gitti!"));
+            to_name: name,
+            subject: `⚡ Olympus'a hoş geldin, ${name}`,
+            eyebrow: 'HESAP OLUŞTURULDU',
+            headline: 'Zirveye ilk adım atıldı.',
+            message: 'Project Olympus hesabın hazır. Antrenmanların, beslenmen ve ilerlemen artık tek bir yerde. Her hafta sonunda sana kısa bir performans raporu göndereceğiz.',
+            content_html: mailInfoRows([['Hesap', email], ['Başlangıç', new Date().toLocaleDateString('tr-TR')]])
+        });
     }).catch(err => {
+        window.isRegisteringNewAccount = false;
         alert("Kayıt oluşturulamadı.\n(" + err.message + ")");
     });
 };

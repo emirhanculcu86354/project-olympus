@@ -3,12 +3,13 @@
 //  - Uygulama kabuğu (HTML/JS/CSS/manifest): ÖNCE AĞ, olmazsa önbellek → güncellemeler anında gelir, çevrimdışı da açılır
 //  - Ağır statik dosyalar (görsel, ses, video, 3D model, oyun ZIP): ÖNCE ÖNBELLEK → bir kez indirilir, sonra anında açılır
 //  - Başka alan adları (Firebase, CDN, API'ler) hiç ellenmez
-const CACHE_NAME = 'olympus-cache-v86';
+const CACHE_NAME = 'olympus-cache-v87';
 // js/ altındaki dosyalar olympus.html'deki sırayla (scripts/js-order.json)
 const APP_SHELL = [
   'index.html',
   'olympus.html',
   'style.css',
+  'css/olympus2.css',
   'js/01-cekirdek-firebase.js',
   'js/02-oturum-ve-program-verisi.js',
   'js/03-dilala.js',
@@ -38,6 +39,9 @@ const APP_SHELL = [
   'js/27-giris.js',
   'js/28-oly-maintain.js',
   'js/29-pwa.js',
+  'js/30-olympus2-cekirdek.js',
+  'js/31-olympus2-ekranlar.js',
+  'js/32-olympus2-oynatici.js',
   'manifest.json',
   'icon.png'
 ];

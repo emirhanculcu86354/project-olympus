@@ -22,6 +22,13 @@ function restoreLastSession() {
     } else if (lastScreen === 'kpss') {
         openKPSSCenter();
     }
+
+    // Yarıda kalan bir antrenman varsa doğrudan Olympus'u aç; seans kapsülüyle kaldığı yerden devam edilir
+    if (localStorage.getItem('oly2_active_session') && window.O2) {
+        document.getElementById('hub-screen').classList.add('hidden');
+        document.getElementById('oly2-screen').classList.remove('hidden');
+        O2.open();
+    }
 }
 
 // Her ekran açılışına hafıza kaydı ekleyen yardımcı fonksiyon

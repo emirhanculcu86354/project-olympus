@@ -14,7 +14,9 @@
     <link rel="apple-touch-icon" href="icon.png">
     <link href="https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,400..900;1,400..900&display=swap"
         rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="css/olympus2.css">
 
     <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
@@ -282,7 +284,7 @@
                     <!-- 1. SAYFA (İlk 4 Modül) -->
                     <div class="hub-page">
                         <div class="hub-grid">
-                            <div class="hub-card hub-card-olympus" onclick="enterAppFromHub('app-content', 'OLYMPUS')">
+                            <div class="hub-card hub-card-olympus" onclick="enterAppFromHub('oly2-screen', 'OLYMPUS')">
                                 <span class="hub-card-kicker">CORE</span>
                                 <h3>Olympus</h3>
                                 <p>Kişisel Gelişim & Spor</p>
@@ -383,6 +385,39 @@
             style="color: var(--goldnova); font-family: 'Courier New', monospace; font-size: 60px; font-weight: 900; margin: 0; white-space: nowrap; text-shadow: 0 0 30px rgba(255,255,255,0.5);">
             TEXT</h1>
     </div>
+    <!-- ==========================================
+         🏛️ OLYMPUS 2.0 — SPOR MODÜLÜ (css/olympus2.css, js/30-32)
+         İçerik JS ile çizilir. Eski tasarım (#app-content) yedek olarak korunuyor: Ayarlar → Klasik Olympus
+         ========================================== -->
+    <div id="oly2-screen" class="o2 hidden" aria-label="Olympus spor">
+        <div class="o2-aurora"></div>
+        <header class="o2-top">
+            <button class="o2-icon-btn" onclick="O2.close()" aria-label="Merkez Üs'e dön">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M15 18 9 12l6-6"/></svg>
+            </button>
+            <div class="o2-brand"><b>OLYMPUS</b> TRAINING</div>
+            <button class="o2-avatar" onclick="O2.settingsSheet()" aria-label="Ayarlar"><img id="o2-avatar-img" src="icon.png" alt=""></button>
+        </header>
+        <main id="o2-view" class="o2-view"></main>
+        <div id="o2-live-pill" class="o2-live-pill hidden" onclick="O2.resumeSession()" role="button"></div>
+        <nav class="o2-tabbar" aria-label="Olympus sekmeleri">
+            <button class="o2-tab active" data-tab="today" onclick="O2.go('today')">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M3 10.5 12 3l9 7.5V20a1 1 0 0 1-1 1h-5v-6H9v6H4a1 1 0 0 1-1-1z"/></svg>Bugün</button>
+            <button class="o2-tab" data-tab="train" onclick="O2.go('train')">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M6.5 6.5v11M17.5 6.5v11M3.5 9v6M20.5 9v6M6.5 12h11"/></svg>Antrenman</button>
+            <button class="o2-orb" onclick="O2.orb()" aria-label="Bugünün antrenmanını başlat">
+                <svg viewBox="0 0 24 24" fill="currentColor"><path d="M8 5.5v13a1 1 0 0 0 1.5.86l10.4-6.5a1 1 0 0 0 0-1.72L9.5 4.64A1 1 0 0 0 8 5.5Z"/></svg>
+            </button>
+            <button class="o2-tab" data-tab="fuel" onclick="O2.go('fuel')">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M12 21c-4.4 0-8-3.4-8-8 0-5 4.6-9.3 8-10 3.4.7 8 5 8 10 0 4.6-3.6 8-8 8Z"/><path d="M12 21V11m0 4 3-3m-3 0-2.5-2.5"/></svg>Beslenme</button>
+            <button class="o2-tab" data-tab="progress" onclick="O2.go('progress')">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M3 20h18"/><path d="M6 16v-4M11 16V8M16 16v-6M20 16V5"/></svg>İlerleme</button>
+        </nav>
+        <div id="o2-sheet-layer" class="o2-sheet-layer"></div>
+        <div id="o2-player" class="o2-player hidden"></div>
+        <div id="o2-toast" class="o2-toast" role="status" aria-live="polite"></div>
+    </div>
+
     <div id="app-content" class="hidden">
         <header class="mobile-header" id="main-header">
             <div class="header-top">
@@ -6058,6 +6093,9 @@
     <script src="js/27-giris.js"></script>
     <script src="js/28-oly-maintain.js"></script>
     <script src="js/29-pwa.js"></script>
+    <script src="js/30-olympus2-cekirdek.js"></script>
+    <script src="js/31-olympus2-ekranlar.js"></script>
+    <script src="js/32-olympus2-oynatici.js"></script>
 </body>
 
 </html>

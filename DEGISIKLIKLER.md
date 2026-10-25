@@ -37,3 +37,33 @@ Değişiklik öncesi dosyaların yedeği: `_yedek_2026-10-23/` (eski `www/` dahi
 - Sıra önemlidir: yeni dosya eklersen `olympus.html`, `sw.js` (APP_SHELL) ve `scripts/js-order.json` listelerine aynı sırayla ekle.
 - Bölme sırasında AST ile kontrol edildi: hiçbir dosya, yüklenirken kendisinden sonra gelen bir dosyadaki fonksiyonu çağırmıyor; birleştirilmiş içerik orijinalle satır satır aynı.
 - Orijinal tek dosya: `_yedek_2026-10-23/script_bolunmeden_once.js`.
+
+---
+
+# Olympus 2.0 — Spor Modülü Yenilemesi (2026-10-25)
+
+Hub'daki **Olympus** kartı artık yeni spor modülünü açıyor. Eski tasarım silinmedi: yeni modülde **Ayarlar → Klasik Olympus** ile açılır; iki ekran aynı verileri (olympus_* anahtarları) kullanır, hiçbir kayıt kaybolmaz.
+
+**Dosyalar:** `css/olympus2.css` (tasarım sistemi), `js/30-olympus2-cekirdek.js` (veri & hesap motorları), `js/31-olympus2-ekranlar.js` (ekranlar), `js/32-olympus2-oynatici.js` (canlı antrenman). Tümü `window.O2` ad alanında; eski koda dokunmaz.
+
+## Tasarım dili: "Olympus Noir"
+Derin siyah zemin, ince grafit yüzeyler, sadece vurgu için şampanya-altın gradyan; fonksiyonel renkler (toparlanma yeşili, efor turuncusu, su mavisi, uyku moru). Manrope tipografi, tablo rakamları, yaylı (spring) geçişler, cam efektli yüzen sekme çubuğu ve ortada "Başlat" küresi.
+
+## Ekranlar
+- **Bugün:** Hazırlık skoru (uyku + kas toparlanması + antrenman yükünden 0-100), su / hareket / haftalık seans halkaları, günün seansı kartı (çalışacak kaslar figür üzerinde), haftalık seri, hızlı kayıt (su, kilo, uyku, kardiyo), Oly Koç önerileri + Gemini ile "Derin analiz".
+- **Antrenman:** Faz 1-2-3 ve manuel oluşturucuyla kaydedilen **özel programlar artık gerçekten seçilebiliyor**; gün seçici, hareket listesi (en iyi set, tahmini 1RM, akıllı öneri, teknik videosu), 1RM hesaplayıcı, seans geçmişi.
+- **Beslenme:** Vücut ağırlığına ve günün karbonhidrat tipine göre hesaplanan makro halkası, öğün zaman çizelgesi (alternatif öğün, yendi işareti), animasyonlu su şişesi, günlük takviye listesi.
+- **İlerleme:** Kilo trendi, yağ oranı (US Navy), haftalık hacim grafiği (8 hafta), 12 haftalık tutarlılık ısı haritası, ön/arka kas toparlanma haritası, kişisel rekor tablosu, ölçüler, gelişim fotoğrafları, haftalık rapor e-postası.
+
+## Canlı antrenman oynatıcısı
+- Set tablosu: önceki performans, **progresif yüklenme önerisi** (tekrar aralığının tepesine ulaştıysan ağırlığı +2.5 / +5 kg artırır), ağırlık sonraki setlere taşınır.
+- Dinlenme sayacı: halka animasyonu, ±15 sn, son 3 saniye titreşim, bitişte ses + titreşim; arka planda da doğru sayar (zaman damgası tabanlı).
+- **Anlık kişisel rekor tespiti** (Epley 1RM) ve konfetili kutlama.
+- Ekran kilitlenmez (Wake Lock); oynatıcı küçültülünce sekme çubuğunun üstünde canlı seans kapsülü; uygulama kapansa bile seans kaldığı yerden devam eder.
+- Seans özeti: süre, hacim, set, rekorlar, çalışan kaslar, zorluk puanı, not, paylaş.
+- Kayıt eski sisteme de yazılır (İdman geçmişi, egzersiz rekorları, kas yorgunluğu, Olympus puanı, "Antrenman Yapıldı" görevi) ve Firestore'a (`users/{uid}.training`) senkronlanır; başka cihazdaki seanslar açılışta birleştirilir.
+
+## EmailJS (tamamlandı)
+- Panelde yeni **"Olympus Bildirim"** şablonu oluşturuldu (`template_s3u8pzd`): koyu/altın premium HTML tasarım, değişkenler: `subject, preheader, eyebrow, headline, message, {{{content_html}}}, to_name, to_email`.
+- `sendOlympusMail()` ortak motoru: **yeni cihazdan giriş uyarısı** (tüm giriş yöntemleri; aynı cihazda bir kez), **hoş geldin e-postası** (kayıtta), **haftalık performans raporu** (yeni haftanın ilk açılışında, ayarlardan kapatılabilir; İlerleme'den elle de gönderilebilir).
+- Eski "Welcome" şablonu (`template_ec7zmcb`) yedek olarak duruyor. Ücretsiz plan: ayda 200 e-posta.

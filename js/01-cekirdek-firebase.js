@@ -21,11 +21,59 @@ let presenceConnectionRef = null;
 
 db.settings({ cacheSizeBytes: firebase.firestore.CACHE_SIZE_UNLIMITED, merge: true });
 
-// EmailJS Başlatma (Kendi Public Key'ini Emailjs.com'dan alıp buraya yazacaksın)
+// ==========================================
+// ✉️ EMAILJS E-POSTA MOTORU
+// ==========================================
+// Panel: dashboard.emailjs.com — Gmail servisi + "Olympus Bildirim" şablonu.
+// Şablon değişkenleri: to_email, to_name, subject, preheader, eyebrow, headline, message, {{{content_html}}}
+// Ücretsiz planda ayda 200 gönderim hakkı var; bu yüzden e-postalar sadece anlamlı anlarda atılır.
 emailjs.init("Id219wUMMGoBxc3Jh");
 const EMAILJS_SERVICE_ID = "service_8a342ow";
-// Güvenlik (yeni giriş) maili için EmailJS'te şablon oluşturup ID'sini buraya yaz; boşken mail atılmaz.
-const EMAILJS_SECURITY_TEMPLATE_ID = "";
+const EMAILJS_NOTIFY_TEMPLATE_ID = "template_s3u8pzd";
+
+function sendOlympusMail({ to_email, to_name, subject, preheader = '', eyebrow = '', headline, message = '', content_html = '' }) {
+    if (!to_email) return Promise.resolve(null);
+    return emailjs.send(EMAILJS_SERVICE_ID, EMAILJS_NOTIFY_TEMPLATE_ID, {
+        to_email, to_name: to_name || 'Sporcu', subject, preheader: preheader || subject,
+        eyebrow, headline, message, content_html
+    }).catch(err => {
+        console.warn('E-posta gönderilemedi:', err);
+        return null;
+    });
+}
+
+// E-posta içi bilgi tablosu (etiket / değer satırları) — e-posta istemcileri için inline stil
+function mailInfoRows(rows) {
+    const tr = rows.map(([label, value]) => `
+        <tr>
+            <td style="padding:12px 16px;border-bottom:1px solid #23232a;font-size:12px;color:#7d7d88;letter-spacing:.5px;">${escapeHTML(label)}</td>
+            <td style="padding:12px 16px;border-bottom:1px solid #23232a;font-size:14px;color:#ffffff;font-weight:700;text-align:right;">${escapeHTML(value)}</td>
+        </tr>`).join('');
+    return `<table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background:#17171b;border:1px solid #23232a;border-radius:14px;border-collapse:separate;overflow:hidden;">${tr}</table>`;
+}
+
+// 🛡️ Yeni cihazdan giriş uyarısı: aynı cihazda aynı hesaba ikinci kez mail atmaz (kotayı korur)
+async function sendNewDeviceLoginAlert(user) {
+    if (!user || user.isAnonymous || !user.email) return;
+    const deviceKey = `olympus_known_device_${user.uid}`;
+    if (localStorage.getItem(deviceKey)) return;
+    localStorage.setItem(deviceKey, new Date().toISOString());
+    if (window.isRegisteringNewAccount) { window.isRegisteringNewAccount = false; return; }
+
+    const location = await getUserLocation();
+    const time = new Date().toLocaleString('tr-TR');
+    const device = /Android/i.test(navigator.userAgent) ? 'Android' : /iPhone|iPad/i.test(navigator.userAgent) ? 'iOS' : 'Tarayıcı';
+
+    sendOlympusMail({
+        to_email: user.email,
+        to_name: user.displayName,
+        subject: '🛡️ Olympus hesabına yeni bir cihazdan giriş yapıldı',
+        eyebrow: 'GÜVENLİK BİLDİRİMİ',
+        headline: 'Yeni cihaz girişi',
+        message: 'Hesabına daha önce görmediğimiz bir cihazdan giriş yapıldı. Bu sen değilsen şifreni hemen değiştir.',
+        content_html: mailInfoRows([['Zaman', time], ['Konum', location], ['Cihaz', device]])
+    });
+}
 
 // 🌍 Kullanıcının IP Adresinden Konumunu Bulan Fonksiyon
 async function getUserLocation() {
@@ -90,6 +138,7 @@ auth.onAuthStateChanged(user => {
         }, { merge: true });
 
         loadDataFromCloud(user.uid);
+        sendNewDeviceLoginAlert(user);
         listenForNotifications();
         updateProfileFollowStats();
 
@@ -119,22 +168,8 @@ document.getElementById('google-login-btn').addEventListener('click', async () =
     const provider = new firebase.auth.GoogleAuthProvider();
     
     try {
-        const result = await auth.signInWithPopup(provider);
-        const user = result.user;
-        
-        // 🌍 Konumu bul ve Mail at (şablon tanımlıysa)
-        if (!EMAILJS_SECURITY_TEMPLATE_ID) return;
-        const location = await getUserLocation();
-        const time = new Date().toLocaleString('tr-TR');
-
-        emailjs.send(EMAILJS_SERVICE_ID, EMAILJS_SECURITY_TEMPLATE_ID, {
-            to_name: user.displayName,
-            to_email: user.email,
-            login_time: time,
-            login_location: location,
-            message: `Hesabınıza ${time} tarihinde ${location} konumundan yeni bir giriş yapıldı. Eğer bu siz değilseniz hemen şifrenizi değiştirin.`
-        });
-        
+        // Yeni cihaz uyarısı onAuthStateChanged içinde tüm giriş yöntemleri için gönderilir
+        await auth.signInWithPopup(provider);
     } catch (err) {
         alert("Giriş Hatası: " + err.message);
     }

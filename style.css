@@ -8903,6 +8903,7 @@ body:has(#olyscore-screen:not(.hidden)) #oly-avatar,
 body:has(#olysocial-screen:not(.hidden)) #oly-avatar,
 body:has(#olyos-screen:not(.hidden)) #oly-avatar,
 body:has(#maintain-screen:not(.hidden)) #oly-avatar,
+body:has(#oly2-screen:not(.hidden)) #oly-avatar,
 body:has(#active-workout-screen:not(.hidden)) #oly-avatar {
     display: none !important;
 }

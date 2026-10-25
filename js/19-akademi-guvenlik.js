@@ -117,7 +117,11 @@ window.closeSecurityMode = function () {
     document.getElementById('security-screen').classList.add('hidden');
     if (typeof saveLastScreen === 'function') saveLastScreen('profile');
 
-    // Geri tuşu Olympus uygulamasına (açıldığı yere) döner
+    // Akademi yeni Olympus'tan açıldıysa o zaten altta duruyor; klasik ekrandan açıldıysa ona dön
+    if (window.securityReturnScreen === 'oly2-screen') {
+        window.securityReturnScreen = null;
+        return;
+    }
     const olympusApp = document.getElementById('app-content');
     if (olympusApp) {
         olympusApp.classList.remove('hidden');
