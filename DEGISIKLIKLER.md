@@ -89,3 +89,28 @@ Derin siyah zemin, ince grafit yüzeyler, sadece vurgu için şampanya-altın gr
 ## E-posta: emirhan@culbase.com
 - EmailJS'e Google Workspace servisi bağlandı: `service_culbase` (emirhan@culbase.com). Tüm uygulama e-postaları buradan gider; hata olursa eski kişisel Gmail servisi (`service_8a342ow`) otomatik yedek.
 - "Olympus Bildirim" şablonu: gönderen adı "Project Olympus · CULBASE", yanıt adresi emirhan@culbase.com.
+
+---
+
+# Olympus Training (2026-10-26)
+
+Spor modülü artık uygulamanın kendisi: **Olympus Training**. Ayrı kurulum yok; aynı uygulama, aynı veriler.
+
+## Marka
+- Yeni logo: Olympos zirvesi + halter barı + yıldız (`assets/olympus-training-mark.svg`). Android ikonları, PWA ikonları ve uygulama adı "Olympus Training" olarak güncellendi.
+- Yeni açılış: 10 saniyelik video yerine ~2,5 sn'lik logo çizim animasyonu.
+- Yeni giriş/kayıt ekranı (Olympus Noir). Form kimlikleri ve giriş fonksiyonları değişmedi.
+
+## Açılış ve gezinme
+- Girişten sonra doğrudan **Olympus Training** açılır. Super App (eski hub modülleri) **Training → Ayarlar → Super App**'te.
+- Ayarlar → "Uygulama açılışı" ile istersen tekrar Super App ile açılacak şekilde değiştirebilirsin.
+- Hub baştan tasarlandı ve ikiye ayrıldı: **Olympus Training** (canlı özetli uygulama kartı) / **Super App** (anı karuseli, durum widget'ı, tüm modüller). Karusel, widget ve selamlama mantığı aynı.
+- Geri tuşu: Training ana ekranında uygulamadan çıkar; alt sayfa/oynatıcı/sekme açıkken önce onları kapatır; Super App'ten Training'e döner.
+- Dilala modu ve tüm Super App modülleri yerinde duruyor.
+
+## Spor tarafına eklenenler
+- **Kardiyo (GPS):** Koşu, yürüyüş, bisiklet. Canlı koyu harita ve rota, mesafe, süre, tempo/hız, kalori, otomatik kilometre bölümleri, duraklat/devam, ekran açık kalır. Seans detayında rota haritası ve bölüm grafiği. Haftalık rapora ve İlerleme'ye kardiyo km'si eklendi.
+- **Nefes (4-7-8):** Animasyonlu, 4 turluk nefes egzersizi (Zen yerine).
+- **Hareket geçmişi:** Egzersiz detayında ve rekor tablosundan 1RM gelişim grafiği + seans seans setler.
+- **Haftalık seri:** Haftalık hedefe üst üste kaç hafta ulaşıldığı (Bugün ve İlerleme'de).
+- Kardiyo yorgunluğu mesafeyle orantılı hesaplanıyor; günün antrenman kartı sadece ağırlık seanslarını "tamamlandı" sayıyor.

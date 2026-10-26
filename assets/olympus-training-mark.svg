@@ -1,0 +1,19 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 120 120" role="img" aria-label="Olympus Training">
+  <!-- Olympus Training işareti: Olympos zirvesi (A) + halter barı + kuzey yıldızı -->
+  <defs>
+    <linearGradient id="otGold" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#f6dea0"/>
+      <stop offset=".45" stop-color="#e6c374"/>
+      <stop offset="1" stop-color="#b9842c"/>
+    </linearGradient>
+  </defs>
+  <g fill="url(#otGold)">
+    <path d="M28 88 60 28 92 88" fill="none" stroke="url(#otGold)" stroke-width="11" stroke-linecap="round" stroke-linejoin="miter" stroke-miterlimit="4"/>
+    <rect x="14" y="70" width="92" height="6" rx="3"/>
+    <rect x="12" y="60" width="7" height="26" rx="3"/>
+    <rect x="21" y="64" width="5" height="18" rx="2.5"/>
+    <rect x="101" y="60" width="7" height="26" rx="3"/>
+    <rect x="94" y="64" width="5" height="18" rx="2.5"/>
+    <path d="M90 13 92.4 21.6 101 24 92.4 26.4 90 35 87.6 26.4 79 24 87.6 21.6Z"/>
+  </g>
+</svg>

@@ -14,7 +14,11 @@ function restoreLastSession() {
     const lastScreen = localStorage.getItem('olympus_last_active_screen');
 
     const hasSecMode = activeSecMode === 'polis' || activeSecMode === 'jandarma';
-    if (hasSecMode && lastScreen === 'security') {
+    const trainingHome = (localStorage.getItem('olympus_launch_target') || 'training') === 'training';
+    if (trainingHome) {
+        // Super App modülleri açılışta geri yüklenmez; sadece akademi teması korunur
+        if (hasSecMode) document.body.classList.add(`${activeSecMode}-theme`);
+    } else if (hasSecMode && lastScreen === 'security') {
         openSecurityMode(activeSecMode, true);
     } else if (hasSecMode) {
         // Ekranı açmadan sadece akademi temasını koru
@@ -24,7 +28,7 @@ function restoreLastSession() {
     }
 
     // Yarıda kalan bir antrenman varsa doğrudan Olympus'u aç; seans kapsülüyle kaldığı yerden devam edilir
-    if (localStorage.getItem('oly2_active_session') && window.O2) {
+    if (localStorage.getItem('oly2_active_session') && window.O2 && document.getElementById('oly2-screen').classList.contains('hidden')) {
         document.getElementById('hub-screen').classList.add('hidden');
         document.getElementById('oly2-screen').classList.remove('hidden');
         O2.open();

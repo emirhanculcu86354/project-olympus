@@ -133,6 +133,7 @@
 
     O2.close = () => {
         O2.closeSheet(true);
+        if (O2.isTrainingHome()) return O2.openSuperApp();
         returnToHub();
     };
 
@@ -140,8 +141,15 @@
     O2.back = () => {
         if (O2.isSheetOpen()) { O2.closeSheet(); return; }
         if (O2.isPlayerOpen && O2.isPlayerOpen()) { O2.minimizePlayer(); return; }
+        if (O2.isBreathOpen && O2.isBreathOpen()) { O2.breatheStop(); return; }
+        if (O2.isCardioOpen && O2.isCardioOpen()) { O2.toast('Kaydı bitirmek için "Bitir"e dokun', 'run'); return; }
+        if (O2.isTrainingHome()) { if (O2.ui.tab !== 'today') O2.go('today'); return; }
         O2.close();
     };
+
+    // Training ana ekran olduğunda, kök dışındaki her katman için geçmiş kaydı aç (geri tuşu onu kapatsın)
+    const markLayer = () => { if (O2.isTrainingHome() && typeof pushModuleHistory === 'function') pushModuleHistory(); };
+    O2.markLayer = markLayer;
 
     function syncAvatar() {
         const user = typeof auth !== 'undefined' && auth.currentUser;
@@ -158,6 +166,7 @@
 
     O2.go = (tab, silent) => {
         O2.ui.tab = tab;
+        if (tab !== 'today') markLayer();
         document.querySelectorAll('.o2-tab').forEach(b => b.classList.toggle('active', b.dataset.tab === tab));
         if (!silent) haptic(8);
         O2.render();
@@ -198,6 +207,7 @@
         requestAnimationFrame(() => requestAnimationFrame(() => layer.classList.add('open')));
         animateRings(layer);
         haptic(10);
+        markLayer();
     };
     O2.isSheetOpen = () => $('o2-sheet-layer').classList.contains('open');
     O2.closeSheet = (instant) => {
@@ -233,7 +243,7 @@
         const settings = O2.settings();
         const todayKcal = kcalToday();
         const active = O2.activeSession && O2.activeSession();
-        const doneToday = O2.sessions().filter(s => s.dayKey === O2.dayKey()).pop();
+        const doneToday = O2.sessions().filter(s => s.dayKey === O2.dayKey() && s.type !== 'cardio').pop();
 
         return `
         <div class="o2-stagger">
@@ -271,7 +281,7 @@
             <div class="o2-section-head"><h3>Bugünün seansı</h3><button class="o2-link" onclick="O2.go('train')">Programı gör</button></div>
             ${plan.isRest ? restCard(plan) : (doneToday ? doneCard(doneToday) : sessionHero(plan, 0))}
 
-            <div class="o2-section-head"><h3>Bu hafta</h3><span class="o2-link" style="color:var(--o2-text-3)">${week.sessions} seans · ${O2.fmtNum(week.volume)} kg</span></div>
+            <div class="o2-section-head"><h3>Bu hafta</h3><span class="o2-link" style="color:var(--o2-text-3)">${O2.weekStreak() ? `🔥 ${O2.weekStreak()} hafta seri · ` : ''}${week.sessions} seans</span></div>
             <div class="o2-card" style="padding:12px;">${weekStrip()}</div>
 
             ${document.body.classList.contains('dilala-mode') ? `
@@ -425,11 +435,8 @@
         O2.render();
     };
 
-    O2.openCardio = () => {
-        if (typeof openCardioHub === 'function') return openCardioHub();
-        if (typeof openCardioScreen === 'function') openCardioScreen('run');
-    };
-    O2.openZen = () => { if (typeof startZenMode === 'function') startZenMode(); };
+    O2.openCardio = () => O2.cardioSheet();
+    O2.openZen = () => O2.breathe();
 
     // ==========================================
     // 🏋️ ANTRENMAN
@@ -495,9 +502,14 @@
 
     function historyList() {
         const items = [];
-        O2.sessions().forEach(s => items.push({ t: s.endedAt, title: s.title, sub: `${O2.fmtClock(s.durationSec)} · ${O2.fmtNum(s.volume)} kg · ${s.setCount} set`, prs: (s.prs || []).length, id: s.id }));
+        O2.sessions().forEach(s => items.push({
+            t: s.endedAt, title: s.title, id: s.id, prs: (s.prs || []).length,
+            sub: s.type === 'cardio'
+                ? `${O2.fmtNum(s.distanceKm, 2)} km · ${O2.fmtClock(s.durationSec)}${s.kind === 'ride' ? '' : ` · ${O2.fmtPace(s.paceSec)}/km`}`
+                : `${O2.fmtClock(s.durationSec)} · ${O2.fmtNum(s.volume)} kg · ${s.setCount} set`
+        }));
         (LS.get('olympus_past_workouts', []) || []).forEach(w => {
-            if (String(w.id || '').startsWith('o2_')) return;
+            if (String(w.id || '').startsWith('o2')) return;
             const d = O2.parseDate(w.date);
             if (d) items.push({ t: d.getTime() + 1, title: w.title, sub: `${w.date} · ${w.duration || ''}`, prs: 0, id: null });
         });
@@ -530,12 +542,28 @@
             ${last ? `<div class="o2-field"><label>Son performans</label><div class="o2-chips">${last.sets.map(s => `<span class="o2-chip">${O2.fmtNum(s.w, 1)} kg × ${s.r}</span>`).join('')}</div></div>` : ''}
             <div class="o2-field"><label>Tempo nasıl okunur</label><p style="margin:0;font-size:13px;line-height:1.6;color:var(--o2-text-2)">${esc(e.tempo || '2-0-1-0')} → iniş · alt duraklama · kalkış · üst duraklama (saniye). ${target.sets} set, ${target.isTime ? 'süre' : 'tekrar'} hedefi ${target.low && target.high && target.low !== target.high ? `${target.low}-${target.high}` : (target.high || 'maksimum')}.</p></div>
             <a class="o2-btn o2-btn-ghost o2-btn-block" style="margin-top:18px;text-decoration:none;" href="${video}" target="_blank" rel="noopener">${I('play')}Teknik videosunu izle</a>
+            ${O2.exerciseHistoryHTML(e.name)}
         `);
+        O2.drawExerciseChart(e.name, 'o2-ex-chart');
+    };
+
+    // Programda olmayan (rekor tablosundan açılan) hareketler için geçmiş
+    O2.exerciseInfo = (name) => {
+        const best = O2.bests()[name];
+        O2.sheet(name, `
+            <div class="o2-chips"><span class="o2-chip gold">${O2.MUSCLES[O2.muscleOf(name)]}</span></div>
+            <div class="o2-grid-2" style="margin-top:14px">
+                <div class="o2-card o2-stat"><small>En iyi set</small><strong>${best ? `${O2.fmtNum(best.w, 1)}<small> kg × ${best.r}</small>` : '—'}</strong></div>
+                <div class="o2-card o2-stat"><small>Tahmini 1RM</small><strong>${best ? `${O2.fmtNum(best.e1rm, 1)}<small> kg</small>` : '—'}</strong></div>
+            </div>
+            ${O2.exerciseHistoryHTML(name) || '<div class="o2-empty">Bu hareket için Olympus Training seans kaydı yok.</div>'}`);
+        O2.drawExerciseChart(name, 'o2-ex-chart');
     };
 
     O2.sessionSheet = (id) => {
         const s = O2.sessions().find(x => x.id === id);
         if (!s) return;
+        if (s.type === 'cardio') return O2.sheet(s.title, O2.cardioDetail(s));
         O2.sheet(s.title, `
             <div class="o2-grid-3">
                 <div class="o2-card o2-stat"><small>Süre</small><strong style="font-size:20px">${O2.fmtClock(s.durationSec)}</strong></div>
@@ -666,6 +694,10 @@
             return `rgba(255,122,69,${.4 + f * .6})`;
         };
         const bests = Object.entries(O2.bests()).sort((a, b) => b[1].e1rm - a[1].e1rm).slice(0, 6);
+        const streak = O2.weekStreak();
+        const cardioList = w0.list.filter(s => s.type === 'cardio');
+        const runs = cardioList.filter(s => s.kind !== 'ride' && s.paceSec);
+        const cardioWeek = { km: cardioList.reduce((a, s) => a + (s.distanceKm || 0), 0), count: cardioList.length, bestPace: runs.length ? Math.min(...runs.map(s => s.paceSec)) : null };
         const photos = LS.get('olympus_progress_photos', []) || [];
         const MEAS = [['w', 'Kilo', 'kg'], ['height', 'Boy', 'cm'], ['chest', 'Göğüs', 'cm'], ['waist', 'Bel', 'cm'], ['arm', 'Kol', 'cm'], ['shoulder', 'Omuz', 'cm'], ['thigh', 'Bacak', 'cm'], ['neck', 'Boyun', 'cm']];
 
@@ -680,7 +712,16 @@
                 <div class="o2-card o2-stat is-tap" onclick="O2.logSheet('weight')"><small>Vücut ağırlığı</small><strong>${lastW ? O2.fmtNum(lastW.w, 1) : '—'}<small> kg</small></strong>${wDelta !== null ? `<div class="delta ${Math.abs(wDelta) < .3 ? 'flat' : 'good'}">${wDelta >= 0 ? '▲' : '▼'} ${O2.fmtNum(Math.abs(wDelta), 1)} kg · 4 hafta</div>` : '<div class="delta flat">Kayıt ekle</div>'}</div>
                 <div class="o2-card o2-stat is-tap" onclick="O2.logSheet('measure')" style="margin-top:0"><small>Yağ oranı</small><strong>${bf ? `%${O2.fmtNum(bf, 1)}` : '—'}</strong><div class="delta flat">${bf ? 'US Navy formülü' : 'Ölçü gir'}</div></div>
                 <div class="o2-card o2-stat" style="margin-top:0"><small>Haftalık hacim</small><strong>${O2.fmtNum(w0.volume / 1000, 1)}<small> ton</small></strong><div class="delta ${volDelta === null ? 'flat' : volDelta >= 0 ? 'good' : 'bad'}">${volDelta === null ? 'Geçen hafta veri yok' : `${volDelta >= 0 ? '▲' : '▼'} %${Math.abs(volDelta)} geçen haftaya göre`}</div></div>
-                <div class="o2-card o2-stat" style="margin-top:0"><small>Rekorlar</small><strong>${bests.length}</strong><div class="delta ${w0.prs ? 'good' : 'flat'}">${w0.prs ? `Bu hafta +${w0.prs} PR` : 'Bu hafta yeni PR yok'}</div></div>
+                <div class="o2-card o2-stat" style="margin-top:0"><small>Haftalık seri</small><strong>${streak}<small> hafta</small></strong><div class="delta ${streak ? 'good' : 'flat'}">${streak ? `Hedef: haftada ${O2.settings().weeklyTarget} seans` : 'Bu hafta hedefi tamamla'}</div></div>
+            </div>
+
+            <div class="o2-section-head"><h3>Kardiyo</h3><button class="o2-link" onclick="O2.cardioSheet()">Başlat</button></div>
+            <div class="o2-card">
+                <div class="o2-grid-3">
+                    <div><div class="o2-eyebrow">Bu hafta</div><div style="font-size:22px;font-weight:800;margin-top:4px">${O2.fmtNum(cardioWeek.km, 1)}<span style="font-size:12px;color:var(--o2-text-3)"> km</span></div></div>
+                    <div><div class="o2-eyebrow">Aktivite</div><div style="font-size:22px;font-weight:800;margin-top:4px">${cardioWeek.count}</div></div>
+                    <div><div class="o2-eyebrow">En iyi tempo</div><div style="font-size:22px;font-weight:800;margin-top:4px">${O2.fmtPace(cardioWeek.bestPace)}</div></div>
+                </div>
             </div>
 
             <div class="o2-section-head"><h3>Ağırlık trendi</h3><button class="o2-link" onclick="O2.logSheet('weight')">+ Kayıt</button></div>
@@ -705,7 +746,7 @@
 
             <div class="o2-section-head"><h3>Kişisel rekorlar</h3></div>
             <div class="o2-card" style="padding:4px 18px;">${bests.length ? bests.map(([name, b]) => `
-                <div class="o2-pr"><div class="o2-pr-medal">${I('trophy')}</div><div class="o2-row-main"><h5>${esc(name)}</h5><p>${O2.fmtNum(b.w, 1)} kg × ${b.r} · ${esc(O2.prettyDate(b.date))}</p></div><div class="o2-row-end"><strong>${O2.fmtNum(b.e1rm, 1)}</strong>1RM</div></div>`).join('') : `<div class="o2-empty">Set kaydettikçe rekorların burada birikecek.</div>`}</div>
+                <div class="o2-pr" style="cursor:pointer" onclick="O2.exerciseInfo(${jsArg(name)})"><div class="o2-pr-medal">${I('trophy')}</div><div class="o2-row-main"><h5>${esc(name)}</h5><p>${O2.fmtNum(b.w, 1)} kg × ${b.r} · ${esc(O2.prettyDate(b.date))}</p></div><div class="o2-row-end"><strong>${O2.fmtNum(b.e1rm, 1)}</strong>1RM</div></div>`).join('') : `<div class="o2-empty">Set kaydettikçe rekorların burada birikecek.</div>`}</div>
 
             <div class="o2-section-head"><h3>Ölçüler</h3><button class="o2-link" onclick="O2.logSheet('measure')">Düzenle</button></div>
             <div class="o2-card"><div class="o2-grid-2" style="gap:14px 18px">${MEAS.map(([k, label, unit]) => `<div><div class="o2-eyebrow" style="letter-spacing:1px">${label}</div><div style="margin-top:4px;font-size:18px;font-weight:800">${p[k] ? `${esc(p[k])} <span style="font-size:12px;color:var(--o2-text-3)">${unit}</span>` : '<span style="color:var(--o2-text-3)">—</span>'}</div></div>`).join('')}</div></div>
@@ -975,11 +1016,26 @@
                 <button class="o2-btn o2-btn-ghost" onclick="O2.openAcademy('jandarma')">${I('shield')}JASEM</button>
             </div>
 
+            <div class="o2-section-head" style="margin-top:26px"><h3>Super App</h3></div>
+            <div class="o2-card o2-card-glow is-tap" onclick="O2.openSuperApp()" style="margin-bottom:12px">
+                <div class="o2-coach">
+                    <img src="icon.png" alt="" style="width:46px;height:46px;border-radius:14px;object-fit:cover;flex-shrink:0">
+                    <div style="flex:1"><h4>Project Olympus Super App</h4><p>KPSS, Finans, Garaj, Arcade, Business, OlyScore, OlySocial ve diğer modüller</p></div>
+                    ${I('chev', 'chev')}
+                </div>
+            </div>
+            <div class="o2-field" style="margin-top:4px"><label>Uygulama açılışı</label>
+                <div class="o2-segment">
+                    <button class="${O2.isTrainingHome() ? 'active' : ''}" onclick="O2.formPick(this); O2.setLaunchTarget('training')">Olympus Training</button>
+                    <button class="${O2.isTrainingHome() ? '' : 'active'}" onclick="O2.formPick(this); O2.setLaunchTarget('hub')">Super App</button>
+                </div>
+            </div>
+
             <div class="o2-section-head" style="margin-top:26px"><h3>Diğer</h3></div>
             <div class="o2-list">
                 <div class="o2-row is-tap" onclick="O2.openClassic()"><div class="o2-row-idx">${I('grid')}</div><div class="o2-row-main"><h5>Klasik Olympus</h5><p>Önceki tasarıma geç (tüm veriler ortak)</p></div>${I('chev', 'chev')}</div>
-                <div class="o2-row is-tap" onclick="O2.close()"><div class="o2-row-idx">${I('back')}</div><div class="o2-row-main"><h5>Merkez Üs</h5><p>Hub ekranına dön</p></div>${I('chev', 'chev')}</div>
-            </div>`);
+            </div>
+            <p style="margin:22px 0 0;text-align:center;font-size:11px;color:var(--o2-text-3);letter-spacing:.4px">Olympus Training · Project Olympus</p>`);
     };
 
     O2.saveSettingsSheet = () => {
@@ -1177,6 +1233,67 @@
         const n = src.innerText.trim();
         dst.classList.toggle('hidden', src.style.display === 'none' || !n || n === '0');
         dst.textContent = n;
+    };
+
+    // ==========================================
+    // 🏠 ANA EKRAN: OLYMPUS TRAINING ↔ SUPER APP
+    // ==========================================
+    O2.isTrainingHome = () => (localStorage.getItem('olympus_launch_target') || 'training') === 'training';
+
+    // Training "ev" kökünde mi? (geri tuşu burada uygulamadan çıkar)
+    O2.isHomeRoot = () => O2.isTrainingHome()
+        && !$('oly2-screen').classList.contains('hidden')
+        && !O2.isSheetOpen() && !O2.isPlayerOpen() && !(O2.isCardioOpen && O2.isCardioOpen())
+        && O2.ui.tab === 'today';
+
+    // Açılış: splash'ten sonra doğrudan Training
+    O2.launch = () => {
+        $('oly2-screen').classList.remove('hidden');
+        $('oly2-screen').classList.add('o2-enter');
+        setTimeout(() => $('oly2-screen').classList.remove('o2-enter'), 900);
+        O2.ui.tab = 'today';
+        O2.open();
+    };
+
+    // Hub'daki Training kartından ya da geri tuşuyla Training'e dönüş
+    O2.openFromHub = () => {
+        const hub = $('hub-screen');
+        hub.classList.add('hidden');
+        hub.style.display = '';
+        $('oly2-screen').classList.remove('hidden');
+        O2.open();
+    };
+
+    // Ayarlar → Super App: hub'ı Super App bölümünde aç
+    O2.openSuperApp = () => {
+        O2.closeSheet(true);
+        $('oly2-screen').classList.add('hidden');
+        const hub = $('hub-screen');
+        hub.classList.remove('hidden');
+        hub.style.display = 'flex';
+        hubPane('super');
+        if (typeof updateHubGreeting === 'function') updateHubGreeting();
+        if (typeof pushModuleHistory === 'function') pushModuleHistory();
+    };
+
+    O2.setLaunchTarget = (target) => {
+        localStorage.setItem('olympus_launch_target', target);
+        O2.toast(target === 'training' ? 'Uygulama Olympus Training ile açılacak' : 'Uygulama Super App ile açılacak', 'settings');
+    };
+
+    // Hub'daki Training kartının canlı özeti
+    O2.renderHubTraining = () => {
+        const el = $('hub2-training-stats');
+        if (!el) return;
+        const r = O2.readiness();
+        const plan = O2.dayPlan(0);
+        const w = O2.weekStats(0);
+        const doneToday = O2.sessions().some(s => s.dayKey === O2.dayKey() && s.type !== 'cardio');
+        const planName = plan.isRest ? 'Dinlenme günü' : String(plan.title).split(':').pop().trim();
+        el.innerHTML = `
+            <div><small>Hazırlık</small><strong style="color:${r.tone}">${r.score}</strong></div>
+            <div><small>Bugün</small><strong>${doneToday ? '✓ Tamam' : esc(planName)}</strong></div>
+            <div><small>Bu hafta</small><strong>${w.sessions}/${O2.settings().weeklyTarget}</strong></div>`;
     };
 
     // Önceki tasarım: eski Olympus ekranı yedek olarak korunuyor

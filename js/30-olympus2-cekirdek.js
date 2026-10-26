@@ -225,9 +225,13 @@
     // Kas başına son çalışma zamanı: yeni seanslar + eski "worked_muscles_v2" (kaba gruplar)
     O2.muscleLastWorked = () => {
         const last = {};
-        O2.sessions().forEach(s => (s.muscles || []).forEach(m => {
-            last[m] = Math.max(last[m] || 0, s.endedAt || 0);
-        }));
+        O2.sessions().forEach(s => {
+            // Kardiyo kasları mesafeyle orantılı yorar: 10 km+ tam etki, kısa koşu neredeyse hiç
+            const ts = s.type === 'cardio'
+                ? (s.endedAt || 0) - (1 - O2.clamp((s.distanceKm || 0) / 10)) * 72 * 36e5
+                : (s.endedAt || 0);
+            (s.muscles || []).forEach(m => { last[m] = Math.max(last[m] || 0, ts); });
+        });
         const legacy = LS.get('olympus_worked_muscles_v2', {}) || {};
         const legacyMap = { chest: ['chest'], 'arms-l': ['biceps', 'triceps', 'shoulders'], 'arms-r': ['biceps', 'triceps', 'shoulders'], core: ['core'], 'legs-l': ['quads', 'hamstrings', 'glutes', 'calves'], 'legs-r': ['quads', 'hamstrings', 'glutes', 'calves'] };
         Object.entries(legacy).forEach(([k, ts]) => (legacyMap[k] || []).forEach(m => { last[m] = Math.max(last[m] || 0, ts); }));
@@ -361,7 +365,7 @@
         const end = O2.addDays(start, 7);
         const list = O2.sessions().filter(s => s.endedAt >= start.getTime() && s.endedAt < end.getTime());
         const legacyCount = (LS.get('olympus_past_workouts', []) || []).filter(w => {
-            if (String(w.id || '').startsWith('o2_')) return false; // yeni seansların uyumluluk kopyası
+            if (String(w.id || '').startsWith('o2')) return false; // yeni seansların uyumluluk kopyası
             const d = O2.parseDate(w.date);
             return d && d >= start && d < end;
         }).length;
@@ -372,6 +376,7 @@
             minutes: Math.round(list.reduce((a, s) => a + (s.durationSec || 0), 0) / 60),
             sets: list.reduce((a, s) => a + (s.setCount || 0), 0),
             prs: list.reduce((a, s) => a + (s.prs || []).length, 0),
+            km: list.reduce((a, s) => a + (s.distanceKm || 0), 0),
             list
         };
     };
@@ -465,6 +470,7 @@
             ['Tamamlanan set', `${w.sets}`],
             ['Kişisel rekor', `${w.prs}`]
         ];
+        if (w.km) rows.push(['Kardiyo', `${O2.fmtNum(w.km, 1)} km`]);
         if (weightNow) rows.push(['Vücut ağırlığı', `${weightNow} kg${weightRef ? ` (${weightNow - weightRef >= 0 ? '+' : ''}${(weightNow - weightRef).toFixed(1)})` : ''}`]);
         if (avgSleep) rows.push(['Ortalama uyku', `${avgSleep.toFixed(1)} saat`]);
 

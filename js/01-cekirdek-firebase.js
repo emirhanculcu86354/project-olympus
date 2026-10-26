@@ -105,6 +105,21 @@ function jsArg(value) {
 // YÜKLEME EKRANI KONTROLÜ İÇİN DEĞİŞKEN
 let isAppInitialized = false;
 
+// Girişten sonraki ana ekran: varsayılan Olympus Training; Training ayarlarından Super App (hub) seçilebilir
+function showHomeScreen() {
+    const hub = document.getElementById('hub-screen');
+    document.getElementById('app-content').classList.add('hidden');
+    initHubCarousel();
+    if ((localStorage.getItem('olympus_launch_target') || 'training') === 'training' && window.O2) {
+        hub.classList.add('hidden');
+        O2.launch();
+    } else {
+        hub.classList.remove('hidden');
+        hub.style.display = 'flex';
+        hubPane(localStorage.getItem('olympus_hub_pane') || 'training');
+    }
+}
+
 auth.onAuthStateChanged(user => {
     if (user) {
         setupRealtimePresence(user.uid);
@@ -116,18 +131,12 @@ auth.onAuthStateChanged(user => {
         if (!isAppInitialized) {
             isAppInitialized = true; // Bayrağı hemen çek
             playSplashAnimation(() => {
-                document.getElementById('hub-screen').classList.remove('hidden');
-                document.getElementById('hub-screen').style.display = 'flex';
-                document.getElementById('app-content').classList.add('hidden');
-                initHubCarousel();
+                showHomeScreen();
                 restoreLastSession();
             });
         } else {
-            // Zaten çalışıyorsa (sayfa yenilenmediyse) direkt Hub'a geç
-            document.getElementById('hub-screen').classList.remove('hidden');
-            document.getElementById('hub-screen').style.display = 'flex';
-            document.getElementById('app-content').classList.add('hidden');
-            initHubCarousel();
+            // Zaten çalışıyorsa (sayfa yenilenmediyse) direkt ana ekrana geç
+            showHomeScreen();
         }
 
         const photo = user.photoURL || 'icon.png';

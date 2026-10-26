@@ -3,7 +3,8 @@
    Spor modülü (js/30-32). Tüm kurallar .o2 kapsamı altında; eski stillere dokunmaz.
    ========================================================================== */
 
-.o2 {
+/* Tasarım değişkenleri: Training (.o2) ile aynı dili kullanan hub, giriş ve açılış ekranları (.o2-theme) paylaşır */
+.o2, .o2-theme {
     /* Zemin & yüzeyler */
     --o2-bg: #050506;
     --o2-surface: #0e0e11;
@@ -37,6 +38,12 @@
     --o2-safe-top: env(safe-area-inset-top, 0px);
     --o2-safe-bottom: env(safe-area-inset-bottom, 0px);
 
+    color: var(--o2-text);
+    font-family: 'Manrope', 'Montserrat', system-ui, -apple-system, sans-serif;
+    -webkit-font-smoothing: antialiased;
+}
+
+.o2 {
     position: fixed;
     inset: 0;
     /* Kardiyo, Zen ve Akademi gibi paylaşılan ekranlar (z-index 3000) bu modülün üstünde açılır */
@@ -1186,3 +1193,246 @@ body.dilala-mode .o2-aurora { background: radial-gradient(ellipse at 30% 20%, rg
 .o2 { --o2-g1: #f6dea0; --o2-g2: #e6c374; --o2-g3: #b9842c; }
 body.dilala-mode .o2 { --o2-g1: #ffd1dc; --o2-g2: #ff9db5; --o2-g3: #e8577a; }
 .o2-live-pill { left: 0; right: 0; margin: 0 auto; width: max-content; transform: none; animation: o2Fade .4s ease both; }
+
+/* ==========================================================================
+   🏔️ OLYMPUS TRAINING MARKASI: üst bar logosu, açılış, giriş ekranı
+   ========================================================================== */
+.o2-brand { gap: 10px; letter-spacing: 2.6px; }
+.o2-brand span { white-space: nowrap; }
+.o2-brand-mark { width: 30px; height: 30px; display: block; filter: drop-shadow(0 4px 12px var(--o2-gold-glow)); }
+.o2-enter { animation: o2AppIn .8s var(--o2-spring) both; }
+@keyframes o2AppIn { from { opacity: 0; transform: scale(1.04); filter: blur(6px); } to { opacity: 1; transform: none; filter: none; } }
+
+/* Ortak kelime logosu */
+.ot-wordmark { font: 800 15px/1 'Manrope', sans-serif; letter-spacing: 6px; color: #f5f5f7; }
+.ot-wordmark b {
+    background: linear-gradient(135deg, #f6dea0, #e6c374 40%, #b9842c);
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+}
+
+/* Açılış: logo çizilir, bar ve yıldız belirir */
+.ot-splash { background: radial-gradient(ellipse at 50% 30%, #1a1610 0%, #0b0b0e 55%) !important; }
+.ot-splash-inner { display: flex; flex-direction: column; align-items: center; gap: 26px; }
+.ot-splash-mark { width: 132px; height: 132px; overflow: visible; filter: drop-shadow(0 10px 40px rgba(230, 195, 116, .35)); }
+.ot-splash .ot-peak { stroke-dasharray: 150; stroke-dashoffset: 150; animation: otDraw 1.1s .15s cubic-bezier(.6, 0, .2, 1) forwards; }
+.ot-splash .ot-bar { transform-origin: 60px 73px; transform: scaleX(0); animation: otBar .6s 1s cubic-bezier(.2, .9, .25, 1.1) forwards; }
+.ot-splash .ot-star { transform-origin: 90px 24px; transform: scale(0) rotate(-90deg); animation: otStar .7s 1.45s cubic-bezier(.2, .9, .25, 1.2) forwards; }
+.ot-splash .ot-wordmark { opacity: 0; letter-spacing: 12px; animation: otWord .9s 1.3s ease forwards; }
+@keyframes otDraw { to { stroke-dashoffset: 0; } }
+@keyframes otBar { to { transform: scaleX(1); } }
+@keyframes otStar { to { transform: scale(1) rotate(0); } }
+@keyframes otWord { to { opacity: 1; letter-spacing: 6px; } }
+.ot-splash.slide-up-animation { transform: none; opacity: 0; transition: opacity .7s ease; }
+
+/* Giriş ekranı */
+.ot-login {
+    z-index: 99990 !important;
+    background: #0b0b0e !important;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 24px 18px;
+    overflow-y: auto;
+}
+.ot-login.hidden { display: none !important; }
+.ot-login-glow { position: fixed; inset: -30% -20% auto; height: 70vh; background: radial-gradient(ellipse at 50% 40%, rgba(230, 195, 116, .16), transparent 60%); pointer-events: none; }
+.ot-login-box { position: relative; width: 100%; max-width: 380px; display: flex; flex-direction: column; align-items: stretch; text-align: center; }
+.ot-login-mark { width: 74px; height: 74px; margin: 0 auto 16px; filter: drop-shadow(0 10px 30px rgba(230, 195, 116, .35)); }
+.ot-login-sub { margin: 12px 0 28px; font-size: 13.5px; color: var(--o2-text-2); }
+.ot-label { display: block; margin: 14px 2px 7px; text-align: left; font-size: 11px; font-weight: 800; letter-spacing: 1px; text-transform: uppercase; color: var(--o2-text-3); }
+.ot-label-row { display: flex; align-items: baseline; justify-content: space-between; }
+.ot-label-row a { font-size: 12px; font-weight: 700; color: var(--o2-gold); text-decoration: none; }
+.ot-input {
+    width: 100%;
+    height: 52px;
+    padding: 0 16px;
+    border-radius: 15px;
+    background: #141418;
+    border: 1px solid rgba(255, 255, 255, .1);
+    color: #f5f5f7;
+    font: 600 16px 'Manrope', sans-serif;
+    outline: none;
+    box-sizing: border-box;
+    transition: border-color .2s, box-shadow .2s;
+}
+.ot-input:focus { border-color: rgba(230, 195, 116, .6); box-shadow: 0 0 0 4px rgba(230, 195, 116, .12); }
+.ot-btn {
+    width: 100%;
+    height: 52px;
+    margin-top: 12px;
+    border-radius: 16px;
+    border: 0;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    font: 800 15px 'Manrope', sans-serif;
+    cursor: pointer;
+    transition: transform .25s cubic-bezier(.2, .9, .25, 1.05);
+    box-sizing: border-box;
+}
+.ot-btn:active { transform: scale(.97); }
+.ot-btn-gold { margin-top: 22px; background: linear-gradient(135deg, #f6dea0, #e6c374 40%, #b9842c); color: #171104; box-shadow: 0 12px 30px -10px rgba(230, 195, 116, .5), inset 0 1px 0 rgba(255, 255, 255, .45); }
+.ot-btn-ghost { background: rgba(255, 255, 255, .05); border: 1px solid rgba(255, 255, 255, .1); color: #f5f5f7; }
+.ot-btn-text { background: none; color: var(--o2-text-2); font-size: 13px; height: 42px; }
+.ot-btn-row { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+.ot-divider { display: flex; align-items: center; gap: 12px; margin: 22px 0 6px; font-size: 11px; font-weight: 800; letter-spacing: 2px; text-transform: uppercase; color: var(--o2-text-3); }
+.ot-divider::before, .ot-divider::after { content: ""; flex: 1; height: 1px; background: rgba(255, 255, 255, .08); }
+.ot-switch { margin: 18px 0 0; font-size: 13px; color: var(--o2-text-2); }
+.ot-switch span { color: var(--o2-gold); font-weight: 800; cursor: pointer; }
+
+/* ==========================================================================
+   🧭 HUB (MERKEZ ÜS): OLYMPUS TRAINING / SUPER APP
+   ========================================================================== */
+.hub2 {
+    background: #050506 !important;
+    padding: calc(env(safe-area-inset-top, 0px) + 14px) 18px calc(env(safe-area-inset-bottom, 0px) + 18px) !important;
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-start !important;
+    align-items: stretch !important;
+    overflow-y: auto !important;
+    overflow-x: hidden;
+}
+.hub2.hidden { display: none !important; }
+.hub2-aurora { position: absolute !important; inset: -20% -30% auto; height: 60vh; pointer-events: none; background: radial-gradient(ellipse at 30% 20%, rgba(230, 195, 116, .12), transparent 55%), radial-gradient(ellipse at 85% 0%, rgba(90, 200, 250, .06), transparent 50%); }
+.hub2 > * { position: relative; }
+.hub2-top { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin-top: 4px; }
+.hub2-eyebrow { font-size: 12px; font-weight: 700; color: var(--o2-text-2); }
+.hub2-top h1 { margin: 2px 0 0; font: 800 28px/1.1 'Manrope', sans-serif; letter-spacing: -1px; color: #f5f5f7; }
+.hub2-orb { width: 46px; height: 46px; border-radius: 50%; padding: 2px; background: var(--o2-gold-grad); flex-shrink: 0; }
+.hub2-orb img { width: 100%; height: 100%; border-radius: 50%; object-fit: cover; border: 2px solid #050506; display: block; }
+
+.hub2-switch {
+    position: relative;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    margin: 22px 0 18px;
+    padding: 4px;
+    border-radius: 16px;
+    background: rgba(255, 255, 255, .04);
+    border: 1px solid rgba(255, 255, 255, .07);
+}
+.hub2-switch button { position: relative; z-index: 1; height: 42px; border: 0; background: none; border-radius: 12px; font: 800 13.5px 'Manrope', sans-serif; color: var(--o2-text-3); cursor: pointer; transition: color .3s; }
+.hub2-switch button.active { color: #f5f5f7; }
+.hub2-switch-thumb { position: absolute; top: 4px; bottom: 4px; left: 4px; width: calc(50% - 4px); border-radius: 12px; background: #1b1b21; box-shadow: 0 4px 14px rgba(0, 0, 0, .5), inset 0 1px 0 rgba(255, 255, 255, .06); transition: transform .45s var(--o2-spring); }
+.hub2-switch[data-active="super"] .hub2-switch-thumb { transform: translateX(100%); }
+
+.hub2-pane { display: none; animation: o2PageIn .5s var(--o2-spring) both; }
+.hub2-pane.active { display: block; }
+
+.hub2-app-card {
+    position: relative;
+    padding: 22px;
+    border-radius: 26px;
+    cursor: pointer;
+    overflow: hidden;
+    background: radial-gradient(circle at 90% 0%, rgba(230, 195, 116, .22), transparent 50%), linear-gradient(180deg, #141418, #0e0e11);
+    border: 1px solid rgba(230, 195, 116, .25);
+    box-shadow: 0 30px 60px -30px rgba(230, 195, 116, .35);
+    transition: transform .35s var(--o2-spring);
+}
+.hub2-app-card:active { transform: scale(.98); }
+.hub2-app-head { display: flex; align-items: center; gap: 16px; }
+.hub2-app-icon { width: 64px; height: 64px; border-radius: 18px; box-shadow: 0 10px 26px -8px rgba(0, 0, 0, .8); }
+.hub2-app-head h2 { margin: 0; font: 800 22px/1.1 'Manrope', sans-serif; letter-spacing: -.6px; color: #f5f5f7; }
+.hub2-app-head h2 b { background: var(--o2-gold-grad); -webkit-background-clip: text; background-clip: text; color: transparent; }
+.hub2-app-head p { margin: 5px 0 0; font-size: 12.5px; color: var(--o2-text-2); font-weight: 600; }
+.hub2-app-stats { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-top: 20px; }
+.hub2-app-stats div { padding: 12px; border-radius: 14px; background: rgba(255, 255, 255, .04); border: 1px solid rgba(255, 255, 255, .06); min-width: 0; }
+.hub2-app-stats small { display: block; font-size: 10px; font-weight: 800; letter-spacing: 1px; text-transform: uppercase; color: var(--o2-text-3); }
+.hub2-app-stats strong { display: block; margin-top: 5px; font: 800 16px 'Manrope', sans-serif; color: #f5f5f7; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.hub2-app-cta { display: flex; align-items: center; justify-content: center; gap: 6px; height: 50px; margin-top: 18px; border-radius: 16px; background: var(--o2-gold-grad); color: #171104; font: 800 15px 'Manrope', sans-serif; box-shadow: inset 0 1px 0 rgba(255, 255, 255, .45); }
+.hub2-app-cta svg { width: 18px; height: 18px; }
+.hub2-note { margin: 16px 6px 0; font-size: 12px; line-height: 1.6; color: var(--o2-text-3); text-align: center; }
+
+.hub2-carousel { height: 190px !important; border-radius: 22px !important; overflow: hidden; border: 1px solid rgba(255, 255, 255, .07); margin: 0 !important; }
+.hub2-widget {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    margin-top: 12px;
+    padding: 14px 16px;
+    border-radius: 18px;
+    background: linear-gradient(180deg, #141418, #0e0e11);
+    border: 1px solid rgba(255, 255, 255, .07);
+    cursor: pointer;
+}
+.hub2-widget span { font-size: 10px; font-weight: 800; letter-spacing: 1.6px; text-transform: uppercase; color: var(--o2-gold); }
+.hub2-widget h4 { margin: 4px 0 0; font: 700 14px 'Manrope', sans-serif; color: #f5f5f7; }
+.hub2-widget i { width: 38px; height: 38px; border-radius: 12px; display: grid; place-items: center; background: rgba(230, 195, 116, .12); font-style: normal; flex-shrink: 0; }
+.hub2-section-title { margin: 24px 2px 12px; font: 800 17px 'Manrope', sans-serif; letter-spacing: -.3px; color: #f5f5f7; }
+.hub2-modules { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; }
+.hub2-mod {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 3px;
+    min-width: 0;
+    padding: 14px 12px;
+    border-radius: 18px;
+    background: radial-gradient(circle at 100% 0%, color-mix(in srgb, var(--c) 18%, transparent), transparent 60%), #0e0e11;
+    border: 1px solid rgba(255, 255, 255, .07);
+    color: #f5f5f7;
+    text-align: left;
+    cursor: pointer;
+    transition: transform .3s var(--o2-spring);
+}
+.hub2-mod:active { transform: scale(.95); }
+.hub2-mod i { width: 36px; height: 36px; margin-bottom: 8px; border-radius: 12px; display: grid; place-items: center; background: color-mix(in srgb, var(--c) 14%, transparent); color: var(--c); }
+.hub2-mod svg { width: 19px; height: 19px; fill: none; stroke: currentColor; stroke-width: 1.9; stroke-linecap: round; stroke-linejoin: round; }
+.hub2-mod b { font: 800 13.5px 'Manrope', sans-serif; }
+.hub2-mod small { font-size: 10.5px; font-weight: 600; color: var(--o2-text-3); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 100%; }
+
+@media (min-width: 720px) {
+    .hub2 > * { width: 100%; max-width: 560px; margin-left: auto; margin-right: auto; }
+    .hub2-modules { grid-template-columns: repeat(4, 1fr); }
+}
+
+/* ==========================================================================
+   🏃 KARDİYO & 🫁 NEFES
+   ========================================================================== */
+.o2-cardio-kind { margin-top: 0 !important; padding: 16px 8px; display: flex; flex-direction: column; align-items: center; gap: 10px; }
+.o2-cardio-kind i { width: 46px; height: 46px; border-radius: 15px; display: grid; place-items: center; font-style: normal; }
+.o2-cardio-kind i svg { width: 24px; height: 24px; }
+.o2-cardio-kind b { font-size: 14px; font-weight: 800; }
+
+.o2-cardio-map { flex: 1; min-height: 240px; margin: 6px 14px 0; border-radius: 24px; overflow: hidden; border: 1px solid var(--o2-line-2); background: #111; }
+.o2-cardio-map .leaflet-control-attribution { background: rgba(0, 0, 0, .5) !important; color: #777 !important; font-size: 9px; }
+.o2-cardio-map .leaflet-control-attribution a { color: #999 !important; }
+.o2-cardio-stats { padding: 18px 18px 6px; }
+.o2-cardio-main { text-align: center; margin-bottom: 16px; }
+.o2-cardio-main strong { display: block; font-size: 64px; font-weight: 800; letter-spacing: -3px; line-height: 1; font-variant-numeric: tabular-nums; }
+.o2-cardio-main small, .o2-cardio-stats .o2-grid-3 small { display: block; margin-top: 6px; font-size: 10px; font-weight: 800; letter-spacing: 1.6px; color: var(--o2-text-3); }
+.o2-cardio-stats .o2-grid-3 > div { text-align: center; }
+.o2-cardio-stats .o2-grid-3 strong { font-size: 24px; font-weight: 800; letter-spacing: -.8px; font-variant-numeric: tabular-nums; }
+.o2-cardio-mini { height: 190px; border-radius: 18px; overflow: hidden; border: 1px solid var(--o2-line-2); background: #111; }
+
+.o2-breath { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 22px; padding: 20px; text-align: center; }
+.o2-breath-orb {
+    width: 150px;
+    height: 150px;
+    border-radius: 50%;
+    display: grid;
+    place-items: center;
+    background: radial-gradient(circle at 35% 30%, rgba(246, 222, 160, .55), rgba(185, 132, 44, .18) 60%, transparent 72%);
+    border: 1px solid rgba(230, 195, 116, .35);
+    box-shadow: 0 0 60px rgba(230, 195, 116, .18);
+    transform: scale(.7);
+    transition-property: transform, box-shadow;
+    transition-timing-function: ease-in-out;
+}
+.o2-breath-orb span { font-size: 44px; font-weight: 800; color: #f5f5f7; font-variant-numeric: tabular-nums; }
+.o2-breath-orb.in { transform: scale(1.45); box-shadow: 0 0 120px rgba(230, 195, 116, .35); }
+.o2-breath-orb.hold { transform: scale(1.45); }
+.o2-breath-orb.out { transform: scale(.7); box-shadow: 0 0 40px rgba(230, 195, 116, .12); }
+.o2-breath-orb.done { transform: scale(1); background: var(--o2-gold-grad); }
+.o2-breath-orb.done span { color: #171104; }
+.o2-breath h2 { margin: 40px 0 0; font-size: 28px; font-weight: 800; letter-spacing: -.8px; }
+.o2-breath p { margin: 0; font-size: 13px; color: var(--o2-text-2); }
+
+/* OSM haritasını Olympus Noir'e uydur: renkleri ters çevir, ton ve doygunluğu düşür */
+.o2-cardio-map .leaflet-tile-pane, .o2-cardio-mini .leaflet-tile-pane { filter: invert(1) hue-rotate(180deg) grayscale(.55) brightness(.78) contrast(.92); }

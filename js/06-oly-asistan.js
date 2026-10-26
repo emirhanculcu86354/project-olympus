@@ -247,7 +247,7 @@ function playSplashAnimation(onCompleteCallback) {
         return;
     }
 
-    // 10 Saniye bekle (10000 milisaniye)
+    // Olympus Training logo animasyonu ~2,4 sn sürer (css/olympus2.css → .ot-splash)
     setTimeout(() => {
         // Ekranı CSS ile yukarı kaydır (Perde açılışı)
         loadingScreen.classList.add('slide-up-animation');
@@ -258,5 +258,5 @@ function playSplashAnimation(onCompleteCallback) {
             if (onCompleteCallback) onCompleteCallback(); 
         }, 800);
 
-    }, 10000); // <-- Süreyi 10 Saniye Yaptık
+    }, 2600);
 }

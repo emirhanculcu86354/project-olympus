@@ -270,7 +270,14 @@ function isScreenOpen(id) {
     return !!el && !el.classList.contains('hidden') && getComputedStyle(el).display !== 'none';
 }
 
+// Uygulama Olympus Training ile açılıyorsa (varsayılan) Training'in ana sekmesi "ev" sayılır:
+// orada geri tuşu uygulamadan çıkar, Super App (hub) ise Training'e geri döner.
+function isTrainingHome() {
+    return (localStorage.getItem('olympus_launch_target') || 'training') === 'training';
+}
+
 function isInsideModule() {
+    if (window.O2 && O2.isHomeRoot && O2.isHomeRoot()) return false;
     return !isScreenOpen('hub-screen') && !isScreenOpen('login-screen') && !!auth.currentUser;
 }
 
@@ -279,10 +286,17 @@ function pushModuleHistory() {
 }
 
 window.addEventListener('popstate', () => {
+    // Super App ekranındayken geri: Training'e dön
+    if (isScreenOpen('hub-screen') && isTrainingHome() && auth.currentUser && window.O2) {
+        O2.openFromHub();
+        return;
+    }
     if (!isInsideModule()) return;
     const closer = BACK_CLOSERS.find(([id]) => isScreenOpen(id));
     if (closer) closer[1]();
     else returnToHub();
+    // Modülden Super App'e dönüldüyse bir sonraki geri tuşu Training'e götürsün
+    if (isScreenOpen('hub-screen') && isTrainingHome()) pushModuleHistory();
     // Hâlâ bir modülün içindeysek (ör. Akademi'den Olympus'a dönüldü) bir sonraki geri tuşu için kaydı yenile
     if (isInsideModule()) pushModuleHistory();
 });
@@ -340,5 +354,18 @@ window.updateHubGreeting = function () {
 
     const imgEl = document.getElementById('hub-header-img');
     if (imgEl) imgEl.src = photo;
+
+    if (window.O2 && O2.renderHubTraining) O2.renderHubTraining();
+};
+
+// Hub'daki "Olympus Training / Super App" bölüm geçişi
+window.hubPane = function (name) {
+    document.querySelectorAll('.hub2-switch button').forEach(b => b.classList.toggle('active', b.dataset.pane === name));
+    document.querySelectorAll('.hub2-pane').forEach(p => p.classList.toggle('active', p.id === 'hub2-' + name));
+    const sw = document.querySelector('.hub2-switch');
+    if (sw) sw.dataset.active = name;
+    localStorage.setItem('olympus_hub_pane', name);
+    if (name === 'training' && window.O2 && O2.renderHubTraining) O2.renderHubTraining();
+    if (navigator.vibrate) navigator.vibrate(10);
 };
 // ==========================================

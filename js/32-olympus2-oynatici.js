@@ -81,6 +81,7 @@
 
     function openPlayer() {
         $('o2-player').classList.remove('hidden');
+        if (O2.markLayer) O2.markLayer();
         $('o2-live-pill').classList.add('hidden');
         requestWakeLock();
         renderPlayer();

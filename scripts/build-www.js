@@ -11,7 +11,7 @@ const FILES = [
     'icon.png', 'bank.png', 'bmw.png', 'bmw_g20.glb', 'megane.glb',
     'engine.mp3', 'music.mp3', 'acılıs.mp4'
 ];
-const DIRS = ['js', 'css', 'culbase_system', 'games', 'memories'];
+const DIRS = ['js', 'css', 'assets', 'culbase_system', 'games', 'memories'];
 
 fs.rmSync(out, { recursive: true, force: true });
 fs.mkdirSync(out, { recursive: true });

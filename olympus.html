@@ -5,13 +5,14 @@
     <meta charset="UTF-8">
     <!-- Ekranın en altına (Home Indicator) kadar tam ekran (Edge-to-Edge) kullanım izni -->
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-    <meta name="theme-color" content="#050505">
+    <meta name="theme-color" content="#0B0B0E">
     <link rel="manifest" href="manifest.json">
     <meta name="mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-    <title>Project Olympus</title>
-    <link rel="apple-touch-icon" href="icon.png">
+    <title>Olympus Training</title>
+    <link rel="apple-touch-icon" href="assets/olympus-training-apple-touch.png">
+    <link rel="icon" type="image/svg+xml" href="assets/olympus-training-mark.svg">
     <link href="https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,400..900;1,400..900&display=swap"
         rel="stylesheet">
     <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
@@ -42,122 +43,72 @@
 </head>
 
 <body>
-    <!-- 🎬 PREMIUM AÇILIŞ (SPLASH) EKRANI -->
-    <div id="loading-screen" class="loading-screen" style="background: #050505;">
-        <!-- Kendi animasyonlu logonu buraya ekliyorsun -->
-        <video autoplay muted playsinline src="acılıs.mp4" class="splash-logo-anim"></video>
+    <!-- 🎬 OLYMPUS TRAINING AÇILIŞ EKRANI (logo çizim animasyonu, ~2,5 sn) -->
+    <div id="loading-screen" class="loading-screen ot-splash o2-theme">
+        <div class="ot-splash-inner">
+            <svg class="ot-splash-mark" viewBox="0 0 120 120" aria-hidden="true">
+                <defs><linearGradient id="otSplashGold" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#f6dea0"/><stop offset=".45" stop-color="#e6c374"/><stop offset="1" stop-color="#b9842c"/></linearGradient></defs>
+                <path class="ot-peak" d="M28 88 60 28 92 88" fill="none" stroke="url(#otSplashGold)" stroke-width="11" stroke-linecap="round" stroke-linejoin="miter"/>
+                <g class="ot-bar" fill="url(#otSplashGold)">
+                    <rect x="14" y="70" width="92" height="6" rx="3"/><rect x="12" y="60" width="7" height="26" rx="3"/><rect x="21" y="64" width="5" height="18" rx="2.5"/><rect x="101" y="60" width="7" height="26" rx="3"/><rect x="94" y="64" width="5" height="18" rx="2.5"/>
+                </g>
+                <path class="ot-star" fill="url(#otSplashGold)" d="M90 13 92.4 21.6 101 24 92.4 26.4 90 35 87.6 26.4 79 24 87.6 21.6Z"/>
+            </svg>
+            <div class="ot-wordmark">OLYMPUS <b>TRAINING</b></div>
+        </div>
     </div>
 
-    <!-- 🔐 PREMIUM GİRİŞ VE KAYIT EKRANI -->
-    <div id="login-screen" class="full-screen-overlay"
-        style="background: linear-gradient(135deg, #050505 0%, #1a1a1a 100%); z-index: 99999;">
-        <div class="login-box"
-            style="padding: 40px 30px; background: #0a0a0a; border: 1px solid #333; border-radius: 20px; box-shadow: 0 15px 50px rgba(0,0,0,0.8); width: 90%; max-width: 380px;">
-
-            <h1 class="brand-title" style="margin-bottom: 5px; font-size: 24px;">PROJECT OLYMPUS</h1>
-            <p style="color:var(--text-muted); margin-bottom: 25px; font-size: 13px;">Sisteme giriş yap veya kayıt ol.
-            </p>
+    <!-- 🔐 OLYMPUS TRAINING GİRİŞ VE KAYIT EKRANI (kimlikler ve fonksiyonlar js/27-giris.js ile aynı) -->
+    <div id="login-screen" class="full-screen-overlay ot-login o2-theme">
+        <div class="ot-login-glow"></div>
+        <div class="ot-login-box">
+            <img src="assets/olympus-training-mark.svg" alt="" class="ot-login-mark">
+            <div class="ot-wordmark">OLYMPUS <b>TRAINING</b></div>
+            <p class="ot-login-sub">Antrenmanın, beslenmen ve ilerlemen tek yerde.</p>
 
             <!-- GİRİŞ (LOGIN) FORMU -->
             <div id="login-form-view">
-                <div class="input-group" style="margin-bottom: 15px; text-align: left;">
-                    <label
-                        style="color:#aaa; font-size:11px; margin-bottom:5px; display:block; font-weight:bold;">E-Posta
-                        Adresi</label>
-                    <input type="email" id="login-email" placeholder="ornek@mail.com"
-                        style="width:100%; padding:14px; background:#111; color:#fff; border:1px solid #333; border-radius:10px; outline:none; font-size:14px; transition: border 0.3s;"
-                        onfocus="this.style.borderColor='var(--goldnova)'" onblur="this.style.borderColor='#333'">
+                <label class="ot-label" for="login-email">E-posta</label>
+                <input class="ot-input" type="email" id="login-email" placeholder="ornek@mail.com" autocomplete="email">
+                <div class="ot-label-row">
+                    <label class="ot-label" for="login-password">Şifre</label>
+                    <a href="javascript:void(0)" onclick="sendPasswordResetEmail()">Şifremi unuttum</a>
                 </div>
-                <div class="input-group" style="margin-bottom: 20px; text-align: left;">
-                    <div style="display: flex; justify-content: space-between;">
-                        <label
-                            style="color:#aaa; font-size:11px; margin-bottom:5px; display:block; font-weight:bold;">Şifre</label>
-                        <!-- YENİ: Şifre Sıfırlama Maili Gönderme Butonu -->
-                        <a href="javascript:void(0)" onclick="sendPasswordResetEmail()"
-                            style="color: #4b6bfb; font-size: 11px; text-decoration: none; font-weight: bold;">Şifremi
-                            Unuttum?</a>
-                    </div>
-                    <input type="password" id="login-password" placeholder="••••••••"
-                        style="width:100%; padding:14px; background:#111; color:#fff; border:1px solid #333; border-radius:10px; outline:none; font-size:14px; transition: border 0.3s;"
-                        onfocus="this.style.borderColor='var(--goldnova)'" onblur="this.style.borderColor='#333'">
-                </div>
+                <input class="ot-input" type="password" id="login-password" placeholder="••••••••" autocomplete="current-password">
 
-                <button onclick="loginWithEmail()" class="save-btn"
-                    style="background: var(--goldnova); color:#000; margin-bottom: 15px; padding: 14px; border-radius: 10px; font-size: 15px; width: 100%;">Giriş
-                    Yap</button>
+                <button onclick="loginWithEmail()" class="ot-btn ot-btn-gold">Giriş yap</button>
 
-                <div style="display:flex; align-items:center; margin-bottom:15px;">
-                    <div style="flex:1; height:1px; background:#333;"></div>
-                    <span
-                        style="color:#666; font-size:10px; font-weight:bold; padding:0 10px; letter-spacing:1px;">VEYA</span>
-                    <div style="flex:1; height:1px; background:#333;"></div>
-                </div>
+                <div class="ot-divider"><span>veya</span></div>
 
-                <!-- Google Butonu -->
-                <button id="google-login-btn" class="edit-btn"
-                    style="display:flex; justify-content:center; align-items:center; gap:10px; width: 100%; padding: 12px; margin-bottom: 10px; border-color: #555; color: #fff; border-radius: 10px;">
-                    <img src="https://upload.wikimedia.org/wikipedia/commons/c/c1/Google_%22G%22_logo.svg" alt="G"
-                        style="width:18px;"> Google ile Devam Et
+                <button id="google-login-btn" class="ot-btn ot-btn-ghost">
+                    <img src="https://upload.wikimedia.org/wikipedia/commons/c/c1/Google_%22G%22_logo.svg" alt="" width="18" height="18"> Google ile devam et
                 </button>
-
-                <!-- YENİ: Apple ve GitHub Butonları (Yan Yana) -->
-                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 10px;">
-                    <button onclick="appleLogin()" class="edit-btn"
-                        style="display:flex; justify-content:center; align-items:center; gap:8px; padding: 12px; border-color: #555; color: #fff; border-radius: 10px;">
-                        <img src="https://images.seeklogo.com/logo-png/15/1/apple-logo-png_seeklogo-158010.png"
-                            style="width:18px; filter: invert(1);"> Apple
+                <div class="ot-btn-row">
+                    <button onclick="appleLogin()" class="ot-btn ot-btn-ghost">
+                        <svg viewBox="0 0 24 24" width="18" height="18" fill="currentColor"><path d="M16.4 12.7c0-2.6 2.1-3.8 2.2-3.9-1.2-1.8-3.1-2-3.8-2-1.6-.2-3.1.9-3.9.9-.8 0-2-.9-3.4-.9-1.7 0-3.3 1-4.2 2.6-1.8 3.1-.5 7.7 1.3 10.2.9 1.2 1.9 2.6 3.2 2.6 1.3-.1 1.8-.8 3.3-.8 1.6 0 2 .8 3.4.8 1.4 0 2.3-1.3 3.1-2.5 1-1.4 1.4-2.8 1.4-2.9-.1 0-2.7-1-2.7-4.1ZM13.9 5.1c.7-.9 1.2-2 1-3.2-1 .1-2.3.7-3 1.6-.7.8-1.2 2-1.1 3.1 1.2.1 2.3-.6 3.1-1.5Z"/></svg> Apple
                     </button>
-                    <button onclick="githubLogin()" class="edit-btn"
-                        style="display:flex; justify-content:center; align-items:center; gap:8px; padding: 12px; border-color: #555; color: #fff; border-radius: 10px;">
-                        <img src="https://github.githubassets.com/images/modules/logos_page/GitHub-Mark.png"
-                            style="width:18px; filter: invert(1);"> GitHub
+                    <button onclick="githubLogin()" class="ot-btn ot-btn-ghost">
+                        <svg viewBox="0 0 24 24" width="18" height="18" fill="currentColor"><path d="M12 .5a11.5 11.5 0 0 0-3.6 22.4c.6.1.8-.3.8-.6v-2c-3.2.7-3.9-1.5-3.9-1.5-.5-1.3-1.3-1.7-1.3-1.7-1-.7.1-.7.1-.7 1.2.1 1.8 1.2 1.8 1.2 1 1.8 2.8 1.3 3.4 1 .1-.8.4-1.3.8-1.6-2.6-.3-5.3-1.3-5.3-5.7 0-1.3.5-2.3 1.2-3.1-.1-.3-.5-1.5.1-3.1 0 0 1-.3 3.2 1.2a11 11 0 0 1 5.8 0C17.3 4.3 18.3 4.6 18.3 4.6c.6 1.6.2 2.8.1 3.1.8.8 1.2 1.8 1.2 3.1 0 4.4-2.7 5.4-5.3 5.7.4.4.8 1.1.8 2.2v3.2c0 .3.2.7.8.6A11.5 11.5 0 0 0 12 .5Z"/></svg> GitHub
                     </button>
                 </div>
+                <button onclick="guestLogin()" class="ot-btn ot-btn-text">Misafir olarak incele · 2 dk</button>
 
-                <!-- Misafir Butonu -->
-                <button onclick="guestLogin()" class="edit-btn"
-                    style="width: 100%; padding: 12px; border-color: #00d2ff; color: #00d2ff; margin-bottom: 25px; border-radius: 10px;">👤
-                    Misafir Olarak İncele (2 Dk)</button>
-
-                <p style="font-size:12px; color:#888; margin:0;">Hesabın yok mu? <span
-                        onclick="toggleAuthView('register')"
-                        style="color:var(--goldnova); font-weight:bold; cursor:pointer;">Kayıt Ol</span></p>
+                <p class="ot-switch">Hesabın yok mu? <span onclick="toggleAuthView('register')">Kayıt ol</span></p>
             </div>
 
             <!-- KAYIT (REGISTER) FORMU -->
             <div id="register-form-view" style="display:none;">
-                <div class="input-group" style="margin-bottom: 15px; text-align: left;">
-                    <label style="color:#aaa; font-size:11px; margin-bottom:5px; display:block; font-weight:bold;">Ad
-                        Soyad</label>
-                    <input type="text" id="reg-name" placeholder="Örn: Emirhan Çulcu"
-                        style="width:100%; padding:14px; background:#111; color:#fff; border:1px solid #333; border-radius:10px; outline:none; font-size:14px; transition: border 0.3s;"
-                        onfocus="this.style.borderColor='var(--goldnova)'" onblur="this.style.borderColor='#333'">
-                </div>
-                <div class="input-group" style="margin-bottom: 15px; text-align: left;">
-                    <label
-                        style="color:#aaa; font-size:11px; margin-bottom:5px; display:block; font-weight:bold;">E-Posta
-                        Adresi</label>
-                    <input type="email" id="reg-email" placeholder="ornek@mail.com"
-                        style="width:100%; padding:14px; background:#111; color:#fff; border:1px solid #333; border-radius:10px; outline:none; font-size:14px; transition: border 0.3s;"
-                        onfocus="this.style.borderColor='var(--goldnova)'" onblur="this.style.borderColor='#333'">
-                </div>
-                <div class="input-group" style="margin-bottom: 25px; text-align: left;">
-                    <label style="color:#aaa; font-size:11px; margin-bottom:5px; display:block; font-weight:bold;">Şifre
-                        (En az 6 karakter)</label>
-                    <input type="password" id="reg-password" placeholder="••••••••"
-                        style="width:100%; padding:14px; background:#111; color:#fff; border:1px solid #333; border-radius:10px; outline:none; font-size:14px; transition: border 0.3s;"
-                        onfocus="this.style.borderColor='var(--goldnova)'" onblur="this.style.borderColor='#333'">
-                </div>
+                <label class="ot-label" for="reg-name">Ad soyad</label>
+                <input class="ot-input" type="text" id="reg-name" placeholder="Adın ve soyadın" autocomplete="name">
+                <label class="ot-label" for="reg-email">E-posta</label>
+                <input class="ot-input" type="email" id="reg-email" placeholder="ornek@mail.com" autocomplete="email">
+                <label class="ot-label" for="reg-password">Şifre (en az 6 karakter)</label>
+                <input class="ot-input" type="password" id="reg-password" placeholder="••••••••" autocomplete="new-password">
 
-                <button onclick="registerWithEmail()" class="save-btn"
-                    style="background: var(--goldnova); color:#000; margin-bottom: 25px; padding: 14px; border-radius: 10px; font-size: 15px; width: 100%;">Hesabı
-                    Oluştur</button>
+                <button onclick="registerWithEmail()" class="ot-btn ot-btn-gold">Hesap oluştur</button>
 
-                <p style="font-size:12px; color:#888; margin:0;">Zaten hesabın var mı? <span
-                        onclick="toggleAuthView('login')"
-                        style="color:var(--goldnova); font-weight:bold; cursor:pointer;">Giriş Yap</span></p>
+                <p class="ot-switch">Zaten hesabın var mı? <span onclick="toggleAuthView('login')">Giriş yap</span></p>
             </div>
-
         </div>
     </div>
 
@@ -235,146 +186,88 @@
         </div>
     </div>
     <!-- ==========================================
-         🌟 MERKEZ ÜS (HUB / SUPER APP ANA MENÜ) 
+         🌟 MERKEZ ÜS (HUB) — İKİ BÖLÜM: OLYMPUS TRAINING / SUPER APP
+         Tasarım: css/olympus2.css (.hub2). Karusel, widget ve selamlama kimlikleri js/12-hub.js ile aynı.
+         Uygulama Olympus Training ile açılır; bu ekrana Training → Ayarlar → Super App'ten gelinir.
          ========================================== -->
-    <div id="hub-screen" class="full-screen-overlay hidden hub-shell">
+    <div id="hub-screen" class="full-screen-overlay hidden hub-shell hub2 o2-theme">
+        <div class="hub2-aurora"></div>
 
-        <!-- Hub'a özel üst bar, mevcut profil verisiyle güncellenmeye devam eder. -->
-        <header class="hub-topbar">
+        <header class="hub2-top">
             <div>
-                <span class="hub-eyebrow">PERSONAL OPERATING SYSTEM</span>
-                <h1>PROJECT OLYMPUS</h1>
+                <span class="hub2-eyebrow" id="hub-greeting-text">İyi Günler,</span>
+                <h1 id="hub-greeting-name">Sporcu</h1>
             </div>
-            <div class="hub-profile-orb">
+            <div class="hub2-orb">
                 <img id="hub-header-img" src="icon.png" alt="Profil fotoğrafı">
             </div>
         </header>
 
-        <!-- Üst Kısım: mevcut karusel ve fotoğraf yükleme davranışı korunur. -->
-        <div class="hub-carousel-container">
-            <div id="hub-carousel-track">
-                <!-- 1. Slayt -->
-                <div class="hub-slide hub-brand-slide">
-                    <img src="icon.png" alt="Project Olympus">
-                </div>
-            </div>
-
-
-            <!-- Gizli Fotoğraf Yükleme Butonu -->
-            <button onclick="document.getElementById('hub-photo-upload').click()" class="hub-memory-button">📷
-                Anı Ekle</button>
-            <input type="file" id="hub-photo-upload" accept="image/*" style="display: none;"
-                onchange="addHubPhoto(event)">
-        </div>
-        <div class="hub-widget-wrap">
-            <div class="hub-status-widget" onclick="rotateHubWidget()">
-                <div class="hub-status-copy">
-                    <span>Sistem Durumu</span>
-                    <h4 id="hub-widget-title">Yükleniyor...</h4>
-                </div>
-                <div class="hub-status-icon">⚡</div>
-            </div>
+        <div class="hub2-switch" role="tablist" aria-label="Uygulama seçimi">
+            <button class="active" data-pane="training" onclick="hubPane('training')" role="tab">Olympus Training</button>
+            <button data-pane="super" onclick="hubPane('super')" role="tab">Super App</button>
+            <i class="hub2-switch-thumb"></i>
         </div>
 
-        <main class="hub-content">
-            <!-- 📱 iOS TARZI KAYDIRILABİLİR ANA MENÜ -->
-            <div class="hub-pages-wrapper">
-                <div class="hub-pages-container" id="hub-pages-slider">
-
-                    <!-- 1. SAYFA (İlk 4 Modül) -->
-                    <div class="hub-page">
-                        <div class="hub-grid">
-                            <div class="hub-card hub-card-olympus" onclick="enterAppFromHub('oly2-screen', 'OLYMPUS')">
-                                <span class="hub-card-kicker">CORE</span>
-                                <h3>Olympus</h3>
-                                <p>Kişisel Gelişim & Spor</p>
-                                <div class="hub-card-icon">🏋️‍♂️</div>
-                            </div>
-                            <div class="hub-card hub-card-arcade" onclick="enterAppFromHub('arcade-screen', 'ARCADE')">
-                                <span class="hub-card-kicker">PLAY</span>
-                                <h3>Arcade</h3>
-                                <p>Retro Terminal</p>
-                                <div class="hub-card-icon">🕹️</div>
-                            </div>
-                            <div class="hub-card hub-card-business"
-                                onclick="enterAppFromHub('business-screen', 'BUSINESS')">
-                                <span class="hub-card-kicker">FOCUS</span>
-                                <h3>Business</h3>
-                                <p>Üretkenlik & İş</p>
-                                <div class="hub-card-icon">💼</div>
-                            </div>
-                            <div class="hub-card hub-card-kpss" onclick="openKPSSCenter()">
-                                <span class="hub-card-kicker">STUDY</span>
-                                <h3>KPSS Akademi</h3>
-                                <p>Ders & Deneme Takibi</p>
-                                <div class="hub-card-icon">📚</div>
-                            </div>
+        <main class="hub2-body">
+            <!-- OLYMPUS TRAINING -->
+            <section id="hub2-training" class="hub2-pane active">
+                <div class="hub2-app-card" onclick="O2.openFromHub()" role="button" aria-label="Olympus Training'i aç">
+                    <div class="hub2-app-head">
+                        <img src="assets/olympus-training-icon-192.png" alt="" class="hub2-app-icon">
+                        <div>
+                            <h2>Olympus <b>Training</b></h2>
+                            <p>Antrenman · Beslenme · İlerleme</p>
                         </div>
                     </div>
+                    <div id="hub2-training-stats" class="hub2-app-stats"></div>
+                    <div class="hub2-app-cta">Aç <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m9 6 6 6-6 6"/></svg></div>
+                </div>
+                <p class="hub2-note">Olympus Training artık uygulamanın ana ekranı. Super App modüllerine bu ekrandaki sekmeden ya da Training ayarlarından ulaşabilirsin.</p>
+            </section>
 
-                    <!-- 2. SAYFA (Yaşam Modülleri) -->
-                    <div class="hub-page">
-                        <div class="hub-grid">
-                            <div class="hub-card hub-card-finance" onclick="enterAppFromHub('finance-screen', 'WEALTH')">
-                                <span class="hub-card-kicker">WEALTH</span>
-                                <h3>Finans</h3>
-                                <p>Bütçe & Nakit Akışı</p>
-                                <div class="hub-card-icon">💳</div>
-                            </div>
-                            <div class="hub-card hub-card-garage" onclick="enterAppFromHub('garage-screen', 'DRIVE')">
-                                <span class="hub-card-kicker">DRIVE</span>
-                                <h3>Garaj</h3>
-                                <p>Hedef Araç & Motivasyon</p>
-                                <div class="hub-card-icon">🏎️</div>
-                            </div>
-                            <div class="hub-card hub-card-score" onclick="openOlyScore()">
-                                <span class="hub-card-kicker">SPORTS</span>
-                                <h3>OlyScore</h3>
-                                <p>Galatasaray Canlı Merkezi</p>
-                                <div class="hub-card-icon">🦁</div>
-                            </div>
-                            <div class="hub-card hub-card-social" onclick="openOlySocial()">
-                                <span class="hub-card-kicker">CONNECT</span>
-                                <h3>OlySocial</h3>
-                                <p>Sporcu Ağı & Paylaşım</p>
-                                <div class="hub-card-icon">🌐</div>
-                            </div>
-                        </div>
+            <!-- SUPER APP -->
+            <section id="hub2-super" class="hub2-pane">
+                <div class="hub-carousel-container hub2-carousel">
+                    <div id="hub-carousel-track">
+                        <div class="hub-slide hub-brand-slide"><img src="icon.png" alt="Project Olympus"></div>
                     </div>
-
-                    <!-- 3. SAYFA (Sistem & Saha Araçları) -->
-                    <div class="hub-page">
-                        <div class="hub-grid">
-                            <div class="hub-card hub-card-wide hub-card-olyos" onclick="enterAppFromHub('olyos-screen', 'OLYOS')">
-                                <span class="hub-card-kicker">SYSTEM</span>
-                                <h3>OlyOS</h3>
-                                <p>Araçlar, Müzik & Dosya Yönetimi</p>
-                                <div class="hub-card-icon">📱</div>
-                            </div>
-                            <div class="hub-card hub-card-wide hub-card-maintain" onclick="openMaintainScreen()">
-                                <span class="hub-card-kicker">FIELD OPS</span>
-                                <h3>Oly-Maintain</h3>
-                                <p>Arıza, Bakım & Envanter Takibi</p>
-                                <div class="hub-card-icon">🔧</div>
-                            </div>
-                        </div>
-                    </div>
-
+                    <button onclick="document.getElementById('hub-photo-upload').click()" class="hub-memory-button">📷 Anı Ekle</button>
+                    <input type="file" id="hub-photo-upload" accept="image/*" style="display: none;" onchange="addHubPhoto(event)">
                 </div>
 
-                <!-- Sayfa Noktaları (Pagination Dots) -->
-                <div class="hub-pagination">
-                    <span class="hub-dot active"></span>
-                    <span class="hub-dot"></span>
-                    <span class="hub-dot"></span>
+                <div class="hub2-widget" onclick="rotateHubWidget()" role="button">
+                    <div>
+                        <span>Sistem durumu</span>
+                        <h4 id="hub-widget-title">Yükleniyor...</h4>
+                    </div>
+                    <i>⚡</i>
                 </div>
-            </div>
 
-            <!-- Karşılama Metni -->
-            <footer class="hub-greeting">
-                <h2 id="hub-greeting-text">İyi Günler,</h2>
-                <p id="hub-greeting-name">Sporcu</p>
-            </footer>
+                <div class="hub2-section-title">Modüller</div>
+                <div class="hub2-modules">
+                    <button class="hub2-mod" style="--c:#c084fc" onclick="enterAppFromHub('arcade-screen', 'ARCADE')">
+                        <i><svg viewBox="0 0 24 24"><rect x="2.5" y="7" width="19" height="11" rx="5"/><path d="M7 11v3M5.5 12.5h3M15.5 12h.01M18 13.5h.01"/></svg></i><b>Arcade</b><small>Retro terminal</small></button>
+                    <button class="hub2-mod" style="--c:#38bdf8" onclick="enterAppFromHub('business-screen', 'BUSINESS')">
+                        <i><svg viewBox="0 0 24 24"><rect x="3" y="7" width="18" height="13" rx="3"/><path d="M8 7V5a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2M3 13h18"/></svg></i><b>Business</b><small>Üretkenlik & iş</small></button>
+                    <button class="hub2-mod" style="--c:#34d399" onclick="openKPSSCenter()">
+                        <i><svg viewBox="0 0 24 24"><path d="M4 5a2 2 0 0 1 2-2h13v16H6a2 2 0 0 0-2 2Z"/><path d="M4 19V5M9 7h6"/></svg></i><b>KPSS</b><small>Ders & deneme</small></button>
+                    <button class="hub2-mod" style="--c:#00d2ff" onclick="enterAppFromHub('finance-screen', 'WEALTH')">
+                        <i><svg viewBox="0 0 24 24"><rect x="2.5" y="5" width="19" height="14" rx="3"/><path d="M2.5 10h19M6.5 15h4"/></svg></i><b>Finans</b><small>Bütçe & nakit</small></button>
+                    <button class="hub2-mod" style="--c:#f39c12" onclick="enterAppFromHub('garage-screen', 'DRIVE')">
+                        <i><svg viewBox="0 0 24 24"><path d="M5 16h14l-1.5-6.2A2 2 0 0 0 15.6 8H8.4a2 2 0 0 0-1.9 1.8Z"/><path d="M4 16v3h3v-3M17 16v3h3v-3"/><circle cx="8" cy="13" r=".8"/><circle cx="16" cy="13" r=".8"/></svg></i><b>Garaj</b><small>Hedef araç</small></button>
+                    <button class="hub2-mod" style="--c:#c084fc" onclick="openOlyScore()">
+                        <i><svg viewBox="0 0 24 24"><path d="M8 21h8M12 17v4M7 4h10v5a5 5 0 0 1-10 0Z"/><path d="M17 5h3a3 3 0 0 1-3 4M7 5H4a3 3 0 0 0 3 4"/></svg></i><b>OlyScore</b><small>GS canlı</small></button>
+                    <button class="hub2-mod" style="--c:#60a5fa" onclick="openOlySocial()">
+                        <i><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3a14 14 0 0 1 0 18M12 3a14 14 0 0 0 0 18"/></svg></i><b>OlySocial</b><small>Sporcu ağı</small></button>
+                    <button class="hub2-mod" style="--c:#00d2ff" onclick="enterAppFromHub('olyos-screen', 'OLYOS')">
+                        <i><svg viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7" rx="2"/><rect x="14" y="3" width="7" height="7" rx="2"/><rect x="3" y="14" width="7" height="7" rx="2"/><rect x="14" y="14" width="7" height="7" rx="2"/></svg></i><b>OlyOS</b><small>Araçlar</small></button>
+                    <button class="hub2-mod" style="--c:#f39c12" onclick="openMaintainScreen()">
+                        <i><svg viewBox="0 0 24 24"><path d="M14.7 6.3a4 4 0 0 0-5.4 5.4L3 18l3 3 6.3-6.3a4 4 0 0 0 5.4-5.4l-2.6 2.6-2.4-.6-.6-2.4Z"/></svg></i><b>Maintain</b><small>Arıza & bakım</small></button>
+                    <button class="hub2-mod" style="--c:#e6c374" onclick="enterAppFromHub('app-content', 'OLYMPUS')">
+                        <i><svg viewBox="0 0 24 24"><path d="M6.5 6.5v11M17.5 6.5v11M3.5 9v6M20.5 9v6M6.5 12h11"/></svg></i><b>Klasik</b><small>Eski Olympus</small></button>
+                </div>
+            </section>
         </main>
     </div>
 
@@ -392,10 +285,10 @@
     <div id="oly2-screen" class="o2 hidden" aria-label="Olympus spor">
         <div class="o2-aurora"></div>
         <header class="o2-top">
-            <button class="o2-icon-btn" onclick="O2.close()" aria-label="Merkez Üs'e dön">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M15 18 9 12l6-6"/></svg>
+            <button class="o2-brand" onclick="O2.go('today')" aria-label="Olympus Training ana ekran">
+                <img src="assets/olympus-training-mark.svg" alt="" class="o2-brand-mark">
+                <span>OLYMPUS <b>TRAINING</b></span>
             </button>
-            <div class="o2-brand"><b>OLYMPUS</b> TRAINING</div>
             <div style="display:flex;align-items:center;gap:10px">
                 <button class="o2-icon-btn" style="position:relative" onclick="O2.openNotifications()" aria-label="Bildirimler">
                     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M6 8a6 6 0 1 1 12 0c0 7 3 9 3 9H3s3-2 3-9"/><path d="M10.3 21a1.9 1.9 0 0 0 3.4 0"/></svg>
@@ -421,6 +314,7 @@
         </nav>
         <div id="o2-sheet-layer" class="o2-sheet-layer"></div>
         <div id="o2-player" class="o2-player hidden"></div>
+        <div id="o2-cardio" class="o2-player hidden"></div>
         <div id="o2-toast" class="o2-toast" role="status" aria-live="polite"></div>
     </div>
 
@@ -6105,6 +5999,7 @@
     <script src="js/31-olympus2-ekranlar.js"></script>
     <script src="js/32-olympus2-oynatici.js"></script>
     <script src="js/33-olympus2-programlar.js"></script>
+    <script src="js/34-olympus2-kardiyo.js"></script>
 </body>
 
 </html>
