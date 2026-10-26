@@ -743,7 +743,8 @@ a.o2-btn { color: var(--o2-text); text-decoration: none; }
 @keyframes o2Blink { 50% { opacity: .35; } }
 
 /* ---------- Alt sayfa (bottom sheet) ---------- */
-.o2-sheet-layer { position: absolute; inset: 0; z-index: 40; pointer-events: none; }
+/* Oynatıcı (60) ve dinlenme katmanının (70) üstünde: antrenman sırasında açılan alt sayfalar görünsün */
+.o2-sheet-layer { position: absolute; inset: 0; z-index: 75; pointer-events: none; }
 .o2-backdrop {
     position: absolute;
     inset: 0;
@@ -1216,15 +1217,15 @@ body.dilala-mode .o2 { --o2-g1: #ffd1dc; --o2-g2: #ff9db5; --o2-g3: #e8577a; }
 .ot-splash { background: radial-gradient(ellipse at 50% 30%, #1a1610 0%, #0b0b0e 55%) !important; }
 .ot-splash-inner { display: flex; flex-direction: column; align-items: center; gap: 26px; }
 .ot-splash-mark { width: 132px; height: 132px; overflow: visible; filter: drop-shadow(0 10px 40px rgba(230, 195, 116, .35)); }
-.ot-splash .ot-peak { stroke-dasharray: 150; stroke-dashoffset: 150; animation: otDraw 1.1s .15s cubic-bezier(.6, 0, .2, 1) forwards; }
-.ot-splash .ot-bar { transform-origin: 60px 73px; transform: scaleX(0); animation: otBar .6s 1s cubic-bezier(.2, .9, .25, 1.1) forwards; }
-.ot-splash .ot-star { transform-origin: 90px 24px; transform: scale(0) rotate(-90deg); animation: otStar .7s 1.45s cubic-bezier(.2, .9, .25, 1.2) forwards; }
-.ot-splash .ot-wordmark { opacity: 0; letter-spacing: 12px; animation: otWord .9s 1.3s ease forwards; }
+.ot-splash .ot-peak { stroke-dasharray: 150; stroke-dashoffset: 150; animation: otDraw .65s .05s cubic-bezier(.6, 0, .2, 1) forwards; }
+.ot-splash .ot-bar { transform-origin: 60px 73px; transform: scaleX(0); animation: otBar .4s .55s cubic-bezier(.2, .9, .25, 1.1) forwards; }
+.ot-splash .ot-star { transform-origin: 90px 24px; transform: scale(0) rotate(-90deg); animation: otStar .45s .8s cubic-bezier(.2, .9, .25, 1.2) forwards; }
+.ot-splash .ot-wordmark { opacity: 0; letter-spacing: 12px; animation: otWord .6s .6s ease forwards; }
 @keyframes otDraw { to { stroke-dashoffset: 0; } }
 @keyframes otBar { to { transform: scaleX(1); } }
 @keyframes otStar { to { transform: scale(1) rotate(0); } }
 @keyframes otWord { to { opacity: 1; letter-spacing: 6px; } }
-.ot-splash.slide-up-animation { transform: none; opacity: 0; transition: opacity .7s ease; }
+.ot-splash.slide-up-animation { transform: none; opacity: 0; transition: opacity .45s ease; }
 
 /* Giriş ekranı */
 .ot-login {
@@ -1436,3 +1437,121 @@ body.dilala-mode .o2 { --o2-g1: #ffd1dc; --o2-g2: #ff9db5; --o2-g3: #e8577a; }
 
 /* OSM haritasını Olympus Noir'e uydur: renkleri ters çevir, ton ve doygunluğu düşür */
 .o2-cardio-map .leaflet-tile-pane, .o2-cardio-mini .leaflet-tile-pane { filter: invert(1) hue-rotate(180deg) grayscale(.55) brightness(.78) contrast(.92); }
+
+/* ==========================================================================
+   🍽️ BESİN GÜNLÜĞÜ · 🔥 ISINMA · 🏋️ PLAKA · 👤 PROFİL · 📅 TAKVİM · 🖼️ KARŞILAŞTIRMA
+   ========================================================================== */
+.o2-food-macros { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; margin-top: 18px; }
+.o2-food-macros div { display: flex; flex-direction: column; gap: 6px; min-width: 0; }
+.o2-food-macros span { font-size: 10.5px; font-weight: 800; letter-spacing: .8px; text-transform: uppercase; color: var(--o2-text-3); }
+.o2-food-macros b { font-size: 13px; font-weight: 800; white-space: nowrap; }
+.o2-food-meal { margin: 12px 0 0; font-size: 11px; font-weight: 800; letter-spacing: 1.2px; text-transform: uppercase; color: var(--o2-gold); }
+
+.o2-warmup { margin-top: 14px; padding: 14px 16px; border-radius: 18px; background: var(--o2-surface); border: 1px solid var(--o2-line); }
+.o2-warmup summary { list-style: none; display: flex; align-items: center; gap: 10px; cursor: pointer; font-size: 14px; font-weight: 800; }
+.o2-warmup summary::-webkit-details-marker { display: none; }
+.o2-warmup summary svg { width: 18px; height: 18px; color: var(--o2-orange); flex-shrink: 0; }
+.o2-warmup summary span { margin-left: auto; font-size: 11.5px; font-weight: 700; color: var(--o2-text-3); }
+
+.o2-plates { display: flex; align-items: center; justify-content: center; gap: 3px; height: 130px; padding: 0 10px; }
+.o2-plate-bar { width: 70px; height: 12px; border-radius: 6px 0 0 6px; background: linear-gradient(180deg, #d4d4d8, #71717a); }
+.o2-plate { width: 16px; height: var(--h); border-radius: 5px; box-shadow: inset 0 0 0 2px rgba(0, 0, 0, .25), 0 6px 14px rgba(0, 0, 0, .5); }
+.o2-plate-sleeve { width: 36px; height: 18px; border-radius: 0 6px 6px 0; background: linear-gradient(180deg, #e4e4e7, #a1a1aa); }
+
+.o2-profile-head { display: flex; flex-direction: column; align-items: center; text-align: center; padding-top: 8px; }
+.o2-profile-head h1 { margin: 14px 0 4px; font-size: 26px; font-weight: 800; letter-spacing: -.8px; }
+.o2-profile-head p { margin: 0; font-size: 13px; color: var(--o2-text-2); }
+
+.o2-achievements { display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; }
+.o2-ach { padding: 16px 14px; border-radius: 20px; background: var(--o2-surface); border: 1px solid var(--o2-line); display: flex; flex-direction: column; align-items: flex-start; }
+.o2-ach i { width: 40px; height: 40px; border-radius: 13px; display: grid; place-items: center; font-style: normal; background: rgba(255, 255, 255, .05); color: var(--o2-text-3); margin-bottom: 10px; }
+.o2-ach i svg { width: 20px; height: 20px; }
+.o2-ach h5 { margin: 0; font-size: 14px; font-weight: 800; }
+.o2-ach p { margin: 3px 0 0; font-size: 11.5px; line-height: 1.4; color: var(--o2-text-3); }
+.o2-ach .o2-bar { width: 100%; }
+.o2-ach.done { background: radial-gradient(circle at 100% 0%, rgba(230, 195, 116, .16), transparent 55%), var(--o2-surface); border-color: rgba(230, 195, 116, .35); }
+.o2-ach.done i { background: var(--o2-gold-grad); color: #171104; box-shadow: 0 8px 20px -8px var(--o2-gold-glow); }
+
+.o2-cal { display: grid; grid-template-columns: repeat(7, 1fr); gap: 4px; }
+.o2-cal small { text-align: center; font-size: 10px; font-weight: 800; letter-spacing: .6px; color: var(--o2-text-3); padding-bottom: 6px; }
+.o2-cal button { aspect-ratio: 1; border-radius: 12px; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 3px; font-size: 13px; font-weight: 700; color: var(--o2-text-2); cursor: default; }
+.o2-cal button.has { background: rgba(230, 195, 116, .08); color: var(--o2-text); cursor: pointer; }
+.o2-cal button.today { box-shadow: inset 0 0 0 1.5px var(--o2-gold); color: var(--o2-text); }
+.o2-cal em { display: flex; gap: 2px; height: 5px; }
+.o2-cal em b { width: 5px; height: 5px; border-radius: 50%; }
+
+.o2-compare { position: relative; aspect-ratio: 3 / 4; border-radius: 20px; overflow: hidden; background: #111; border: 1px solid var(--o2-line-2); }
+.o2-compare > img, .o2-compare-top img { position: absolute; top: 0; left: 0; height: 100%; object-fit: cover; }
+.o2-compare > img { width: 100%; }
+.o2-compare-top { position: absolute; inset: 0; clip-path: inset(0 50% 0 0); }
+.o2-compare-top img { width: 100%; }
+.o2-compare-handle::before { content: ""; position: absolute; left: 50%; top: -400px; bottom: -400px; width: 2px; margin-left: -1px; background: #fff; z-index: -1; }
+.o2-compare-handle { position: absolute; top: 50%; left: 50%; width: 34px; height: 34px; margin: -17px 0 0 -17px; border-radius: 50%; background: #fff; box-shadow: 0 4px 14px rgba(0, 0, 0, .5); pointer-events: none; }
+.o2-compare-tag { position: absolute; top: 12px; padding: 4px 9px; border-radius: 8px; background: rgba(0, 0, 0, .6); font-size: 10px; font-weight: 800; letter-spacing: 1.4px; }
+.o2-compare-tag.left { left: 12px; }
+.o2-compare-tag.right { right: 12px; }
+.o2-compare-range { width: 100%; margin-top: 14px; accent-color: var(--o2-gold); }
+
+/* ==========================================================================
+   🎨 ESKİ SPOR EKRANLARINA OLYMPUS NOIR (Arena, Sporlar, Sohbet, Kardiyo merkezi)
+   Satır içi stilleri ezmek için !important kullanılıyor; ekranların işlevi değişmiyor.
+   ========================================================================== */
+#arena-sec, #sports-sec, #messages-page, #cardio-hub-screen {
+    --goldnova: #e6c374;
+    --card-bg: #121216;
+    --bg-dark: #050506;
+    --text-muted: #8b8b95;
+    font-family: 'Manrope', 'Montserrat', system-ui, sans-serif;
+}
+#arena-sec *, #sports-sec *, #messages-page *, #cardio-hub-screen * { font-family: inherit; }
+#arena-sec, #sports-sec { background: radial-gradient(ellipse at 30% -10%, rgba(230, 195, 116, .1), transparent 50%), #050506 !important; }
+#cardio-hub-screen, #messages-page { background: #050506 !important; }
+
+#arena-sec h2, #sports-sec h2, #sports-sec h3, #arena-sec h3 { letter-spacing: -.4px !important; font-weight: 800 !important; }
+
+#arena-sec .track-card, #sports-sec .track-card, #cardio-hub-screen .track-card,
+#arena-sec .arena-user-card, #arena-sec .arena-search-box, #arena-sec .podium-container,
+#sports-sec .card, #arena-sec .card {
+    background: linear-gradient(180deg, #141418, #0e0e11) !important;
+    border: 1px solid rgba(255, 255, 255, .07) !important;
+    border-radius: 20px !important;
+    box-shadow: 0 18px 40px -26px rgba(0, 0, 0, .9) !important;
+}
+#arena-sec .podium-item { background: linear-gradient(180deg, #1b1b21, #0e0e11) !important; border-color: rgba(255, 255, 255, .08) !important; }
+#arena-sec .podium-item.rank-1 { border-color: rgba(230, 195, 116, .5) !important; box-shadow: 0 20px 40px -20px rgba(230, 195, 116, .45) !important; }
+
+#arena-sec .arena-entry-btn, #sports-sec .save-btn, #arena-sec .save-btn, #cardio-hub-screen .save-btn {
+    background: linear-gradient(135deg, #f6dea0, #e6c374 40%, #b9842c) !important;
+    color: #171104 !important;
+    border: 0 !important;
+    border-radius: 16px !important;
+    font-weight: 800 !important;
+    box-shadow: 0 12px 30px -12px rgba(230, 195, 116, .5) !important;
+}
+#arena-sec .edit-btn, #sports-sec .edit-btn, #cardio-hub-screen .edit-btn {
+    background: rgba(255, 255, 255, .05) !important;
+    border: 1px solid rgba(255, 255, 255, .1) !important;
+    color: #f5f5f7 !important;
+    border-radius: 12px !important;
+    font-weight: 700 !important;
+}
+#arena-sec input, #sports-sec input, #sports-sec select, #messages-page input {
+    background: #141418 !important;
+    border: 1px solid rgba(255, 255, 255, .1) !important;
+    border-radius: 14px !important;
+    color: #f5f5f7 !important;
+}
+#sports-sec .day-toggle.active, #sports-sec .toggle-container .active { background: #1b1b21 !important; color: #f5f5f7 !important; }
+#sports-sec .track-icon, #cardio-hub-screen .track-icon { filter: saturate(.9); }
+#messages-page .chat-list-card { background: linear-gradient(180deg, #141418, #0e0e11) !important; border: 1px solid rgba(255, 255, 255, .07) !important; border-radius: 18px !important; }
+
+/* Antrenman ekranı aksiyonları: dar ekranda 2×2 ızgara */
+.o2-player-actions { display: grid; grid-template-columns: repeat(2, 1fr); }
+.o2-player-actions .o2-btn { width: 100%; }
+
+.o2-warmup summary { flex-wrap: wrap; }
+.o2-warmup summary span { margin-left: 28px; width: 100%; }
+
+/* Training'den açılan klasik bölümler (Arena, Sporlar): klasik kabuk gizlenir, sadece bölüm görünür */
+body.o2-bridge #main-header, body.o2-bridge .bottom-nav, body.o2-bridge #app-content .fab-container, body.o2-bridge #oly-avatar { display: none !important; }
+body.o2-bridge #app-content .content { padding-top: calc(env(safe-area-inset-top, 0px) + 8px) !important; padding-bottom: calc(env(safe-area-inset-bottom, 0px) + 24px) !important; background: #050506; }

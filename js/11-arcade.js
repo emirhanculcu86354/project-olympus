@@ -68,13 +68,13 @@ window.loadArcadeGame = function () {
         // Bu sayede oyun taşmaz, kutuya mükemmel oranda oturur.
         container.innerHTML = '<canvas id="jsdos-canvas" style="width: 100%; height: 100%; display: block; object-fit: contain; border-radius: 8px; image-rendering: pixelated;"></canvas>';
 
-        Dos(document.getElementById("jsdos-canvas"), { wdosboxUrl: "https://js-dos.com/6.22/current/wdosbox.js" }).ready(function (fs, main) {
+        loadExternalScript('https://js-dos.com/6.22/current/js-dos.js').then(() => Dos(document.getElementById("jsdos-canvas"), { wdosboxUrl: "https://js-dos.com/6.22/current/wdosbox.js" }).ready(function (fs, main) {
             fs.extract(`./games/${zipName}`).then(function () {
                 main(["-c", exeName]).then(function (ci) {
                     window.dosCommandInterface = ci;
                 });
             }).catch(err => alert(`Hata: ${zipName} dosyası 'games' klasöründe bulunamadı! Lütfen dosyanın yüklü olduğundan emin ol.`));
-        });
+        })).catch(() => alert('Oyun motoru yüklenemedi. İnternet bağlantını kontrol et.'));
     };
 
     // OYUN BİLGİLERİ (GitHub'daki uzantılara göre .ZIP veya .zip olarak hassas ayarlandı)

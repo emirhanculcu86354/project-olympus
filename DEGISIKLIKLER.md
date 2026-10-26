@@ -114,3 +114,26 @@ Spor modülü artık uygulamanın kendisi: **Olympus Training**. Ayrı kurulum y
 - **Hareket geçmişi:** Egzersiz detayında ve rekor tablosundan 1RM gelişim grafiği + seans seans setler.
 - **Haftalık seri:** Haftalık hedefe üst üste kaç hafta ulaşıldığı (Bugün ve İlerleme'de).
 - Kardiyo yorgunluğu mesafeyle orantılı hesaplanıyor; günün antrenman kartı sadece ağırlık seanslarını "tamamlandı" sayıyor.
+
+---
+
+# Olympus Training · Güncelleme 2 (2026-10-27)
+
+## Daha hızlı açılış
+- Açılış artık sayfa açıldıktan ~1,3 sn sonra biter (önce: giriş kontrolünden sonra sabit 2,6 sn + animasyon).
+- Tüm scriptler `defer`: açılış animasyonu kütüphaneler yüklenmeden hemen çizilir.
+- Three.js (+GLTF/DRACO), JS-DOS ve model-viewer artık başlangıçta yüklenmiyor; sadece yarış oyunu, Arcade ve Garaj açılınca indiriliyor.
+- Android'in yerel açılış görseli (eski Project Olympus) yeni logoyla değiştirildi; iki farklı açılış ekranı arka arkaya gelmiyor.
+
+## Yeni spor özellikleri
+- **Besin günlüğü:** 28 hazır Türk mutfağı besini + özel besin, porsiyon seçimi, öğünlere göre liste; alınan kalori/protein/karb/yağ hedefe karşı (Beslenme sekmesi). Son kullanılanlar üstte.
+- **Isınma setleri:** Bileşik hareketlerde çalışma ağırlığına göre otomatik ısınma önerisi (bar×10, %50×5, %70×3, %85×1).
+- **Plaka hesaplayıcı:** Halter hareketlerinde taraf başına plakalar, görsel bar çizimi (20/15/10 kg bar seçenekleri).
+- **Profil sayfası** (sağ üstteki fotoğraf): ömür boyu istatistikler, 12 başarım (ilerleme çubuklu), aylık antrenman takvimi (günlere dokununca seans), **CSV dışa aktarma**.
+- **Hareket kütüphanesi:** 59 hareket, kas/ekipman filtresi, arama, 25 temel harekete Türkçe teknik ipuçları, 1RM geçmişi.
+- **Önce/Sonra:** Gelişim fotoğraflarını kaydırıcıyla karşılaştırma, kilo/bel farkıyla.
+
+## Tasarım
+- Arena, Sporlar, Sohbet ve Kardiyo merkezi Olympus Noir renk/tipografisini aldı; Training'den açıldıklarında klasik üst bar/alt menü gizlenir, geri tuşu Training'e döner.
+- Antrenman ekranında açılan alt sayfalar (Hareketler listesi, Plaka) artık ekranın arkasında kalmıyor (katman hatası düzeltildi).
+- Antrenman aksiyonları 2×2 ızgara; beslenme makro etiketleri dar ekrana sığıyor.

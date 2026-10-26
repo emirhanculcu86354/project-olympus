@@ -108,6 +108,17 @@ window.quitRacerGame = function() {
 };
 
 window.startRacerEngine = function(carType) {
+    // Three.js + yükleyiciler sadece yarış başlarken indirilir (açılışı hızlandırır)
+    if (typeof THREE === 'undefined' || !THREE.GLTFLoader) {
+        loadExternalScript('https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js')
+            .then(() => Promise.all([
+                loadExternalScript('https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/loaders/GLTFLoader.js'),
+                loadExternalScript('https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/loaders/DRACOLoader.js')
+            ]))
+            .then(() => startRacerEngine(carType))
+            .catch(() => alert('3D motor yüklenemedi. İnternet bağlantını kontrol et.'));
+        return;
+    }
     if (navigator.vibrate) navigator.vibrate(50);
     document.getElementById('racer-select-screen').style.display = 'none';
     document.getElementById('racer-game-screen').style.display = 'block';

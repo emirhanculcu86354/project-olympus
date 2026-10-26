@@ -45,6 +45,7 @@ let activeGarageCar = 'megane'; // Varsayılan araç
 
 // Araç Geçiş Butonlarını ve Verileri Ayarlayan Fonksiyon
 window.switchGarageCar = function(carKey) {
+    loadExternalScript('https://ajax.googleapis.com/ajax/libs/model-viewer/3.4.0/model-viewer.min.js', 'module');
     activeGarageCar = carKey;
     const carData = garageCarsData[carKey];
 

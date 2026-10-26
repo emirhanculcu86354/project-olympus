@@ -177,7 +177,10 @@
         O2.ui.charts.forEach(c => { try { c.destroy(); } catch (e) { } });
         O2.ui.charts = [];
         const view = $('o2-view');
-        const renderers = { today: renderToday, train: renderTrain, fuel: renderFuel, progress: renderProgress, builder: () => O2.renderBuilder() };
+        const renderers = {
+            today: renderToday, train: renderTrain, fuel: renderFuel, progress: renderProgress,
+            builder: () => O2.renderBuilder(), profile: () => O2.renderProfile(), library: () => O2.renderLibrary()
+        };
         view.innerHTML = `<div class="o2-page">${renderers[O2.ui.tab]()}</div>`;
         animateRings(view);
         if (O2.ui.tab === 'progress') drawProgressCharts();
@@ -539,6 +542,7 @@
                 <div class="o2-card o2-stat" style="margin-top:0"><small>Tahmini 1RM</small><strong>${best ? `${O2.fmtNum(best.e1rm, 1)}<small> kg</small>` : '—'}</strong></div>
             </div>
             ${sug.note ? `<div class="o2-insight">${I('spark')}<span>${sug.note}</span></div>` : ''}
+            ${O2.cuesFor(e.name) ? `<div class="o2-field"><label>Teknik</label><ul class="o2-coach-list" style="margin:2px 0 0">${O2.cuesFor(e.name).map(c => `<li>${esc(c)}</li>`).join('')}</ul></div>` : ''}
             ${last ? `<div class="o2-field"><label>Son performans</label><div class="o2-chips">${last.sets.map(s => `<span class="o2-chip">${O2.fmtNum(s.w, 1)} kg × ${s.r}</span>`).join('')}</div></div>` : ''}
             <div class="o2-field"><label>Tempo nasıl okunur</label><p style="margin:0;font-size:13px;line-height:1.6;color:var(--o2-text-2)">${esc(e.tempo || '2-0-1-0')} → iniş · alt duraklama · kalkış · üst duraklama (saniye). ${target.sets} set, ${target.isTime ? 'süre' : 'tekrar'} hedefi ${target.low && target.high && target.low !== target.high ? `${target.low}-${target.high}` : (target.high || 'maksimum')}.</p></div>
             <a class="o2-btn o2-btn-ghost o2-btn-block" style="margin-top:18px;text-decoration:none;" href="${video}" target="_blank" rel="noopener">${I('play')}Teknik videosunu izle</a>
@@ -592,9 +596,7 @@
         const water = O2.water();
         const supps = LS.get(`oly2_supps_${key}`, []);
         const SUPPS = [['creatine', 'Kreatin', '5 g'], ['whey', 'Whey', '1 ölçek'], ['omega', 'Omega-3', '2 kapsül'], ['multi', 'Multivitamin', '1 tablet']];
-        const pct = eaten.length / d.meals.length;
 
-        const rp = mac.protein * 4 / mac.kcal, rc = mac.carb * 4 / mac.kcal;
         return `
         <div class="o2-stagger">
             <div class="o2-hero-head">
@@ -603,19 +605,7 @@
             </div>
             <div class="o2-segment"><button class="${off === 0 ? 'active' : ''}" onclick="O2.pickFuelDay(0)">Bugün</button><button class="${off === 1 ? 'active' : ''}" onclick="O2.pickFuelDay(1)">Yarın</button></div>
 
-            <div class="o2-card o2-card-glow o2-macro" style="margin-top:12px;">
-                <div style="position:relative;width:116px;height:116px;">
-                    ${O2.ring({ pct: rp, size: 116, stroke: 10, color: 'var(--o2-gold)', center: '' })}
-                    <div style="position:absolute;inset:14px;">${O2.ring({ pct: rc, size: 88, stroke: 9, color: 'var(--o2-blue)', center: '' })}</div>
-                    <div style="position:absolute;inset:27px;">${O2.ring({ pct: pct, size: 62, stroke: 8, color: 'var(--o2-green)', center: `<strong style="font-size:15px;letter-spacing:-.4px">${O2.fmtNum(mac.kcal)}</strong><span style="font-size:8px;margin-top:1px">KCAL</span>` })}</div>
-                </div>
-                <div class="o2-macro-legend">
-                    <div><span><i style="background:var(--o2-gold)"></i>Protein</span><b>${mac.protein} g</b></div>
-                    <div><span><i style="background:var(--o2-blue)"></i>Karbonhidrat</span><b>${mac.carb} g</b></div>
-                    <div><span><i style="background:var(--o2-text-3)"></i>Yağ</span><b>${mac.fat} g</b></div>
-                    <div><span><i style="background:var(--o2-green)"></i>Öğünler</span><b>${eaten.length}/${d.meals.length}</b></div>
-                </div>
-            </div>
+            <div style="margin-top:12px">${O2.foodCard(key, mac)}</div>
             <p style="margin:10px 4px 0;font-size:11.5px;color:var(--o2-text-3);line-height:1.5">Hedefler ${O2.fmtNum(mac.bw, 1)} kg vücut ağırlığına ve günün karbonhidrat tipine göre hesaplanır.</p>
 
             <div class="o2-section-head"><h3>Öğün planı</h3><span class="o2-link" style="color:var(--o2-text-3)">Değişim için dokun</span></div>
@@ -751,7 +741,7 @@
             <div class="o2-section-head"><h3>Ölçüler</h3><button class="o2-link" onclick="O2.logSheet('measure')">Düzenle</button></div>
             <div class="o2-card"><div class="o2-grid-2" style="gap:14px 18px">${MEAS.map(([k, label, unit]) => `<div><div class="o2-eyebrow" style="letter-spacing:1px">${label}</div><div style="margin-top:4px;font-size:18px;font-weight:800">${p[k] ? `${esc(p[k])} <span style="font-size:12px;color:var(--o2-text-3)">${unit}</span>` : '<span style="color:var(--o2-text-3)">—</span>'}</div></div>`).join('')}</div></div>
 
-            <div class="o2-section-head"><h3>Gelişim fotoğrafları</h3><span class="o2-link" style="color:var(--o2-text-3)">${photos.length}/10</span></div>
+            <div class="o2-section-head"><h3>Gelişim fotoğrafları</h3>${photos.length >= 2 ? `<button class="o2-link" onclick="O2.compareSheet()">Karşılaştır</button>` : `<span class="o2-link" style="color:var(--o2-text-3)">${photos.length}/10</span>`}</div>
             <div class="o2-card">
                 <div class="o2-photos">
                     <button class="add" onclick="document.getElementById('o2-photo-input').click()" aria-label="Fotoğraf ekle">${I('camera')}</button>
@@ -1124,6 +1114,12 @@
     // Arena ve Sporlar eski ekranın içinde yaşıyor: oraya geçip kapanınca buraya geri dönülür
     O2.openClassicSection = (fnName) => {
         window.o2ClassicBridge = true;
+        document.body.classList.add('o2-bridge'); // klasik üst bar/alt menü gizlenir, bölüm tam ekran
+        // Klasik "Profil'e Dön" düğmeleri bu bağlamda Training'e döner
+        document.querySelectorAll('#app-content [onclick="closeSportsScreen()"]').forEach(btn => {
+            if (!btn.dataset.label) btn.dataset.label = btn.innerHTML;
+            btn.innerHTML = '← Training';
+        });
         O2.closeSheet(true);
         $('oly2-screen').classList.add('hidden');
         const app = $('app-content');
@@ -1147,6 +1143,8 @@
     // Klasik ekrandan Olympus 2.0'a geçiş (klasik başlıktaki "2.0" düğmesi)
     O2.openFromClassic = () => {
         window.o2ClassicBridge = false;
+        document.body.classList.remove('o2-bridge');
+        document.querySelectorAll('#app-content [data-label]').forEach(btn => { btn.innerHTML = btn.dataset.label; });
         const app = $('app-content');
         app.classList.add('hidden');
         app.style.display = '';

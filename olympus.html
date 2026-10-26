@@ -19,31 +19,24 @@
     <link rel="stylesheet" href="style.css">
     <link rel="stylesheet" href="css/olympus2.css">
 
-    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+    <script defer src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+    <script defer src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
     <link href="https://fonts.googleapis.com/css2?family=Caveat:wght@400..700&display=swap" rel="stylesheet">
-    <script src="https://www.gstatic.com/firebasejs/10.8.1/firebase-app-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/10.8.1/firebase-auth-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/10.8.1/firebase-firestore-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/10.8.1/firebase-database-compat.js"></script>
-    <!-- JS-DOS EMÜLATÖR MOTORU -->
-    <script src="https://js-dos.com/6.22/current/js-dos.js"></script>
+    <script defer src="https://www.gstatic.com/firebasejs/10.8.1/firebase-app-compat.js"></script>
+    <script defer src="https://www.gstatic.com/firebasejs/10.8.1/firebase-auth-compat.js"></script>
+    <script defer src="https://www.gstatic.com/firebasejs/10.8.1/firebase-firestore-compat.js"></script>
+    <script defer src="https://www.gstatic.com/firebasejs/10.8.1/firebase-database-compat.js"></script>
     <!-- 🗺️ HARİTA VE GPS KÜTÜPHANELERİ (Leaflet) -->
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
-    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
-    <!-- 3D MODEL GÖRÜNTÜLEYİCİ MOTORU -->
-    <script type="module" src="https://ajax.googleapis.com/ajax/libs/model-viewer/3.4.0/model-viewer.min.js"></script>
-    <!-- 🎮 3D OYUN MOTORU (THREE.JS & GLTF LOADER) -->
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/loaders/GLTFLoader.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/loaders/DRACOLoader.js"></script>
+    <script defer src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
     <!-- EMAILJS E-POSTA MOTORU -->
-    <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/@emailjs/browser@3/dist/email.min.js"></script>
+    <!-- Not: Three.js, JS-DOS ve model-viewer artık sadece Garaj / yarış / Arcade açılınca yükleniyor (loadExternalScript). Tüm scriptler defer: sırayla, sayfa çizildikten sonra çalışır. -->
+    <script defer src="https://cdn.jsdelivr.net/npm/@emailjs/browser@3/dist/email.min.js"></script>
 
 </head>
 
 <body>
-    <!-- 🎬 OLYMPUS TRAINING AÇILIŞ EKRANI (logo çizim animasyonu, ~2,5 sn) -->
+    <!-- 🎬 OLYMPUS TRAINING AÇILIŞ EKRANI (logo çizim animasyonu ~1,2 sn; js/06 → playSplashAnimation) -->
     <div id="loading-screen" class="loading-screen ot-splash o2-theme">
         <div class="ot-splash-inner">
             <svg class="ot-splash-mark" viewBox="0 0 120 120" aria-hidden="true">
@@ -294,7 +287,7 @@
                     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M6 8a6 6 0 1 1 12 0c0 7 3 9 3 9H3s3-2 3-9"/><path d="M10.3 21a1.9 1.9 0 0 0 3.4 0"/></svg>
                     <span id="o2-notif-badge" class="o2-notif-badge hidden"></span>
                 </button>
-                <button class="o2-avatar" onclick="O2.settingsSheet()" aria-label="Ayarlar"><img id="o2-avatar-img" src="icon.png" alt=""></button>
+                <button class="o2-avatar" onclick="O2.go('profile')" aria-label="Profil"><img id="o2-avatar-img" src="icon.png" alt=""></button>
             </div>
         </header>
         <main id="o2-view" class="o2-view"></main>
@@ -5966,40 +5959,41 @@
     </div>
 
     <!-- Uygulama kodu: modül dosyaları bu SIRAYLA yüklenmeli (ortak global kapsamı paylaşırlar) -->
-    <script src="js/01-cekirdek-firebase.js"></script>
-    <script src="js/02-oturum-ve-program-verisi.js"></script>
-    <script src="js/03-dilala.js"></script>
-    <script src="js/04-olympus-antrenman.js"></script>
-    <script src="js/05-olympus-profil.js"></script>
-    <script src="js/06-oly-asistan.js"></script>
-    <script src="js/07-arena.js"></script>
-    <script src="js/08-tema-futbol-bildirim.js"></script>
-    <script src="js/09-kamp.js"></script>
-    <script src="js/10-culbase-gecit.js"></script>
-    <script src="js/11-arcade.js"></script>
-    <script src="js/12-hub.js"></script>
-    <script src="js/13-business-plc.js"></script>
-    <script src="js/14-profil-ve-program-olusturucu.js"></script>
-    <script src="js/15-sohbet.js"></script>
-    <script src="js/16-takip-fab-ada.js"></script>
-    <script src="js/17-kardiyo-polaroid.js"></script>
-    <script src="js/18-kpss.js"></script>
-    <script src="js/19-akademi-guvenlik.js"></script>
-    <script src="js/20-arayuz-yardimcilari.js"></script>
-    <script src="js/21-finans.js"></script>
-    <script src="js/22-garaj.js"></script>
-    <script src="js/23-racer.js"></script>
-    <script src="js/24-olyscore.js"></script>
-    <script src="js/25-olysocial.js"></script>
-    <script src="js/26-olyos-zamanlayici.js"></script>
-    <script src="js/27-giris.js"></script>
-    <script src="js/28-oly-maintain.js"></script>
-    <script src="js/29-pwa.js"></script>
-    <script src="js/30-olympus2-cekirdek.js"></script>
-    <script src="js/31-olympus2-ekranlar.js"></script>
-    <script src="js/32-olympus2-oynatici.js"></script>
-    <script src="js/33-olympus2-programlar.js"></script>
-    <script src="js/34-olympus2-kardiyo.js"></script>
+    <script defer src="js/01-cekirdek-firebase.js"></script>
+    <script defer src="js/02-oturum-ve-program-verisi.js"></script>
+    <script defer src="js/03-dilala.js"></script>
+    <script defer src="js/04-olympus-antrenman.js"></script>
+    <script defer src="js/05-olympus-profil.js"></script>
+    <script defer src="js/06-oly-asistan.js"></script>
+    <script defer src="js/07-arena.js"></script>
+    <script defer src="js/08-tema-futbol-bildirim.js"></script>
+    <script defer src="js/09-kamp.js"></script>
+    <script defer src="js/10-culbase-gecit.js"></script>
+    <script defer src="js/11-arcade.js"></script>
+    <script defer src="js/12-hub.js"></script>
+    <script defer src="js/13-business-plc.js"></script>
+    <script defer src="js/14-profil-ve-program-olusturucu.js"></script>
+    <script defer src="js/15-sohbet.js"></script>
+    <script defer src="js/16-takip-fab-ada.js"></script>
+    <script defer src="js/17-kardiyo-polaroid.js"></script>
+    <script defer src="js/18-kpss.js"></script>
+    <script defer src="js/19-akademi-guvenlik.js"></script>
+    <script defer src="js/20-arayuz-yardimcilari.js"></script>
+    <script defer src="js/21-finans.js"></script>
+    <script defer src="js/22-garaj.js"></script>
+    <script defer src="js/23-racer.js"></script>
+    <script defer src="js/24-olyscore.js"></script>
+    <script defer src="js/25-olysocial.js"></script>
+    <script defer src="js/26-olyos-zamanlayici.js"></script>
+    <script defer src="js/27-giris.js"></script>
+    <script defer src="js/28-oly-maintain.js"></script>
+    <script defer src="js/29-pwa.js"></script>
+    <script defer src="js/30-olympus2-cekirdek.js"></script>
+    <script defer src="js/31-olympus2-ekranlar.js"></script>
+    <script defer src="js/32-olympus2-oynatici.js"></script>
+    <script defer src="js/33-olympus2-programlar.js"></script>
+    <script defer src="js/34-olympus2-kardiyo.js"></script>
+    <script defer src="js/35-olympus2-ozellikler.js"></script>
 </body>
 
 </html>

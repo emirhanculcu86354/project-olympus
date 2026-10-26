@@ -247,7 +247,9 @@ function playSplashAnimation(onCompleteCallback) {
         return;
     }
 
-    // Olympus Training logo animasyonu ~2,4 sn sürer (css/olympus2.css → .ot-splash)
+    // Logo animasyonu ~1,2 sn (css/olympus2.css → .ot-splash). Sayfa açıldığından beri geçen süre düşülür;
+    // giriş kontrolü geç gelirse fazladan beklenmez.
+    const elapsed = performance.now();
     setTimeout(() => {
         // Ekranı CSS ile yukarı kaydır (Perde açılışı)
         loadingScreen.classList.add('slide-up-animation');
@@ -255,8 +257,7 @@ function playSplashAnimation(onCompleteCallback) {
         // CSS animasyon süresi dolunca arkaplandan tamamen sil ve yönlendir
         setTimeout(() => {
             loadingScreen.style.display = 'none';
-            if (onCompleteCallback) onCompleteCallback(); 
-        }, 800);
-
-    }, 2600);
+        }, 450);
+        if (onCompleteCallback) onCompleteCallback();
+    }, Math.max(0, 1300 - elapsed));
 }

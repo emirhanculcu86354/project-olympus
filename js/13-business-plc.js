@@ -1077,10 +1077,11 @@ window.zoomPDF = function (delta) {
 
 // Ağır kütüphaneleri (html2pdf vb.) sadece ihtiyaç anında bir kez yükler
 const loadedExternalScripts = {};
-function loadExternalScript(src) {
+function loadExternalScript(src, type) {
     if (!loadedExternalScripts[src]) {
         loadedExternalScripts[src] = new Promise((resolve, reject) => {
             const tag = document.createElement('script');
+            if (type) tag.type = type;
             tag.src = src;
             tag.onload = resolve;
             tag.onerror = () => { delete loadedExternalScripts[src]; reject(new Error('Yüklenemedi: ' + src)); };

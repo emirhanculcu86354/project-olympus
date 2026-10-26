@@ -180,6 +180,7 @@
                 </div>
 
                 ${ex.note ? `<div class="o2-insight">${I('spark')}<span>${ex.note}</span></div>` : ''}
+                ${ex.sets.every(s => !s.done) ? O2.warmupHTML(ex) : ''}
 
                 <div class="o2-sets">
                     <div class="o2-sets-head"><span>Set</span><span>Önceki</span><span>${ex.target.isTime ? 'Kg' : 'Kg'}</span><span>${ex.target.isTime ? 'Sn' : 'Tekrar'}</span><span></span></div>
@@ -197,6 +198,7 @@
                     <button class="o2-btn o2-btn-ghost o2-btn-sm" onclick="O2.addSet()">${I('plus')}Set ekle</button>
                     <a class="o2-btn o2-btn-ghost o2-btn-sm" style="text-decoration:none" target="_blank" rel="noopener" href="https://www.youtube.com/results?search_query=${encodeURIComponent(ex.name + ' exercise form')}">${I('play')}Teknik</a>
                     <button class="o2-btn o2-btn-ghost o2-btn-sm" onclick="O2.exerciseList()">${I('list')}Liste</button>
+                    ${ex.target.isTime || !(O2.isBarbell && O2.isBarbell(ex.name)) ? '' : `<button class="o2-btn o2-btn-ghost o2-btn-sm" onclick="O2.plateSheet(${+(ex.sets[ci >= 0 ? ci : 0].w) || 0})">${I('calc')}Plaka</button>`}
                 </div>
 
                 ${next ? `
