@@ -326,6 +326,7 @@
         el.innerHTML = `<small>KİŞİSEL REKOR</small><h3>${O2.fmtNum(pr.w, 1)} kg × ${pr.r}</h3><p>${esc(pr.ex)} · 1RM ${O2.fmtNum(pr.prev, 1)} → <b style="color:var(--o2-gold)">${O2.fmtNum(pr.e1rm, 1)} kg</b></p>`;
         el.classList.add('show');
         O2.haptic([40, 60, 40, 60, 120]);
+        if (O2.voice) O2.voice(`Yeni kişisel rekor! ${pr.w} kilo, ${pr.r} tekrar.`);
         if (typeof confetti === 'function') confetti({ particleCount: 140, spread: 85, origin: { y: .35 }, colors: ['#f6dea0', '#e6c374', '#b9842c', '#ffffff'] });
         setTimeout(() => el.classList.remove('show'), 2600);
     }
@@ -354,6 +355,10 @@
         if (natural) {
             O2.haptic([200, 100, 200]);
             beep();
+            if (O2.voice) {
+                const ex = S.exercises[S.cur], ci = ex.sets.findIndex(x => !x.done);
+                O2.voice(ci >= 0 ? `Dinlenme bitti. ${ci + 1}. set, ${ex.sets[ci].w || ''} kilo, ${ex.sets[ci].r || ''} tekrar.` : (S.exercises[S.cur + 1] ? `Sıradaki hareket: ${S.exercises[S.cur + 1].name}.` : 'Tüm setler tamam. Harika iş.'));
+            }
             if (typeof showDynamicIsland === 'function' && document.hidden) showDynamicIsland('Dinlenme bitti', 'Sıradaki sete hazırlan', '⚡');
         }
         // Mevcut hareketin setleri bittiyse otomatik sonrakine geç
@@ -387,6 +392,7 @@
     O2.gotoExercise = (i) => {
         if (i < 0 || i >= S.exercises.length) return;
         S.cur = i;
+        if (O2.voice) O2.voice(`${S.exercises[i].name}. ${S.exercises[i].scheme.replace(/x/i, 'set, ')} tekrar.`);
         S.rest = null;
         persist();
         O2.haptic(8);
@@ -485,7 +491,14 @@
     O2.noteSession = (v) => { S.note = v; persist(); };
     O2.backToWorkout = () => { summaryMode = false; S.endedAt = null; persist(); renderPlayer(); };
 
+    // Özet ekranındaki "Paylaş": seansı kaydedip görsel paylaşım kartı üretir
     O2.shareSession = async () => {
+        if (O2.shareCard) {
+            const id = S.id;
+            O2.saveSession();
+            setTimeout(() => O2.shareCard(id), 500);
+            return;
+        }
         const sum = summarize();
         const text = `🏛️ Project Olympus\n${String(S.title).split(':').pop().trim()} tamamlandı\n⏱️ ${O2.fmtClock(sum.durationSec)} · 🏋️ ${O2.fmtNum(sum.volume)} kg · ${sum.setCount} set${S.prs.length ? `\n🏆 ${S.prs.length} kişisel rekor` : ''}`;
         try {

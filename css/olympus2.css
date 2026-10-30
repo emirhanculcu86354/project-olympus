@@ -1555,3 +1555,30 @@ body.dilala-mode .o2 { --o2-g1: #ffd1dc; --o2-g2: #ff9db5; --o2-g3: #e8577a; }
 /* Training'den açılan klasik bölümler (Arena, Sporlar): klasik kabuk gizlenir, sadece bölüm görünür */
 body.o2-bridge #main-header, body.o2-bridge .bottom-nav, body.o2-bridge #app-content .fab-container, body.o2-bridge #oly-avatar { display: none !important; }
 body.o2-bridge #app-content .content { padding-top: calc(env(safe-area-inset-top, 0px) + 8px) !important; padding-bottom: calc(env(safe-area-inset-bottom, 0px) + 24px) !important; background: #050506; }
+
+/* ==========================================================================
+   ⚖️ HACİM DENGESİ · 🏅 GÜÇ SEVİYESİ · 🏁 MEYDAN OKUMA · 📷 BARKOD
+   ========================================================================== */
+.o2-balance { display: flex; flex-direction: column; gap: 10px; }
+.o2-balance-row { display: grid; grid-template-columns: 82px 1fr 26px; align-items: center; gap: 10px; font-size: 12px; font-weight: 700; color: var(--o2-text-2); }
+.o2-balance-row b { text-align: right; font-weight: 800; }
+.o2-balance-track { position: relative; height: 8px; border-radius: 8px; background: rgba(255, 255, 255, .05); overflow: hidden; }
+.o2-balance-zone { position: absolute; top: 0; bottom: 0; background: rgba(61, 220, 151, .12); border-left: 1px dashed rgba(61, 220, 151, .45); border-right: 1px dashed rgba(61, 220, 151, .45); }
+.o2-balance-fill { position: absolute; left: 0; top: 0; bottom: 0; border-radius: 8px; transition: width 1.2s var(--o2-ease); }
+
+.o2-strength { padding: 14px 0; border-bottom: 1px solid var(--o2-line); }
+.o2-strength:last-child { border-bottom: 0; }
+.o2-strength-head { display: flex; align-items: center; justify-content: space-between; gap: 10px; }
+.o2-strength-head h5 { margin: 0; font-size: 15px; font-weight: 800; }
+.o2-strength-scale { display: grid; grid-template-columns: repeat(5, 1fr); gap: 4px; margin: 10px 0 8px; }
+.o2-strength-scale i { height: 6px; border-radius: 6px; background: rgba(255, 255, 255, .07); }
+.o2-strength-scale i.on { background: var(--o2-gold-grad); }
+.o2-strength p { margin: 0; font-size: 12px; color: var(--o2-text-3); line-height: 1.5; }
+
+.o2-challenge + .o2-challenge { margin-top: 10px; }
+.o2-challenge.done { border-color: rgba(230, 195, 116, .4); background: radial-gradient(circle at 100% 0%, rgba(230, 195, 116, .14), transparent 55%), linear-gradient(180deg, var(--o2-surface-2), var(--o2-surface)); }
+
+.o2-scan { position: relative; aspect-ratio: 4 / 3; border-radius: 20px; overflow: hidden; background: #000; border: 1px solid var(--o2-line-2); }
+.o2-scan video { width: 100%; height: 100%; object-fit: cover; display: block; }
+.o2-scan-line { position: absolute; left: 10%; right: 10%; top: 50%; height: 2px; background: var(--o2-gold); box-shadow: 0 0 18px var(--o2-gold); animation: o2Scan 1.8s ease-in-out infinite alternate; }
+@keyframes o2Scan { from { top: 22%; } to { top: 78%; } }

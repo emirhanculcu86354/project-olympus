@@ -78,7 +78,7 @@
     // Halkaları DOM'a girdikten sonra doldurarak animasyon başlat
     const animateRings = (root) => requestAnimationFrame(() => requestAnimationFrame(() => {
         root.querySelectorAll('.o2-ring-bar[data-off]').forEach(el => { el.style.strokeDashoffset = el.dataset.off; });
-        root.querySelectorAll('.o2-bar i[data-w]').forEach(el => { el.style.width = el.dataset.w; });
+        root.querySelectorAll('.o2-bar i[data-w], .o2-balance-fill[data-w]').forEach(el => { el.style.width = el.dataset.w; });
     }));
 
     // ==========================================
@@ -129,6 +129,7 @@
         const changed = await O2.cloudLoad();
         if (changed) O2.render();
         O2.maybeSendWeeklyReport();
+        if (O2.consumeLaunchAction) O2.consumeLaunchAction();
     };
 
     O2.close = () => {
@@ -286,6 +287,7 @@
 
             <div class="o2-section-head"><h3>Bu hafta</h3><span class="o2-link" style="color:var(--o2-text-3)">${O2.weekStreak() ? `🔥 ${O2.weekStreak()} hafta seri · ` : ''}${week.sessions} seans</span></div>
             <div class="o2-card" style="padding:12px;">${weekStrip()}</div>
+            ${O2.challenges().length ? `<div class="o2-section-head"><h3>Meydan okumalar</h3><button class="o2-link" onclick="O2.go('profile')">Tümü</button></div>${O2.challengeCards(true)}` : ''}
 
             ${document.body.classList.contains('dilala-mode') ? `
             <div class="o2-card is-tap o2-dilala-card" onclick="O2.openDilalaSpace()" style="margin-top:12px">
@@ -564,10 +566,11 @@
         O2.drawExerciseChart(name, 'o2-ex-chart');
     };
 
+    const shareBtn = (id) => `<button class="o2-btn o2-btn-ghost o2-btn-block" style="margin-top:16px" onclick="O2.shareCard('${esc(id)}')">${I('camera')}Paylaşım kartı oluştur</button>`;
     O2.sessionSheet = (id) => {
         const s = O2.sessions().find(x => x.id === id);
         if (!s) return;
-        if (s.type === 'cardio') return O2.sheet(s.title, O2.cardioDetail(s));
+        if (s.type === 'cardio') return O2.sheet(s.title, O2.cardioDetail(s) + shareBtn(s.id));
         O2.sheet(s.title, `
             <div class="o2-grid-3">
                 <div class="o2-card o2-stat"><small>Süre</small><strong style="font-size:20px">${O2.fmtClock(s.durationSec)}</strong></div>
@@ -578,6 +581,7 @@
                 <div class="o2-row"><div class="o2-row-main"><h5>${esc(e.name)}</h5><p>${e.sets.map(st => `${O2.fmtNum(st.w, 1)}×${st.r}`).join('  ·  ')}</p></div>
                 ${(s.prs || []).some(p => p.ex === e.name) ? '<span class="o2-chip gold">PR</span>' : ''}</div>`).join('')}</div>
             ${s.note ? `<div class="o2-field"><label>Not</label><p style="margin:0;color:var(--o2-text-2);font-size:13px">${esc(s.note)}</p></div>` : ''}
+            ${shareBtn(s.id)}
         `);
     };
 
@@ -716,9 +720,16 @@
 
             <div class="o2-section-head"><h3>Ağırlık trendi</h3><button class="o2-link" onclick="O2.logSheet('weight')">+ Kayıt</button></div>
             <div class="o2-card">${weights.length >= 2 ? '<div class="o2-chart"><canvas id="o2-chart-weight"></canvas></div>' : `<div class="o2-empty">${I('scale')}<br>Trend için en az 2 tartı kaydı gerekiyor.</div>`}</div>
+            ${O2.goalHTML()}
 
             <div class="o2-section-head"><h3>Haftalık hacim</h3><span class="o2-link" style="color:var(--o2-text-3)">8 hafta</span></div>
             <div class="o2-card"><div class="o2-chart" style="height:170px"><canvas id="o2-chart-volume"></canvas></div></div>
+
+            <div class="o2-section-head"><h3>Hacim dengesi</h3><span class="o2-link" style="color:var(--o2-text-3)">son 7 gün · set</span></div>
+            ${O2.muscleBalanceHTML()}
+
+            <div class="o2-section-head"><h3>Güç seviyesi</h3><span class="o2-link" style="color:var(--o2-text-3)">vücut ağırlığına göre</span></div>
+            ${O2.strengthHTML()}
 
             <div class="o2-section-head"><h3>Tutarlılık</h3><span class="o2-link" style="color:var(--o2-text-3)">12 hafta</span></div>
             <div class="o2-card">${heatmap()}</div>
@@ -733,6 +744,8 @@
                 <div class="o2-muscle-grid">${Object.keys(O2.MUSCLES).map(m => `
                     <div class="o2-muscle-row"><div><span>${O2.MUSCLES[m]}</span><b>%${Math.round(rec[m] * 100)}</b></div><div class="o2-bar"><i data-w="${Math.round(rec[m] * 100)}%" style="width:0;background:${rec[m] > .95 ? 'var(--o2-green)' : rec[m] > .6 ? 'var(--o2-gold)' : 'var(--o2-orange)'}"></i></div></div>`).join('')}</div>
             </div>
+
+            ${O2.recoveryTrendHTML()}
 
             <div class="o2-section-head"><h3>Kişisel rekorlar</h3></div>
             <div class="o2-card" style="padding:4px 18px;">${bests.length ? bests.map(([name, b]) => `
@@ -782,6 +795,7 @@
 
     function drawProgressCharts() {
         if (typeof Chart === 'undefined') return;
+        if (O2.drawRecoveryChart) O2.drawRecoveryChart();
         const gold = '#e6c374';
         const grid = 'rgba(255,255,255,.05)';
         const tick = '#63636e';
@@ -993,6 +1007,14 @@
                 <div><h5>Haftalık rapor e-postası</h5><p>Her hafta başında performans özetini ${esc((user && user.email) || 'e-postana')} gönderir.</p></div>
                 <span class="o2-switch ${s.weeklyMail ? 'on' : ''}" id="o2-set-mail"></span>
             </div>
+            <div class="o2-toggle-row" onclick="this.querySelector('.o2-switch').classList.toggle('on')">
+                <div><h5>Sesli koç</h5><p>Antrenmanda dinlenme bitişini, sıradaki seti ve rekorları sesli söyler.</p></div>
+                <span class="o2-switch ${s.voiceCoach ? 'on' : ''}" id="o2-set-voice"></span>
+            </div>
+            <div class="o2-list">
+                <div class="o2-row is-tap" onclick="O2.remindersSheet()"><div class="o2-row-idx">${I('bell')}</div><div class="o2-row-main"><h5>Hatırlatıcılar</h5><p>Antrenman, su ve uyku bildirimleri</p></div>${I('chev', 'chev')}</div>
+                <div class="o2-row is-tap" onclick="O2.goalSheet()"><div class="o2-row-idx">${I('scale')}</div><div class="o2-row-main"><h5>Hedef kilo</h5><p>${s.goalWeight ? `${O2.fmtNum(s.goalWeight, 1)} kg` : 'Belirlenmedi'}</p></div>${I('chev', 'chev')}</div>
+            </div>
             <button class="o2-btn o2-btn-gold o2-btn-block" style="margin-top:18px" onclick="O2.saveSettingsSheet()">Kaydet</button>
 
             <div class="o2-toggle-row" onclick="O2.toggleDilala()">
@@ -1034,7 +1056,8 @@
         O2.saveSettings({
             restSec: O2.clamp(parseInt($('o2-set-rest').value) || 90, 15, 600),
             weeklyTarget: O2.clamp(parseInt($('o2-set-target').value) || 5, 1, 14),
-            weeklyMail: $('o2-set-mail').classList.contains('on')
+            weeklyMail: $('o2-set-mail').classList.contains('on'),
+            voiceCoach: $('o2-set-voice').classList.contains('on')
         });
         O2.closeSheet(); O2.render(); O2.toast('Ayarlar kaydedildi', 'settings');
     };

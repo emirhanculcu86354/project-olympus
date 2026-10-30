@@ -3,7 +3,7 @@
 //  - Uygulama kabuğu (HTML/JS/CSS/manifest): ÖNCE AĞ, olmazsa önbellek → güncellemeler anında gelir, çevrimdışı da açılır
 //  - Ağır statik dosyalar (görsel, ses, video, 3D model, oyun ZIP): ÖNCE ÖNBELLEK → bir kez indirilir, sonra anında açılır
 //  - Başka alan adları (Firebase, CDN, API'ler) hiç ellenmez
-const CACHE_NAME = 'olympus-cache-v90';
+const CACHE_NAME = 'olympus-cache-v91';
 // js/ altındaki dosyalar olympus.html'deki sırayla (scripts/js-order.json)
 const APP_SHELL = [
   'index.html',
@@ -47,6 +47,7 @@ const APP_SHELL = [
   'js/33-olympus2-programlar.js',
   'js/34-olympus2-kardiyo.js',
   'js/35-olympus2-ozellikler.js',
+  'js/36-olympus2-gelismis.js',
   'manifest.json',
   'icon.png'
 ];
@@ -103,4 +104,20 @@ self.addEventListener('fetch', (event) => {
       });
     })
   );
+});
+
+// Bildirime dokunulunca uygulamayı öne getir ve ilgili eylemi (antrenman, su, uyku) ilet
+self.addEventListener('notificationclick', (event) => {
+  event.notification.close();
+  const action = event.notification.data && event.notification.data.action;
+  event.waitUntil((async () => {
+    const all = await self.clients.matchAll({ type: 'window', includeUncontrolled: true });
+    const client = all[0];
+    if (client) {
+      await client.focus();
+      if (action) client.postMessage({ olyAction: action });
+    } else {
+      await self.clients.openWindow('olympus.html' + (action ? '?action=' + action : ''));
+    }
+  })());
 });

@@ -137,3 +137,30 @@ Spor modülü artık uygulamanın kendisi: **Olympus Training**. Ayrı kurulum y
 - Arena, Sporlar, Sohbet ve Kardiyo merkezi Olympus Noir renk/tipografisini aldı; Training'den açıldıklarında klasik üst bar/alt menü gizlenir, geri tuşu Training'e döner.
 - Antrenman ekranında açılan alt sayfalar (Hareketler listesi, Plaka) artık ekranın arkasında kalmıyor (katman hatası düzeltildi).
 - Antrenman aksiyonları 2×2 ızgara; beslenme makro etiketleri dar ekrana sığıyor.
+
+---
+
+# Olympus Training · Güncelleme 3 (2026-10-31)
+
+Yeni modül: `js/36-olympus2-gelismis.js`. Yeni bağımlılık: `@capacitor/local-notifications` (Android bildirimleri).
+
+## Analiz
+- **Hacim dengesi (İlerleme):** Son 7 günde kas grubu başına çalışma seti; 10-20 set ideal bant, eksik kalan kaslar yazılır.
+- **Güç seviyesi:** Bench, Squat, Romanian Deadlift, Military Press, Barbell Row için vücut ağırlığına göre seviye (Başlangıç → Elit) ve bir sonraki seviye için gereken 1RM.
+- **Hedef kilo:** Hedef belirle; son 8 haftanın tartı eğiliminden haftalık hız ve tahmini varış tarihi.
+- **Uyku & nabız trendi:** Son 14 kayıt, çift eksenli grafik ve ortalamalar.
+
+## Motivasyon
+- **Meydan okumalar (Profil + Bugün):** Aylık 16 seans / 50 km / 50 ton / 5 rekor; ilerleme çubuğu, tamamlanınca kutlama. Ay sonuna 7 günden az kaldıysa gelecek ayınkiler sunulur.
+- **Paylaşım kartı:** Her seans/kardiyo için 1080×1920 (hikâye boyutu) görsel: logo, istatistikler, rekorlar ya da rota. Telefonda doğrudan paylaşım menüsü açılır. Seans özetindeki "Paylaş" artık kaydedip bu kartı üretir.
+- **Sesli koç (Ayarlar):** Dinlenme bitince sıradaki seti (ağırlık/tekrar), hareket geçişlerini ve kişisel rekorları Türkçe sesli söyler.
+
+## Beslenme
+- **İnternette ara:** Open Food Facts veritabanında ürün arama (100 g değerleriyle), anahtar gerekmez.
+- **Barkod tara:** Destekleyen cihazlarda kamerayla barkod okuma; desteklemeyenlerde barkod numarası elle girilir.
+
+## Hatırlatıcılar ve kısayollar
+- **Hatırlatıcılar (Ayarlar):** Günlük antrenman (saat seçilebilir), su (10:00-20:00 arası 2 saatte bir), sabah uyku kaydı. Android'de uygulama kapalıyken de gelir; tarayıcıda uygulama açıkken. Bildirime dokununca ilgili ekran açılır.
+- **Uygulama ikonu kısayolları (PWA):** Antrenmanı başlat, Su ekle, Kardiyo, Besin ekle (`?action=…`).
+
+**Android'e kurmadan önce:** `npm install` (yeni eklenti) → `npm run android`.

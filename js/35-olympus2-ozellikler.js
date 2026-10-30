@@ -66,6 +66,8 @@
             <input class="o2-input" id="o2-food-q" placeholder="Besin ara" value="${esc(query)}" oninput="O2.foodSheet('${key}', this.value)">
             <div class="o2-segment" id="o2-food-meal" style="margin-top:10px">${MEALS.map(m => `<button class="${m === (O2.ui.foodMeal || defMeal) ? 'active' : ''}" onclick="O2.formPick(this); O2.ui.foodMeal='${m}'">${m}</button>`).join('')}</div>
             <div class="o2-list" style="margin-top:6px">
+                <div class="o2-row is-tap" onclick="O2.barcodeSheet('${key}')"><div class="o2-row-idx" style="color:var(--o2-gold)">${I('camera')}</div><div class="o2-row-main"><h5>Barkod tara</h5><p>Paketli ürünü kamerayla bul</p></div>${I('chev', 'chev')}</div>
+                ${query.trim().length >= 3 ? `<div class="o2-row is-tap" onclick="O2.foodOnlineSearch('${key}', document.getElementById('o2-food-q').value)"><div class="o2-row-idx" style="color:var(--o2-blue)">${I('spark')}</div><div class="o2-row-main"><h5>İnternette ara: "${esc(query.trim())}"</h5><p>Open Food Facts · 100 g değerleri</p></div></div><div id="o2-food-online"></div>` : ''}
                 ${list.map(f => `
                 <div class="o2-row is-tap" onclick="O2.foodAmountSheet('${key}', ${jsArg(JSON.stringify(f))})">
                     <div class="o2-row-main"><h5>${esc(f.name)}</h5><p>${esc(f.unit)} · P ${f.p} · K ${f.c} · Y ${f.f}</p></div>
@@ -246,6 +248,9 @@
                     <h5>${a[1]}</h5><p>${a[2]}</p>
                     ${done ? '<span class="o2-chip gold" style="margin-top:8px">Kazanıldı</span>' : `<div class="o2-bar" style="margin-top:10px"><i data-w="${Math.min(100, Math.round(v / t * 100))}%" style="width:0;background:var(--o2-gold-grad)"></i></div>`}
                 </div>`).join('')}</div>
+
+            <div class="o2-section-head"><h3>Meydan okumalar</h3><span class="o2-link" style="color:var(--o2-text-3)">bu ay</span></div>
+            ${O2.challengeCards()}
 
             <div class="o2-section-head"><h3>Takvim</h3><div style="display:flex;gap:6px"><button class="o2-icon-btn" style="width:32px;height:32px" onclick="O2.calMonth(-1)" aria-label="Önceki ay">${I('back')}</button><button class="o2-icon-btn" style="width:32px;height:32px" onclick="O2.calMonth(1)" aria-label="Sonraki ay">${I('chev')}</button></div></div>
             <div class="o2-card">${calendarHTML()}</div>

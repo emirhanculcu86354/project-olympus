@@ -18,5 +18,55 @@
       "type": "image/png",
       "purpose": "any maskable"
     }
+  ],
+  "shortcuts": [
+    {
+      "name": "Antrenmanı başlat",
+      "short_name": "Başlat",
+      "url": "olympus.html?action=start",
+      "icons": [
+        {
+          "src": "assets/olympus-training-icon-192.png",
+          "sizes": "192x192",
+          "type": "image/png"
+        }
+      ]
+    },
+    {
+      "name": "Su ekle",
+      "short_name": "Su",
+      "url": "olympus.html?action=water",
+      "icons": [
+        {
+          "src": "assets/olympus-training-icon-192.png",
+          "sizes": "192x192",
+          "type": "image/png"
+        }
+      ]
+    },
+    {
+      "name": "Kardiyo",
+      "short_name": "Kardiyo",
+      "url": "olympus.html?action=cardio",
+      "icons": [
+        {
+          "src": "assets/olympus-training-icon-192.png",
+          "sizes": "192x192",
+          "type": "image/png"
+        }
+      ]
+    },
+    {
+      "name": "Besin ekle",
+      "short_name": "Besin",
+      "url": "olympus.html?action=food",
+      "icons": [
+        {
+          "src": "assets/olympus-training-icon-192.png",
+          "sizes": "192x192",
+          "type": "image/png"
+        }
+      ]
+    }
   ]
 }
