@@ -1,0 +1,43 @@
+rules_version = '2';
+
+// Olympus Firestore güvenlik kuralları
+// Yayınlama: Firebase Console → Firestore Database → Kurallar → bu dosyanın içeriğini yapıştır → Yayınla
+// (ya da Firebase CLI ile: firebase deploy --only firestore:rules)
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    function signedIn() { return request.auth != null; }
+    function isOwner(uid) { return signedIn() && request.auth.uid == uid; }
+
+    // Kullanıcı profili: herkes (giriş yapmış) okuyabilir — Arena, OlySocial, sohbet listesi bunu kullanır.
+    // Sahibi her şeyi yazar; diğer kullanıcılar sadece takip / bildirim / ortak maç alanlarına dokunabilir.
+    match /users/{uid} {
+      allow read: if signedIn();
+      allow create, delete: if isOwner(uid);
+      allow update: if isOwner(uid)
+        || (signedIn() && request.resource.data.diff(resource.data).affectedKeys()
+              .hasOnly(['followers', 'notifications', 'shared_matches']));
+
+      // Bulut yedeği (Ayarlar → Veri & yedek): yalnızca sahibi
+      match /kv/{key} {
+        allow read, write: if isOwner(uid);
+      }
+    }
+
+    // Birebir sohbet: belge kimliği iki kullanıcının uid'lerinin "_" ile birleşimi
+    match /chats/{chatId} {
+      allow read, write: if signedIn() && request.auth.uid in chatId.split('_');
+      match /messages/{messageId} {
+        allow read, create: if signedIn() && request.auth.uid in chatId.split('_');
+        allow update, delete: if signedIn() && request.auth.uid in chatId.split('_');
+      }
+    }
+
+    // Haftalık liderlik tablosu: herkes okur, herkes yalnızca kendi satırını yazar
+    match /leaderboard/{weekId}/users/{uid} {
+      allow read: if signedIn();
+      allow write: if isOwner(uid)
+        && (request.method == 'delete' || (request.resource.data.score is number && request.resource.data.score < 100000));
+    }
+  }
+}

@@ -211,6 +211,13 @@
         const top = last.sets.reduce((a, s) => (O2.e1rm(s.w, s.r) > O2.e1rm(a.w, a.r) ? s : a), last.sets[0]);
         const muscle = O2.muscleOf(ex.name);
         const bigLower = ['quads', 'hamstrings', 'glutes'].includes(muscle);
+        // RPE ≥ 9.5: hâlâ limitte → yükleme yok, aynı ağırlıkla tekrar
+        if (top.rpe >= 10) return { w: top.w, r: top.r, note: `Geçen sefer <b>${top.w} kg × ${top.r}</b> limitteydi (RPE ${top.rpe}). Bugün aynı yükte formu sağlamlaştır.` };
+        // RPE ≤ 7: rahat → aralığın tepesine ulaşmasa bile yükle
+        if (top.rpe && top.rpe <= 7 && target.high) {
+            const inc = bigLower ? 5 : 2.5;
+            return { w: +top.w + inc, r: target.low || top.r, note: `Geçen sefer ${top.w} kg × ${top.r} rahat geçti (RPE ${top.rpe}). Bugün <b>${+top.w + inc} kg</b> dene.` };
+        }
         if (target.high && top.r >= target.high) {
             const inc = bigLower ? 5 : 2.5;
             return { w: +top.w + inc, r: target.low || top.r, note: `Geçen sefer ${top.w} kg × ${top.r} ile aralığın tepesine ulaştın. Bugün <b>${+top.w + inc} kg</b> dene.` };

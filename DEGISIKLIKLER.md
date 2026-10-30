@@ -164,3 +164,31 @@ Yeni modül: `js/36-olympus2-gelismis.js`. Yeni bağımlılık: `@capacitor/loca
 - **Uygulama ikonu kısayolları (PWA):** Antrenmanı başlat, Su ekle, Kardiyo, Besin ekle (`?action=…`).
 
 **Android'e kurmadan önce:** `npm install` (yeni eklenti) → `npm run android`.
+
+# Olympus Training · Güncelleme 4 — Akademi, yedek, hatırlatıcılar (2026-10-31)
+
+## Olympus Akademi (TSK · Jandarma · Polis)
+- Eski POMEM/JASEM modu yerine Training içinde yeni **Akademi** ekranı (`js/38-olympus2-akademi.js`): üç branş, branş başına hedefler (MSÜ, Uzman Erbaş, Sözleşmeli Er, Subay · JAMYO, JSGA, J. Uzman Erbaş · POMEM, PMYO, PAEM), erkek/kadın normları.
+- **Hazırlık skoru:** fiziki test (%40), mülakat kartları (%30), belge listesi (%15), son 14 gündeki istikrar (%15).
+- **Fiziki yeterlilik:** FYT (mekik, şınav, 400 m) ve parkur (7 istasyon · 70 m) için baraj/hedef çubukları, puan, en iyi değer, test geçmişi; istasyon turlu kronometre ve 1 dakikalık tekrar sayacı. Normlar tahmini; "Normlar"dan ilana göre düzenlenir.
+- **Mülakat:** branşa özel + kişisel + 175 genel kültür sorusu; bilinmeyenleri öne alan kart çalışması, 60 sn süreli 5 soruluk prova (sesli okuma, Gemini komisyon değerlendirmesi), rütbe & teşkilat testi, eski kameralı simülatöre geçiş.
+- Sınav takvimi (yazılı / fiziki / mülakat geri sayımı), belge kontrol listesi, branş hazırlık programını tek dokunuşla Training'e kurma, resmi ilan bağlantısı. Eski kayıtlar (mülakat tarihi, parkur süresi) ilk açılışta içe aktarılır.
+
+## Veriler artık silinmiyor (bulut yedeği)
+- `js/37-olympus2-yedek.js`: tüm modüllerin yerel verisi (olympus_*, oly2_*, dilala_*, kpss_*, finans, garaj, futbol, culbase) her değişiklikte `users/{uid}/kv` altına yedeklenir; büyük değerler (fotoğraflar) parçalanır.
+- Uygulama ana ekrandan/yer işaretlerinden kaldırılıp yeniden eklenince aynı hesapla giriş yapıldığında her şey otomatik geri yüklenir (yeni cihazda bulut önceliklidir, sonra en yeni değişiklik kazanır).
+- Ayarlar → **Veri & yedek**: durum, şimdi yedekle, buluttan geri yükle, JSON dosyasına aktar/içe al. Tarayıcıdan kalıcı depolama izni istenir. Gemini anahtarı buluta yazılmaz.
+
+## Hatırlatıcılar: telefon + e-posta
+- Antrenman bildirimi artık o günün seans adıyla gelir, dinlenme günlerinde ve o gün antrenman yapıldıysa gelmez (7 günlük takvim her açılışta tazelenir).
+- Yeni **Akademi çalışması** hatırlatıcısı (sınava kalan günle).
+- **E-posta hatırlatıcısı:** `apps-script/olympus-hatirlatici.gs` (Google Apps Script). Firebase kimliği sunucuda doğrulanır, mail yalnızca hesabın kendi adresine gider; sınavlara 30/7/1 gün kala ayrıca uyarır. Kurulum adımları dosyanın başında.
+
+## Antrenman
+- **Süperset:** oynatıcıda iki hareketi eşle; A1 → dinlenmeden A2 → dinlen → A1.
+- **Set başına RPE:** dinlenme ekranında son setin zorluğu (6-10). Öneri motoru kullanır: RPE ≤ 7 → yük artır, RPE 10 → aynı yükte kal.
+- **Haftalık koç** (İlerleme): hedef seans, eksik kas grupları, plato/hacim/hazırlık ve Akademi takvimine göre 3-4 somut adım; "AI planı" ile Gemini'den 7 günlük plan.
+- **Haftalık sıralama** (`js/39-olympus2-koc.js`): isteğe bağlı katılım, `leaderboard/{hafta}/users/{uid}`.
+
+## Güvenlik
+- `firestore.rules`: kullanıcı belgesine sadece sahibi yazar (diğerleri yalnızca takip/bildirim/ortak maç alanları), yedek yalnızca sahibine açık, sohbetler yalnızca iki tarafa, sıralamada herkes yalnızca kendi satırını yazar. Firebase Console'dan yayınlanmalı.

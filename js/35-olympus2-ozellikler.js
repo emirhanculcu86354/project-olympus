@@ -249,7 +249,7 @@
                     ${done ? '<span class="o2-chip gold" style="margin-top:8px">Kazanıldı</span>' : `<div class="o2-bar" style="margin-top:10px"><i data-w="${Math.min(100, Math.round(v / t * 100))}%" style="width:0;background:var(--o2-gold-grad)"></i></div>`}
                 </div>`).join('')}</div>
 
-            <div class="o2-section-head"><h3>Meydan okumalar</h3><span class="o2-link" style="color:var(--o2-text-3)">bu ay</span></div>
+            <div class="o2-section-head"><h3>Meydan okumalar</h3><button class="o2-link" onclick="O2.leaderboardSheet()">Haftalık sıralama</button></div>
             ${O2.challengeCards()}
 
             <div class="o2-section-head"><h3>Takvim</h3><div style="display:flex;gap:6px"><button class="o2-icon-btn" style="width:32px;height:32px" onclick="O2.calMonth(-1)" aria-label="Önceki ay">${I('back')}</button><button class="o2-icon-btn" style="width:32px;height:32px" onclick="O2.calMonth(1)" aria-label="Sonraki ay">${I('chev')}</button></div></div>

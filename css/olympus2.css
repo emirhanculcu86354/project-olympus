@@ -1582,3 +1582,85 @@ body.o2-bridge #app-content .content { padding-top: calc(env(safe-area-inset-top
 .o2-scan video { width: 100%; height: 100%; object-fit: cover; display: block; }
 .o2-scan-line { position: absolute; left: 10%; right: 10%; top: 50%; height: 2px; background: var(--o2-gold); box-shadow: 0 0 18px var(--o2-gold); animation: o2Scan 1.8s ease-in-out infinite alternate; }
 @keyframes o2Scan { from { top: 22%; } to { top: 78%; } }
+
+/* ==========================================================================
+   🛡️ OLYMPUS AKADEMİ (TSK · JANDARMA · POLİS) · ☁️ YEDEK · ⚡ SÜPERSET & RPE
+   ========================================================================== */
+.o2-acad-branches { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; margin-top: 18px; }
+.o2-acad-branch {
+    display: flex; flex-direction: column; align-items: flex-start; gap: 2px; padding: 14px 12px; border-radius: 18px;
+    background: linear-gradient(180deg, var(--o2-surface-2), var(--o2-surface)); border: 1px solid var(--o2-line);
+    color: var(--o2-text); text-align: left; cursor: pointer; transition: transform .2s var(--o2-ease), border-color .2s, background .2s;
+}
+.o2-acad-branch:active { transform: scale(.97); }
+.o2-acad-branch i { width: 34px; height: 34px; border-radius: 11px; display: grid; place-items: center; margin-bottom: 8px; color: var(--acad); background: color-mix(in srgb, var(--acad) 14%, transparent); }
+.o2-acad-branch i svg { width: 18px; height: 18px; }
+.o2-acad-branch b { font-size: 15px; font-weight: 800; letter-spacing: -.2px; }
+.o2-acad-branch small { font-size: 11px; color: var(--o2-text-3); font-weight: 700; }
+.o2-acad-branch.active { border-color: color-mix(in srgb, var(--acad) 55%, transparent); background: radial-gradient(circle at 100% 0%, color-mix(in srgb, var(--acad) 22%, transparent), transparent 60%), linear-gradient(180deg, var(--o2-surface-2), var(--o2-surface)); box-shadow: 0 10px 30px -14px var(--acad); }
+
+.o2-acad-dates .o2-card { margin-top: 0; padding: 12px; display: flex; flex-direction: column; gap: 2px; text-align: left; color: var(--o2-text); }
+.o2-acad-dates small { font-size: 10px; font-weight: 800; letter-spacing: .8px; text-transform: uppercase; color: var(--o2-text-3); }
+.o2-acad-dates strong { font-size: 24px; font-weight: 800; letter-spacing: -1px; margin-top: 4px; color: var(--acad); }
+.o2-acad-dates span { font-size: 11px; color: var(--o2-text-3); }
+
+.o2-acad-ev { padding: 14px 0; border-bottom: 1px solid var(--o2-line); }
+.o2-acad-ev:last-of-type { border-bottom: 0; }
+.o2-acad-ev-head { display: flex; justify-content: space-between; align-items: center; gap: 12px; }
+.o2-acad-ev-head h5 { margin: 0; font-size: 15px; font-weight: 800; }
+.o2-acad-ev-head p { margin: 3px 0 0; font-size: 11.5px; color: var(--o2-text-3); }
+.o2-acad-ev-val { text-align: right; flex-shrink: 0; }
+.o2-acad-ev-val strong { display: block; font-size: 19px; font-weight: 800; letter-spacing: -.5px; }
+.o2-acad-ev-val small { font-size: 11px; font-weight: 700; opacity: .85; }
+.o2-acad-ev-best { margin: 6px 0 0; font-size: 11px; color: var(--o2-text-3); }
+
+.o2-acad-tile { margin-top: 0; padding: 16px; text-align: left; display: flex; flex-direction: column; gap: 4px; color: var(--o2-text); }
+.o2-acad-tile i { width: 38px; height: 38px; border-radius: 12px; display: grid; place-items: center; margin-bottom: 8px; background: rgba(255, 255, 255, .05); font-style: normal; }
+.o2-acad-tile h4 { margin: 0; font-size: 14px; font-weight: 800; }
+.o2-acad-tile p { margin: 0; font-size: 11.5px; line-height: 1.4; color: var(--o2-text-3); }
+
+.o2-acad-card { padding: 4px 2px 0; }
+.o2-acad-card h3 { margin: 16px 0 0; font-size: 21px; line-height: 1.35; font-weight: 800; letter-spacing: -.4px; }
+.o2-acad-answer { margin-top: 16px; padding: 14px 16px; border-radius: 16px; background: rgba(61, 220, 151, .07); border: 1px solid rgba(61, 220, 151, .22); animation: o2Fade .35s var(--o2-ease); }
+.o2-acad-answer small, .o2-acad-ai small { font-size: 10px; font-weight: 800; letter-spacing: 1px; text-transform: uppercase; color: var(--o2-green); }
+.o2-acad-answer p, .o2-acad-ai p { margin: 6px 0 0; font-size: 14px; line-height: 1.55; color: var(--o2-text-2); }
+.o2-acad-ai { margin-top: 12px; padding: 14px 16px; border-radius: 16px; background: rgba(167, 139, 250, .08); border: 1px solid rgba(167, 139, 250, .25); }
+.o2-acad-ai small { color: var(--o2-violet); }
+.o2-acad-timer { min-width: 48px; height: 32px; padding: 0 12px; border-radius: 16px; display: grid; place-items: center; font-weight: 800; font-variant-numeric: tabular-nums; background: rgba(230, 195, 116, .12); color: var(--o2-gold); }
+.o2-acad-timer.low { background: rgba(255, 107, 107, .14); color: #ff6b6b; animation: o2Pulse 1s infinite; }
+@keyframes o2Pulse { 50% { opacity: .55; } }
+.o2-acad-options { display: flex; flex-direction: column; gap: 8px; margin-top: 18px; }
+.o2-acad-options .o2-btn { justify-content: flex-start; text-align: left; height: auto; min-height: 50px; padding: 12px 16px; white-space: normal; line-height: 1.35; }
+.o2-acad-options .o2-btn.ok { border-color: rgba(61, 220, 151, .6); background: rgba(61, 220, 151, .14); color: var(--o2-green); }
+.o2-acad-options .o2-btn.bad { border-color: rgba(255, 107, 107, .6); background: rgba(255, 107, 107, .12); color: #ff6b6b; }
+.o2-acad-result { display: flex; flex-direction: column; align-items: center; gap: 14px; text-align: center; padding-top: 6px; }
+.o2-acad-result p { margin: 0; font-size: 14px; line-height: 1.5; color: var(--o2-text-2); max-width: 300px; }
+
+.o2-acad-sw { display: flex; flex-direction: column; align-items: center; gap: 6px; padding: 10px 0 0; }
+.o2-acad-sw-num { font-size: 68px; font-weight: 800; letter-spacing: -3px; font-variant-numeric: tabular-nums; line-height: 1; background: var(--o2-gold-grad); -webkit-background-clip: text; background-clip: text; color: transparent; }
+.o2-acad-sw small { font-size: 12px; color: var(--o2-text-3); }
+.o2-acad-sw-tap { margin-top: 12px; width: 150px; height: 150px; border-radius: 50%; display: grid; place-items: center; font-size: 34px; font-weight: 800; color: #1a1407; background: var(--o2-gold-grad); box-shadow: 0 18px 40px -16px var(--o2-gold); cursor: pointer; user-select: none; -webkit-user-select: none; transition: transform .12s; }
+.o2-acad-sw-tap:active { transform: scale(.93); }
+.o2-acad-sw-laps { display: flex; flex-direction: column; gap: 4px; width: 100%; max-height: 140px; overflow-y: auto; margin-top: 10px; }
+.o2-acad-sw-laps span { display: flex; justify-content: space-between; padding: 8px 12px; border-radius: 12px; background: rgba(255, 255, 255, .04); font-size: 13px; font-weight: 700; font-variant-numeric: tabular-nums; }
+.o2-acad-sw-laps em { font-style: normal; color: var(--o2-text-3); }
+
+.o2-backup-orb { width: 46px; height: 46px; border-radius: 15px; display: grid; place-items: center; flex-shrink: 0; background: rgba(255, 255, 255, .06); color: var(--o2-text-3); }
+.o2-backup-orb.on { background: rgba(61, 220, 151, .14); color: var(--o2-green); }
+.o2-backup-orb svg { width: 22px; height: 22px; }
+
+.o2-rpe { margin-top: 22px; text-align: center; }
+.o2-rpe small { font-size: 10.5px; font-weight: 800; letter-spacing: 2px; text-transform: uppercase; color: var(--o2-text-3); }
+.o2-rpe-row { display: flex; justify-content: center; gap: 6px; margin-top: 8px; }
+.o2-rpe-row button { width: 42px; height: 42px; border-radius: 13px; border: 1px solid var(--o2-line-2); background: rgba(255, 255, 255, .04); color: var(--o2-text); font-weight: 800; font-size: 15px; cursor: pointer; }
+.o2-rpe-row button.on { background: var(--o2-gold-grad); color: #1a1407; border-color: transparent; }
+.o2-set-rpe { display: block; font-size: 9.5px; font-weight: 800; color: var(--o2-gold); letter-spacing: .3px; margin-top: 1px; }
+.o2-ss-badge { display: inline-flex; align-items: center; gap: 4px; }
+.o2-chip.ss { color: #1a1407; background: linear-gradient(135deg, #a78bfa, #5ac8fa); border-color: transparent; }
+
+.o2-leader { display: flex; align-items: center; gap: 12px; padding: 12px 0; border-bottom: 1px solid var(--o2-line); }
+.o2-leader:last-child { border-bottom: 0; }
+.o2-leader-rank { width: 28px; text-align: center; font-weight: 800; color: var(--o2-text-3); font-variant-numeric: tabular-nums; }
+.o2-leader:nth-child(1) .o2-leader-rank { color: var(--o2-gold); }
+.o2-leader img { width: 38px; height: 38px; border-radius: 50%; object-fit: cover; background: var(--o2-surface-2); }
+.o2-leader.me { background: linear-gradient(90deg, rgba(230, 195, 116, .08), transparent); border-radius: 14px; padding-left: 8px; }

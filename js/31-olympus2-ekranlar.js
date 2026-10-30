@@ -180,7 +180,8 @@
         const view = $('o2-view');
         const renderers = {
             today: renderToday, train: renderTrain, fuel: renderFuel, progress: renderProgress,
-            builder: () => O2.renderBuilder(), profile: () => O2.renderProfile(), library: () => O2.renderLibrary()
+            builder: () => O2.renderBuilder(), profile: () => O2.renderProfile(), library: () => O2.renderLibrary(),
+            academy: () => O2.renderAcademy()
         };
         view.innerHTML = `<div class="o2-page">${renderers[O2.ui.tab]()}</div>`;
         animateRings(view);
@@ -288,6 +289,7 @@
             <div class="o2-section-head"><h3>Bu hafta</h3><span class="o2-link" style="color:var(--o2-text-3)">${O2.weekStreak() ? `🔥 ${O2.weekStreak()} hafta seri · ` : ''}${week.sessions} seans</span></div>
             <div class="o2-card" style="padding:12px;">${weekStrip()}</div>
             ${O2.challenges().length ? `<div class="o2-section-head"><h3>Meydan okumalar</h3><button class="o2-link" onclick="O2.go('profile')">Tümü</button></div>${O2.challengeCards(true)}` : ''}
+            ${O2.academyCard ? O2.academyCard() : ''}
 
             ${document.body.classList.contains('dilala-mode') ? `
             <div class="o2-card is-tap o2-dilala-card" onclick="O2.openDilalaSpace()" style="margin-top:12px">
@@ -709,6 +711,8 @@
                 <div class="o2-card o2-stat" style="margin-top:0"><small>Haftalık seri</small><strong>${streak}<small> hafta</small></strong><div class="delta ${streak ? 'good' : 'flat'}">${streak ? `Hedef: haftada ${O2.settings().weeklyTarget} seans` : 'Bu hafta hedefi tamamla'}</div></div>
             </div>
 
+            ${O2.weeklyCoachHTML ? O2.weeklyCoachHTML() : ''}
+
             <div class="o2-section-head"><h3>Kardiyo</h3><button class="o2-link" onclick="O2.cardioSheet()">Başlat</button></div>
             <div class="o2-card">
                 <div class="o2-grid-3">
@@ -1022,10 +1026,10 @@
                 <span class="o2-switch ${document.body.classList.contains('dilala-mode') ? 'on' : ''}"></span>
             </div>
 
-            <div class="o2-section-head" style="margin-top:26px"><h3>Akademi modu</h3></div>
-            <div class="o2-grid-2">
-                <button class="o2-btn o2-btn-ghost" onclick="O2.openAcademy('polis')">${I('shield')}POMEM</button>
-                <button class="o2-btn o2-btn-ghost" onclick="O2.openAcademy('jandarma')">${I('shield')}JASEM</button>
+            <div class="o2-section-head" style="margin-top:26px"><h3>Akademi & veri</h3></div>
+            <div class="o2-list">
+                <div class="o2-row is-tap" onclick="O2.openAcademyHub()"><div class="o2-row-idx">${I('shield')}</div><div class="o2-row-main"><h5>Olympus Akademi</h5><p>TSK · Jandarma · Polis sınav ve mülakat hazırlığı</p></div>${I('chev', 'chev')}</div>
+                <div class="o2-row is-tap" onclick="O2.backupSheet()"><div class="o2-row-idx">${I('settings')}</div><div class="o2-row-main"><h5>Veri & yedek</h5><p>${user ? 'Bulut yedeği açık · uygulamayı silsen de veriler kalır' : 'Misafir · yedek için giriş yap'}</p></div>${I('chev', 'chev')}</div>
             </div>
 
             <div class="o2-section-head" style="margin-top:26px"><h3>Super App</h3></div>
@@ -1123,6 +1127,8 @@
             ['ball', 'Sporlar', 'Halı saha & FUT', 'var(--o2-green)', "O2.openClassicSection('openSportsScreen')", 'openSportsScreen'],
             ['run', 'Kardiyo', 'GPS koşu & bisiklet', 'var(--o2-orange)', 'O2.openCardio()', 'openCardioHub'],
             ['tent', 'Kamp', 'Doğa günlüğü', '#c4a37a', 'openCampBook()', 'openCampBook'],
+            ['shield', 'Akademi', 'TSK · Jandarma · Polis', '#6b9cf5', "O2.go('academy')", null],
+            ['trophy', 'Sıralama', 'Haftalık liderlik', 'var(--o2-gold)', 'O2.leaderboardSheet()', null],
             ['medal', 'Rozetler', 'Başarımların', 'var(--o2-gold)', 'O2.badgesSheet()', null],
             ['leaf', 'Zen', '4-7-8 nefes', 'var(--o2-green)', 'O2.openZen()', 'startZenMode'],
             ['game', 'Mini oyun', 'Olympus Catch', 'var(--o2-violet)', 'openMiniGame()', 'openMiniGame']

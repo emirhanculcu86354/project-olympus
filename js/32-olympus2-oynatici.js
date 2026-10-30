@@ -56,7 +56,7 @@
                 const sug = O2.suggest(e);
                 const last = O2.lastPerformance(e.name);
                 return {
-                    name: e.name, scheme: e.scheme, tempo: e.tempo, rpe: e.rpe,
+                    name: e.name, scheme: e.scheme, tempo: e.tempo, rpe: e.rpe, ss: !!e.ss,
                     muscle: O2.muscleOf(e.name), target, note: sug.note,
                     sets: Array.from({ length: target.sets }, (_, i) => {
                         const prev = last && (last.sets[i] || last.sets[last.sets.length - 1]);
@@ -176,6 +176,7 @@
                         <span class="o2-chip gold">${esc(ex.scheme)}</span>
                         ${ex.tempo ? `<span class="o2-chip">Tempo ${esc(ex.tempo)}</span>` : ''}
                         ${ex.rpe ? `<span class="o2-chip">RPE ${esc(ex.rpe)}</span>` : ''}
+                        ${ssLabel(S.cur) ? `<span class="o2-chip ss">${I('swap')}${ssLabel(S.cur)}</span>` : ''}
                     </div>
                 </div>
 
@@ -186,7 +187,7 @@
                     <div class="o2-sets-head"><span>Set</span><span>Önceki</span><span>${ex.target.isTime ? 'Kg' : 'Kg'}</span><span>${ex.target.isTime ? 'Sn' : 'Tekrar'}</span><span></span></div>
                     ${ex.sets.map((s, i) => `
                     <div class="o2-set ${s.done ? 'done' : ''} ${i === ci ? 'current' : ''}">
-                        <span class="o2-set-no">${i + 1}</span>
+                        <span class="o2-set-no">${i + 1}${s.rpe ? `<small class="o2-set-rpe">@${s.rpe}</small>` : ''}</span>
                         <span class="o2-set-prev">${esc(s.prev)}</span>
                         <input type="number" inputmode="decimal" step="0.5" value="${s.w}" placeholder="—" onchange="O2.editSet(${i}, 'w', this.value)" aria-label="${i + 1}. set ağırlık">
                         <input type="number" inputmode="numeric" value="${s.r}" placeholder="${ex.target.isMax ? 'max' : '—'}" onchange="O2.editSet(${i}, 'r', this.value)" aria-label="${i + 1}. set tekrar">
@@ -198,6 +199,7 @@
                     <button class="o2-btn o2-btn-ghost o2-btn-sm" onclick="O2.addSet()">${I('plus')}Set ekle</button>
                     <a class="o2-btn o2-btn-ghost o2-btn-sm" style="text-decoration:none" target="_blank" rel="noopener" href="https://www.youtube.com/results?search_query=${encodeURIComponent(ex.name + ' exercise form')}">${I('play')}Teknik</a>
                     <button class="o2-btn o2-btn-ghost o2-btn-sm" onclick="O2.exerciseList()">${I('list')}Liste</button>
+                    ${next || S.exercises[S.cur - 1] && S.exercises[S.cur - 1].ss ? `<button class="o2-btn o2-btn-ghost o2-btn-sm" onclick="O2.toggleSuperset()">${I('swap')}${ex.ss || (S.exercises[S.cur - 1] || {}).ss ? 'Süperseti boz' : 'Süperset'}</button>` : ''}
                     ${ex.target.isTime || !(O2.isBarbell && O2.isBarbell(ex.name)) ? '' : `<button class="o2-btn o2-btn-ghost o2-btn-sm" onclick="O2.plateSheet(${+(ex.sets[ci >= 0 ? ci : 0].w) || 0})">${I('calc')}Plaka</button>`}
                 </div>
 
@@ -217,6 +219,40 @@
             ${S.rest ? restOverlay() : ''}
             <div class="o2-pr-burst" id="o2-pr-burst"></div>`;
     }
+
+    // Süperset: ex.ss = bir sonraki hareketle eşli (A1 → A2 dinlenmeden, A2 sonrası dinlen ve A1'e dön)
+    function ssLabel(i) {
+        if (S.exercises[i] && S.exercises[i].ss && S.exercises[i + 1]) return `Süperset · ${S.exercises[i + 1].name}`;
+        if (S.exercises[i - 1] && S.exercises[i - 1].ss) return `Süperset · ${S.exercises[i - 1].name}`;
+        return '';
+    }
+    O2.toggleSuperset = () => {
+        const i = S.exercises[S.cur].ss || !(S.exercises[S.cur - 1] && S.exercises[S.cur - 1].ss) ? S.cur : S.cur - 1;
+        const a = S.exercises[i];
+        if (!S.exercises[i + 1]) return;
+        a.ss = !a.ss;
+        // Zincir oluşmasın: eşin kendi eşliği kalkar
+        if (a.ss) { S.exercises[i + 1].ss = false; if (S.exercises[i - 1]) S.exercises[i - 1].ss = false; }
+        persist(); O2.haptic(10); renderPlayer();
+        O2.toast(a.ss ? `Süperset: ${a.name} + ${S.exercises[i + 1].name}` : 'Süperset kaldırıldı', 'swap');
+    };
+
+    // Set başına RPE (algılanan zorluk): dinlenirken son set için seçilir, öneri motoru kullanır
+    function rpePicker() {
+        const last = S.lastSet && S.exercises[S.lastSet.ex] && S.exercises[S.lastSet.ex].sets[S.lastSet.i];
+        if (!last || S.exercises[S.lastSet.ex].target.isTime) return '';
+        return `
+            <div class="o2-rpe"><small>Son set ne kadar zordu? · RPE</small>
+                <div class="o2-rpe-row">${[6, 7, 8, 9, 10].map(v => `<button class="${last.rpe === v ? 'on' : ''}" onclick="O2.setRPE(${v})">${v}</button>`).join('')}</div>
+            </div>`;
+    }
+    O2.setRPE = (v) => {
+        if (!S || !S.lastSet) return;
+        const set = S.exercises[S.lastSet.ex].sets[S.lastSet.i];
+        set.rpe = set.rpe === v ? undefined : v;
+        persist(); O2.haptic(8);
+        document.querySelectorAll('.o2-rpe-row button').forEach(b => b.classList.toggle('on', +b.textContent === set.rpe));
+    };
 
     function restOverlay() {
         const ex = S.exercises[S.cur];
@@ -239,6 +275,7 @@
                 <div class="o2-ring-center"><strong id="o2-rest-num">${O2.fmtClock(Math.ceil(left))}</strong><span>SANİYE</span></div>
             </div>
             <div class="o2-rest-next"><small>SIRADAKİ</small><h4>${esc(nextLabel)}</h4></div>
+            ${rpePicker()}
             <div class="o2-rest-controls">
                 <button class="o2-btn o2-btn-ghost" onclick="O2.adjustRest(-15)">−15</button>
                 <button class="o2-btn o2-btn-gold" onclick="O2.skipRest()">Atla</button>
@@ -296,7 +333,19 @@
 
         const prHit = checkPR(ex, i);
         const lastOfAll = S.exercises.every(exDone);
-        if (!lastOfAll) startRest();
+        S.lastSet = { ex: S.cur, i };
+        const pairNext = ex.ss && S.exercises[S.cur + 1];
+        const pairPrev = S.exercises[S.cur - 1] && S.exercises[S.cur - 1].ss ? S.exercises[S.cur - 1] : null;
+        if (!lastOfAll) {
+            if (pairNext && !exDone(pairNext)) {
+                // A1 bitti → dinlenmeden A2'ye
+                S.cur++;
+                O2.toast(`Süperset · şimdi ${pairNext.name}`, 'swap');
+            } else {
+                startRest();
+                if (pairPrev && !exDone(pairPrev)) S.returnTo = S.cur - 1;
+            }
+        }
         persist();
         renderPlayer();
         if (prHit) celebratePR(prHit);
@@ -361,9 +410,10 @@
             }
             if (typeof showDynamicIsland === 'function' && document.hidden) showDynamicIsland('Dinlenme bitti', 'Sıradaki sete hazırlan', '⚡');
         }
-        // Mevcut hareketin setleri bittiyse otomatik sonrakine geç
+        // Süperset turunda A1'e dön; değilse mevcut hareket bittiyse sonrakine geç
         const ex = S.exercises[S.cur];
-        if (exDone(ex) && S.cur < S.exercises.length - 1) S.cur++;
+        if (S.returnTo !== undefined && S.returnTo !== null) { S.cur = S.returnTo; S.returnTo = null; }
+        else if (exDone(ex) && S.cur < S.exercises.length - 1) S.cur++;
         persist();
         if (O2.isPlayerOpen()) renderPlayer();
     }
@@ -392,6 +442,7 @@
     O2.gotoExercise = (i) => {
         if (i < 0 || i >= S.exercises.length) return;
         S.cur = i;
+        S.returnTo = null;
         if (O2.voice) O2.voice(`${S.exercises[i].name}. ${S.exercises[i].scheme.replace(/x/i, 'set, ')} tekrar.`);
         S.rest = null;
         persist();
@@ -436,7 +487,7 @@
         let volume = 0, setCount = 0;
         const muscles = new Set();
         const exercises = S.exercises.map(e => {
-            const sets = e.sets.filter(s => s.done).map(s => ({ w: +s.w || 0, r: +s.r || 0 }));
+            const sets = e.sets.filter(s => s.done).map(s => (s.rpe ? { w: +s.w || 0, r: +s.r || 0, rpe: s.rpe } : { w: +s.w || 0, r: +s.r || 0 }));
             sets.forEach(s => { if (!e.target.isTime) volume += s.w * s.r; });
             setCount += sets.length;
             if (sets.length) muscles.add(e.muscle);
