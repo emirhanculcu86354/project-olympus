@@ -207,3 +207,10 @@ Yeni modül: `js/36-olympus2-gelismis.js`. Yeni bağımlılık: `@capacitor/loca
 
 ## E-posta hatırlatıcıları canlı
 - Apps Script servisi emirhan@culbase.com hesabında yayınlandı (15 dk tetikleyici kurulu); adres uygulamaya varsayılan olarak gömüldü. Ayarlar → Hatırlatıcılar → "E-posta ile de hatırlat"ı açmak yeterli.
+
+# Akademi düzeltmesi — branşa göre doğru fiziki test (2026-11-01)
+- **Jandarma (JAMYO, JSGA, Uzman Erbaş) ve Polis (POMEM, PMYO, PAEM):** fiziki yeterlilik artık yalnızca süreli parkur (7 istasyon, ~70 m). Yanlışlıkla eklenmiş "destek" şınav ve 400 m kaldırıldı; Jandarma Uzman Erbaş TSK testinden parkura alındı.
+- **TSK:** mekik (1 dk), şınav (1 dk), 400 m; her etkinliğin kendi sayaç / kronometre düğmesi var.
+- Parkur puanlaması ilan tablosuna göre: ≤40 sn 100 puan, 48 sn 60 puan (baraj), ≥50 sn 0 puan (kadın 45 / 53 / 55). Puan tablosu kartta görünüyor; Normlar'dan üç değer de düzenlenebiliyor.
+- Parkur istasyonları rehberi ve kronometrede istasyon adlarıyla tur süreleri.
+- Test sonuçları branşa göre ayrıldı (POMEM parkuru Jandarma skorunu etkilemiyor). Dönem tavsiyeleri parkur / FYT'ye göre ayrı.

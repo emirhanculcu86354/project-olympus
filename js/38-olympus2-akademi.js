@@ -29,7 +29,7 @@
             tracks: [
                 { id: 'jamyo', name: 'JAMYO', sub: 'Astsubay', test: 'parkur' },
                 { id: 'jsga', name: 'JSGA', sub: 'Subay / lisans', test: 'parkur' },
-                { id: 'juzman', name: 'Uzman Erbaş', sub: 'Jandarma', test: 'fyt' }
+                { id: 'juzman', name: 'Uzman Erbaş', sub: 'Jandarma', test: 'parkur' }
             ]
         },
         polis: {
@@ -50,12 +50,22 @@
             { id: 'pushup', name: 'Şınav', note: '1 dakika', unit: 'tekrar', better: 'high', pass: { m: 15, f: 6 }, target: { m: 45, f: 28 } },
             { id: 'run400', name: '400 m koşu', note: 'Tek seferde', unit: 'sn', better: 'low', pass: { m: 130, f: 150 }, target: { m: 75, f: 90 } }
         ],
+        // Jandarma ve Polis alımlarında fiziki yeterlilik tek bir süreli parkurdur (şınav/mekik/koşu yok)
         parkur: [
-            { id: 'parkur', name: 'Parkur', note: '7 istasyon · 70 m', unit: 'sn', better: 'low', pass: { m: 48, f: 53 }, target: { m: 40, f: 45 } },
-            { id: 'pushup', name: 'Şınav', note: '1 dakika · destek', unit: 'tekrar', better: 'high', pass: { m: 20, f: 8 }, target: { m: 45, f: 28 } },
-            { id: 'run400', name: '400 m koşu', note: 'Kondisyon · destek', unit: 'sn', better: 'low', pass: { m: 100, f: 120 }, target: { m: 70, f: 85 } }
+            { id: 'parkur', name: 'Fiziki yeterlilik parkuru', note: '7 istasyon · ~70 m · tek deneme', unit: 'sn', better: 'low', pass: { m: 48, f: 53 }, target: { m: 40, f: 45 }, zero: { m: 50, f: 55 } }
         ]
     };
+
+    // Parkur istasyonları (sıra ve ölçüler dönemden döneme değişebilir; ilandaki krokiye bak)
+    const PARKUR_STATIONS = [
+        ['Çabukluk / slalom', 'Dubalar arasında hızlı yön değiştirme; ayak bileği ve kalça çevikliği.'],
+        ['Engel / sıçrama', 'Sıçrama tahtası veya engel üzerinden geçiş; patlayıcı bacak gücü.'],
+        ['Minder & takla', 'Öne takla; baş dönmeden hızla kalkıp devam etmek.'],
+        ['Denge', 'Denge aleti üzerinde düşmeden geçiş; düşersen tekrar gerekir, zaman kaybettirir.'],
+        ['Tünel / lastik', 'Alçak geçiş ya da lastik içinden geçme; gövde kontrolü.'],
+        ['Ağırlık taşıma', 'Ağırlıkları belirlenen noktaya taşıyıp bırakma; kavrama ve core.'],
+        ['Sağlık topu & bitiş', 'Topa dokunma / taşıma ve finişe sprint.']
+    ];
 
     const DOCS = {
         common: ['Nüfus cüzdanı', 'Diploma / mezuniyet belgesi', 'Sınav sonuç belgesi (KPSS / YKS / MSÜ)', 'Adli sicil kaydı (e-Devlet)', 'Vesikalık fotoğraflar', 'Başvuru formu çıktısı', 'Sınav giriş belgesi', 'Spor kıyafeti & ayakkabı (test günü)'],
@@ -195,7 +205,10 @@
 
     const norm = (st, ev) => {
         const custom = st.norms[`${trackOf(st).test}_${ev.id}_${st.gender}`];
-        return custom || { pass: ev.pass[st.gender], target: ev.target[st.gender] };
+        const n = { ...(custom || { pass: ev.pass[st.gender], target: ev.target[st.gender] }) };
+        // Süreli testte 0 puan sınırı: tanımlıysa ilan tablosu, yoksa barajdan 2 sn sonrası
+        if (ev.better === 'low' && n.zero === undefined) n.zero = custom ? n.pass + 2 : (ev.zero ? ev.zero[st.gender] : n.pass + 2);
+        return n;
     };
     // 0-100: baraj ≈ 60, hedef = 100
     function score(ev, v, n) {
@@ -203,18 +216,21 @@
         if (ev.better === 'low') {
             if (v <= n.target) return 100;
             if (v <= n.pass) return Math.round(60 + 40 * (n.pass - v) / Math.max(.1, n.pass - n.target));
-            return Math.max(0, Math.round(60 - (v - n.pass) * 12));
+            if (v >= n.zero) return 0;
+            return Math.round(60 * (n.zero - v) / Math.max(.1, n.zero - n.pass));
         }
         if (v >= n.target) return 100;
         if (v >= n.pass) return Math.round(60 + 40 * (v - n.pass) / Math.max(1, n.target - n.pass));
         return Math.round(60 * v / Math.max(1, n.pass));
     }
+    // Sonuçlar branş bazında: POMEM parkuru Jandarma'nın parkur skorunu etkilemez
+    const myTests = (st) => st.tests.filter(t => !t.track || branchOf(st).tracks.some(x => x.id === t.track));
     const latest = (st, evId) => {
-        const t = [...st.tests].reverse().find(x => x.res && x.res[evId] !== undefined);
+        const t = [...myTests(st)].reverse().find(x => x.res && x.res[evId] !== undefined);
         return t ? { v: t.res[evId], d: t.d } : null;
     };
     const best = (st, ev) => {
-        const vals = st.tests.map(t => t.res && t.res[ev.id]).filter(v => v !== undefined && v !== null);
+        const vals = myTests(st).map(t => t.res && t.res[ev.id]).filter(v => v !== undefined && v !== null);
         if (!vals.length) return null;
         return ev.better === 'low' ? Math.min(...vals) : Math.max(...vals);
     };
@@ -320,11 +336,15 @@
 
             <div class="o2-section-head"><h3>Fiziki yeterlilik</h3><button class="o2-link" onclick="O2.acadNormsSheet()">Normlar</button></div>
             <div class="o2-card" style="padding:6px 18px 16px">
+                <p class="o2-acad-test-desc">${tr.test === 'parkur'
+                    ? `${esc(br.name)} alımlarında fiziki yeterlilik <b>tek bir süreli parkurdur</b>: 7 istasyon, yaklaşık 70 m. Şınav, mekik veya koşu ayrıca ölçülmez.`
+                    : `${esc(br.name)} FYT: <b>mekik (1 dk), şınav (1 dk) ve 400 m koşu</b>. Bir testten 0 puan almak elenme sebebidir.`}</p>
                 ${evs.map(ev => fitnessRow(st, ev)).join('')}
                 <div class="o2-grid-2" style="margin-top:14px">
                     <button class="o2-btn o2-btn-gold" onclick="O2.acadTestSheet()">${I('plus')}Sonuç</button>
-                    <button class="o2-btn o2-btn-ghost" onclick="O2.acadStopwatch('${evs[0].id}')">${I('clock')}${evs[0].unit === 'sn' ? 'Kronometre' : 'Sayaç'}</button>
+                    <button class="o2-btn o2-btn-ghost" onclick="O2.acadStopwatch('${evs[0].id}')">${I('clock')}${tr.test === 'parkur' ? 'Kronometre' : 'Mekik sayacı'}</button>
                 </div>
+                ${tr.test === 'parkur' ? parkurInfoHTML(st, evs[0]) : ''}
             </div>
             ${testChartHTML(st, evs)}
             ${testHistory(st, evs)}
@@ -369,6 +389,21 @@
         </div>`;
     };
 
+    function parkurInfoHTML(st, ev) {
+        const n = norm(st, ev);
+        const rows = [[n.target, 100], [(n.target + n.pass) / 2, 80], [n.pass, 60], [n.zero, 0]];
+        return `
+            <div class="o2-acad-scale">
+                <small>Puan tablosu · ${st.gender === 'm' ? 'erkek' : 'kadın'}</small>
+                <div>${rows.map(([t, p], i) => `<span class="${p === 60 ? 'pass' : p === 0 ? 'fail' : ''}"><b>${i === 0 ? '≤ ' : i === 3 ? '≥ ' : ''}${O2.fmtNum(t, 1)} sn</b><em>${p} puan${p === 60 ? ' · baraj' : ''}</em></span>`).join('')}</div>
+            </div>
+            <details class="o2-acad-stations">
+                <summary>${I('list')}İstasyonlar ve çalışma ipuçları</summary>
+                <ol>${PARKUR_STATIONS.map(([t, d]) => `<li><b>${esc(t)}</b><span>${esc(d)}</span></li>`).join('')}</ol>
+                <p>Kronometrede her istasyon sonunda "İstasyon"a basarak tur sürelerini kaydet; en yavaş istasyonuna ayrıca çalış. Sıra ve ölçüler ilandaki krokiye göre değişebilir.</p>
+            </details>`;
+    }
+
     function fitnessRow(st, ev) {
         const n = norm(st, ev), l = latest(st, ev.id), b = best(st, ev);
         const sc = l ? score(ev, l.v, n) : null;
@@ -380,6 +415,7 @@
                 <div><h5>${esc(ev.name)}</h5><p>${esc(ev.note)} · Baraj ${fmtVal(ev, n.pass)} · Hedef ${fmtVal(ev, n.target)}</p></div>
                 <div class="o2-acad-ev-val" style="color:${tone}"><strong>${l ? fmtVal(ev, l.v) : '—'}</strong><small>${sc === null ? 'kayıt yok' : `${sc} puan`}</small></div>
             </div>
+            ${trackOf(st).test === 'fyt' ? `<button class="o2-link o2-acad-ev-measure" onclick="O2.acadStopwatch('${ev.id}')">${I(ev.unit === 'sn' ? 'clock' : 'bolt')}${ev.unit === 'sn' ? 'Kronometreyle ölç' : '1 dakika say'}</button>` : ''}
             <div class="o2-bar" style="margin-top:8px"><i data-w="${sc || 0}%" style="width:0;background:${tone}"></i></div>
             ${b !== null && l && b !== l.v ? `<p class="o2-acad-ev-best">En iyi: ${fmtVal(ev, b)}</p>` : ''}
         </div>`;
@@ -437,7 +473,7 @@
     // 📈 Test grafiği: resmi etkinliğin zaman içindeki gelişimi + baraj/hedef çizgileri
     function testChartHTML(st, evs) {
         const ev = evs[0];
-        const pts = st.tests.filter(t => t.res && t.res[ev.id] !== undefined);
+        const pts = myTests(st).filter(t => t.res && t.res[ev.id] !== undefined);
         if (pts.length < 2) return '';
         return `
         <div class="o2-card" style="margin-top:12px">
@@ -449,7 +485,7 @@
         const el = $('o2-acad-chart');
         if (!el || typeof Chart === 'undefined') return;
         const st = state(), ev = eventsOf(st)[0], n = norm(st, ev), color = branchOf(st).color;
-        const pts = st.tests.filter(t => t.res && t.res[ev.id] !== undefined);
+        const pts = myTests(st).filter(t => t.res && t.res[ev.id] !== undefined);
         const labels = pts.map(t => { const d = O2.parseDate(t.d); return d ? d.toLocaleDateString('tr-TR', { day: 'numeric', month: 'short' }) : t.d; });
         const line = (v, c) => ({ data: pts.map(() => v), borderColor: c, borderDash: [5, 5], borderWidth: 1.5, pointRadius: 0, fill: false });
         O2.ui.charts.push(new Chart(el.getContext('2d'), {
@@ -471,11 +507,11 @@
 
     // 📉 Sınava giden yol: dönemlendirme ve son 7 günde azalan yüklenme (taper)
     const TAPER = {
-        7: ['Son tam test simülasyonu', 'Gerçek test temposunda 1 tam deneme; süreni kaydet.'],
+        7: ['Son tam test simülasyonu', 'Gerçek test temposunda 1 tam deneme (parkur ya da FYT); süreni kaydet.'],
         6: ['Hafif koşu + mobilite', '25 dk rahat koşu, 10 dk esneme. Kuvvet yok.'],
         5: ['Kısa hız', '4 × 20 sn çeviklik/sprint, tam dinlenmeyle. Hacim düşük, hız yüksek.'],
         4: ['Dinlenme', 'Yürüyüş ve mobilite. Uyku 8 saat.'],
-        3: ['Keskinleştirme', '%80 tempoda 2 kısa parkur/400 m denemesi; tekniğe odaklan.'],
+        3: ['Keskinleştirme', '%80 tempoda 2 kısa deneme (parkur istasyonları ya da 200 m); tekniğe odaklan.'],
         2: ['Aktivasyon', '15 dk hafif ısınma + 3 kısa hızlanma. Yorulmadan bitir.'],
         1: ['Tam dinlenme', 'Belgelerini, kıyafetini hazırla. Bol su, erken yat.'],
         0: ['Test günü', 'Hafif kahvaltı (test öncesi 2-3 saat), 15 dk ısınma, dinamik esneme. Başarılar!']
@@ -496,8 +532,12 @@
         ];
         const cur = phases.find(p => left <= p.from && left >= p.to) || phases[0];
         const advice = {
-            base: 'Haftada 4-5 seans: kuvvet (şınav/mekik/barfiks), çeviklik ve 1 uzun koşu. Her 2 haftada bir test kaydet.',
-            build: 'Haftada 2 test simülasyonu, aralara sprint ve kuvvet. Zayıf istasyonuna (tur süreleri) odaklan.',
+            base: trackOf(st).test === 'parkur'
+                ? 'Haftada 4-5 seans: çeviklik (slalom, yön değiştirme), takla ve denge çalışması, bacak patlayıcılığı ve kuvvet. Her 2 haftada bir tam parkur süresi kaydet.'
+                : 'Haftada 4-5 seans: şınav ve mekik setleri, 200-400 m tempo koşuları ve 1 uzun koşu. Her 2 haftada bir FYT denemesi kaydet.',
+            build: trackOf(st).test === 'parkur'
+                ? 'Haftada 2 tam parkur simülasyonu (istasyon turlarıyla). En yavaş istasyonuna ayrı blok ayır; takladan sonra hızlı kalkışı çalış.'
+                : 'Haftada 2 FYT simülasyonu (1 dk mekik + 1 dk şınav + 400 m). Aralara interval koşu ve kuvvet.',
             peak: 'Toplam hacmi %40 azalt, yoğunluğu koru. Yeni hareket deneme, sakatlık riskini sıfırla.',
             taper: ''
         }[cur.id];
@@ -516,7 +556,7 @@
     }
 
     function testHistory(st, evs) {
-        const list = st.tests.filter(t => evs.some(ev => t.res && t.res[ev.id] !== undefined)).slice(-5).reverse();
+        const list = myTests(st).filter(t => evs.some(ev => t.res && t.res[ev.id] !== undefined)).slice(-5).reverse();
         if (!list.length) return '';
         return `
         <div class="o2-card" style="padding:4px 18px 8px;margin-top:12px"><div class="o2-list">${list.map(t => `
@@ -567,12 +607,13 @@
             <p style="margin:0 0 14px;font-size:12.5px;line-height:1.55;color:var(--o2-text-3)">Varsayılanlar son dönem ilanlarından derlenmiş <b>tahmini</b> değerlerdir (${st.gender === 'm' ? 'erkek' : 'kadın'}). Başvurduğun ilandaki puan tablosuna göre düzenle.</p>
             ${evs.map(ev => { const n = norm(st, ev); return `
             <div class="o2-field"><label>${esc(ev.name)} (${ev.unit})</label>
-                <div class="o2-grid-2">
-                    <input class="o2-input" id="o2-norm-${ev.id}-p" inputmode="decimal" value="${n.pass}" placeholder="Baraj">
+                <div class="${ev.zero ? 'o2-grid-3' : 'o2-grid-2'}">
                     <input class="o2-input" id="o2-norm-${ev.id}-t" inputmode="decimal" value="${n.target}" placeholder="Tam puan">
+                    <input class="o2-input" id="o2-norm-${ev.id}-p" inputmode="decimal" value="${n.pass}" placeholder="Baraj">
+                    ${ev.zero ? `<input class="o2-input" id="o2-norm-${ev.id}-z" inputmode="decimal" value="${n.zero}" placeholder="0 puan">` : ''}
                 </div>
             </div>`; }).join('')}
-            <p style="margin:0;font-size:11.5px;color:var(--o2-text-3)">Sol: baraj (≈60 puan) · Sağ: tam puan hedefi</p>
+            <p style="margin:0;font-size:11.5px;color:var(--o2-text-3)">${evs[0].zero ? 'Sırasıyla: 100 puan · 60 puan (baraj) · 0 puan süresi' : 'Sol: tam puan hedefi · Sağ: baraj (≈60 puan)'}</p>
             <div class="o2-grid-2" style="margin-top:16px">
                 <button class="o2-btn o2-btn-ghost" onclick="O2.acadResetNorms()">Varsayılan</button>
                 <button class="o2-btn o2-btn-gold" onclick="O2.acadSaveNorms()">Kaydet</button>
@@ -582,7 +623,8 @@
         update(st => {
             eventsOf(st).forEach(ev => {
                 const p = parseTime($(`o2-norm-${ev.id}-p`).value), t = parseTime($(`o2-norm-${ev.id}-t`).value);
-                if (p && t) st.norms[`${trackOf(st).test}_${ev.id}_${st.gender}`] = { pass: p, target: t };
+                const zEl = $(`o2-norm-${ev.id}-z`), z = zEl ? parseTime(zEl.value) : null;
+                if (p && t) st.norms[`${trackOf(st).test}_${ev.id}_${st.gender}`] = z && z > p ? { pass: p, target: t, zero: z } : { pass: p, target: t };
             });
         });
         O2.closeSheet(); O2.toast('Normlar kaydedildi', 'check');
@@ -641,7 +683,7 @@
             <div class="o2-grid-3" style="margin-top:14px">
                 <button class="o2-btn o2-btn-ghost" onclick="O2.swReset()">Sıfırla</button>
                 <button class="o2-btn o2-btn-gold" id="o2-sw-main" onclick="O2.swToggle()">Başlat</button>
-                <button class="o2-btn o2-btn-ghost" onclick="${isTime ? 'O2.swLap()' : 'O2.swRep(-1)'}">${isTime ? 'İstasyon' : '−1'}</button>
+                <button class="o2-btn o2-btn-ghost" onclick="${isTime ? 'O2.swLap()' : 'O2.swRep(-1)'}">${isTime ? (ev.id === 'parkur' ? 'İstasyon' : 'Tur') : '−1'}</button>
             </div>
             <button class="o2-btn o2-btn-ghost o2-btn-block" style="margin-top:10px" onclick="O2.swSave()">${I('check')}Sonucu teste kaydet</button>`);
     };
@@ -672,7 +714,8 @@
         const t = swElapsed() / 1000;
         sw.laps.push(t);
         O2.haptic(10);
-        $('o2-sw-laps').innerHTML = sw.laps.map((l, i) => `<span>${i + 1}. ${l.toFixed(1)} sn <em>+${(l - (sw.laps[i - 1] || 0)).toFixed(1)}</em></span>`).reverse().join('');
+        const names = sw.ev.id === 'parkur' ? PARKUR_STATIONS.map(x => x[0]) : [];
+        $('o2-sw-laps').innerHTML = sw.laps.map((l, i) => `<span>${names[i] ? esc(names[i]) : `${i + 1}.`} · ${l.toFixed(1)} sn <em>+${(l - (sw.laps[i - 1] || 0)).toFixed(1)}</em></span>`).reverse().join('');
     };
     O2.swRep = (d = 1) => {
         if (!sw) return;

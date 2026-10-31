@@ -1685,3 +1685,25 @@ body.o2-bridge #app-content .content { padding-top: calc(env(safe-area-inset-top
 .o2-acad-mic { width: 52px; height: 52px; flex-shrink: 0; border-radius: 50%; border: 1px solid var(--o2-line-2); background: rgba(255, 255, 255, .05); color: var(--o2-text); display: grid; place-items: center; cursor: pointer; transition: all .2s; }
 .o2-acad-mic svg { width: 22px; height: 22px; }
 .o2-acad-mic.on { background: var(--o2-red); border-color: transparent; color: #fff; box-shadow: 0 0 0 8px rgba(255, 90, 95, .18); animation: o2Pulse 1.2s infinite; }
+
+/* Akademi · fiziki test açıklaması, parkur puan tablosu ve istasyonlar */
+.o2-acad-test-desc { margin: 12px 0 2px; font-size: 12.5px; line-height: 1.55; color: var(--o2-text-2); }
+.o2-acad-test-desc b { color: var(--o2-text); }
+.o2-acad-ev-measure { display: inline-flex; align-items: center; gap: 6px; margin-top: 10px; font-size: 12px; }
+.o2-acad-ev-measure svg { width: 14px; height: 14px; }
+.o2-acad-scale { margin-top: 16px; padding: 14px; border-radius: 16px; background: rgba(255, 255, 255, .03); border: 1px solid var(--o2-line); }
+.o2-acad-scale small { font-size: 10px; font-weight: 800; letter-spacing: 1px; text-transform: uppercase; color: var(--o2-text-3); }
+.o2-acad-scale > div { display: grid; grid-template-columns: repeat(4, 1fr); gap: 6px; margin-top: 10px; }
+.o2-acad-scale span { display: flex; flex-direction: column; gap: 2px; padding: 8px 6px; border-radius: 11px; background: rgba(61, 220, 151, .08); text-align: center; }
+.o2-acad-scale span.pass { background: rgba(230, 195, 116, .12); }
+.o2-acad-scale span.fail { background: rgba(255, 90, 95, .1); }
+.o2-acad-scale b { font-size: 13px; font-weight: 800; font-variant-numeric: tabular-nums; }
+.o2-acad-scale em { font-style: normal; font-size: 10px; color: var(--o2-text-3); font-weight: 700; }
+.o2-acad-stations { margin-top: 12px; }
+.o2-acad-stations summary { display: flex; align-items: center; gap: 8px; cursor: pointer; list-style: none; font-size: 13px; font-weight: 800; color: var(--o2-gold); padding: 6px 0; }
+.o2-acad-stations summary::-webkit-details-marker { display: none; }
+.o2-acad-stations summary svg { width: 16px; height: 16px; }
+.o2-acad-stations ol { margin: 8px 0 0; padding: 0 0 0 20px; display: flex; flex-direction: column; gap: 8px; }
+.o2-acad-stations li b { display: block; font-size: 13px; }
+.o2-acad-stations li span { display: block; font-size: 12px; line-height: 1.45; color: var(--o2-text-3); }
+.o2-acad-stations p { margin: 10px 0 0; font-size: 11.5px; line-height: 1.5; color: var(--o2-text-3); }
