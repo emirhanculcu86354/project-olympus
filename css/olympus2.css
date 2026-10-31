@@ -81,6 +81,8 @@
     filter: blur(10px);
     z-index: 0;
 }
+/* iPhone ana ekran uygulamasında durum çubuğunun arkasında bulanık bir leke gibi görünüyordu: kapatıldı */
+.o2-aurora { display: none; }
 
 /* ---------- Üst bar ---------- */
 .o2-top {
