@@ -249,6 +249,21 @@
         return { total, fitness, interview, docPct, consistency, known, qTotal: qs.length, docDone, docTotal: docs.length, active };
     }
 
+    // Boy & VKİ: ilanlarda genelde VKİ 18-27 aralığı ve asgari boy aranır (tahmini, düzenlenebilir)
+    const BODY_DEFAULT = { bmiMin: 18, bmiMax: 27, height: { m: 167, f: 160 } };
+    const bodyNorm = (st) => ({ ...BODY_DEFAULT, ...(st.body || {}), height: { ...BODY_DEFAULT.height, ...((st.body || {}).height || {}) } });
+    function bodyCheck(st) {
+        const p = LS.get('olympus_profile', {}) || {};
+        const h = parseFloat(p.height), w = parseFloat(p.w);
+        const n = bodyNorm(st);
+        if (!h || !w) return { ok: null, h, w, n };
+        const m = h / 100, bmi = w / (m * m);
+        const minW = n.bmiMin * m * m, maxW = n.bmiMax * m * m;
+        const hOk = h >= n.height[st.gender];
+        const bOk = bmi >= n.bmiMin && bmi <= n.bmiMax;
+        return { ok: hOk && bOk, hOk, bOk, bmi, h, w, minW, maxW, n };
+    }
+
     const daysLeft = (iso) => {
         if (!iso) return null;
         const d = O2.parseDate(iso);
@@ -311,7 +326,12 @@
                     <button class="o2-btn o2-btn-ghost" onclick="O2.acadStopwatch('${evs[0].id}')">${I('clock')}${evs[0].unit === 'sn' ? 'Kronometre' : 'Sayaç'}</button>
                 </div>
             </div>
+            ${testChartHTML(st, evs)}
             ${testHistory(st, evs)}
+            ${taperHTML(st)}
+
+            <div class="o2-section-head"><h3>Boy & kilo</h3><button class="o2-link" onclick="O2.acadBodySheet()">Normlar</button></div>
+            ${bodyHTML(st)}
 
             <div class="o2-card is-tap" style="margin-top:12px" onclick="O2.acadInstallProgram()">
                 <div class="o2-coach">
@@ -362,6 +382,136 @@
             </div>
             <div class="o2-bar" style="margin-top:8px"><i data-w="${sc || 0}%" style="width:0;background:${tone}"></i></div>
             ${b !== null && l && b !== l.v ? `<p class="o2-acad-ev-best">En iyi: ${fmtVal(ev, b)}</p>` : ''}
+        </div>`;
+    }
+
+    function bodyHTML(st) {
+        const b = bodyCheck(st);
+        if (b.ok === null) return `
+            <div class="o2-card is-tap" onclick="O2.logSheet('measure')"><div class="o2-coach">
+                <div class="o2-coach-orb">${I('ruler')}</div>
+                <div style="flex:1"><h4>Boy ve kilonu gir</h4><p>VKİ ve boy şartını ilana göre kontrol edelim.</p></div>${I('chev', 'chev')}
+            </div></div>`;
+        const lo = 15, hi = 35, pos = (v) => O2.clamp((v - lo) / (hi - lo)) * 100;
+        const tone = b.bOk ? 'var(--o2-green)' : (b.bmi > b.n.bmiMax && b.bmi <= b.n.bmiMax + 1) || (b.bmi < b.n.bmiMin && b.bmi >= b.n.bmiMin - 1) ? 'var(--o2-gold)' : 'var(--o2-red)';
+        const diff = b.bmi > b.n.bmiMax ? b.w - b.maxW : b.bmi < b.n.bmiMin ? b.minW - b.w : 0;
+        return `
+        <div class="o2-card">
+            <div class="o2-acad-ev-head">
+                <div><h5>Vücut kitle indeksi</h5><p>${O2.fmtNum(b.h)} cm · ${O2.fmtNum(b.w, 1)} kg · uygun aralık ${b.n.bmiMin}-${b.n.bmiMax}</p></div>
+                <div class="o2-acad-ev-val" style="color:${tone}"><strong>${O2.fmtNum(b.bmi, 1)}</strong><small>${b.bOk ? 'uygun' : 'aralık dışı'}</small></div>
+            </div>
+            <div class="o2-acad-bmi">
+                <i class="zone" style="left:${pos(b.n.bmiMin)}%;width:${pos(b.n.bmiMax) - pos(b.n.bmiMin)}%"></i>
+                <i class="dot" style="left:${pos(b.bmi)}%;background:${tone}"></i>
+            </div>
+            <div class="o2-grid-2" style="margin-top:12px">
+                <div class="o2-acad-mini"><small>Kilo aralığın</small><b>${O2.fmtNum(b.minW, 1)}-${O2.fmtNum(b.maxW, 1)} kg</b></div>
+                <div class="o2-acad-mini"><small>Asgari boy</small><b style="color:${b.hOk ? 'var(--o2-green)' : 'var(--o2-red)'}">${b.n.height[st.gender]} cm ${b.hOk ? '✓' : '✗'}</b></div>
+            </div>
+            <p style="margin:12px 0 0;font-size:12px;line-height:1.5;color:var(--o2-text-2)">${diff ? `${b.bmi > b.n.bmiMax ? 'Aralığa girmek için' : 'Aralığa çıkmak için'} yaklaşık <b>${O2.fmtNum(diff, 1)} kg</b> ${b.bmi > b.n.bmiMax ? 'vermelisin' : 'almalısın'}. Haftada 0,5 kg ile ~${Math.ceil(diff / .5)} hafta.` : 'Boy-kilo şartını karşılıyorsun. Sınava kadar kiloyu bu aralıkta tut.'}</p>
+            <button class="o2-btn o2-btn-ghost o2-btn-sm" style="margin-top:12px" onclick="O2.logSheet('weight')">${I('scale')}Kilo kaydet</button>
+        </div>`;
+    }
+    O2.acadBodySheet = () => {
+        const st = state(), n = bodyNorm(st);
+        O2.sheet('Boy & VKİ normları', `
+            <p style="margin:0 0 14px;font-size:12.5px;line-height:1.55;color:var(--o2-text-3)">Varsayılanlar son dönem ilanlarındaki yaygın değerlerdir (tahmini). Başvurduğun ilandaki boy ve VKİ şartına göre düzenle.</p>
+            <div class="o2-grid-2">
+                <div class="o2-field"><label>VKİ alt</label><input class="o2-input" id="o2-bmi-min" inputmode="decimal" value="${n.bmiMin}"></div>
+                <div class="o2-field"><label>VKİ üst</label><input class="o2-input" id="o2-bmi-max" inputmode="decimal" value="${n.bmiMax}"></div>
+            </div>
+            <div class="o2-field"><label>Asgari boy (${st.gender === 'm' ? 'erkek' : 'kadın'}, cm)</label><input class="o2-input" id="o2-bmi-h" inputmode="numeric" value="${n.height[st.gender]}"></div>
+            <button class="o2-btn o2-btn-ghost o2-btn-block" onclick="O2.logSheet('measure')">${I('ruler')}Boyumu güncelle</button>
+            <button class="o2-btn o2-btn-gold o2-btn-block" style="margin-top:10px" onclick="O2.acadSaveBody()">Kaydet</button>`);
+    };
+    O2.acadSaveBody = () => {
+        update(st => {
+            const n = bodyNorm(st);
+            const min = parseFloat($('o2-bmi-min').value), max = parseFloat($('o2-bmi-max').value), h = parseFloat($('o2-bmi-h').value);
+            st.body = { bmiMin: min || n.bmiMin, bmiMax: max || n.bmiMax, height: { ...n.height, [st.gender]: h || n.height[st.gender] } };
+        });
+        O2.closeSheet(); O2.toast('Normlar kaydedildi', 'check');
+    };
+
+    // 📈 Test grafiği: resmi etkinliğin zaman içindeki gelişimi + baraj/hedef çizgileri
+    function testChartHTML(st, evs) {
+        const ev = evs[0];
+        const pts = st.tests.filter(t => t.res && t.res[ev.id] !== undefined);
+        if (pts.length < 2) return '';
+        return `
+        <div class="o2-card" style="margin-top:12px">
+            <div class="o2-acad-ev-head"><div><h5>${esc(ev.name)} gelişimi</h5><p>${pts.length} test · ${ev.better === 'low' ? 'düşük daha iyi' : 'yüksek daha iyi'}</p></div></div>
+            <div style="position:relative;height:170px;margin-top:10px"><canvas id="o2-acad-chart"></canvas></div>
+        </div>`;
+    }
+    O2.drawAcademyChart = () => {
+        const el = $('o2-acad-chart');
+        if (!el || typeof Chart === 'undefined') return;
+        const st = state(), ev = eventsOf(st)[0], n = norm(st, ev), color = branchOf(st).color;
+        const pts = st.tests.filter(t => t.res && t.res[ev.id] !== undefined);
+        const labels = pts.map(t => { const d = O2.parseDate(t.d); return d ? d.toLocaleDateString('tr-TR', { day: 'numeric', month: 'short' }) : t.d; });
+        const line = (v, c) => ({ data: pts.map(() => v), borderColor: c, borderDash: [5, 5], borderWidth: 1.5, pointRadius: 0, fill: false });
+        O2.ui.charts.push(new Chart(el.getContext('2d'), {
+            type: 'line',
+            data: { labels, datasets: [
+                { data: pts.map(t => t.res[ev.id]), borderColor: color, backgroundColor: color + '22', borderWidth: 2.5, tension: .35, fill: true, pointRadius: 4, pointBackgroundColor: color },
+                line(n.pass, 'rgba(255,122,69,.7)'), line(n.target, 'rgba(61,220,151,.7)')
+            ] },
+            options: {
+                responsive: true, maintainAspectRatio: false,
+                plugins: { legend: { display: false }, tooltip: { backgroundColor: '#18181c', displayColors: false, callbacks: { label: (c) => c.datasetIndex === 0 ? fmtVal(ev, c.parsed.y) : c.datasetIndex === 1 ? `Baraj ${fmtVal(ev, n.pass)}` : `Hedef ${fmtVal(ev, n.target)}` } } },
+                scales: {
+                    x: { grid: { display: false }, ticks: { color: '#63636e', font: { size: 10, weight: 'bold' } }, border: { display: false } },
+                    y: { reverse: ev.better === 'low', grid: { color: 'rgba(255,255,255,.05)' }, ticks: { color: '#63636e', font: { size: 10, weight: 'bold' }, maxTicksLimit: 5 }, border: { display: false } }
+                }
+            }
+        }));
+    };
+
+    // 📉 Sınava giden yol: dönemlendirme ve son 7 günde azalan yüklenme (taper)
+    const TAPER = {
+        7: ['Son tam test simülasyonu', 'Gerçek test temposunda 1 tam deneme; süreni kaydet.'],
+        6: ['Hafif koşu + mobilite', '25 dk rahat koşu, 10 dk esneme. Kuvvet yok.'],
+        5: ['Kısa hız', '4 × 20 sn çeviklik/sprint, tam dinlenmeyle. Hacim düşük, hız yüksek.'],
+        4: ['Dinlenme', 'Yürüyüş ve mobilite. Uyku 8 saat.'],
+        3: ['Keskinleştirme', '%80 tempoda 2 kısa parkur/400 m denemesi; tekniğe odaklan.'],
+        2: ['Aktivasyon', '15 dk hafif ısınma + 3 kısa hızlanma. Yorulmadan bitir.'],
+        1: ['Tam dinlenme', 'Belgelerini, kıyafetini hazırla. Bol su, erken yat.'],
+        0: ['Test günü', 'Hafif kahvaltı (test öncesi 2-3 saat), 15 dk ısınma, dinamik esneme. Başarılar!']
+    };
+    function taperHTML(st) {
+        const left = daysLeft(st.dates.fitness);
+        if (left === null) return `
+            <div class="o2-card is-tap" style="margin-top:12px" onclick="O2.acadDatesSheet()"><div class="o2-coach">
+                <div class="o2-coach-orb">${I('clock')}</div>
+                <div style="flex:1"><h4>Sınava giden yol</h4><p>Fiziki test tarihini ekle; hafta hafta yüklenme ve son 7 günün azaltma planı çıksın.</p></div>${I('chev', 'chev')}
+            </div></div>`;
+        if (left < 0) return '';
+        const phases = [
+            { id: 'base', name: 'Temel', sub: 'Hacim & kondisyon', from: 99, to: 43 },
+            { id: 'build', name: 'Yoğunlaşma', sub: 'Haftada 2 simülasyon', from: 42, to: 15 },
+            { id: 'peak', name: 'Azaltma', sub: 'Hacim −%40, hız korunur', from: 14, to: 8 },
+            { id: 'taper', name: 'Taper', sub: 'Son 7 gün', from: 7, to: 0 }
+        ];
+        const cur = phases.find(p => left <= p.from && left >= p.to) || phases[0];
+        const advice = {
+            base: 'Haftada 4-5 seans: kuvvet (şınav/mekik/barfiks), çeviklik ve 1 uzun koşu. Her 2 haftada bir test kaydet.',
+            build: 'Haftada 2 test simülasyonu, aralara sprint ve kuvvet. Zayıf istasyonuna (tur süreleri) odaklan.',
+            peak: 'Toplam hacmi %40 azalt, yoğunluğu koru. Yeni hareket deneme, sakatlık riskini sıfırla.',
+            taper: ''
+        }[cur.id];
+        const days = cur.id === 'taper' ? Array.from({ length: Math.min(left, 7) + 1 }, (_, i) => left - i).map(d => ({ d, date: O2.addDays(O2.startOfDay(), left - d), ...{ t: TAPER[d] } })) : [];
+        return `
+        <div class="o2-section-head"><h3>Sınava giden yol</h3><span class="o2-link" style="color:var(--o2-text-3)">${left === 0 ? 'Bugün' : `${left} gün`}</span></div>
+        <div class="o2-card">
+            <div class="o2-acad-phases">${phases.map(p => `<div class="${p === cur ? 'on' : (left < p.to ? 'done' : '')}"><b>${p.name}</b><small>${p.sub}</small></div>`).join('')}</div>
+            ${advice ? `<p style="margin:14px 0 0;font-size:13px;line-height:1.55;color:var(--o2-text-2)">${advice}</p>` : `
+            <div class="o2-list" style="margin-top:8px">${days.map(x => `
+                <div class="o2-row">
+                    <div class="o2-row-idx" style="color:${x.d === 0 ? 'var(--o2-gold)' : 'var(--o2-text-3)'};font-size:11px;font-weight:800">${x.d === 0 ? 'GÜN' : `G-${x.d}`}</div>
+                    <div class="o2-row-main"><h5>${esc(x.t[0])}${x.d === left ? ' · bugün' : ''}</h5><p>${esc(x.date.toLocaleDateString('tr-TR', { weekday: 'long', day: 'numeric', month: 'short' }))} · ${esc(x.t[1])}</p></div>
+                </div>`).join('')}</div>`}
         </div>`;
     }
 
@@ -556,12 +706,13 @@
         } else {
             list = all.map(q => ({ q, k: rank(q) + Math.random() * .5 })).sort((a, b) => a.k - b.k).map(x => x.q).slice(0, 20);
         }
-        deck = { list, i: 0, shown: false, mock, ok: 0, timer: null, left: 60 };
+        deck = { list, i: 0, shown: false, mock, ok: 0, timer: null, left: 60, scores: {} };
         update(st => markDay(st), false);
         drawCard();
     };
     function drawCard() {
         clearInterval(deck.timer);
+        stopMic();
         const q = deck.list[deck.i];
         if (!q) return finishDeck();
         deck.shown = false; deck.left = deck.mock ? 60 : 0;
@@ -573,7 +724,11 @@
                 </div>
                 <h3>${esc(q.q)}</h3>
                 <div id="o2-acad-answer" class="o2-acad-answer" hidden><small>Örnek cevap</small><p>${esc(q.a)}</p></div>
-                ${deck.mock ? `<textarea class="o2-input" id="o2-acad-mine" rows="3" style="height:auto;margin-top:12px;padding:12px" placeholder="Cevabını yaz ya da sesli söyle, sonra AI değerlendirsin (isteğe bağlı)"></textarea>
+                ${deck.mock ? `<div class="o2-acad-mic-row">
+                    <button class="o2-acad-mic" id="o2-acad-mic" onclick="O2.acadMic()" aria-label="Sesli cevap">${I('mic')}</button>
+                    <span id="o2-acad-mic-hint">${SR ? 'Mikrofona dokun ve cevabını sesli söyle' : 'Bu cihazda konuşma tanıma yok; cevabını yaz'}</span>
+                </div>
+                <textarea class="o2-input" id="o2-acad-mine" rows="3" style="height:auto;margin-top:10px;padding:12px" placeholder="Söylediklerin burada yazıya dönüşür; süre bitince AI otomatik değerlendirir"></textarea>
                 <div id="o2-acad-ai" class="o2-acad-ai" hidden></div>` : ''}
             </div>
             <div id="o2-acad-actions">${deckActions()}</div>`);
@@ -599,9 +754,43 @@
     O2.acadReveal = () => {
         if (!deck) return;
         clearInterval(deck.timer);
+        stopMic();
         deck.shown = true;
         $('o2-acad-answer').hidden = false;
         $('o2-acad-actions').innerHTML = deckActions();
+        // Cevap verildiyse ve Gemini anahtarı varsa komisyon notunu otomatik iste
+        const mine = $('o2-acad-mine');
+        if (deck.mock && mine && mine.value.trim().length > 8 && localStorage.getItem('OLY_API_KEY')) O2.acadAI();
+    };
+
+    // 🎙️ Konuşma tanıma (tr-TR): söylenenler canlı olarak yazıya döner
+    const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
+    let rec = null;
+    function stopMic() {
+        if (rec) { try { rec.stop(); } catch (e) { } rec = null; }
+        const b = $('o2-acad-mic');
+        if (b) b.classList.remove('on');
+    }
+    O2.acadMic = () => {
+        if (!SR) { O2.toast('Konuşma tanıma bu cihazda desteklenmiyor', 'chat'); return; }
+        if (rec) { stopMic(); return; }
+        if ('speechSynthesis' in window) speechSynthesis.cancel();
+        const box = $('o2-acad-mine');
+        const base = box.value ? box.value.trim() + ' ' : '';
+        rec = new SR();
+        rec.lang = 'tr-TR'; rec.continuous = true; rec.interimResults = true;
+        rec.onresult = (e) => {
+            let text = '';
+            for (let i = 0; i < e.results.length; i++) text += e.results[i][0].transcript;
+            if ($('o2-acad-mine')) $('o2-acad-mine').value = base + text.trim();
+        };
+        rec.onerror = (e) => { if (e.error === 'not-allowed') O2.toast('Mikrofon izni verilmedi', 'chat'); stopMic(); };
+        rec.onend = () => { if (rec) stopMic(); };
+        try { rec.start(); } catch (e) { rec = null; return; }
+        $('o2-acad-mic').classList.add('on');
+        const hint = $('o2-acad-mic-hint');
+        if (hint) hint.textContent = 'Dinliyorum… bitirince tekrar dokun';
+        O2.haptic(15);
     };
     O2.acadSpeak = () => {
         const q = deck && deck.list[deck.i];
@@ -633,16 +822,22 @@
         const st = state();
         try {
             const text = await askGeminiAI(`Sen ${branchOf(st).full} ${trackOf(st).name} mülakat komisyonu üyesisin. Adayın cevabını 0-10 arası puanla, en fazla 3 kısa madde ile güçlü yanı, eksiği ve daha iyi bir cevap önerisini Türkçe yaz. Toplam 90 kelimeyi geçme.\nSoru: ${q.q}\nÖrnek doğru bilgi: ${q.a}\nAdayın cevabı: ${mine}`);
-            box.innerHTML = `<small>Komisyon notu</small><p>${esc(text || '').replace(/\n/g, '<br>')}</p>`;
+            box.innerHTML = `<small>Komisyon notu</small><p>${esc(text || '').replace(/\*\*/g, '').replace(/\n/g, '<br>')}</p>`;
+            const m = String(text || '').match(/(\d+(?:[.,]\d)?)\s*\/\s*10/);
+            if (m && deck) deck.scores[deck.i] = parseFloat(m[1].replace(',', '.'));
         } catch (e) {
             box.innerHTML = `<p>${esc(e.message || 'Değerlendirme alınamadı')}</p>`;
         }
     };
     function finishDeck() {
         const { ok, list, mock } = deck;
+        const sc = Object.values(deck.scores);
+        const avg = sc.length ? sc.reduce((a, b) => a + b, 0) / sc.length : null;
+        if (mock && avg !== null) update(st => { st.mockScores = [...(st.mockScores || []).slice(-19), { d: O2.dayKey(), avg: Math.round(avg * 10) / 10 }]; }, false);
         O2.sheet(mock ? 'Prova bitti' : 'Tur tamam', `
             <div class="o2-acad-result">
                 ${O2.ring({ pct: ok / Math.max(1, list.length), size: 120, stroke: 11, center: `<strong>${ok}/${list.length}</strong><span>BİLDİN</span>` })}
+                ${avg !== null ? `<p><b style="color:var(--o2-violet)">Komisyon ortalaması: ${O2.fmtNum(avg, 1)}/10</b></p>` : ''}
                 <p>${ok === list.length ? 'Kusursuz! Komisyonun karşısına hazırsın.' : ok >= list.length * .6 ? 'İyi gidiyorsun. "Tekrar et" dediklerin bir sonraki turda önce gelecek.' : 'Zor sorular bir sonraki turda önce gelecek. Her gün kısa tekrar en etkilisi.'}</p>
             </div>
             <div class="o2-grid-2" style="margin-top:16px">

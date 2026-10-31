@@ -9,7 +9,7 @@ const out = path.join(root, 'www');
 const FILES = [
     'index.html', 'olympus.html', 'style.css', 'sw.js', 'manifest.json',
     'icon.png', 'bank.png', 'bmw.png', 'bmw_g20.glb', 'megane.glb',
-    'engine.mp3', 'music.mp3', 'acılıs.mp4'
+    'engine.mp3', 'music.mp3', 'acılıs.mp4', 'privacypolicy.html'
 ];
 const DIRS = ['js', 'css', 'assets', 'culbase_system', 'games', 'memories'];
 

@@ -1664,3 +1664,22 @@ body.o2-bridge #app-content .content { padding-top: calc(env(safe-area-inset-top
 .o2-leader:nth-child(1) .o2-leader-rank { color: var(--o2-gold); }
 .o2-leader img { width: 38px; height: 38px; border-radius: 50%; object-fit: cover; background: var(--o2-surface-2); }
 .o2-leader.me { background: linear-gradient(90deg, rgba(230, 195, 116, .08), transparent); border-radius: 14px; padding-left: 8px; }
+
+/* Akademi · VKİ, dönemlendirme, sesli prova */
+.o2-acad-bmi { position: relative; height: 10px; margin-top: 14px; border-radius: 10px; background: linear-gradient(90deg, rgba(90, 200, 250, .25), rgba(255, 255, 255, .06) 30%, rgba(255, 255, 255, .06) 60%, rgba(255, 90, 95, .3)); }
+.o2-acad-bmi .zone { position: absolute; top: 0; bottom: 0; border-radius: 10px; background: rgba(61, 220, 151, .35); }
+.o2-acad-bmi .dot { position: absolute; top: 50%; width: 18px; height: 18px; border-radius: 50%; transform: translate(-50%, -50%); border: 3px solid var(--o2-bg, #050507); box-shadow: 0 0 14px currentColor; }
+.o2-acad-mini { padding: 12px; border-radius: 14px; background: rgba(255, 255, 255, .04); }
+.o2-acad-mini small { display: block; font-size: 10px; font-weight: 800; letter-spacing: .8px; text-transform: uppercase; color: var(--o2-text-3); }
+.o2-acad-mini b { display: block; margin-top: 4px; font-size: 15px; font-weight: 800; }
+.o2-acad-phases { display: grid; grid-template-columns: repeat(4, 1fr); gap: 6px; }
+.o2-acad-phases div { padding: 10px 8px; border-radius: 12px; background: rgba(255, 255, 255, .04); border: 1px solid transparent; }
+.o2-acad-phases b { display: block; font-size: 12px; font-weight: 800; }
+.o2-acad-phases small { display: block; margin-top: 3px; font-size: 10px; line-height: 1.3; color: var(--o2-text-3); }
+.o2-acad-phases .on { border-color: color-mix(in srgb, var(--acad, var(--o2-gold)) 60%, transparent); background: color-mix(in srgb, var(--acad, var(--o2-gold)) 14%, transparent); }
+.o2-acad-phases .on b { color: var(--acad, var(--o2-gold)); }
+.o2-acad-phases .done { opacity: .45; }
+.o2-acad-mic-row { display: flex; align-items: center; gap: 12px; margin-top: 16px; font-size: 12.5px; color: var(--o2-text-3); }
+.o2-acad-mic { width: 52px; height: 52px; flex-shrink: 0; border-radius: 50%; border: 1px solid var(--o2-line-2); background: rgba(255, 255, 255, .05); color: var(--o2-text); display: grid; place-items: center; cursor: pointer; transition: all .2s; }
+.o2-acad-mic svg { width: 22px; height: 22px; }
+.o2-acad-mic.on { background: var(--o2-red); border-color: transparent; color: #fff; box-shadow: 0 0 0 8px rgba(255, 90, 95, .18); animation: o2Pulse 1.2s infinite; }

@@ -192,3 +192,18 @@ Yeni modül: `js/36-olympus2-gelismis.js`. Yeni bağımlılık: `@capacitor/loca
 
 ## Güvenlik
 - `firestore.rules`: kullanıcı belgesine sadece sahibi yazar (diğerleri yalnızca takip/bildirim/ortak maç alanları), yedek yalnızca sahibine açık, sohbetler yalnızca iki tarafa, sıralamada herkes yalnızca kendi satırını yazar. Firebase Console'dan yayınlanmalı.
+
+# Olympus Training · Güncelleme 5 — Akademi+, Health Connect, e-posta servisi (2026-10-31)
+
+## Akademi
+- **Boy & kilo:** profildeki boy/kiloya göre VKİ, uygun aralık çubuğu, boyuna göre izin verilen kilo aralığı, asgari boy kontrolü ve aralığa girmek için kaç kilo/hafta gerektiği. Normlar (VKİ 18-27, boy 167/160 cm) tahmini, "Normlar"dan düzenlenir.
+- **Test grafiği:** resmi etkinliğin (parkur / mekik) zaman içindeki gelişimi; baraj ve hedef çizgileriyle (süre testlerinde eksen ters: yukarı = daha iyi).
+- **Sınava giden yol:** fiziki test tarihine göre Temel → Yoğunlaşma → Azaltma → Taper dönemleri; son 7 gün gün gün azalan yüklenme planı (G-7 son simülasyon … G-1 tam dinlenme, test günü rutini).
+- **Sesli prova:** mikrofonla konuşma Türkçe yazıya dönüşür; süre bitince ya da "Cevabı göster"de Gemini komisyon değerlendirmesi otomatik gelir, puanlar prova sonunda ortalanır ve saklanır.
+
+## Health Connect (Android)
+- `js/40-olympus2-saglik.js` + `@capgo/capacitor-health`: adım, aktif kalori, dinlenik nabız, uyku ve kilo son 7 gün için otomatik okunur (yalnızca okuma), mevcut kayıtlara yazılır; hazırlık skoru, halkalar ve VKİ bunları kullanır.
+- Ayarlar → Health Connect: bağlan / şimdi eşitle / bağlantıyı kes. `privacypolicy.html` Health Connect izin ekranı için eklendi. Android minSdk 24 → 26.
+
+## E-posta hatırlatıcıları canlı
+- Apps Script servisi emirhan@culbase.com hesabında yayınlandı (15 dk tetikleyici kurulu); adres uygulamaya varsayılan olarak gömüldü. Ayarlar → Hatırlatıcılar → "E-posta ile de hatırlat"ı açmak yeterli.

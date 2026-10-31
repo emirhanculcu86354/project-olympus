@@ -428,7 +428,13 @@
     const REMINDER_IDS = { legacyWorkout: 9001, sleep: 9002, water: [9010, 9011, 9012, 9013, 9014, 9015], workout: [9030, 9031, 9032, 9033, 9034, 9035, 9036], academy: [9040, 9041, 9042, 9043, 9044, 9045, 9046] };
     const ALL_IDS = [REMINDER_IDS.legacyWorkout, REMINDER_IDS.sleep, ...REMINDER_IDS.water, ...REMINDER_IDS.workout, ...REMINDER_IDS.academy];
     const WATER_HOURS = [10, 12, 14, 16, 18, 20];
-    O2.reminderSettings = () => ({ workout: false, workoutTime: '18:00', water: false, sleep: false, academy: false, academyTime: '20:30', mail: false, mailUrl: '', ...(LS.get('oly2_reminders', {}) || {}) });
+    // emirhan@culbase.com hesabında yayınlanan Apps Script servisi (apps-script/olympus-hatirlatici.gs)
+    const MAIL_URL = 'https://script.google.com/macros/s/AKfycbwWqzNnfaoi6sN1QE4Yncb2kGvhHdeEgFlJ_gPwNfS9eHJMYSSmBCm7GAHBDmGtehBisg/exec';
+    O2.reminderSettings = () => {
+        const r = { workout: false, workoutTime: '18:00', water: false, sleep: false, academy: false, academyTime: '20:30', mail: false, mailUrl: '', ...(LS.get('oly2_reminders', {}) || {}) };
+        if (!r.mailUrl) r.mailUrl = MAIL_URL;
+        return r;
+    };
     const anyOn = (r) => r.workout || r.water || r.sleep || r.academy;
     const hm = (t) => t.split(':').map(Number);
     const trainedOn = (key) => O2.sessions().some(s => s.dayKey === key && s.type !== 'cardio');

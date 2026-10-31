@@ -54,7 +54,8 @@
         medal: '<circle cx="12" cy="15" r="5"/><path d="m8.5 11.5-3-8.5h4l2.5 6M15.5 11.5l3-8.5h-4L12 9"/>',
         swords: '<path d="m14.5 17.5 6-6V5h-6.5l-6 6M13 19l6-6M16 16l4 4M19 21l2-2"/><path d="M9.5 6.5 3.5 12.5V19H10l6-6"/>',
         bell: '<path d="M6 8a6 6 0 1 1 12 0c0 7 3 9 3 9H3s3-2 3-9"/><path d="M10.3 21a1.9 1.9 0 0 0 3.4 0"/>',
-        ruler: '<path d="M3 17 17 3l4 4L7 21Z"/><path d="m7 13 2 2M10 10l2 2M13 7l2 2"/>'
+        ruler: '<path d="M3 17 17 3l4 4L7 21Z"/><path d="m7 13 2 2M10 10l2 2M13 7l2 2"/>',
+        mic: '<rect x="9" y="3" width="6" height="11" rx="3"/><path d="M5 11a7 7 0 0 0 14 0M12 18v3"/>'
     };
     O2.icon = (name, cls = '') => `<svg class="${cls}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round">${P[name] || ''}</svg>`;
     const I = O2.icon;
@@ -186,6 +187,7 @@
         view.innerHTML = `<div class="o2-page">${renderers[O2.ui.tab]()}</div>`;
         animateRings(view);
         if (O2.ui.tab === 'progress') drawProgressCharts();
+        if (O2.ui.tab === 'academy' && O2.drawAcademyChart) O2.drawAcademyChart();
     };
 
     // ==========================================
@@ -1029,6 +1031,7 @@
             <div class="o2-section-head" style="margin-top:26px"><h3>Akademi & veri</h3></div>
             <div class="o2-list">
                 <div class="o2-row is-tap" onclick="O2.openAcademyHub()"><div class="o2-row-idx">${I('shield')}</div><div class="o2-row-main"><h5>Olympus Akademi</h5><p>TSK · Jandarma · Polis sınav ve mülakat hazırlığı</p></div>${I('chev', 'chev')}</div>
+                <div class="o2-row is-tap" onclick="O2.healthSheet()"><div class="o2-row-idx">${I('heart')}</div><div class="o2-row-main"><h5>Health Connect</h5><p>${O2.healthSupported && O2.healthSupported() ? 'Adım, nabız, uyku ve kilo otomatik gelsin' : 'Android uygulamasında adım, nabız, uyku'}</p></div>${I('chev', 'chev')}</div>
                 <div class="o2-row is-tap" onclick="O2.backupSheet()"><div class="o2-row-idx">${I('settings')}</div><div class="o2-row-main"><h5>Veri & yedek</h5><p>${user ? 'Bulut yedeği açık · uygulamayı silsen de veriler kalır' : 'Misafir · yedek için giriş yap'}</p></div>${I('chev', 'chev')}</div>
             </div>
 
