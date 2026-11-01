@@ -182,7 +182,7 @@
         const renderers = {
             today: renderToday, train: renderTrain, fuel: renderFuel, progress: renderProgress,
             builder: () => O2.renderBuilder(), profile: () => O2.renderProfile(), library: () => O2.renderLibrary(),
-            academy: () => O2.renderAcademy()
+            academy: () => O2.renderAcademy(), flow: () => O2.renderFlow()
         };
         view.innerHTML = `<div class="o2-page">${renderers[O2.ui.tab]()}</div>`;
         animateRings(view);
@@ -287,6 +287,8 @@
 
             <div class="o2-section-head"><h3>Bugünün seansı</h3><button class="o2-link" onclick="O2.go('train')">Programı gör</button></div>
             ${plan.isRest ? restCard(plan) : (doneToday ? doneCard(doneToday) : sessionHero(plan, 0))}
+
+            ${O2.flowTodayCard ? O2.flowTodayCard() : ''}
 
             <div class="o2-section-head"><h3>Bu hafta</h3><span class="o2-link" style="color:var(--o2-text-3)">${O2.weekStreak() ? `🔥 ${O2.weekStreak()} hafta seri · ` : ''}${week.sessions} seans</span></div>
             <div class="o2-card" style="padding:12px;">${weekStrip()}</div>
@@ -616,15 +618,17 @@
             <div style="margin-top:12px">${O2.foodCard(key, mac)}</div>
             <p style="margin:10px 4px 0;font-size:11.5px;color:var(--o2-text-3);line-height:1.5">Hedefler ${O2.fmtNum(mac.bw, 1)} kg vücut ağırlığına ve günün karbonhidrat tipine göre hesaplanır.</p>
 
-            <div class="o2-section-head"><h3>Öğün planı</h3><span class="o2-link" style="color:var(--o2-text-3)">Değişim için dokun</span></div>
-            ${d.meals.map((m, i) => `
+            <div class="o2-section-head"><h3>Öğün planı</h3><button class="o2-link" onclick="O2.dietSheet && O2.dietSheet()">✦ AI planı</button></div>
+            ${O2.dietPlanCard ? O2.dietPlanCard() : ''}
+            ${(O2.dietMealsFor ? O2.dietMealsFor(d, key) : d.meals).map((m, i) => `
             <div class="o2-card o2-meal ${eaten.includes(i) ? 'done' : ''}" id="o2-meal-${i}">
                 <div class="o2-meal-icon">${m.i || '🍽️'}</div>
-                <div onclick="document.getElementById('o2-meal-${i}').classList.toggle('show-alt')" style="cursor:pointer">
+                <div>
                     <small>${esc(m.t)}</small>
                     <h5>${esc(m.d)}</h5>
+                    ${m.kcal ? `<p class="o2-meal-mac"><b>${O2.fmtNum(m.kcal)} kcal</b> · P ${O2.fmtNum(m.p)} · K ${O2.fmtNum(m.c)} · Y ${O2.fmtNum(m.f)}</p>` : ''}
                     <div class="o2-alt">${esc(m.alt || 'Alternatif bulunmuyor.')}</div>
-                    <span class="o2-meal-swap">${I('swap')}Alternatif</span>
+                    <button class="o2-meal-swap" onclick="${m.opts && m.opts.length > 1 ? `O2.dietSwap('${key}', ${i})` : `document.getElementById('o2-meal-${i}').classList.toggle('show-alt')`}">${I('swap')}${m.opts && m.opts.length > 1 ? `Değiştir · ${(m.optIndex || 0) + 1}/${m.opts.length}` : 'Alternatif'}</button>
                 </div>
                 <button class="o2-check ${eaten.includes(i) ? 'on' : ''}" onclick="O2.toggleMeal('${key}', ${i})" aria-label="Yendi olarak işaretle">${I('check')}</button>
             </div>`).join('')}
@@ -1018,7 +1022,7 @@
                 <span class="o2-switch ${s.voiceCoach ? 'on' : ''}" id="o2-set-voice"></span>
             </div>
             <div class="o2-list">
-                <div class="o2-row is-tap" onclick="O2.remindersSheet()"><div class="o2-row-idx">${I('bell')}</div><div class="o2-row-main"><h5>Hatırlatıcılar</h5><p>Antrenman, su ve uyku bildirimleri</p></div>${I('chev', 'chev')}</div>
+                <div class="o2-row is-tap" onclick="O2.remindersSheet()"><div class="o2-row-idx">${I('bell')}</div><div class="o2-row-main"><h5>Bildirimler</h5><p>Antrenman, akış, öğün, Akademi, su · telefon + e-posta</p></div>${I('chev', 'chev')}</div>
                 <div class="o2-row is-tap" onclick="O2.goalSheet()"><div class="o2-row-idx">${I('scale')}</div><div class="o2-row-main"><h5>Hedef kilo</h5><p>${s.goalWeight ? `${O2.fmtNum(s.goalWeight, 1)} kg` : 'Belirlenmedi'}</p></div>${I('chev', 'chev')}</div>
             </div>
             <button class="o2-btn o2-btn-gold o2-btn-block" style="margin-top:18px" onclick="O2.saveSettingsSheet()">Kaydet</button>
@@ -1130,6 +1134,7 @@
             ['ball', 'Sporlar', 'Halı saha & FUT', 'var(--o2-green)', "O2.openClassicSection('openSportsScreen')", 'openSportsScreen'],
             ['run', 'Kardiyo', 'GPS koşu & bisiklet', 'var(--o2-orange)', 'O2.openCardio()', 'openCardioHub'],
             ['tent', 'Kamp', 'Doğa günlüğü', '#c4a37a', 'openCampBook()', 'openCampBook'],
+            ['clock', 'Akış', 'Rutin & saatler', '#a78bfa', "O2.go('flow')", null],
             ['shield', 'Akademi', 'TSK · Jandarma · Polis', '#6b9cf5', "O2.go('academy')", null],
             ['trophy', 'Sıralama', 'Haftalık liderlik', 'var(--o2-gold)', 'O2.leaderboardSheet()', null],
             ['medal', 'Rozetler', 'Başarımların', 'var(--o2-gold)', 'O2.badgesSheet()', null],

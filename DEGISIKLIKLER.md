@@ -214,3 +214,24 @@ Yeni modül: `js/36-olympus2-gelismis.js`. Yeni bağımlılık: `@capacitor/loca
 - Parkur puanlaması ilan tablosuna göre: ≤40 sn 100 puan, 48 sn 60 puan (baraj), ≥50 sn 0 puan (kadın 45 / 53 / 55). Puan tablosu kartta görünüyor; Normlar'dan üç değer de düzenlenebiliyor.
 - Parkur istasyonları rehberi ve kronometrede istasyon adlarıyla tur süreleri.
 - Test sonuçları branşa göre ayrıldı (POMEM parkuru Jandarma skorunu etkilemiyor). Dönem tavsiyeleri parkur / FYT'ye göre ayrı.
+
+# Olympus Training · Güncelleme 6 — Bildirim merkezi, Akış, AI diyet planı (2026-11-01)
+
+## 🔔 Bildirim merkezi (js/41)
+- Tüm hatırlatıcılar tek takvimden üretiliyor: antrenman, **günlük akış blokları**, **öğün saatleri**, Akademi, su, uyku. Sessiz saatler (su hatırlatıcısı susar), akış blokları için "X dk önce" seçeneği.
+- Üç kanal: Android yerel bildirim (uygulama kapalıyken, internetsiz) · **web push** (iPhone/Android ana ekran uygulaması kapalıyken; Firebase Cloud Messaging + Apps Script sunucusu) · e-posta (antrenman ve Akademi).
+- Ayarlar → Bildirimler: kanal durumu (izin, iPhone'da ana ekrana ekleme uyarısı), "Sıradaki bildirimler" önizlemesi ve **Test et** düğmesi.
+- Takvim her açılışta ve uygulama öne geldiğinde ileri kaydırılıyor; antrenman yapıldıysa o günün hatırlatıcısı düşüyor; çift bildirim engellendi.
+- Service worker `push` olayını işliyor; Apps Script sunucusu 5 dakikada bir saati gelen bildirimleri gönderiyor (`apps-script/olympus-hatirlatici.gs`, `appsscript.json`).
+
+## 🕒 Akış — günlük rutin (js/42, Dayflow'un sade sürümü)
+- Haftanın günlerine göre tekrarlayan rutin blokları + o güne özel görevler; saat çizelgesi, "şimdi" çizgisi, aktif blokta kalan süre, blok tamamlama, gün halkası.
+- Antrenman bloğu o günün programından başlık alır (dinlenme gününde aktif dinlenme), Akademi ve öğün blokları ilgili ekranlara bağlanır.
+- Hazır şablonlar (Akademi hazırlık günü, iş/okul günü, hafif gün), alışkanlıklar (su/antrenman/Akademi otomatik işaretlenir, seri sayacı), 25/50/90 dk odak zamanlayıcı.
+- **AI ile planla:** "9-12 arası KPSS, akşam 7'de antrenman, 1 saat kitap" gibi bir cümleden blokları yerleştirir (Gemini; anahtar yoksa cihaz içi Türkçe ayrıştırıcı).
+- Bugün ekranında "Şimdi / Sıradaki" kartı, Keşfet'te Akış kutusu.
+
+## 🥗 AI diyet planlayıcı (js/43)
+- Hedef (yağ yakımı / koruma / kas), kalori, 3-5 öğün, ilk-son öğün saati, tercihler (Türk mutfağı, pratik, bütçe, yüksek protein, vejetaryen, laktozsuz, glutensiz) ve sevilmeyenlere göre 7 günlük plan; antrenman ve dinlenme günü ayrı kalori.
+- Her öğünde 3 seçenek: "Değiştir" ile geçiş; öğün işaretlenince kalori/makrolarıyla besin günlüğüne eklenir (geri alınca çıkar). Günlük hedefler planla eşleşir.
+- Gemini yoksa cihaz içi şablon motoru (Türk mutfağı besin tabanı, porsiyon ölçekleme). Haftalık alışveriş listesi (kopyalanabilir). Öğün saatleri bildirim takvimine girer.

@@ -3,7 +3,7 @@
 //  - Uygulama kabuğu (HTML/JS/CSS/manifest): ÖNCE AĞ, olmazsa önbellek → güncellemeler anında gelir, çevrimdışı da açılır
 //  - Ağır statik dosyalar (görsel, ses, video, 3D model, oyun ZIP): ÖNCE ÖNBELLEK → bir kez indirilir, sonra anında açılır
 //  - Başka alan adları (Firebase, CDN, API'ler) hiç ellenmez
-const CACHE_NAME = 'olympus-cache-v95';
+const CACHE_NAME = 'olympus-cache-v96';
 // js/ altındaki dosyalar olympus.html'deki sırayla (scripts/js-order.json)
 const APP_SHELL = [
   'index.html',
@@ -52,6 +52,9 @@ const APP_SHELL = [
   'js/38-olympus2-akademi.js',
   'js/39-olympus2-koc.js',
   'js/40-olympus2-saglik.js',
+  'js/41-olympus2-bildirim.js',
+  'js/42-olympus2-akis.js',
+  'js/43-olympus2-diyet.js',
   'manifest.json',
   'icon.png'
 ];
@@ -108,6 +111,24 @@ self.addEventListener('fetch', (event) => {
       });
     })
   );
+});
+
+// Web push (Firebase Cloud Messaging): sunucu zamanı gelen hatırlatıcıyı gönderir, uygulama kapalıyken de gösterilir
+self.addEventListener('push', (event) => {
+  let payload = {};
+  try { payload = event.data ? event.data.json() : {}; } catch (e) { payload = { data: { body: event.data && event.data.text() } }; }
+  const d = payload.data || payload;
+  const n = payload.notification || {};
+  const title = d.title || n.title || 'Olympus Training';
+  const options = {
+    body: d.body || n.body || '',
+    icon: 'assets/olympus-training-icon-192.png',
+    badge: 'assets/olympus-training-icon-192.png',
+    tag: d.tag || undefined,
+    renotify: !!d.tag,
+    data: { action: d.action || '' }
+  };
+  event.waitUntil(self.registration.showNotification(title, options));
 });
 
 // Bildirime dokunulunca uygulamayı öne getir ve ilgili eylemi (antrenman, su, uyku) ilet

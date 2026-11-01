@@ -1707,3 +1707,59 @@ body.o2-bridge #app-content .content { padding-top: calc(env(safe-area-inset-top
 .o2-acad-stations li b { display: block; font-size: 13px; }
 .o2-acad-stations li span { display: block; font-size: 12px; line-height: 1.45; color: var(--o2-text-3); }
 .o2-acad-stations p { margin: 10px 0 0; font-size: 11.5px; line-height: 1.5; color: var(--o2-text-3); }
+
+/* ==========================================================================
+   🔔 BİLDİRİM MERKEZİ · 🕒 AKIŞ · 🥗 DİYET PLANI
+   ========================================================================== */
+.o2-notif-status { display: flex; align-items: center; gap: 12px; padding: 14px; border-radius: 18px; background: rgba(255, 255, 255, .04); border: 1px solid var(--o2-line); }
+.o2-notif-status > svg { width: 22px; height: 22px; flex-shrink: 0; color: var(--o2-text-3); }
+.o2-notif-status > div { flex: 1; }
+.o2-notif-status h5 { margin: 0; font-size: 14px; font-weight: 800; }
+.o2-notif-status p { margin: 3px 0 0; font-size: 12px; line-height: 1.45; color: var(--o2-text-3); }
+.o2-notif-status.on { border-color: rgba(61, 220, 151, .3); background: rgba(61, 220, 151, .07); }
+.o2-notif-status.on > svg { color: var(--o2-green); }
+.o2-notif-status.warn { border-color: rgba(255, 122, 69, .3); background: rgba(255, 122, 69, .07); }
+.o2-notif-status.warn > svg { color: var(--o2-orange); }
+.o2-notif-row { border-bottom: 1px solid var(--o2-line); padding-bottom: 8px; }
+.o2-notif-row .o2-toggle-row { border-bottom: 0; }
+.o2-notif-time { height: 40px; font-size: 14px; max-width: 150px; margin: -2px 0 6px; }
+
+.o2-flow-hero { display: flex; align-items: center; gap: 16px; margin-top: 14px; }
+.o2-flow-hero h4 { margin: 4px 0 0; font-size: 17px; font-weight: 800; line-height: 1.3; }
+.o2-flow-hero p { margin: 4px 0 0; font-size: 12.5px; color: var(--o2-text-3); line-height: 1.45; }
+.o2-flow-list { position: relative; display: flex; flex-direction: column; gap: 8px; }
+.o2-flow-block { display: grid; grid-template-columns: 50px 1fr 34px; gap: 10px; align-items: center; }
+.o2-flow-time { text-align: right; font-variant-numeric: tabular-nums; }
+.o2-flow-time b { display: block; font-size: 14px; font-weight: 800; }
+.o2-flow-time small { display: block; font-size: 10.5px; color: var(--o2-text-3); margin-top: 2px; }
+.o2-flow-card { position: relative; padding: 12px 14px 12px 16px; border-radius: 16px; background: linear-gradient(180deg, var(--o2-surface-2), var(--o2-surface)); border: 1px solid var(--o2-line); cursor: pointer; overflow: hidden; }
+.o2-flow-card::before { content: ''; position: absolute; left: 0; top: 10px; bottom: 10px; width: 3px; border-radius: 3px; background: var(--c); }
+.o2-flow-title { display: flex; align-items: center; gap: 10px; }
+.o2-flow-title i { width: 30px; height: 30px; flex-shrink: 0; border-radius: 10px; display: grid; place-items: center; color: var(--c); background: color-mix(in srgb, var(--c) 14%, transparent); }
+.o2-flow-title i svg { width: 16px; height: 16px; }
+.o2-flow-title h5 { margin: 0; font-size: 14px; font-weight: 800; line-height: 1.3; }
+.o2-flow-title p { margin: 2px 0 0; font-size: 11.5px; color: var(--o2-text-3); }
+.o2-flow-block.active .o2-flow-card { border-color: color-mix(in srgb, var(--c) 55%, transparent); background: radial-gradient(circle at 100% 0%, color-mix(in srgb, var(--c) 16%, transparent), transparent 60%), linear-gradient(180deg, var(--o2-surface-2), var(--o2-surface)); box-shadow: 0 10px 30px -18px var(--c); }
+.o2-flow-block.active .o2-flow-time b { color: var(--c); }
+.o2-flow-block.past .o2-flow-card, .o2-flow-block.past .o2-flow-time { opacity: .5; }
+.o2-flow-block.done .o2-flow-card { opacity: .5; }
+.o2-flow-block.done h5 { text-decoration: line-through; text-decoration-color: rgba(255, 255, 255, .35); }
+.o2-flow-progress { height: 4px; margin-top: 10px; border-radius: 4px; background: rgba(255, 255, 255, .06); overflow: hidden; }
+.o2-flow-progress i { display: block; height: 100%; background: var(--c); border-radius: 4px; }
+.o2-flow-left { display: block; margin-top: 6px; font-size: 11px; font-weight: 700; color: var(--c); }
+.o2-flow-now { position: relative; height: 14px; margin: 2px 0 2px 50px; }
+.o2-flow-now::before { content: ''; position: absolute; left: 0; right: 34px; top: 50%; height: 2px; background: var(--o2-red); border-radius: 2px; box-shadow: 0 0 10px rgba(255, 90, 95, .5); }
+.o2-flow-now span { position: absolute; left: -48px; top: 50%; transform: translateY(-50%); font-size: 10.5px; font-weight: 800; color: var(--o2-red); font-variant-numeric: tabular-nums; }
+.o2-flow-habits { display: grid; grid-template-columns: repeat(2, 1fr); gap: 8px; }
+.o2-flow-habit { display: flex; flex-direction: column; align-items: flex-start; gap: 2px; padding: 12px; border-radius: 16px; background: rgba(255, 255, 255, .03); border: 1px solid var(--o2-line); text-align: left; color: var(--o2-text); cursor: pointer; transition: all .2s; }
+.o2-flow-habit span { font-size: 20px; }
+.o2-flow-habit b { font-size: 13px; font-weight: 800; margin-top: 4px; line-height: 1.3; }
+.o2-flow-habit small { font-size: 11px; color: var(--o2-text-3); font-weight: 700; }
+.o2-flow-habit.on { border-color: rgba(61, 220, 151, .4); background: rgba(61, 220, 151, .08); }
+.o2-flow-habit.on small { color: var(--o2-green); }
+.o2-flow-focus h4 { margin: 0; font-size: 15px; font-weight: 800; }
+.o2-flow-focus p { margin: 4px 0 0; font-size: 12.5px; color: var(--o2-text-3); }
+.o2-flow-today { margin-top: 12px; }
+.o2-meal-mac { margin: 6px 0 0; font-size: 11.5px; color: var(--o2-text-3); font-variant-numeric: tabular-nums; }
+.o2-meal-mac b { color: var(--o2-green); }
+button.o2-meal-swap { padding: 0; border: 0; background: none; cursor: pointer; }

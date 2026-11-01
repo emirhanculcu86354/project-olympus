@@ -420,197 +420,22 @@
     };
 
     // ==========================================
-    // ⏰ HATIRLATICILAR (telefon bildirimi + e-posta)
-    // ==========================================
-    // Android'de @capacitor/local-notifications (uygulama kapalıyken de çalışır); web'de uygulama açıkken bildirim.
-    // E-posta: Google Apps Script servisi (apps-script/olympus-hatirlatici.gs) her gün seçilen saatte mail atar.
-    const LN = () => window.Capacitor && window.Capacitor.Plugins && window.Capacitor.Plugins.LocalNotifications;
-    const REMINDER_IDS = { legacyWorkout: 9001, sleep: 9002, water: [9010, 9011, 9012, 9013, 9014, 9015], workout: [9030, 9031, 9032, 9033, 9034, 9035, 9036], academy: [9040, 9041, 9042, 9043, 9044, 9045, 9046] };
-    const ALL_IDS = [REMINDER_IDS.legacyWorkout, REMINDER_IDS.sleep, ...REMINDER_IDS.water, ...REMINDER_IDS.workout, ...REMINDER_IDS.academy];
-    const WATER_HOURS = [10, 12, 14, 16, 18, 20];
-    // emirhan@culbase.com hesabında yayınlanan Apps Script servisi (apps-script/olympus-hatirlatici.gs)
-    const MAIL_URL = 'https://script.google.com/macros/s/AKfycbwWqzNnfaoi6sN1QE4Yncb2kGvhHdeEgFlJ_gPwNfS9eHJMYSSmBCm7GAHBDmGtehBisg/exec';
-    O2.reminderSettings = () => {
-        const r = { workout: false, workoutTime: '18:00', water: false, sleep: false, academy: false, academyTime: '20:30', mail: false, mailUrl: '', ...(LS.get('oly2_reminders', {}) || {}) };
-        if (!r.mailUrl) r.mailUrl = MAIL_URL;
-        return r;
-    };
-    const anyOn = (r) => r.workout || r.water || r.sleep || r.academy;
-    const hm = (t) => t.split(':').map(Number);
-    const trainedOn = (key) => O2.sessions().some(s => s.dayKey === key && s.type !== 'cardio');
-
-    // Önümüzdeki 7 günün bildirimleri: antrenman günü başlığıyla, dinlenme günleri ve bugün yapılmışsa atlanır
-    function upcoming(r) {
-        const list = [];
-        const now = new Date();
-        for (let i = 0; i < 7; i++) {
-            const day = O2.addDays(O2.startOfDay(), i);
-            if (r.workout) {
-                const [h, m] = hm(r.workoutTime);
-                const at = new Date(day); at.setHours(h, m, 0, 0);
-                const plan = O2.dayPlan(i);
-                if (at > now && !plan.isRest && !(i === 0 && trainedOn(O2.dayKey()))) {
-                    const title = String(plan.title || '').split(':').pop().trim();
-                    list.push({ id: REMINDER_IDS.workout[i], at, title: 'Antrenman vakti 💪', body: `Bugün: ${title}. Hazırlık skoruna bak ve başla.`, action: 'start' });
-                }
-            }
-            if (r.academy && O2.academySummary) {
-                const [h, m] = hm(r.academyTime);
-                const at = new Date(day); at.setHours(h, m, 0, 0);
-                const s = O2.academySummary();
-                if (at > now && s) {
-                    const next = s.dates.map(d => ({ ...d, left: d.left - i })).filter(d => d.left >= 0).sort((a, b) => a.left - b.left)[0];
-                    const when = next ? (next.left === 0 ? `${next.label} bugün!` : next.left === 1 ? `${next.label} yarın!` : `${next.label}: ${next.left} gün kaldı.`) : '';
-                    list.push({ id: REMINDER_IDS.academy[i], at, title: `🛡️ ${s.branch} · ${s.track} hazırlığı`, body: `${when} Bugün 10 mülakat kartı çalış ve testini kaydet.`.trim(), action: 'academy' });
-                }
-            }
-        }
-        return list;
-    }
-
-    O2.applyReminders = async (opts = {}) => {
-        const r = O2.reminderSettings();
-        const plugin = LN();
-        if (plugin) {
-            try {
-                const perm = await plugin.checkPermissions();
-                if (perm.display !== 'granted' && anyOn(r)) {
-                    if (opts.silent) return false;
-                    const req = await plugin.requestPermissions();
-                    if (req.display !== 'granted') { O2.toast('Bildirim izni verilmedi', 'bell'); return false; }
-                }
-                await plugin.cancel({ notifications: ALL_IDS.map(id => ({ id })) });
-                const list = upcoming(r).map(n => ({ id: n.id, title: n.title, body: n.body, schedule: { at: n.at, allowWhileIdle: true }, extra: { action: n.action } }));
-                if (r.sleep) list.push({ id: REMINDER_IDS.sleep, title: 'Günaydın', body: 'Dün gece kaç saat uyudun? Kaydet, hazırlık skorun güncellensin.', schedule: { on: { hour: 9, minute: 30 }, allowWhileIdle: true }, extra: { action: 'sleep' } });
-                if (r.water) WATER_HOURS.forEach((h, i) => list.push({ id: REMINDER_IDS.water[i], title: 'Su vakti 💧', body: 'Bir bardak su iç; hedefe bir adım daha.', schedule: { on: { hour: h, minute: 0 }, allowWhileIdle: true }, extra: { action: 'water' } }));
-                if (list.length) await plugin.schedule({ notifications: list });
-                return true;
-            } catch (e) { console.warn('Hatırlatıcılar kurulamadı:', e); return false; }
-        }
-        // Web yedeği: izin al, uygulama açıkken zamanı gelince göster
-        if (anyOn(r) && 'Notification' in window && Notification.permission !== 'granted') {
-            if (opts.silent) return false;
-            const p = await Notification.requestPermission();
-            if (p !== 'granted') { O2.toast('Bildirim izni verilmedi', 'bell'); return false; }
-        }
-        scheduleWebReminders();
-        return true;
-    };
-
-    let webTimers = [];
-    function scheduleWebReminders() {
-        webTimers.forEach(clearTimeout); webTimers = [];
-        if (!('Notification' in window) || Notification.permission !== 'granted') return;
-        const r = O2.reminderSettings();
-        const show = async (title, body, action) => {
-            const reg = navigator.serviceWorker && await navigator.serviceWorker.getRegistration();
-            if (reg) reg.showNotification(title, { body, icon: 'assets/olympus-training-icon-192.png', data: { action } });
-            else new Notification(title, { body, icon: 'assets/olympus-training-icon-192.png' });
-        };
-        const today = O2.dayKey();
-        const at = (h, m, title, body, action) => {
-            const t = new Date(); t.setHours(h, m, 0, 0);
-            if (t <= new Date()) return;
-            webTimers.push(setTimeout(() => show(title, body, action), t - new Date()));
-        };
-        upcoming(r).filter(n => O2.dayKey(n.at) === today).forEach(n => webTimers.push(setTimeout(() => {
-            if (n.action === 'start' && trainedOn(today)) return;
-            show(n.title, n.body, n.action);
-        }, n.at - new Date())));
-        if (r.sleep) at(9, 30, 'Günaydın', 'Dün gece kaç saat uyudun?', 'sleep');
-        if (r.water) WATER_HOURS.forEach(h => at(h, 0, 'Su vakti 💧', 'Bir bardak su iç.', 'water'));
-    }
-
-    // ✉️ E-posta hatırlatıcısı: ayarları ve önümüzdeki 7 günün planını Apps Script servisine gönderir.
-    // Kimlik, Firebase ID token ile sunucuda doğrulanır; mail yalnızca hesabın kendi adresine gider.
-    O2.syncMailReminder = async (force) => {
-        const r = O2.reminderSettings();
-        const u = typeof auth !== 'undefined' && auth.currentUser;
-        if (!r.mailUrl || !u || !/^https:\/\/script\.google\.com\//.test(r.mailUrl)) return false;
-        if (!force && LS.raw('oly2_mail_sync_day', '') === O2.dayKey()) return true;
-        try {
-            const plans = {};
-            for (let i = 0; i < 7; i++) {
-                const p = O2.dayPlan(i);
-                plans[O2.dayKey(O2.addDays(O2.startOfDay(), i))] = p.isRest ? '' : String(p.title || '').split(':').pop().trim();
-            }
-            const last = O2.sessions().filter(s => s.type !== 'cardio').slice(-1)[0];
-            const acad = O2.academySummary ? O2.academySummary() : null;
-            const body = {
-                idToken: await u.getIdToken(),
-                name: O2.userName(),
-                appUrl: /^https:/.test(location.protocol) ? location.origin + location.pathname : '',
-                enabled: !!r.mail,
-                workout: { on: !!(r.mail && r.workout), time: r.workoutTime },
-                academy: { on: !!(r.mail && r.academy), time: r.academyTime, branch: acad ? `${acad.branch} · ${acad.track}` : '', dates: acad ? acad.dates.map(d => ({ label: d.label, date: d.date })) : [] },
-                plans,
-                lastWorkoutDay: last ? last.dayKey : '',
-                weekSessions: O2.weekStats().sessions,
-                weeklyTarget: O2.settings().weeklyTarget
-            };
-            // Apps Script CORS ön kontrolünü desteklemez: text/plain + no-cors ile gönderilir
-            await fetch(r.mailUrl, { method: 'POST', mode: 'no-cors', headers: { 'Content-Type': 'text/plain;charset=utf-8' }, body: JSON.stringify(body) });
-            localStorage.setItem('oly2_mail_sync_day', O2.dayKey());
-            return true;
-        } catch (e) { console.warn('E-posta hatırlatıcısı eşitlenemedi:', e); return false; }
-    };
-
-    O2.remindersSheet = () => {
-        const r = O2.reminderSettings();
-        const row = (key, title, desc) => `
-            <div class="o2-toggle-row" onclick="this.querySelector('.o2-switch').classList.toggle('on')">
-                <div><h5>${title}</h5><p>${desc}</p></div><span class="o2-switch ${r[key] ? 'on' : ''}" data-key="${key}"></span>
-            </div>`;
-        const u = typeof auth !== 'undefined' && auth.currentUser;
-        O2.sheet('Hatırlatıcılar', `
-            ${row('workout', 'Antrenman', 'Antrenman günlerinde, o günün seansıyla; o gün çalıştıysan gelmez')}
-            <div class="o2-field" style="margin-top:10px"><label>Antrenman saati</label><input class="o2-input" type="time" id="o2-rem-time" value="${esc(r.workoutTime)}"></div>
-            ${row('academy', 'Akademi çalışması', 'Her gün mülakat kartları ve sınava kalan gün')}
-            <div class="o2-field" style="margin-top:10px"><label>Akademi saati</label><input class="o2-input" type="time" id="o2-rem-acad" value="${esc(r.academyTime)}"></div>
-            ${row('water', 'Su', '10:00-20:00 arası 2 saatte bir')}
-            ${row('sleep', 'Uyku kaydı', 'Her sabah 09:30')}
-            <div class="o2-section-head" style="margin-top:22px"><h3>E-posta</h3></div>
-            ${row('mail', 'E-posta ile de hatırlat', `Antrenman ve Akademi hatırlatıcıları ${u ? esc(u.email) : 'hesabının e-postasına'} da gelir; sınavlara 30, 7 ve 1 gün kala ayrıca uyarır.`)}
-            <div class="o2-field" style="margin-top:10px"><label>E-posta servisi adresi (Apps Script)</label><input class="o2-input" id="o2-rem-url" inputmode="url" placeholder="https://script.google.com/macros/s/…/exec" value="${esc(r.mailUrl)}"></div>
-            <p style="margin:14px 0 0;font-size:12px;line-height:1.5;color:var(--o2-text-3)">${LN() ? 'Android bildirimleri uygulama kapalıyken de gelir.' : 'Tarayıcıda/ana ekran uygulamasında bildirimler yalnızca uygulama açıkken gelir; kapalıyken e-posta hatırlatıcısı ve Android uygulaması devreye girer.'}${u ? '' : ' E-posta için giriş yapmalısın.'}</p>
-            <button class="o2-btn o2-btn-gold o2-btn-block" style="margin-top:16px" onclick="O2.saveReminders()">Kaydet</button>`);
-    };
-    O2.saveReminders = async () => {
-        const r = O2.reminderSettings();
-        document.querySelectorAll('#o2-sheet-layer .o2-switch[data-key]').forEach(sw => { r[sw.dataset.key] = sw.classList.contains('on'); });
-        r.workoutTime = $('o2-rem-time').value || '18:00';
-        r.academyTime = $('o2-rem-acad').value || '20:30';
-        r.mailUrl = ($('o2-rem-url').value || '').trim();
-        if (r.mail && !/^https:\/\/script\.google\.com\//.test(r.mailUrl)) { O2.toast('Geçerli bir Apps Script adresi gir', 'mail'); return; }
-        LS.set('oly2_reminders', r);
-        const ok = await O2.applyReminders();
-        const mailOk = r.mailUrl ? await O2.syncMailReminder(true) : true;
-        O2.closeSheet();
-        if (ok) O2.toast(anyOn(r) ? (r.mail && mailOk ? 'Bildirim + e-posta hatırlatıcıları kuruldu' : 'Hatırlatıcılar kuruldu') : 'Hatırlatıcılar kapatıldı', 'bell');
-    };
-
-    // Seans kaydedilince bugünün antrenman hatırlatıcısı iptal olsun, e-posta servisi de bilsin
-    const baseSave = O2.saveSession;
-    O2.saveSession = function () {
-        const res = baseSave.apply(this, arguments);
-        O2.applyReminders({ silent: true });
-        O2.syncMailReminder(true);
-        return res;
-    };
-
-    // ==========================================
     // 🔗 KISAYOLLAR & BİLDİRİMDEN AÇILIŞ (?action=start|water|cardio|sleep)
     // ==========================================
+    // Bildirimden / kısayoldan gelen eylemler (diğer modüller O2.actions'a kendi eylemlerini ekler)
+    O2.actions = O2.actions || {};
+    Object.assign(O2.actions, {
+        start: () => O2.orb(),
+        water: () => O2.quickWater(),
+        cardio: () => O2.cardioSheet(),
+        sleep: () => O2.logSheet('sleep'),
+        food: () => { O2.go('fuel'); O2.foodSheet(O2.dayKey()); },
+        academy: () => O2.go('academy')
+    });
     O2.handleAction = (action) => {
         if (!action) return;
-        setTimeout(() => {
-            if (action === 'start') O2.orb();
-            else if (action === 'water') O2.quickWater();
-            else if (action === 'cardio') O2.cardioSheet();
-            else if (action === 'sleep') O2.logSheet('sleep');
-            else if (action === 'food') { O2.go('fuel'); O2.foodSheet(O2.dayKey()); }
-            else if (action === 'academy') O2.go('academy');
-        }, 500);
+        const [name, arg] = String(action).split(':');
+        setTimeout(() => { const fn = O2.actions[name]; if (fn) fn(arg); }, 500);
     };
     O2.consumeLaunchAction = () => {
         const params = new URLSearchParams(location.search);
@@ -620,14 +445,10 @@
         history.replaceState(history.state, '', location.pathname + (params.toString() ? '?' + params : ''));
         O2.handleAction(action);
     };
-    // Bildirime dokunulunca (Android)
+    // Bildirime dokunulunca (Android yerel bildirim ya da web push)
     document.addEventListener('DOMContentLoaded', () => {
-        const plugin = LN();
+        const plugin = window.Capacitor && window.Capacitor.Plugins && window.Capacitor.Plugins.LocalNotifications;
         if (plugin && plugin.addListener) plugin.addListener('localNotificationActionPerformed', (e) => O2.handleAction(e && e.notification && e.notification.extra && e.notification.extra.action));
         if (navigator.serviceWorker) navigator.serviceWorker.addEventListener('message', (e) => { if (e.data && e.data.olyAction) O2.handleAction(e.data.olyAction); });
-        scheduleWebReminders();
-        // Haftalık bildirim takvimini her açılışta tazele (izin istemeden); e-posta servisine günde bir kez bildir
-        setTimeout(() => O2.applyReminders({ silent: true }), 5000);
-        if (typeof auth !== 'undefined') auth.onAuthStateChanged(u => { if (u) setTimeout(() => O2.syncMailReminder(), 6000); });
     });
 })();
