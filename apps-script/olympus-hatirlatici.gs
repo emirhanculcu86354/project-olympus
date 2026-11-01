@@ -214,3 +214,8 @@ const json = (o) => ContentService.createTextOutput(JSON.stringify(o)).setMimeTy
 const toMin = (t) => { const p = String(t).split(':'); return (+p[0]) * 60 + (+p[1] || 0); };
 const safeTime = (t, d) => /^\d{2}:\d{2}$/.test(String(t)) ? t : d;
 const esc = (s) => String(s == null ? '' : s).replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
+
+// Bakım: FCM yetkisini sahte bir anahtarla dener (400/404 = yetki tamam, 403 = yetki eksik)
+function pushYetkiTesti() {
+  Logger.log(JSON.stringify(sendPush('test-token-gecersiz', 'test', 'test', '', 'test')));
+}
