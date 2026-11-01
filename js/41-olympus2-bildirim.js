@@ -14,7 +14,7 @@
     // emirhan@culbase.com hesabında yayınlanan Apps Script servisi (apps-script/olympus-hatirlatici.gs)
     const SERVER_URL = 'https://script.google.com/macros/s/AKfycbwWqzNnfaoi6sN1QE4Yncb2kGvhHdeEgFlJ_gPwNfS9eHJMYSSmBCm7GAHBDmGtehBisg/exec';
     // Firebase Console → Proje ayarları → Cloud Messaging → Web Push sertifikaları (herkese açık anahtar)
-    const VAPID_KEY = '';
+    const VAPID_KEY = 'BIlDxfIJylLYNwgoIb0q8JzSLyxfsjjTfNckUvHQbMf8lXeoUhEwbT92OvMxvONhObfYvJW_5_XZ-_4kGCtH6YU';
     const DAYS_AHEAD = 4;
     const LEGACY_IDS = [9001, 9002, 9010, 9011, 9012, 9013, 9014, 9015, 9030, 9031, 9032, 9033, 9034, 9035, 9036, 9040, 9041, 9042, 9043, 9044, 9045, 9046];
     const WATER_HOURS = [10, 12, 14, 16, 18, 20];
