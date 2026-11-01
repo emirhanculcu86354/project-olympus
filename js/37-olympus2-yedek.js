@@ -252,7 +252,39 @@
             sessionStorage.removeItem('oly_kv_toast');
             setTimeout(() => O2.toast && O2.toast(`Verilerin buluttan geri yüklendi (${restored} kayıt)`, 'check'), 2500);
         }
+        setTimeout(iosStatusBarTip, 6000);
     });
+
+    // iPhone: uygulama eski "saydam durum çubuğu" ayarıyla ana ekrana eklendiyse iOS üst kenarda bulanıklık çizer.
+    // Ayar yalnızca eklenirken okunduğu için bir kez "yeniden ekle" rehberi gösterilir (önce yedek alınır).
+    function iosStatusBarTip() {
+        const ios = /iPhone|iPad|iPod/.test(navigator.userAgent);
+        const standalone = navigator.standalone === true || (window.matchMedia && matchMedia('(display-mode: standalone)').matches);
+        if (!ios || !standalone || localStorage.getItem('oly2_ios_tip_done')) return;
+        const probe = document.createElement('div');
+        probe.style.cssText = 'position:fixed;top:0;height:0;padding-top:env(safe-area-inset-top);visibility:hidden';
+        document.body.appendChild(probe);
+        const top = probe.getBoundingClientRect().height || parseFloat(getComputedStyle(probe).paddingTop) || 0;
+        probe.remove();
+        if (top < 10 || !O2.sheet) return; // yeni ayarla kurulmuş: durum çubuğu düz, ipucu gerekmez
+        const today = new Date().toDateString();
+        if (localStorage.getItem('oly2_ios_tip_day') === today) return; // günde en fazla bir kez
+        localStorage.setItem('oly2_ios_tip_day', today);
+        const u = user(), s = O2.backup.status();
+        const last = s.last ? new Date(s.last).toLocaleString('tr-TR', { day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' }) : 'henüz yok';
+        O2.sheet('Üstteki bulanıklığı kaldır', `
+            <p style="margin:0 0 12px;font-size:13.5px;line-height:1.6;color:var(--o2-text-2)">iPhone, uygulamayı ana ekrana eklediğin andaki ayarı kullanıyor; eski ayar yüzünden iOS saat-pil çubuğunun altını bulanık çiziyor. Bir kez kaldırıp yeniden eklemen yeterli.</p>
+            <div class="o2-card" style="padding:4px 16px"><div class="o2-list">
+                <div class="o2-row"><div class="o2-row-idx">1</div><div class="o2-row-main"><h5>${u ? 'Verilerini yedekle' : 'Önce giriş yap'}</h5><p>${u ? `Bulut yedeği: son eşitleme ${last}` : 'Misafir verileri kaldırınca silinir; giriş yapınca bulut yedeği açılır.'}</p></div></div>
+                <div class="o2-row"><div class="o2-row-idx">2</div><div class="o2-row-main"><h5>Ana ekrandaki simgeyi kaldır</h5><p>Simgeye basılı tut → Uygulamayı Sil</p></div></div>
+                <div class="o2-row"><div class="o2-row-idx">3</div><div class="o2-row-main"><h5>Safari'den yeniden ekle</h5><p>Siteyi aç → Paylaş → Ana Ekrana Ekle → aynı hesapla giriş yap; verilerin geri gelir</p></div></div>
+            </div></div>
+            ${u ? `<button class="o2-btn o2-btn-gold o2-btn-block" style="margin-top:14px" onclick="O2.backupNow()">${O2.icon('check')}Şimdi yedekle</button>` : ''}
+            <div class="o2-grid-2" style="margin-top:10px">
+                <button class="o2-btn o2-btn-ghost" onclick="O2.backup.exportFile()">Dosyaya da aktar</button>
+                <button class="o2-btn o2-btn-ghost" onclick="localStorage.setItem('oly2_ios_tip_done','1'); O2.closeSheet()">Sonra</button>
+            </div>`);
+    }
     // Uygulama arka plana alınınca bekleyenleri hemen gönder
     document.addEventListener('visibilitychange', () => { if (document.hidden) { clearTimeout(pushTimer); push(); } });
 })();

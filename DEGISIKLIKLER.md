@@ -284,3 +284,7 @@ Yeni modül: `js/36-olympus2-gelismis.js`. Yeni bağımlılık: `@capacitor/loca
 - **Yeni bildirim merkezi (zil, js/47):** Sağdan kayan panel (masaüstünde yüzen pencere). "Şimdi senin için" akıllı kartları (bugünkü seans, uyarılar, eksik uyku/su, haftalık değerlendirme, sıradaki hatırlatma, kapalı push), tek dokunuşla aksiyon düğmeleri; Tümü / Sosyal / Antrenman / Akademi / Sistem filtreleri; Bugün · Dün · Bu hafta gruplaması; yeni bildirimlerde renkli nokta; tek tek silme, tümünü temizle, ayarlara geçiş; boş durumda animasyonlu zil.
 - Sosyal bildirimler (maç daveti, takipçi) artık burada; uygulama olayları da yazılıyor: yeni rekor, haftalık hedef tamam, Akademi test rekoru. Zil rozeti gerçek okunmamış sayısını gösterir.
 - **iPhone üst bulanıklık:** Gizli toast, çentik payı yüzünden durum çubuğunun arkasında bulanık leke bırakıyordu — gizliyken tamamen görünmez ve filtresiz. Ek olarak her ekranda durum çubuğunun arkası düz siyah şeritle kapatıldı; klasik "dinamik ada" da gizliyken görünmez.
+
+# iPhone durum çubuğu (2026-11-01)
+- apple-mobile-web-app-status-bar-style → black: durum çubuğu düz siyah, sayfa altından başlar. Saydam ayarda iOS üst kenara kendi bulanıklık efektini çiziyordu.
+- iOS bu ayarı yalnızca Ana Ekrana Ekle sırasında okur: eski ayarla kurulmuş iPhone'larda günde bir kez yeniden ekleme rehberi çıkar (önce yedekle, kaldır, Safari'den yeniden ekle; veriler buluttan geri gelir).
