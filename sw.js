@@ -3,7 +3,7 @@
 //  - Uygulama kabuğu (HTML/JS/CSS/manifest): ÖNCE AĞ, olmazsa önbellek → güncellemeler anında gelir, çevrimdışı da açılır
 //  - Ağır statik dosyalar (görsel, ses, video, 3D model, oyun ZIP): ÖNCE ÖNBELLEK → bir kez indirilir, sonra anında açılır
 //  - Başka alan adları (Firebase, CDN, API'ler) hiç ellenmez
-const CACHE_NAME = 'olympus-cache-v96';
+const CACHE_NAME = 'olympus-cache-v98';
 // js/ altındaki dosyalar olympus.html'deki sırayla (scripts/js-order.json)
 const APP_SHELL = [
   'index.html',
@@ -55,6 +55,8 @@ const APP_SHELL = [
   'js/41-olympus2-bildirim.js',
   'js/42-olympus2-akis.js',
   'js/43-olympus2-diyet.js',
+  'js/44-olympus2-ozet.js',
+  'js/45-olympus2-masaustu.js',
   'manifest.json',
   'icon.png'
 ];
@@ -126,14 +128,46 @@ self.addEventListener('push', (event) => {
     badge: 'assets/olympus-training-icon-192.png',
     tag: d.tag || undefined,
     renotify: !!d.tag,
+    actions: quickActions(d.action || ''),
     data: { action: d.action || '' }
   };
   event.waitUntil(self.registration.showNotification(title, options));
 });
 
+// Bildirim üzerindeki hızlı kayıt düğmeleri (Android/masaüstü Chrome; iOS düğme göstermez)
+function quickActions(action) {
+  if (/^flowdone:/.test(action)) return [{ action: 'q:' + action, title: 'Tamamlandı ✓' }];
+  if (/^mealdone:/.test(action)) return [{ action: 'q:' + action, title: 'Yedim ✓' }];
+  if (action === 'water') return [{ action: 'q:water250', title: '+250 ml 💧' }];
+  return [];
+}
+
+// Düğmeye basılınca kayıt kuyruğa yazılır; uygulama açıldığında (ya da açıksa hemen) işlenir
+function queueAdd(item) {
+  return new Promise((resolve) => {
+    const open = indexedDB.open('olympus-sw', 1);
+    open.onupgradeneeded = () => open.result.createObjectStore('queue', { autoIncrement: true });
+    open.onsuccess = () => {
+      const tx = open.result.transaction('queue', 'readwrite');
+      tx.objectStore('queue').add({ act: item, t: Date.now() });
+      tx.oncomplete = () => resolve(true);
+      tx.onerror = () => resolve(false);
+    };
+    open.onerror = () => resolve(false);
+  });
+}
+
 // Bildirime dokunulunca uygulamayı öne getir ve ilgili eylemi (antrenman, su, uyku) ilet
 self.addEventListener('notificationclick', (event) => {
   event.notification.close();
+  if (event.action && event.action.indexOf('q:') === 0) {
+    event.waitUntil((async () => {
+      await queueAdd(event.action.slice(2));
+      const all = await self.clients.matchAll({ type: 'window', includeUncontrolled: true });
+      all.forEach((c) => c.postMessage({ olyQueue: true }));
+    })());
+    return;
+  }
   const action = event.notification.data && event.notification.data.action;
   event.waitUntil((async () => {
     const all = await self.clients.matchAll({ type: 'window', includeUncontrolled: true });

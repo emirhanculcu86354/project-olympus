@@ -41,9 +41,13 @@
 
     const state = () => {
         const s = LS.get(KEY, null);
-        if (s) return { routine: [], tasks: {}, done: {}, skip: {}, habits: DEFAULT_HABITS, habitLog: {}, focus: {}, ...s };
+        if (s) {
+            // Akış'ın kullanılmaya başlandığı gün: öncesi istatistiklere girmez
+            if (!s.created) { s.created = O2.dayKey(); LS.set(KEY, s); }
+            return { routine: [], tasks: {}, done: {}, skip: {}, habits: DEFAULT_HABITS, habitLog: {}, focus: {}, ...s };
+        }
         // İlk açılışta varsayılan rutini kaydet: blok kimlikleri sabit kalsın (bildirimler ve işaretler buna bağlı)
-        const fresh = { routine: DEFAULT_ROUTINE, tasks: {}, done: {}, skip: {}, habits: DEFAULT_HABITS, habitLog: {}, focus: {} };
+        const fresh = { routine: DEFAULT_ROUTINE, tasks: {}, done: {}, skip: {}, habits: DEFAULT_HABITS, habitLog: {}, focus: {}, created: O2.dayKey() };
         LS.set(KEY, fresh);
         return fresh;
     };
@@ -69,7 +73,9 @@
         const plan = O2.dayPlan(off);
         const list = [
             ...st.routine.filter(b => (b.days || ALL).includes(wd) && !skip.includes(b.id)).map(b => ({ ...b, routine: true })),
-            ...(st.tasks[dk] || []).filter(t => t.time).map(t => ({ ...t, routine: false }))
+            ...(st.tasks[dk] || []).filter(t => t.time).map(t => ({ ...t, routine: false })),
+            // Diğer modüllerin eklediği otomatik bloklar (örn. Akademi sınav modu); tamamlanma rutin gibi done listesinde tutulur
+            ...(O2.flowExtraBlocks ? O2.flowExtraBlocks(date) : []).filter(b => !skip.includes(b.id)).map(b => ({ remind: true, ...b, routine: true, auto: true }))
         ].map(b => {
             // Antrenman bloğu o günün planından başlık alır; dinlenme gününde aktif dinlenmeye döner
             if (b.link === 'workout') return { ...b, title: plan.isRest ? 'Aktif dinlenme · yürüyüş & mobilite' : String(plan.title || b.title).split(':').pop().trim(), rest: plan.isRest };
@@ -529,11 +535,30 @@
         return blocksFor(st, day).filter(b => b.remind !== false && !(i === 0 && isDone(st, dk, b))
             && !(b.link === 'workout' && (r.workout || b.rest)) && !(b.link === 'meal' && r.meals)).map(b => {
             const t = Math.max(0, toMin(b.time) - lead);
-            const action = b.link === 'workout' ? 'start' : b.link === 'academy' ? 'academy' : b.link === 'meal' ? 'fuel' : 'flow';
+            // flowdone:<blok>:<gün> → bildirimdeki "Tamamlandı" düğmesi bloğu uygulamayı açmadan işaretler
+            const action = b.link === 'workout' ? 'start' : b.link === 'academy' ? 'academy' : b.link === 'meal' ? 'fuel' : `flowdone:${b.id}:${dk}`;
             return { key: b.id, h: Math.floor(t / 60), m: t % 60, title: `${lead ? `${lead} dk sonra · ` : ''}${b.title}`, body: `${b.time} · ${b.dur || 30} dk${b.link === 'workout' && !b.rest ? ' · antrenmanı başlatmak için dokun' : ''}`, action };
         });
     });
     O2.actions = O2.actions || {};
     O2.actions.flow = () => O2.go('flow');
+    O2.actions.flowdone = () => O2.go('flow');
     O2.actions.fuel = () => O2.go('fuel');
+
+    // Diğer modüller için: günün blokları ve tamamlanma durumu (masaüstü paneli, sabah özeti, akıllı uyarılar)
+    O2.flowDayInfo = (date = new Date()) => {
+        const st = state(), dk = O2.dayKey(date);
+        if (st.created && dk < st.created) return { blocks: [], done: 0, total: 0, focus: 0 };
+        const blocks = blocksFor(st, date).map(b => ({ ...b, done: isDone(st, dk, b), start: toMin(b.time), end: toMin(b.time) + (b.dur || 30), color: (CATS[b.cat] || CATS.kisisel).color, icon: (CATS[b.cat] || CATS.kisisel).icon }));
+        return { blocks, done: blocks.filter(b => b.done).length, total: blocks.length, focus: st.focus[dk] || 0 };
+    };
+    // Bildirimden "Tamamlandı" (dokunmadan işaretleme)
+    O2.flowMarkDone = (id, dk = O2.dayKey()) => {
+        const st = state();
+        const t = (st.tasks[dk] || []).find(x => x.id === id);
+        if (t) t.done = true;
+        else { const d = st.done[dk] = st.done[dk] || []; if (!d.includes(id)) d.push(id); }
+        save(st);
+        if (O2.ui.tab === 'flow') O2.render();
+    };
 })();

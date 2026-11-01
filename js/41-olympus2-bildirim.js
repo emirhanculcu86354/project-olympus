@@ -27,6 +27,7 @@
         const r = {
             workout: false, workoutTime: '18:00', academy: false, academyTime: '20:30',
             routine: false, routineLead: 5, meals: false, water: false, sleep: false,
+            briefing: true, briefingTime: '07:30', review: true, alerts: true,
             quiet: true, quietFrom: '23:30', quietTo: '07:00',
             mail: false, push: false, mailUrl: '',
             ...(LS.get('oly2_reminders', {}) || {})
@@ -35,7 +36,10 @@
         return r;
     };
     const saveSettings = (r) => LS.set('oly2_reminders', r);
-    const anyOn = (r) => ['workout', 'academy', 'routine', 'meals', 'water', 'sleep'].some(k => r[k]);
+    const anyOn = (r) => ['workout', 'academy', 'routine', 'meals', 'water', 'sleep', 'briefing', 'review', 'alerts'].some(k => r[k]);
+    // Bildirim üzerindeki hızlı kayıt düğmesi türü (Android)
+    const actionType = (a) => /^flowdone:/.test(a) ? 'OLY_DONE' : /^mealdone:/.test(a) ? 'OLY_MEAL' : a === 'water' ? 'OLY_WATER' : undefined;
+    const webActions = (a) => /^flowdone:/.test(a) ? [{ action: 'q:' + a, title: 'Tamamlandı ✓' }] : /^mealdone:/.test(a) ? [{ action: 'q:' + a, title: 'Yedim ✓' }] : a === 'water' ? [{ action: 'q:water250', title: '+250 ml 💧' }] : [];
     const hm = (t) => String(t || '0:0').split(':').map(Number);
     const trainedOn = (key) => O2.sessions().some(s => s.dayKey === key && s.type !== 'cardio');
 
@@ -112,6 +116,7 @@
         const list = O2.notifySchedule().slice(0, 60).map(n => ({
             id: numId(n.id), title: n.title, body: n.body,
             schedule: { at: new Date(n.at), allowWhileIdle: true },
+            actionTypeId: actionType(n.action),
             extra: { action: n.action }
         }));
         if (list.length) await plugin.schedule({ notifications: list });
@@ -176,7 +181,7 @@
         O2.notifySchedule(1).filter(n => n.at < end).forEach(n => webTimers.push(setTimeout(async () => {
             if (n.action === 'start' && trainedOn(O2.dayKey())) return;
             const reg = navigator.serviceWorker && await navigator.serviceWorker.getRegistration();
-            const opt = { body: n.body, icon: 'assets/olympus-training-icon-192.png', badge: 'assets/olympus-training-icon-192.png', tag: n.id, data: { action: n.action } };
+            const opt = { body: n.body, icon: 'assets/olympus-training-icon-192.png', badge: 'assets/olympus-training-icon-192.png', tag: n.id, actions: webActions(n.action), data: { action: n.action } };
             if (reg) reg.showNotification(n.title, opt); else new Notification(n.title, opt);
         }, n.at - Date.now())));
     }
@@ -303,12 +308,15 @@
         O2.sheet('Bildirimler', `
             ${channelCard(r)}
             <div class="o2-section-head" style="margin-top:18px"><h3>Neler hatırlatılsın?</h3></div>
+            ${row('briefing', 'Günün özeti', 'Sabah: bugünkü seans, ilk akış bloğu, sınava kalan gün', time('o2-rem-brief', r.briefingTime || '07:30'))}
             ${row('workout', 'Antrenman', 'Antrenman günlerinde, o günün seansıyla; o gün çalıştıysan gelmez', time('o2-rem-time', r.workoutTime))}
             ${row('routine', 'Günlük akış', 'Akış\'taki rutin blokların ve görevlerin saatinde', `<select class="o2-input o2-notif-time" id="o2-rem-lead">${[0, 5, 10, 15, 30].map(v => `<option value="${v}" ${+r.routineLead === v ? 'selected' : ''}>${v ? v + ' dk önce' : 'Tam saatinde'}</option>`).join('')}</select>`)}
             ${row('meals', 'Öğünler', 'Diyet planındaki öğün saatlerinde, ne yiyeceğinle birlikte')}
             ${row('academy', 'Akademi çalışması', 'Her gün mülakat kartları ve sınava kalan gün', time('o2-rem-acad', r.academyTime))}
             ${row('water', 'Su', '10:00-20:00 arası 2 saatte bir')}
             ${row('sleep', 'Uyku kaydı', 'Her sabah 09:30')}
+            ${row('alerts', 'Akıllı uyarılar', 'Uyku, protein, antrenman arası gibi önemli bir sapma olursa öğlen 12:30')}
+            ${row('review', 'Haftalık değerlendirme', 'Pazar 20:00')}
             ${row('quiet', 'Sessiz saatler', 'Bu aralıkta su hatırlatıcısı gelmez', `<div style="display:flex;gap:6px">${time('o2-rem-qf', r.quietFrom)}${time('o2-rem-qt', r.quietTo)}</div>`)}
             <div class="o2-section-head" style="margin-top:18px"><h3>E-posta</h3></div>
             ${row('mail', 'E-posta ile de hatırlat', `Antrenman ve Akademi hatırlatıcıları ${u ? esc(u.email) : 'hesabının e-postasına'} da gelir; sınavlara 30, 7 ve 1 gün kala ayrıca uyarır.`)}
@@ -327,6 +335,7 @@
         document.querySelectorAll('#o2-sheet-layer .o2-switch[data-key]').forEach(sw => { r[sw.dataset.key] = sw.classList.contains('on'); });
         r.workoutTime = $('o2-rem-time').value || '18:00';
         r.academyTime = $('o2-rem-acad').value || '20:30';
+        r.briefingTime = $('o2-rem-brief').value || '07:30';
         r.routineLead = parseInt($('o2-rem-lead').value) || 0;
         r.quietFrom = $('o2-rem-qf').value || '23:30';
         r.quietTo = $('o2-rem-qt').value || '07:00';

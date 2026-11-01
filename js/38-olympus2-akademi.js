@@ -552,8 +552,79 @@
                     <div class="o2-row-idx" style="color:${x.d === 0 ? 'var(--o2-gold)' : 'var(--o2-text-3)'};font-size:11px;font-weight:800">${x.d === 0 ? 'GÜN' : `G-${x.d}`}</div>
                     <div class="o2-row-main"><h5>${esc(x.t[0])}${x.d === left ? ' · bugün' : ''}</h5><p>${esc(x.date.toLocaleDateString('tr-TR', { weekday: 'long', day: 'numeric', month: 'short' }))} · ${esc(x.t[1])}</p></div>
                 </div>`).join('')}</div>`}
+            <div class="o2-toggle-row" style="margin-top:12px;border-bottom:0" onclick="O2.acadExamMode()">
+                <div><h5>Sınav modu</h5><p>Antrenman programı son 14 günde otomatik azalır, son 7 gün taper planına döner; Akış'a simülasyon, prova ve belge blokları eklenir.</p></div>
+                <span class="o2-switch ${st.examMode ? 'on' : ''}"></span>
+            </div>
         </div>`;
     }
+
+    // ==========================================
+    // 🎯 SINAV MODU: program ve Akış sınav tarihine göre kendini ayarlar
+    // ==========================================
+    O2.acadExamMode = () => {
+        update(st => { st.examMode = !st.examMode; });
+        const on = state().examMode;
+        O2.toast(on ? 'Sınav modu açık · program ve Akış sınava göre ayarlandı' : 'Sınav modu kapatıldı', 'shield');
+        if (O2.refreshNotifications) O2.refreshNotifications();
+    };
+    const examState = () => {
+        if (!localStorage.getItem(KEY)) return null;
+        const st = state();
+        return st.examMode ? st : null;
+    };
+    const TAPER_EX = {
+        parkur: {
+            7: [['Parkur Simülasyonu', '2 x 50 sn', '10'], ['Sprint 200 m', '3 x 40 sn', '8']],
+            5: [['Shuttle Run', '4 x 20 sn', '8']],
+            3: [['Parkur Simülasyonu', '2 x 50 sn', '8']]
+        },
+        fyt: {
+            7: [['Sit Up', '1 x Max', '10'], ['Push Up', '1 x Max', '10'], ['Sprint 400 m', '1 x 90 sn', '10']],
+            5: [['Sprint 100 m', '4 x 20 sn', '8']],
+            3: [['Sit Up', '2 x 20', '7'], ['Push Up', '2 x 15', '7'], ['Sprint 200 m', '2 x 40 sn', '8']]
+        },
+        common: { 6: [['Easy Run', '1 x 25 dk', '5']], 2: [['Hafif koşu + hızlanmalar', '1 x 15 dk', '5']] }
+    };
+    const baseDayPlan = O2.dayPlan;
+    O2.dayPlan = (offset = 0, program) => {
+        const p = baseDayPlan(offset, program);
+        const st = examState();
+        const fit = st && daysLeft(st.dates.fitness);
+        if (fit === null || fit === undefined || fit === false) return p;
+        const left = fit - offset;
+        if (left < 0 || left > 14) return p;
+        if (left <= 7) {
+            const kind = trackOf(st).test;
+            const list = (TAPER_EX[kind][left] || TAPER_EX.common[left] || []).map(([name, scheme, rpe]) => ({ name, scheme, tempo: '', rpe }));
+            const title = left === 0 ? 'Sınav günü 🛡️' : `Taper G-${left}: ${TAPER[left][0]}`;
+            return { ...p, title, ex: list, rest: !list.length, isRest: !list.length, exam: true };
+        }
+        // 8-14 gün: hacim %40 azalır, yoğunluk korunur
+        if (p.isRest) return p;
+        return {
+            ...p, title: `${p.title} · Azaltma`, exam: true,
+            ex: (p.ex || []).map(e => ({ ...e, scheme: String(e.scheme).replace(/^(\d+)(\s*[x×])/i, (_, n, x) => `${Math.max(1, Math.round(+n * .6))}${x}`) }))
+        };
+    };
+    // Akış'a eklenen sınav blokları
+    O2.flowExtraBlocks = (date) => {
+        const st = examState();
+        if (!st) return [];
+        const off = Math.round((O2.startOfDay(date) - O2.startOfDay()) / 864e5);
+        const out = [];
+        const fit = daysLeft(st.dates.fitness), iv = daysLeft(st.dates.interview), wr = daysLeft(st.dates.written);
+        const at = (d, n) => d !== null && d - off === n;
+        const id = (s) => `exam-${s}-${O2.dayKey(date)}`;
+        if (at(fit, 0)) out.push({ id: id('fit'), time: '08:00', dur: 120, title: 'Fiziki yeterlilik sınavı 🛡️', cat: 'spor', link: 'academy' });
+        if (at(fit, 1) || at(iv, 1) || at(wr, 1)) out.push({ id: id('docs'), time: '20:00', dur: 30, title: 'Belgeleri ve kıyafeti hazırla', cat: 'kisisel', link: 'academy' });
+        if (at(iv, 0)) out.push({ id: id('iv'), time: '09:00', dur: 120, title: 'Mülakat 🛡️', cat: 'calisma', link: 'academy' });
+        if (at(wr, 0)) out.push({ id: id('wr'), time: '09:00', dur: 180, title: 'Yazılı sınav 🛡️', cat: 'calisma', link: 'academy' });
+        // Mülakat haftası: her akşam prova; son 3 gün kısa tekrar
+        if (iv !== null && iv - off >= 1 && iv - off <= 7) out.push({ id: id('prova'), time: '20:30', dur: 30, title: `Mülakat provası (5 soru) · ${iv - off} gün kaldı`, cat: 'calisma', link: 'academy' });
+        if (fit !== null && fit - off === 7) out.push({ id: id('sim'), time: '10:00', dur: 45, title: 'Son tam test simülasyonu (süreni kaydet)', cat: 'spor', link: 'academy' });
+        return out;
+    };
 
     function testHistory(st, evs) {
         const list = myTests(st).filter(t => evs.some(ev => t.res && t.res[ev.id] !== undefined)).slice(-5).reverse();

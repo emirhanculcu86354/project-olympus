@@ -448,7 +448,12 @@
     // Bildirime dokunulunca (Android yerel bildirim ya da web push)
     document.addEventListener('DOMContentLoaded', () => {
         const plugin = window.Capacitor && window.Capacitor.Plugins && window.Capacitor.Plugins.LocalNotifications;
-        if (plugin && plugin.addListener) plugin.addListener('localNotificationActionPerformed', (e) => O2.handleAction(e && e.notification && e.notification.extra && e.notification.extra.action));
+        if (plugin && plugin.addListener) plugin.addListener('localNotificationActionPerformed', (e) => {
+            const act = e && e.notification && e.notification.extra && e.notification.extra.action;
+            // "Tamamlandı / Yedim / +250 ml" düğmesi: uygulamayı açmadan kaydet
+            if (e && e.actionId === 'quick' && O2.quickAct) O2.quickAct(act === 'water' ? 'water250' : act);
+            else O2.handleAction(act);
+        });
         if (navigator.serviceWorker) navigator.serviceWorker.addEventListener('message', (e) => { if (e.data && e.data.olyAction) O2.handleAction(e.data.olyAction); });
     });
 })();

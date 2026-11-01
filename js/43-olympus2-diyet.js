@@ -383,6 +383,23 @@ SADECE geçerli JSON döndür, açıklama yazma:
             <button class="o2-btn o2-btn-gold o2-btn-block" style="margin-top:14px" onclick="navigator.clipboard && navigator.clipboard.writeText(${jsArg(rows.join('\n'))}).then(() => O2.toast('Liste kopyalandı', 'check'))">${I('list')}Listeyi kopyala</button>`);
     };
 
+    // Bildirimdeki "Yedim" düğmesi: öğünü işaretler ve günlüğe ekler (uygulama açılmadan, kuyruktan)
+    O2.mealMarkEaten = (k, key) => {
+        const eaten = LS.get(`oly2_meals_${key}`, []) || [];
+        if (eaten.includes(+k)) return;
+        const off = Math.round((O2.startOfDay(O2.parseDate(key) || new Date()) - O2.startOfDay()) / 864e5);
+        const day = O2.diet()[O2.dayIndex(off, 7) + 1];
+        const m = day && O2.dietMealsFor(day, key)[+k];
+        if (m && m.kcal) {
+            const log = O2.foodLog(key).filter(x => x.id !== `meal_${k}`);
+            log.push({ id: `meal_${k}`, name: m.d.slice(0, 60), meal: m.name || 'Öğün', amountLabel: 'Plan öğünü', kcal: m.kcal, p: m.p, c: m.c, f: m.f });
+            LS.set(`oly2_food_${key}`, log);
+        }
+        LS.set(`oly2_meals_${key}`, [...eaten, +k]);
+    };
+    O2.actions = O2.actions || {};
+    O2.actions.mealdone = () => O2.go('fuel');
+
     // Öğün hatırlatıcıları (Bildirimler → Öğünler)
     if (O2.registerNotifySource) O2.registerNotifySource('meals', (day, i) => {
         const p = plan();
@@ -393,7 +410,7 @@ SADECE geçerli JSON döndür, açıklama yazma:
         const eaten = LS.get(`oly2_meals_${key}`, []) || [];
         return O2.dietMealsFor(d, key).filter((m, k) => m.time && !(i === 0 && eaten.includes(k))).map((m, k) => {
             const [h, mm] = m.time.split(':').map(Number);
-            return { key: 'meal' + k, h, m: mm, title: `${m.i || '🍽️'} ${m.name || 'Öğün'} vakti`, body: `${m.d}${m.kcal ? ` · ${m.kcal} kcal` : ''}`, action: 'fuel' };
+            return { key: 'meal' + k, h, m: mm, title: `${m.i || '🍽️'} ${m.name || 'Öğün'} vakti`, body: `${m.d}${m.kcal ? ` · ${m.kcal} kcal` : ''}`, action: `mealdone:${k}:${key}` };
         });
     });
 })();

@@ -235,3 +235,28 @@ Yeni modül: `js/36-olympus2-gelismis.js`. Yeni bağımlılık: `@capacitor/loca
 - Hedef (yağ yakımı / koruma / kas), kalori, 3-5 öğün, ilk-son öğün saati, tercihler (Türk mutfağı, pratik, bütçe, yüksek protein, vejetaryen, laktozsuz, glutensiz) ve sevilmeyenlere göre 7 günlük plan; antrenman ve dinlenme günü ayrı kalori.
 - Her öğünde 3 seçenek: "Değiştir" ile geçiş; öğün işaretlenince kalori/makrolarıyla besin günlüğüne eklenir (geri alınca çıkar). Günlük hedefler planla eşleşir.
 - Gemini yoksa cihaz içi şablon motoru (Türk mutfağı besin tabanı, porsiyon ölçekleme). Haftalık alışveriş listesi (kopyalanabilir). Öğün saatleri bildirim takvimine girer.
+
+# Olympus Training · Güncelleme 7 — Masaüstü, günün özeti, sınav modu (2026-11-01)
+
+## 🖥️ Masaüstü (PC) düzeni (js/45 + CSS)
+- 1024 px ve üstü: alt sekme çubuğu sol kenar menüye dönüşür (Bugün, Antrenman, Beslenme, İlerleme + Akış, Akademi, Kütüphane, Profil, Bildirimler; üstte "Antrenmana başla").
+- 1280 px ve üstü: sağda canlı "Günün paneli" — hazırlık halkası, sıradaki akış blokları (tıkla-tamamla), hızlı kayıt (su, kilo, uyku, besin), akıllı uyarılar, Akademi geri sayımı. Dakikada bir tazelenir.
+- Alt sayfalar ortada pencere olarak açılır, kartlarda fare etkileşimi, ince kaydırma çubuğu, geniş ızgaralar.
+- Klavye: 1-4 sekmeler · F Akış · A Akademi · P Profil · B antrenmana başla · N yeni blok (Akış) · Esc geri.
+
+## ☀️ Günün özeti
+- Bugün ekranının başında: bugünkü seans, hazırlık, akış ilerlemesi, sınava kalan gün, sıradaki 3 blok ve dünden kalan eksikler. Gün içinde başlığı değişir (özet / durum / kapanış), gün boyu gizlenebilir.
+- Sabah bildirimi (varsayılan 07:30): seans, ilk blok ve sınav geri sayımı.
+
+## 🎯 Akademi sınav modu
+- Fiziki test tarihine göre antrenman programı kendini ayarlar: 8-14 gün kala set sayısı %40 azalır, son 7 gün taper planı (simülasyon, kısa hız, keskinleştirme, dinlenme), sınav günü dinlenme.
+- Akış'a otomatik bloklar: sınav günleri, bir gün önce belge/kıyafet hazırlığı, mülakat haftası her akşam prova, 7 gün kala son simülasyon.
+
+## 📝 Haftalık değerlendirme
+- Cumartesi akşamı – Pazartesi: hafta özeti (seans, akış, uyku), enerji / ruh hali / stres / uyku kalitesi, iyi giden – zorlayan, gelecek hafta hedefi ve odak. Gemini gelecek haftayı planlar (anahtar yoksa kurala dayalı öneri). Geçmiş değerlendirmeler İlerleme'de. Pazar 20:00 bildirimi.
+
+## 👆 Tek dokunuşla kayıt
+- Bildirimlerde düğmeler: akış bloğu "Tamamlandı", öğün "Yedim" (günlüğe eklenir), su "+250 ml". Android'de yerel bildirim düğmeleri; web'de (Android/masaüstü Chrome) service worker kuyruğu — uygulama açılınca işlenir. iOS bildirim düğmesi desteklemez.
+
+## ⚠️ Akıllı uyarılar
+- Uyku 3 gün 6,5 saatin altında, protein 2 gün hedefin %70'inin altında, dün az su, 4+ gün antrenmansız, hazırlık düşük antrenman günü, 2 haftadır gelişmeyen Akademi testi, dün akışın yarısı yapılmadı, haftalık hedef tamam. Bugün ekranında ve masaüstü panelinde; günlük kapatılabilir; önemli uyarı 12:30'da bildirim.

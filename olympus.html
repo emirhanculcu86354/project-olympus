@@ -291,6 +291,7 @@
             </div>
         </header>
         <main id="o2-view" class="o2-view"></main>
+        <aside id="o2-side" class="o2-side" aria-label="Günün paneli"></aside>
         <div id="o2-live-pill" class="o2-live-pill hidden" onclick="O2.resumeSession()" role="button"></div>
         <nav class="o2-tabbar" aria-label="Olympus sekmeleri">
             <button class="o2-tab active" data-tab="today" onclick="O2.go('today')">
@@ -299,11 +300,25 @@
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M6.5 6.5v11M17.5 6.5v11M3.5 9v6M20.5 9v6M6.5 12h11"/></svg>Antrenman</button>
             <button class="o2-orb" onclick="O2.orb()" aria-label="Bugünün antrenmanını başlat">
                 <svg viewBox="0 0 24 24" fill="currentColor"><path d="M8 5.5v13a1 1 0 0 0 1.5.86l10.4-6.5a1 1 0 0 0 0-1.72L9.5 4.64A1 1 0 0 0 8 5.5Z"/></svg>
+                <span class="o2-orb-label">Antrenmana başla</span>
             </button>
             <button class="o2-tab" data-tab="fuel" onclick="O2.go('fuel')">
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M12 21c-4.4 0-8-3.4-8-8 0-5 4.6-9.3 8-10 3.4.7 8 5 8 10 0 4.6-3.6 8-8 8Z"/><path d="M12 21V11m0 4 3-3m-3 0-2.5-2.5"/></svg>Beslenme</button>
             <button class="o2-tab" data-tab="progress" onclick="O2.go('progress')">
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M3 20h18"/><path d="M6 16v-4M11 16V8M16 16v-6M20 16V5"/></svg>İlerleme</button>
+            <!-- Yalnızca masaüstü kenar menüsünde görünen ek bölümler -->
+            <span class="o2-tab-sep"></span>
+            <button class="o2-tab o2-tab-desk" data-tab="flow" onclick="O2.go('flow')">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg>Akış</button>
+            <button class="o2-tab o2-tab-desk" data-tab="academy" onclick="O2.go('academy')">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3 4 6v6c0 4.5 3.4 8.2 8 9 4.6-.8 8-4.5 8-9V6Z"/></svg>Akademi</button>
+            <button class="o2-tab o2-tab-desk" data-tab="library" onclick="O2.go('library')">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M8 6h13M8 12h13M8 18h13M3.5 6h.01M3.5 12h.01M3.5 18h.01"/></svg>Kütüphane</button>
+            <button class="o2-tab o2-tab-desk" data-tab="profile" onclick="O2.go('profile')">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="4"/><path d="M4 21c1.5-4 4.5-6 8-6s6.5 2 8 6"/></svg>Profil</button>
+            <button class="o2-tab o2-tab-desk" onclick="O2.remindersSheet()">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M6 8a6 6 0 1 1 12 0c0 7 3 9 3 9H3s3-2 3-9"/><path d="M10.3 21a1.9 1.9 0 0 0 3.4 0"/></svg>Bildirimler</button>
+            <span class="o2-tab-hint">Kısayollar: 1-4 sekmeler · F akış · A akademi · Esc geri</span>
         </nav>
         <div id="o2-sheet-layer" class="o2-sheet-layer"></div>
         <div id="o2-player" class="o2-player hidden"></div>
@@ -6002,6 +6017,8 @@
     <script defer src="js/41-olympus2-bildirim.js"></script>
     <script defer src="js/42-olympus2-akis.js"></script>
     <script defer src="js/43-olympus2-diyet.js"></script>
+    <script defer src="js/44-olympus2-ozet.js"></script>
+    <script defer src="js/45-olympus2-masaustu.js"></script>
 </body>
 
 </html>

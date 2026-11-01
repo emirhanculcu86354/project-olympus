@@ -268,6 +268,7 @@
                 </div>
             </div>` : ''}
 
+            ${O2.briefingCard ? O2.briefingCard() : ''}
             <div class="o2-card o2-card-glow o2-readiness">
                 ${O2.ring({ pct: r.score / 100, size: 132, stroke: 12, center: `<strong>${r.score}</strong><span>HAZIRLIK</span>` })}
                 <div>
@@ -284,6 +285,9 @@
                 ${miniRing(todayKcal / settings.kcalGoal, 'var(--o2-orange)', 'flame', `${O2.fmtNum(todayKcal)}`, 'kcal hareket', "O2.logSheet('kcal')")}
                 ${miniRing(week.sessions / settings.weeklyTarget, 'url(#o2Gold)', 'bolt', `${week.sessions}/${settings.weeklyTarget}`, 'haftalık seans', "O2.go('train')")}
             </div>
+
+            ${O2.alertsHTML ? O2.alertsHTML(3) : ''}
+            ${O2.reviewCard ? O2.reviewCard() : ''}
 
             <div class="o2-section-head"><h3>Bugünün seansı</h3><button class="o2-link" onclick="O2.go('train')">Programı gör</button></div>
             ${plan.isRest ? restCard(plan) : (doneToday ? doneCard(doneToday) : sessionHero(plan, 0))}
