@@ -279,3 +279,8 @@ Yeni modül: `js/36-olympus2-gelismis.js`. Yeni bağımlılık: `@capacitor/loca
 ## Profil
 - **Aylık rapor:** Seanslar, rekorlar, kilo, uyku, Akademi testleri ve haftalık değerlendirmeler tek sayfa; yazdır → PDF.
 - **Veri & gizlilik:** Kategori bazında veri boyutu, tümünü indir, tüm verileri (cihaz + bulut yedeği) "SİL" onayıyla kalıcı silme.
+
+# Bildirim merkezi + iPhone üst bulanıklık düzeltmesi (2026-11-01)
+- **Yeni bildirim merkezi (zil, js/47):** Sağdan kayan panel (masaüstünde yüzen pencere). "Şimdi senin için" akıllı kartları (bugünkü seans, uyarılar, eksik uyku/su, haftalık değerlendirme, sıradaki hatırlatma, kapalı push), tek dokunuşla aksiyon düğmeleri; Tümü / Sosyal / Antrenman / Akademi / Sistem filtreleri; Bugün · Dün · Bu hafta gruplaması; yeni bildirimlerde renkli nokta; tek tek silme, tümünü temizle, ayarlara geçiş; boş durumda animasyonlu zil.
+- Sosyal bildirimler (maç daveti, takipçi) artık burada; uygulama olayları da yazılıyor: yeni rekor, haftalık hedef tamam, Akademi test rekoru. Zil rozeti gerçek okunmamış sayısını gösterir.
+- **iPhone üst bulanıklık:** Gizli toast, çentik payı yüzünden durum çubuğunun arkasında bulanık leke bırakıyordu — gizliyken tamamen görünmez ve filtresiz. Ek olarak her ekranda durum çubuğunun arkası düz siyah şeritle kapatıldı; klasik "dinamik ada" da gizliyken görünmez.

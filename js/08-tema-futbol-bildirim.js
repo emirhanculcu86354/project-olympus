@@ -723,6 +723,9 @@ function listenForNotifications() {
 }
 
 function renderNotifications(notifs) {
+    // Olympus Training bildirim merkezi de bu listeyi gösterir
+    window.__olySocialNotifs = notifs;
+    if (window.O2 && O2.onSocialNotifs) O2.onSocialNotifs(notifs);
     const list = document.getElementById('notifications-list');
     const badge = document.getElementById('notif-badge');
 
