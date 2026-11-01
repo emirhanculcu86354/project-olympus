@@ -260,6 +260,7 @@
                 <div class="o2-coach"><div class="o2-coach-orb" style="background:rgba(255,255,255,.08);color:var(--o2-text);box-shadow:none">${I('list')}</div><div style="flex:1"><h4>Dışa aktar (CSV)</h4><p>Tüm seansların, kardiyoların ve kilo kayıtların Excel/Sheets'te açılabilir dosya olarak.</p></div></div>
                 <button class="o2-btn o2-btn-ghost o2-btn-block" style="margin-top:14px" onclick="O2.exportCSV()">Dosyayı indir</button>
             </div>
+            ${O2.profileExtras ? O2.profileExtras() : ''}
         </div>`;
     };
 

@@ -1915,3 +1915,23 @@ button.o2-meal-swap { padding: 0; border: 0; background: none; cursor: pointer; 
     /* Panel zaten gösterdiği için içerikte tekrar etmesin */
     .o2-page .o2-alerts { display: none; }
 }
+
+/* ==========================================================================
+   ➕ OYNATICI EKLERİ · 🎤 AI KOMİSYON SOHBETİ
+   ========================================================================== */
+.o2-player-extra { display: grid; grid-template-columns: 34px 1fr auto; gap: 12px; align-items: center; margin-top: 12px; padding: 14px; }
+.o2-player-extra > i { width: 34px; height: 34px; border-radius: 11px; display: grid; place-items: center; background: rgba(255, 255, 255, .05); font-style: normal; }
+.o2-player-extra > i svg { width: 18px; height: 18px; }
+.o2-player-extra h5 { margin: 0; font-size: 14px; font-weight: 800; }
+.o2-player-extra p { margin: 3px 0 0; font-size: 12px; line-height: 1.45; color: var(--o2-text-3); }
+.o2-player-extra.warn { border-color: rgba(255, 90, 95, .3); background: rgba(255, 90, 95, .06); }
+#o2-voice-set.on { background: var(--o2-red); color: #fff; border-color: transparent; animation: o2Pulse 1.2s infinite; }
+#o2-chat-mic.on { background: var(--o2-red); color: #fff; border-color: transparent; }
+
+.o2-chat { display: flex; flex-direction: column; gap: 10px; max-height: 46vh; overflow-y: auto; padding: 2px; }
+.o2-chat-msg { max-width: 88%; padding: 12px 14px; border-radius: 18px; background: rgba(255, 255, 255, .05); border: 1px solid var(--o2-line); animation: o2Fade .3s var(--o2-ease); }
+.o2-chat-msg small { display: block; font-size: 10px; font-weight: 800; letter-spacing: 1px; text-transform: uppercase; color: var(--o2-gold); }
+.o2-chat-msg p { margin: 4px 0 0; font-size: 14px; line-height: 1.55; }
+.o2-chat-msg.k { align-self: flex-start; border-bottom-left-radius: 6px; }
+.o2-chat-msg.a { align-self: flex-end; border-bottom-right-radius: 6px; background: rgba(230, 195, 116, .1); border-color: rgba(230, 195, 116, .25); }
+.o2-chat-msg.a small { color: var(--o2-text-3); }

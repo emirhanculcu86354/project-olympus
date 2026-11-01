@@ -260,3 +260,22 @@ Yeni modül: `js/36-olympus2-gelismis.js`. Yeni bağımlılık: `@capacitor/loca
 
 ## ⚠️ Akıllı uyarılar
 - Uyku 3 gün 6,5 saatin altında, protein 2 gün hedefin %70'inin altında, dün az su, 4+ gün antrenmansız, hazırlık düşük antrenman günü, 2 haftadır gelişmeyen Akademi testi, dün akışın yarısı yapılmadı, haftalık hedef tamam. Bugün ekranında ve masaüstü panelinde; günlük kapatılabilir; önemli uyarı 12:30'da bildirim.
+
+# Olympus Training · Güncelleme 8 — AI ve günlük kullanım özellikleri (2026-11-01)
+
+## Antrenman (js/46)
+- **Sesli set kaydı:** Oynatıcıda "Sesli kaydet" → "60 kilo 8 tekrar", "altmış iki buçuk kilo on tekrar", "sekiz tekrar" gibi cümleler sete yazılır ve set tamamlanır (Türkçe sayı kelimeleri de anlaşılır).
+- **Seansa özel ısınma:** İlk sete başlamadan, o günün kaslarına göre 6-10 hareketlik ~5 dk mobilite akışı; sayaçlı, sesli yönlendirmeli.
+- **Ağrı & sakatlık kaydı:** Bölge + şiddet; kayıt açıkken o bölgeyi yoran hareketlerde oynatıcı uyarır ve aynı kası çalıştıran, eklemi daha az zorlayan alternatifleri önerir (tek dokunuşla seansta değiştirir). Akıllı uyarılarda ve profilde görünür.
+
+## Beslenme
+- **Fotoğraftan kalori:** Tabak fotoğrafı → Gemini yiyecekleri, gramajı ve makroları tahmin eder → seçilenler öğüne eklenir.
+- **Dışarıda yiyeceğim:** Plandaki bir öğün için hafif/normal/ağır seçilir; kalan yenmemiş öğünlerin porsiyonu günlük hedefe sığacak şekilde otomatik ayarlanır.
+
+## Akademi
+- **AI komisyon:** Gerçek mülakat akışı — 5 ana soru, yüzeysel cevaplara takip sorusu, sorular sesli okunur, cevap yazılı ya da sesli; sonunda 100 üzerinden puan ve 3 maddelik geri bildirim.
+- **Güncel olaylar destesi:** Gemini 10 güncel soru-cevap kartı üretir, Akademi destesine "Güncel (AI)" olarak eklenir (doğruluk kontrolü uyarısıyla).
+
+## Profil
+- **Aylık rapor:** Seanslar, rekorlar, kilo, uyku, Akademi testleri ve haftalık değerlendirmeler tek sayfa; yazdır → PDF.
+- **Veri & gizlilik:** Kategori bazında veri boyutu, tümünü indir, tüm verileri (cihaz + bulut yedeği) "SİL" onayıyla kalıcı silme.

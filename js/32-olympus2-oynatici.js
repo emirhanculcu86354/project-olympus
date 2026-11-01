@@ -203,6 +203,8 @@
                     ${ex.target.isTime || !(O2.isBarbell && O2.isBarbell(ex.name)) ? '' : `<button class="o2-btn o2-btn-ghost o2-btn-sm" onclick="O2.plateSheet(${+(ex.sets[ci >= 0 ? ci : 0].w) || 0})">${I('calc')}Plaka</button>`}
                 </div>
 
+                ${O2.playerExtras ? O2.playerExtras(S, ex, ci) : ''}
+
                 ${next ? `
                 <div class="o2-card o2-upnext is-tap" onclick="O2.gotoExercise(${S.cur + 1})">
                     <div style="flex:1"><small>SIRADAKİ</small><h5>${esc(next.name)}</h5></div>
@@ -451,6 +453,21 @@
         const body = $('o2-player-body');
         if (body) body.scrollTop = 0;
     };
+
+    // Başka modüllerin (ağrı kaydı vb.) seanstaki bir hareketi değiştirmesi için
+    O2.replaceExercise = (i, name) => {
+        if (!S || !S.exercises[i]) return;
+        const old = S.exercises[i];
+        const sug = O2.suggest({ name, scheme: old.scheme });
+        const last = O2.lastPerformance(name);
+        S.exercises[i] = {
+            ...old, name, muscle: O2.muscleOf(name), note: sug.note, swappedFrom: old.name,
+            sets: old.sets.map((s, k) => s.done ? s : { w: sug.w === '' ? '' : sug.w, r: sug.r === '' ? '' : sug.r, done: false, prev: last ? `${(last.sets[k] || last.sets[0]).w}×${(last.sets[k] || last.sets[0]).r}` : '—' })
+        };
+        persist();
+        renderPlayer();
+    };
+    O2.rerenderPlayer = () => { if (S && O2.isPlayerOpen()) renderPlayer(); };
 
     O2.exerciseList = () => {
         O2.sheet('Hareketler', `<div class="o2-list">${S.exercises.map((e, i) => `

@@ -620,6 +620,7 @@
             <div class="o2-segment"><button class="${off === 0 ? 'active' : ''}" onclick="O2.pickFuelDay(0)">Bugün</button><button class="${off === 1 ? 'active' : ''}" onclick="O2.pickFuelDay(1)">Yarın</button></div>
 
             <div style="margin-top:12px">${O2.foodCard(key, mac)}</div>
+            ${O2.fuelExtras ? O2.fuelExtras(key) : ''}
             <p style="margin:10px 4px 0;font-size:11.5px;color:var(--o2-text-3);line-height:1.5">Hedefler ${O2.fmtNum(mac.bw, 1)} kg vücut ağırlığına ve günün karbonhidrat tipine göre hesaplanır.</p>
 
             <div class="o2-section-head"><h3>Öğün planı</h3><button class="o2-link" onclick="O2.dietSheet && O2.dietSheet()">✦ AI planı</button></div>
@@ -633,6 +634,7 @@
                     ${m.kcal ? `<p class="o2-meal-mac"><b>${O2.fmtNum(m.kcal)} kcal</b> · P ${O2.fmtNum(m.p)} · K ${O2.fmtNum(m.c)} · Y ${O2.fmtNum(m.f)}</p>` : ''}
                     <div class="o2-alt">${esc(m.alt || 'Alternatif bulunmuyor.')}</div>
                     <button class="o2-meal-swap" onclick="${m.opts && m.opts.length > 1 ? `O2.dietSwap('${key}', ${i})` : `document.getElementById('o2-meal-${i}').classList.toggle('show-alt')`}">${I('swap')}${m.opts && m.opts.length > 1 ? `Değiştir · ${(m.optIndex || 0) + 1}/${m.opts.length}` : 'Alternatif'}</button>
+                    ${m.kcal && O2.dietEatOut ? `<button class="o2-meal-swap" style="margin-left:14px" onclick="O2.dietEatOut('${key}', ${i})">🍽 ${m.out ? 'Dışarıda' : 'Dışarıda yiyeceğim'}</button>` : ''}
                 </div>
                 <button class="o2-check ${eaten.includes(i) ? 'on' : ''}" onclick="O2.toggleMeal('${key}', ${i})" aria-label="Yendi olarak işaretle">${I('check')}</button>
             </div>`).join('')}

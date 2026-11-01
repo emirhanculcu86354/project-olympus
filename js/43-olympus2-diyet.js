@@ -233,12 +233,48 @@ SADECE geçerli JSON döndür, açıklama yazma:
     // Gün için seçili alternatifler uygulanmış öğünler
     O2.dietMealsFor = (day, key) => {
         const swaps = LS.get(`oly2_meal_swap_${key}`, {}) || {};
-        return day.meals.map((m, i) => {
+        const outs = LS.get(`oly2_meal_out_${key}`, {}) || {};
+        const eaten = LS.get(`oly2_meals_${key}`, []) || [];
+        const list = day.meals.map((m, i) => {
+            if (outs[i]) {
+                const kc = outs[i];
+                return { ...m, d: `Dışarıda yemek (~${kc} kcal)`, kcal: kc, p: Math.round(kc * .2 / 4), c: Math.round(kc * .45 / 4), f: Math.round(kc * .35 / 9), out: true, opts: null, alt: 'Menüde ızgara et/tavuk + salata + pilav/patates seç; tatlı ve şekerli içecekten kaçın.', optIndex: 0 };
+            }
             const k = swaps[i] || 0;
             if (!m.opts || !m.opts[k] || !k) return { ...m, optIndex: 0 };
             const o = m.opts[k];
             return { ...m, d: o.d, kcal: o.kcal, p: o.p, c: o.c, f: o.f, alt: m.opts.filter((_, j) => j !== k).map(x => x.d).join(' · '), optIndex: k };
         });
+        // Dışarıda yenen öğün varsa kalan (yenmemiş) plan öğünleri günlük hedefe sığacak şekilde ölçeklenir
+        if (!Object.keys(outs).length || !day.target) return list;
+        const fixed = list.reduce((a, m, i) => a + (m.out || eaten.includes(i) ? (m.kcal || 0) : 0), 0);
+        const flex = list.reduce((a, m, i) => a + (!m.out && !eaten.includes(i) ? (m.kcal || 0) : 0), 0);
+        if (!flex) return list;
+        const factor = Math.max(.4, Math.min(1.1, (day.target.kcal - fixed) / flex));
+        return list.map((m, i) => (m.out || eaten.includes(i) || !m.kcal) ? m : {
+            ...m, kcal: Math.round(m.kcal * factor), p: Math.round(m.p * factor), c: Math.round(m.c * factor), f: Math.round(m.f * factor),
+            scaled: Math.round(factor * 100), t: `${m.t} · porsiyon %${Math.round(factor * 100)}`
+        });
+    };
+    // "Bu öğünü dışarıda yiyeceğim": tahmini kalori seçilir, kalan öğünler otomatik dengelenir
+    O2.dietEatOut = (key, i) => {
+        const outs = LS.get(`oly2_meal_out_${key}`, {}) || {};
+        O2.sheet('Dışarıda yiyeceğim', `
+            <p style="margin:0 0 12px;font-size:13px;line-height:1.55;color:var(--o2-text-2)">Ne kadar ağır bir öğün olacak? Kalan öğünlerin porsiyonu günlük hedefine göre otomatik ayarlanır.</p>
+            <div class="o2-grid-3">${[['Hafif', 550, 'Döner dürüm yarım, çorba + salata'], ['Normal', 850, 'Izgara köfte/tavuk menü'], ['Ağır', 1300, 'Pizza, burger menü, kebap']].map(([l, kc, d]) => `
+                <button class="o2-card is-tap o2-acad-tile" style="margin:0" onclick="O2.dietSetOut('${key}', ${i}, ${kc})"><h4>${l}</h4><p>~${kc} kcal</p><p style="margin-top:4px">${d}</p></button>`).join('')}</div>
+            ${outs[i] ? `<button class="o2-btn o2-btn-ghost o2-btn-block" style="margin-top:14px" onclick="O2.dietSetOut('${key}', ${i}, 0)">Plana geri dön</button>` : ''}`);
+    };
+    O2.dietSetOut = (key, i, kcal) => {
+        const outs = LS.get(`oly2_meal_out_${key}`, {}) || {};
+        if (kcal) outs[i] = kcal; else delete outs[i];
+        LS.set(`oly2_meal_out_${key}`, outs);
+        // Günlüğe eklenmiş plan öğünü varsa güncelle
+        const log = O2.foodLog(key);
+        const entry = log.find(x => x.id === `meal_${i}`);
+        if (entry) { const day = O2.diet()[O2.dayIndex(O2.ui.fuelOffset || 0, 7) + 1]; const m = O2.dietMealsFor(day, key)[i]; Object.assign(entry, { name: m.d.slice(0, 60), kcal: m.kcal, p: m.p, c: m.c, f: m.f }); LS.set(`oly2_food_${key}`, log); }
+        O2.closeSheet(); O2.render();
+        O2.toast(kcal ? 'Kalan öğünler dengelendi' : 'Plana dönüldü', 'fuel');
     };
     O2.dietSwap = (key, i) => {
         const dayIdx = O2.dayIndex(O2.ui.fuelOffset || 0, 7) + 1;

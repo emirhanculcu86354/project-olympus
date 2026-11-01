@@ -238,7 +238,8 @@
     // Soru kimliği (metinden kısa özet)
     const qid = (q) => { let h = 0; for (let i = 0; i < q.length; i++) h = (h * 31 + q.charCodeAt(i)) | 0; return (h >>> 0).toString(36); };
     function questions(st, includeGeneral = true) {
-        const list = [...QBANK[st.branch], ...QBANK.common];
+        // Kullanıcının eklediği / AI'ın ürettiği kartlar (örn. güncel olaylar)
+        const list = [...QBANK[st.branch], ...QBANK.common, ...(st.custom || []).map(x => Q(x.cat || 'Güncel', x.q, x.a))];
         if (includeGeneral && typeof interviewQuestions !== 'undefined') {
             const seen = new Set(list.map(x => x.q));
             interviewQuestions.forEach(x => { if (!seen.has(x.q)) { seen.add(x.q); list.push(Q('Genel kültür', x.q, x.a)); } });
@@ -367,6 +368,8 @@
                 <button class="o2-card is-tap o2-acad-tile" onclick="O2.acadPractice(true)"><i style="color:${c}">${I('bolt')}</i><h4>Mülakat provası</h4><p>5 soru · 60 sn süre · AI geri bildirim</p></button>
                 <button class="o2-card is-tap o2-acad-tile" onclick="O2.acadQuiz()"><i style="color:var(--o2-gold)">${I('medal')}</i><h4>Rütbe & teşkilat testi</h4><p>${st.quiz[st.branch] ? `En iyi: ${st.quiz[st.branch]}/10` : '10 soruluk hızlı test'}</p></button>
                 <button class="o2-card is-tap o2-acad-tile" onclick="O2.openAcademy('${br.classic}')"><i style="color:var(--o2-blue)">${I('camera')}</i><h4>Kameralı simülatör</h4><p>Ayna modu, sesli cevap, rapor</p></button>
+                <button class="o2-card is-tap o2-acad-tile" onclick="O2.aiPanel && O2.aiPanel()"><i style="color:var(--o2-gold)">${I('spark')}</i><h4>AI komisyon</h4><p>Gerçek mülakat gibi · takip soruları · 100 üzerinden puan</p></button>
+                <button class="o2-card is-tap o2-acad-tile" onclick="O2.acadNewsDeck && O2.acadNewsDeck()"><i style="color:var(--o2-green)">${I('list')}</i><h4>Güncel olaylar</h4><p>AI 10 güncel soru kartı üretir, destene ekler</p></button>
             </div>
             <div class="o2-insight" style="margin-top:12px">${I('spark')}<span><b>Mülakat ipucu:</b> ${esc(tip)}</span></div>
 
