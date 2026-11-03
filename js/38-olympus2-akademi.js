@@ -43,18 +43,32 @@
         }
     };
 
-    // better: 'low' süre (sn) · 'high' tekrar. pass = baraj (≈60 puan), target = tam puana yakın
+    // MSB 2026 Astsubay Temini Kılavuzu · Tablo-5 (erkek). Tekrar: [en az tekrar, puan] · Koşu: [en geç sn, puan]
+    const FYT_SOURCE = 'MSB 2026 Astsubay Temini Kılavuzu · Tablo-5';
+    const SITUP_M = [60, 59, 58, 57, 56, 55, 54, 53, 52, 51, 50, 49, 48, 47, 46, 45, 44, 43, 42, 41, 40, 39, 38, 37, 36, 35, 34, 33, 32, 31, 30, 29, 28, 27, 26, 25, 24, 23, 22, 21]
+        .map((r, i) => [r, [100, 97, 95, 92, 90, 87, 85, 82, 80, 77, 75, 72, 70, 67, 65, 62, 60, 57, 55, 52, 50, 47, 45, 42, 40, 37, 35, 32, 30, 27, 25, 22, 20, 17, 15, 12, 10, 7, 5, 2][i]])
+        .concat([[16, 1], [0, 0]]);
+    const PUSHUP_M = Array.from({ length: 39 }, (_, i) => [55 - i, 100 - i * 2])   // 55 → 100 … 17 → 24
+        .concat([[16, 20], [15, 18], [14, 16], [13, 14], [12, 12], [11, 10], [10, 7], [9, 4], [6, 1], [0, 0]]);
+    const RUN400_M = Array.from({ length: 19 }, (_, i) => [70 + i, 100 - i * 5])     // 1:10 → 100 … 1:28 → 10
+        .concat([[89, 5], [90, 0]]);
+
+    // better: 'low' süre (sn) · 'high' tekrar. pass = baraj, target = tam puan.
+    // table: resmi puan tablosu (varsa normlar yerine o kullanılır), passPts: testten geçmek için gereken puan
     const EVENTS = {
         fyt: [
-            { id: 'situp', name: 'Mekik', note: '1 dakika', unit: 'tekrar', better: 'high', pass: { m: 20, f: 12 }, target: { m: 50, f: 40 } },
-            { id: 'pushup', name: 'Şınav', note: '1 dakika', unit: 'tekrar', better: 'high', pass: { m: 15, f: 6 }, target: { m: 45, f: 28 } },
-            { id: 'run400', name: '400 m koşu', note: 'Tek seferde', unit: 'sn', better: 'low', pass: { m: 130, f: 150 }, target: { m: 75, f: 90 } }
+            { id: 'situp', name: 'Mekik', short: 'Mekik', note: '2 dakika', dur: 120, unit: 'tekrar', better: 'high', pass: { m: 24, f: 12 }, target: { m: 60, f: 40 }, table: { m: SITUP_M }, passPts: 10 },
+            { id: 'pushup', name: 'Şınav', short: 'Şınav', note: '2 dakika', dur: 120, unit: 'tekrar', better: 'high', pass: { m: 11, f: 6 }, target: { m: 55, f: 28 }, table: { m: PUSHUP_M }, passPts: 10 },
+            { id: 'run400', name: '400 m koşu', short: '400 m', note: 'Tek seferde', unit: 'sn', better: 'low', pass: { m: 88, f: 150 }, target: { m: 70, f: 90 }, table: { m: RUN400_M }, passPts: 10 }
         ],
         // Jandarma ve Polis alımlarında fiziki yeterlilik tek bir süreli parkurdur (şınav/mekik/koşu yok)
         parkur: [
-            { id: 'parkur', name: 'Fiziki yeterlilik parkuru', note: '7 istasyon · ~70 m · tek deneme', unit: 'sn', better: 'low', pass: { m: 48, f: 53 }, target: { m: 40, f: 45 }, zero: { m: 50, f: 55 } }
+            { id: 'parkur', name: 'Fiziki yeterlilik parkuru', short: 'Parkur', note: '7 istasyon · ~70 m · tek deneme', unit: 'sn', better: 'low', pass: { m: 48, f: 53 }, target: { m: 40, f: 45 }, zero: { m: 50, f: 55 } }
         ]
     };
+
+    // TSK boy ve kilo oranları nomogramı (erkek, Tablo-4): boy → [alt, üst] kg. Asgari boy 168 cm.
+    const NOMO_M = { 168: [54, 73], 169: [54, 74], 170: [55, 75], 171: [56, 76], 172: [56, 77], 173: [57, 78], 174: [58, 79], 175: [58, 80], 176: [59, 81], 177: [60, 81], 178: [60, 82], 179: [61, 83], 180: [62, 84], 181: [62, 85], 182: [63, 86], 183: [64, 87], 184: [64, 88], 185: [65, 89], 186: [66, 90], 187: [66, 91], 188: [67, 92], 189: [68, 93], 190: [69, 94], 191: [70, 95], 192: [70, 96], 193: [71, 97], 194: [72, 98], 195: [72, 99] };
 
     // Parkur istasyonları (sıra ve ölçüler dönemden döneme değişebilir; ilandaki krokiye bak)
     const PARKUR_STATIONS = [
@@ -200,19 +214,31 @@
         const n = parseFloat(s);
         return isNaN(n) ? null : n;
     }
-    const fmtSec = (s) => s >= 60 ? `${Math.floor(s / 60)}:${(s % 60).toFixed(1).padStart(4, '0')}` : `${(+s).toFixed(1)} sn`;
+    const fmtSec = (s) => s >= 60 ? `${Math.floor(s / 60)}:${(s % 60).toFixed(1).padStart(4, '0').replace(/\.0$/, '')}` : `${(+s).toFixed(1)} sn`;
     const fmtVal = (ev, v) => v === undefined || v === null ? '—' : ev.unit === 'sn' ? fmtSec(v) : `${v}`;
 
+    const officialTable = (st, ev) => (ev.table && ev.table[st.gender]) || null;
     const norm = (st, ev) => {
+        const table = officialTable(st, ev);
+        if (table) {
+            const at = (pts) => (table.find(r => r[1] === pts) || table[0])[0];
+            return { table, passPts: ev.passPts, pass: at(ev.passPts), target: table[0][0], zero: ev.better === 'low' ? table[table.length - 1][0] : 0 };
+        }
         const custom = st.norms[`${trackOf(st).test}_${ev.id}_${st.gender}`];
         const n = { ...(custom || { pass: ev.pass[st.gender], target: ev.target[st.gender] }) };
         // Süreli testte 0 puan sınırı: tanımlıysa ilan tablosu, yoksa barajdan 2 sn sonrası
         if (ev.better === 'low' && n.zero === undefined) n.zero = custom ? n.pass + 2 : (ev.zero ? ev.zero[st.gender] : n.pass + 2);
         return n;
     };
-    // 0-100: baraj ≈ 60, hedef = 100
+    // 0-100: resmi tablo varsa birebir; yoksa baraj ≈ 60, hedef = 100
     function score(ev, v, n) {
         if (v === null || v === undefined) return null;
+        if (n.table) {
+            // Koşuda salise bir sonraki saniyeye yuvarlanır (1:10.4 → 1:11 satırı)
+            if (ev.better === 'low') { const s = Math.ceil(v - 1e-6); const r = n.table.find(x => s <= x[0]); return r ? r[1] : 0; }
+            const r = n.table.find(x => v >= x[0]);
+            return r ? r[1] : 0;
+        }
         if (ev.better === 'low') {
             if (v <= n.target) return 100;
             if (v <= n.pass) return Math.round(60 + 40 * (n.pass - v) / Math.max(.1, n.pass - n.target));
@@ -222,6 +248,14 @@
         if (v >= n.target) return 100;
         if (v >= n.pass) return Math.round(60 + 40 * (v - n.pass) / Math.max(1, n.target - n.pass));
         return Math.round(60 * v / Math.max(1, n.pass));
+    }
+    const passPts = (n) => n.passPts !== undefined ? n.passPts : 60;
+    // Bir üst puan için gereken değer (resmi tabloda): { v, pts } ya da null
+    function nextStep(ev, v, n) {
+        if (!n.table || v === null || v === undefined) return null;
+        const cur = score(ev, v, n);
+        const rows = n.table.filter(r => r[1] > cur);
+        return rows.length ? { v: rows[rows.length - 1][0], pts: rows[rows.length - 1][1] } : null;
     }
     // Sonuçlar branş bazında: POMEM parkuru Jandarma'nın parkur skorunu etkilemez
     const myTests = (st) => st.tests.filter(t => !t.track || branchOf(st).tracks.some(x => x.id === t.track));
@@ -251,8 +285,7 @@
     function prep(st) {
         const evs = eventsOf(st);
         const scores = evs.map(ev => { const l = latest(st, ev.id); return l ? score(ev, l.v, norm(st, ev)) : 0; });
-        // Resmi test (ilk etkinlik) daha ağır basar
-        const fitness = Math.round(evs.length ? (scores[0] * 2 + scores.slice(1).reduce((a, b) => a + b, 0)) / (evs.length + 1) : 0);
+        const fitness = Math.round(evs.length ? scores.reduce((a, b) => a + b, 0) / evs.length : 0);
         const qs = questions(st, false);
         const known = qs.filter(q => st.cards[q.id] && st.cards[q.id].r === 1).length;
         const interview = Math.round(known / Math.max(1, qs.length) * 100);
@@ -275,6 +308,13 @@
         const n = bodyNorm(st);
         if (!h || !w) return { ok: null, h, w, n };
         const m = h / 100, bmi = w / (m * m);
+        // TSK erkek: VKİ yerine resmi boy-kilo nomogramı
+        if (st.branch === 'tsk' && st.gender === 'm') {
+            const keys = Object.keys(NOMO_M).map(Number), minH = keys[0], maxH = keys[keys.length - 1];
+            const row = NOMO_M[Math.min(maxH, Math.max(minH, Math.floor(h)))];
+            const hOk = h >= minH, bOk = w >= row[0] && w <= row[1];
+            return { nomo: true, ok: hOk && bOk, hOk, bOk, bmi, h, w, minW: row[0], maxW: row[1], minH, over: h >= maxH + 1, n };
+        }
         const minW = n.bmiMin * m * m, maxW = n.bmiMax * m * m;
         const hOk = h >= n.height[st.gender];
         const bOk = bmi >= n.bmiMin && bmi <= n.bmiMax;
@@ -335,12 +375,14 @@
                     <span>${d.left !== null && d.left > 0 ? 'gün kaldı' : st.dates[d.k] ? esc(O2.prettyDate(st.dates[d.k])) : 'Tarih ekle'}</span>
                 </button>`).join('')}</div>
 
-            <div class="o2-section-head"><h3>Fiziki yeterlilik</h3><button class="o2-link" onclick="O2.acadNormsSheet()">Normlar</button></div>
+            <div class="o2-section-head"><h3>Fiziki yeterlilik</h3><button class="o2-link" onclick="O2.acadNormsSheet()">${officialTable(st, evs[0]) ? 'Puan tablosu' : 'Normlar'}</button></div>
             <div class="o2-card" style="padding:6px 18px 16px">
                 <p class="o2-acad-test-desc">${tr.test === 'parkur'
                     ? `${esc(br.name)} alımlarında fiziki yeterlilik <b>tek bir süreli parkurdur</b>: 7 istasyon, yaklaşık 70 m. Şınav, mekik veya koşu ayrıca ölçülmez.`
-                    : `${esc(br.name)} FYT: <b>mekik (1 dk), şınav (1 dk) ve 400 m koşu</b>. Bir testten 0 puan almak elenme sebebidir.`}</p>
+                    : `${esc(br.name)} FYT sırayla: <b>mekik (2 dk), şınav (2 dk) ve 400 m koşu</b>. Her testten <b>en az 10 puan</b> şart; 10'un altında kalan sonraki teste geçemez.${officialTable(st, evs[0]) ? '' : ' <span style="color:var(--o2-text-3)">Kadın puan tablosu eklenmedi; değerler tahminidir.</span>'}`}</p>
+                ${fytTotalHTML(st, evs)}
                 ${evs.map(ev => fitnessRow(st, ev)).join('')}
+                ${tr.test === 'fyt' ? '<p class="o2-acad-ev-best" style="margin-top:10px">0 ile −15 °C arasında koşulursa dereceden 2 sn düşülür. Başarısız olunan teste bir kez itiraz edilip tekrar girilebilir.</p>' : ''}
                 <div class="o2-grid-2" style="margin-top:14px">
                     <button class="o2-btn o2-btn-gold" onclick="O2.acadTestSheet()">${I('plus')}Sonuç</button>
                     <button class="o2-btn o2-btn-ghost" onclick="O2.acadStopwatch('${evs[0].id}')">${I('clock')}${tr.test === 'parkur' ? 'Kronometre' : 'Mekik sayacı'}</button>
@@ -407,21 +449,38 @@
             </details>`;
     }
 
+    const scoreTone = (sc, n) => sc === null ? 'var(--o2-text-3)' : sc >= 90 ? 'var(--o2-green)' : sc >= Math.max(passPts(n), 50) ? 'var(--o2-gold)' : sc >= passPts(n) ? 'var(--o2-orange)' : 'var(--o2-red)';
     function fitnessRow(st, ev) {
         const n = norm(st, ev), l = latest(st, ev.id), b = best(st, ev);
         const sc = l ? score(ev, l.v, n) : null;
-        const ok = sc !== null && sc >= 60;
-        const tone = sc === null ? 'var(--o2-text-3)' : sc >= 90 ? 'var(--o2-green)' : ok ? 'var(--o2-gold)' : 'var(--o2-red)';
+        const tone = scoreTone(sc, n);
+        const next = l ? nextStep(ev, l.v, n) : null;
+        const head = n.table
+            ? `${esc(ev.note)} · Baraj ${fmtVal(ev, n.pass)} (${n.passPts} puan) · 100 puan ${fmtVal(ev, n.target)}`
+            : `${esc(ev.note)} · Baraj ${fmtVal(ev, n.pass)} · Hedef ${fmtVal(ev, n.target)}`;
         return `
         <div class="o2-acad-ev">
             <div class="o2-acad-ev-head">
-                <div><h5>${esc(ev.name)}</h5><p>${esc(ev.note)} · Baraj ${fmtVal(ev, n.pass)} · Hedef ${fmtVal(ev, n.target)}</p></div>
-                <div class="o2-acad-ev-val" style="color:${tone}"><strong>${l ? fmtVal(ev, l.v) : '—'}</strong><small>${sc === null ? 'kayıt yok' : `${sc} puan`}</small></div>
+                <div><h5>${esc(ev.name)}</h5><p>${head}</p></div>
+                <div class="o2-acad-ev-val" style="color:${tone}"><strong>${l ? fmtVal(ev, l.v) : '—'}</strong><small>${sc === null ? 'kayıt yok' : `${sc} puan${sc < passPts(n) ? ' · baraj altı' : ''}`}</small></div>
             </div>
-            ${trackOf(st).test === 'fyt' ? `<button class="o2-link o2-acad-ev-measure" onclick="O2.acadStopwatch('${ev.id}')">${I(ev.unit === 'sn' ? 'clock' : 'bolt')}${ev.unit === 'sn' ? 'Kronometreyle ölç' : '1 dakika say'}</button>` : ''}
+            ${trackOf(st).test === 'fyt' ? `<button class="o2-link o2-acad-ev-measure" onclick="O2.acadStopwatch('${ev.id}')">${I(ev.unit === 'sn' ? 'clock' : 'bolt')}${ev.unit === 'sn' ? 'Kronometreyle ölç' : `${(ev.dur || 60) / 60} dakika say`}</button>` : ''}
             <div class="o2-bar" style="margin-top:8px"><i data-w="${sc || 0}%" style="width:0;background:${tone}"></i></div>
-            ${b !== null && l && b !== l.v ? `<p class="o2-acad-ev-best">En iyi: ${fmtVal(ev, b)}</p>` : ''}
+            ${next || (b !== null && l && b !== l.v) ? `<p class="o2-acad-ev-best">${next ? `Sonraki: ${fmtVal(ev, next.v)}${ev.unit === 'sn' ? '' : ' tekrar'} → ${next.pts} puan` : ''}${next && b !== null && l && b !== l.v ? ' · ' : ''}${b !== null && l && b !== l.v ? `En iyi: ${fmtVal(ev, b)}` : ''}</p>` : ''}
         </div>`;
+    }
+    // FYT ortalama puanı ve barajı geçip geçmediği
+    function fytSummary(st, evs) {
+        const rows = evs.map(ev => { const n = norm(st, ev), l = latest(st, ev.id); return { ev, n, l, sc: l ? score(ev, l.v, n) : null }; });
+        const done = rows.filter(r => r.sc !== null);
+        return { rows, done, avg: done.length ? Math.round(done.reduce((a, r) => a + r.sc, 0) / done.length) : null, pass: done.length === rows.length && rows.every(r => r.sc >= passPts(r.n)) };
+    }
+    function fytTotalHTML(st, evs) {
+        if (evs.length < 2) return '';
+        const s = fytSummary(st, evs);
+        if (!s.done.length) return '';
+        const fail = s.rows.filter(r => r.sc !== null && r.sc < passPts(r.n));
+        return `<div class="o2-acad-total"><div><small>FYT ortalaması</small><strong>${s.avg}<em>/100</em></strong></div><p>${fail.length ? `<b style="color:var(--o2-red)">${fail.map(r => esc(r.ev.short)).join(', ')}</b> barajın altında` : s.pass ? '<b style="color:var(--o2-green)">Üç testte de barajı geçiyorsun</b>' : `${s.done.length}/${s.rows.length} test kayıtlı`}</p></div>`;
     }
 
     function bodyHTML(st) {
@@ -431,6 +490,29 @@
                 <div class="o2-coach-orb">${I('ruler')}</div>
                 <div style="flex:1"><h4>Boy ve kilonu gir</h4><p>VKİ ve boy şartını ilana göre kontrol edelim.</p></div>${I('chev', 'chev')}
             </div></div>`;
+        if (b.nomo) {
+            const lo = b.minW - 12, hi = b.maxW + 12, pos = (v) => O2.clamp((v - lo) / (hi - lo)) * 100;
+            const near = (b.w > b.maxW && b.w <= b.maxW + 2) || (b.w < b.minW && b.w >= b.minW - 2);
+            const tone = b.bOk ? 'var(--o2-green)' : near ? 'var(--o2-gold)' : 'var(--o2-red)';
+            const diff = b.w > b.maxW ? b.w - b.maxW : b.w < b.minW ? b.minW - b.w : 0;
+            return `
+        <div class="o2-card">
+            <div class="o2-acad-ev-head">
+                <div><h5>Boy-kilo nomogramı</h5><p>${O2.fmtNum(b.h)} cm · ${b.hOk ? `${O2.fmtNum(b.minW)}-${O2.fmtNum(b.maxW)} kg aralığı` : 'asgari boyun altında'}</p></div>
+                <div class="o2-acad-ev-val" style="color:${tone}"><strong>${O2.fmtNum(b.w, 1)} kg</strong><small>${b.bOk ? 'uygun' : 'aralık dışı'}</small></div>
+            </div>
+            <div class="o2-acad-bmi">
+                <i class="zone" style="left:${pos(b.minW)}%;width:${pos(b.maxW) - pos(b.minW)}%"></i>
+                <i class="dot" style="left:${pos(b.w)}%;background:${tone}"></i>
+            </div>
+            <div class="o2-grid-2" style="margin-top:12px">
+                <div class="o2-acad-mini"><small>Boyuna göre kilo</small><b>${O2.fmtNum(b.minW)}-${O2.fmtNum(b.maxW)} kg</b></div>
+                <div class="o2-acad-mini"><small>Asgari boy</small><b style="color:${b.hOk ? 'var(--o2-green)' : 'var(--o2-red)'}">${b.minH} cm ${b.hOk ? '✓' : '✗'}</b></div>
+            </div>
+            <p style="margin:12px 0 0;font-size:12px;line-height:1.5;color:var(--o2-text-2)">${!b.hOk ? `TSK'da erkek adaylar için asgari boy <b>${b.minH} cm</b>.` : diff ? `Nomograma girmek için yaklaşık <b>${O2.fmtNum(diff, 1)} kg</b> ${b.w > b.maxW ? 'vermelisin' : 'almalısın'}. Haftada 0,5 kg ile ~${Math.ceil(diff / .5)} hafta.` : 'Boy-kilo nomogramına uyuyorsun. Sınava kadar kiloyu bu aralıkta tut.'}${b.over ? ' Tablo 195 cm\'de bitiyor; 195 cm satırı gösteriliyor.' : ''} <span style="color:var(--o2-text-3)">VKİ ${O2.fmtNum(b.bmi, 1)} · Kaynak: MSB 2026 kılavuzu, Tablo-4.</span></p>
+            <button class="o2-btn o2-btn-ghost o2-btn-sm" style="margin-top:12px" onclick="O2.logSheet('weight')">${I('scale')}Kilo kaydet</button>
+        </div>`;
+        }
         const lo = 15, hi = 35, pos = (v) => O2.clamp((v - lo) / (hi - lo)) * 100;
         const tone = b.bOk ? 'var(--o2-green)' : (b.bmi > b.n.bmiMax && b.bmi <= b.n.bmiMax + 1) || (b.bmi < b.n.bmiMin && b.bmi >= b.n.bmiMin - 1) ? 'var(--o2-gold)' : 'var(--o2-red)';
         const diff = b.bmi > b.n.bmiMax ? b.w - b.maxW : b.bmi < b.n.bmiMin ? b.minW - b.w : 0;
@@ -454,6 +536,14 @@
     }
     O2.acadBodySheet = () => {
         const st = state(), n = bodyNorm(st);
+        if (st.branch === 'tsk' && st.gender === 'm') {
+            const h = Math.floor(parseFloat((LS.get('olympus_profile', {}) || {}).height) || 0);
+            O2.sheet('Boy-kilo nomogramı', `
+            <p style="margin:0 0 12px;font-size:12.5px;line-height:1.55;color:var(--o2-text-3)">MSB 2026 Astsubay Temini Kılavuzu, Tablo-4 (erkek). Asgari boy <b>168 cm</b>. Kilon boyunun satırındaki aralıkta olmalı.</p>
+            <div class="o2-acad-table"><div><b>Boy</b><b>Alt (kg)</b><b>Üst (kg)</b></div>${Object.entries(NOMO_M).map(([k, [a, z]]) => `<div class="${+k === h ? 'on' : ''}"><span>${k}</span><span>${a}</span><span>${z}</span></div>`).join('')}</div>
+            <button class="o2-btn o2-btn-ghost o2-btn-block" style="margin-top:14px" onclick="O2.logSheet('measure')">${I('ruler')}Boyumu güncelle</button>`);
+            return;
+        }
         O2.sheet('Boy & VKİ normları', `
             <p style="margin:0 0 14px;font-size:12.5px;line-height:1.55;color:var(--o2-text-3)">Varsayılanlar son dönem ilanlarındaki yaygın değerlerdir (tahmini). Başvurduğun ilandaki boy ve VKİ şartına göre düzenle.</p>
             <div class="o2-grid-2">
@@ -540,7 +630,7 @@
                 : 'Haftada 4-5 seans: şınav ve mekik setleri, 200-400 m tempo koşuları ve 1 uzun koşu. Her 2 haftada bir FYT denemesi kaydet.',
             build: trackOf(st).test === 'parkur'
                 ? 'Haftada 2 tam parkur simülasyonu (istasyon turlarıyla). En yavaş istasyonuna ayrı blok ayır; takladan sonra hızlı kalkışı çalış.'
-                : 'Haftada 2 FYT simülasyonu (1 dk mekik + 1 dk şınav + 400 m). Aralara interval koşu ve kuvvet.',
+                : 'Haftada 2 FYT simülasyonu (2 dk mekik + 2 dk şınav + 400 m). Aralara interval koşu ve kuvvet.',
             peak: 'Toplam hacmi %40 azalt, yoğunluğu koru. Yeni hareket deneme, sakatlık riskini sıfırla.',
             taper: ''
         }[cur.id];
@@ -677,6 +767,17 @@
 
     O2.acadNormsSheet = () => {
         const st = state(), evs = eventsOf(st);
+        if (evs.every(ev => officialTable(st, ev))) {
+            const col = (ev) => { const t = officialTable(st, ev), mine = latest(st, ev.id), my = mine ? score(ev, mine.v, norm(st, ev)) : null; return `
+                <div class="o2-acad-table"><div><b>${esc(ev.short)}</b><b>Puan</b></div>${t.map((r, i) => {
+                    const label = ev.better === 'low' ? fmtSec(r[0]) :(t[i - 1] && t[i - 1][0] - r[0] > 1 ? `${r[0]}-${t[i - 1][0] - 1}` : r[0]);
+                    return `<div class="${r[1] === ev.passPts ? 'pass' : ''} ${my === r[1] ? 'on' : ''}"><span>${label}</span><span>${r[1]}</span></div>`;
+                }).join('')}</div>`; };
+            O2.sheet('FYT puan tablosu', `
+            <p style="margin:0 0 12px;font-size:12.5px;line-height:1.55;color:var(--o2-text-3)">${FYT_SOURCE} (erkek). Sarı satır baraj (10 puan), altın çerçeve senin son sonucun. Koşuda salise bir üst saniyeye sayılır.</p>
+            <div class="o2-acad-tables">${evs.map(col).join('')}</div>`);
+            return;
+        }
         O2.sheet('Test normları', `
             <p style="margin:0 0 14px;font-size:12.5px;line-height:1.55;color:var(--o2-text-3)">Varsayılanlar son dönem ilanlarından derlenmiş <b>tahmini</b> değerlerdir (${st.gender === 'm' ? 'erkek' : 'kadın'}). Başvurduğun ilandaki puan tablosuna göre düzenle.</p>
             ${evs.map(ev => { const n = norm(st, ev); return `
@@ -734,10 +835,11 @@
         save(st);
         O2.closeSheet();
         const pr = evs.find(ev => res[ev.id] !== undefined && prevBest[ev.id] !== null && (ev.better === 'low' ? res[ev.id] < prevBest[ev.id] : res[ev.id] > prevBest[ev.id]));
-        const allPass = evs.every(ev => res[ev.id] === undefined || score(ev, res[ev.id], norm(st, ev)) >= 60);
+        const allPass = evs.every(ev => { const n = norm(st, ev); return res[ev.id] === undefined || score(ev, res[ev.id], n) >= passPts(n); });
         if (pr && typeof confetti === 'function') confetti({ particleCount: 80, spread: 70, colors: ['#f6dea0', '#e6c374', '#ffffff'] });
-        O2.toast(pr ? `Yeni rekor · ${pr.name}` : allPass ? 'Kaydedildi · barajın üzerindesin' : 'Kaydedildi · hedefe çalışmaya devam', pr ? 'trophy' : 'check');
-        if (O2.ui.tab === 'academy') O2.render();
+        const pts = evs.filter(ev => res[ev.id] !== undefined).map(ev => `${ev.short} ${score(ev, res[ev.id], norm(st, ev))}`).join(' · ');
+        O2.toast(pr ? `Yeni rekor · ${pr.name}` : allPass ? `Kaydedildi · ${pts} puan` : 'Kaydedildi · barajın altında kalan var', pr ? 'trophy' : 'check');
+        if (O2.ui.tab === 'academy' || O2.ui.tab === 'today') O2.render();
     };
 
     // ⏱️ Kronometre / tekrar sayacı (parkur istasyonları için tur kaydı)
@@ -750,7 +852,7 @@
         O2.sheet(ev.name, `
             <div class="o2-acad-sw">
                 <div class="o2-acad-sw-num" id="o2-sw-num">${isTime ? '0.0' : '0'}</div>
-                <small>${isTime ? esc(ev.note) : '1 dakikada tekrar · ekrana dokun'}</small>
+                <small>${isTime ? esc(ev.note) : `${(ev.dur || 60) / 60} dakikada tekrar · ekrana dokun`}</small>
                 ${isTime ? '' : '<div class="o2-acad-sw-tap" onclick="O2.swRep()">+1</div>'}
                 <div class="o2-acad-sw-laps" id="o2-sw-laps"></div>
             </div>
@@ -769,13 +871,13 @@
         if (sw.ev.unit === 'sn') el.textContent = s >= 60 ? `${Math.floor(s / 60)}:${(s % 60).toFixed(1).padStart(4, '0')}` : s.toFixed(1);
         else {
             el.textContent = sw.reps;
-            if (sw.run && s >= 60) { O2.swToggle(); O2.haptic([200, 100, 200]); O2.toast(`Süre doldu · ${sw.reps} tekrar`, 'trophy'); }
+            if (sw.run && s >= (sw.ev.dur || 60)) { O2.swToggle(); O2.haptic([200, 100, 200]); O2.toast(`Süre doldu · ${sw.reps} tekrar`, 'trophy'); }
         }
     }
     O2.swToggle = () => {
         if (!sw) return;
         if (sw.run) { sw.acc += Date.now() - sw.start; sw.run = false; }
-        else { if (sw.ev.unit !== 'sn' && swElapsed() >= 60000) return; sw.start = Date.now(); sw.run = true; }
+        else { if (sw.ev.unit !== 'sn' && swElapsed() >= (sw.ev.dur || 60) * 1000) return; sw.start = Date.now(); sw.run = true; }
         O2.haptic(15);
         $('o2-sw-main').textContent = sw.run ? 'Durdur' : 'Devam';
         clearInterval(swTimer);
@@ -1084,6 +1186,23 @@
                 <div style="flex:1"><h4>${esc(s.branch)} · ${esc(s.track)} hazırlığı · ${s.score}</h4><p>${next ? `${esc(next.label)}: ${next.left === 0 ? 'bugün' : `${next.left} gün`}` : 'Sınav tarihlerini ekle'} · ${s.known}/${s.qTotal} soru</p></div>
                 ${I('chev', 'chev')}
             </div>
+        </div>`;
+    };
+    // Bugün ekranı: son mekik / şınav / 400 m (ya da parkur) sonucu ve puanı
+    O2.academyTestsCard = () => {
+        if (!localStorage.getItem(KEY)) return '';
+        const st = state(), evs = eventsOf(st), br = branchOf(st);
+        const s = fytSummary(st, evs);
+        return `
+        <div class="o2-section-head"><h3>${esc(br.name)} fiziki test</h3><button class="o2-link" onclick="O2.acadTestSheet()">+ Sonuç</button></div>
+        <div class="o2-card is-tap o2-fyt-home" style="--acad:${br.color}" onclick="O2.go('academy')">
+            <div class="o2-fyt-cells" style="grid-template-columns:repeat(${evs.length}, 1fr)">${s.rows.map(r => `
+                <div>
+                    <small>${esc(r.ev.short)}</small>
+                    <strong style="color:${r.sc === null ? 'var(--o2-text-3)' : 'var(--o2-text)'}">${r.l ? fmtVal(r.ev, r.l.v) : '—'}</strong>
+                    <span style="color:${scoreTone(r.sc, r.n)}">${r.sc === null ? 'kayıt yok' : `${r.sc} puan`}</span>
+                </div>`).join('')}</div>
+            <p>${s.avg === null ? 'Henüz sonuç yok · ilk denemeni kaydet' : `${evs.length > 1 ? `Ortalama <b>${s.avg}</b> · ` : ''}${s.rows.some(r => r.sc !== null && r.sc < passPts(r.n)) ? '<b style="color:var(--o2-red)">barajın altında test var</b>' : 'baraj üzerinde'} · son: ${esc(O2.prettyDate(s.done.map(r => r.l.d).sort().pop()))}`}</p>
         </div>`;
     };
 })();

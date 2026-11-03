@@ -288,3 +288,10 @@ Yeni modül: `js/36-olympus2-gelismis.js`. Yeni bağımlılık: `@capacitor/loca
 # iPhone durum çubuğu (2026-11-01)
 - apple-mobile-web-app-status-bar-style → black: durum çubuğu düz siyah, sayfa altından başlar. Saydam ayarda iOS üst kenara kendi bulanıklık efektini çiziyordu.
 - iOS bu ayarı yalnızca Ana Ekrana Ekle sırasında okur: eski ayarla kurulmuş iPhone'larda günde bir kez yeniden ekleme rehberi çıkar (önce yedekle, kaldır, Safari'den yeniden ekle; veriler buluttan geri gelir).
+
+# TSK resmi FYT puanlaması (2026-11-03)
+- Mekik (2 dk), şınav (2 dk) ve 400 m puanları MSB 2026 Astsubay Temini Kılavuzu Tablo-5'e (erkek) göre birebir hesaplanıyor. Baraj her testte 10 puan (mekik 24, şınav 11, 400 m 1:28). Koşuda salise bir üst saniyeye sayılır.
+- Akademi'de FYT ortalaması, barajın altında kalan test uyarısı, "Sonraki: 53 tekrar → 82 puan" ipucu ve son sonucu işaretli tam puan tablosu var. Sayaç 2 dakika.
+- TSK erkek boy-kilo kontrolü VKİ yerine Tablo-4 nomogramıyla yapılıyor (asgari boy 168 cm, boya göre alt/üst kilo).
+- Bugün ekranında "TSK fiziki test" kartı: son mekik, şınav ve 400 m değeri ile puanları. Jandarma ve Polis seçiliyse parkur süresi gösterilir.
+- Kadın puan tablosu henüz eklenmedi; kadın değerleri tahmini kalıyor.

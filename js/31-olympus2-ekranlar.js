@@ -286,6 +286,7 @@
                 ${miniRing(week.sessions / settings.weeklyTarget, 'url(#o2Gold)', 'bolt', `${week.sessions}/${settings.weeklyTarget}`, 'haftalık seans', "O2.go('train')")}
             </div>
 
+            ${O2.academyTestsCard ? O2.academyTestsCard() : ''}
             ${O2.alertsHTML ? O2.alertsHTML(3) : ''}
             ${O2.reviewCard ? O2.reviewCard() : ''}
 

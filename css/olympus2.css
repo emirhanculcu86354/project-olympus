@@ -2051,3 +2051,28 @@ body::before { content: ''; position: fixed; top: 0; left: 0; right: 0; height: 
     .o2-inbox-panel { top: 12px; right: 12px; bottom: 12px; border-radius: 26px; border: 1px solid var(--o2-line-2); }
     .o2-inbox-head { padding-top: 22px; }
 }
+
+/* ==========================================================================
+   🛡️ FYT PUAN TABLOSU · BUGÜN EKRANI TEST KARTI
+   ========================================================================== */
+.o2-acad-total { display: flex; align-items: center; gap: 14px; margin: 4px 0 6px; padding: 12px 14px; border-radius: 16px; background: color-mix(in srgb, var(--acad) 8%, transparent); border: 1px solid color-mix(in srgb, var(--acad) 25%, transparent); }
+.o2-acad-total small { display: block; font-size: 10px; font-weight: 800; letter-spacing: 1px; text-transform: uppercase; color: var(--o2-text-3); }
+.o2-acad-total strong { font-size: 26px; font-weight: 800; letter-spacing: -.8px; color: var(--acad); }
+.o2-acad-total strong em { font-style: normal; font-size: 12px; color: var(--o2-text-3); margin-left: 2px; }
+.o2-acad-total p { margin: 0; font-size: 12.5px; line-height: 1.45; color: var(--o2-text-2); }
+
+.o2-acad-tables { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; align-items: start; }
+.o2-acad-table { border-radius: 14px; border: 1px solid var(--o2-line); overflow: hidden; font-variant-numeric: tabular-nums; }
+.o2-acad-table > div { display: grid; grid-template-columns: repeat(auto-fit, minmax(0, 1fr)); padding: 5px 8px; font-size: 12px; text-align: center; border-top: 1px solid var(--o2-line); }
+.o2-acad-table > div:first-child { border-top: 0; background: rgba(255, 255, 255, .05); font-size: 10.5px; color: var(--o2-text-3); }
+.o2-acad-table > div span:last-child { color: var(--o2-text-2); font-weight: 700; }
+.o2-acad-table > div.pass { background: rgba(230, 195, 116, .16); }
+.o2-acad-table > div.on { box-shadow: inset 0 0 0 2px var(--o2-gold); border-radius: 8px; font-weight: 800; }
+
+.o2-fyt-home { margin-top: 0; padding: 16px; background: radial-gradient(circle at 0% 0%, color-mix(in srgb, var(--acad) 12%, transparent), transparent 60%), linear-gradient(180deg, var(--o2-surface-2), var(--o2-surface)); }
+.o2-fyt-cells { display: grid; gap: 8px; }
+.o2-fyt-cells > div { padding: 10px 8px; border-radius: 14px; text-align: center; background: rgba(255, 255, 255, .04); border: 1px solid var(--o2-line); }
+.o2-fyt-cells small { display: block; font-size: 10.5px; font-weight: 800; letter-spacing: .8px; text-transform: uppercase; color: var(--o2-text-3); }
+.o2-fyt-cells strong { display: block; margin-top: 4px; font-size: 22px; font-weight: 800; letter-spacing: -.6px; font-variant-numeric: tabular-nums; }
+.o2-fyt-cells span { display: block; margin-top: 2px; font-size: 11.5px; font-weight: 800; }
+.o2-fyt-home > p { margin: 12px 2px 0; font-size: 12px; color: var(--o2-text-3); }
