@@ -2076,3 +2076,38 @@ body::before { content: ''; position: fixed; top: 0; left: 0; right: 0; height: 
 .o2-fyt-cells strong { display: block; margin-top: 4px; font-size: 22px; font-weight: 800; letter-spacing: -.6px; font-variant-numeric: tabular-nums; }
 .o2-fyt-cells span { display: block; margin-top: 2px; font-size: 11.5px; font-weight: 800; }
 .o2-fyt-home > p { margin: 12px 2px 0; font-size: 12px; color: var(--o2-text-3); }
+
+/* ==========================================================================
+   ⏭️ ERTELEME · 📋 SEANS DETAYI
+   ========================================================================== */
+.o2-missed { margin-bottom: 12px; border-color: rgba(255, 122, 69, .3); }
+.o2-detail-when { margin: -4px 0 12px; font-size: 12.5px; color: var(--o2-text-3); font-weight: 700; }
+.o2-route-wrap { position: relative; }
+.o2-route-map { height: 240px; transition: height .3s var(--o2-ease); }
+.o2-route-map.big { height: 62vh; }
+.o2-route-full { position: absolute; top: 10px; right: 10px; z-index: 500; width: 34px; height: 34px; border-radius: 11px; display: grid; place-items: center; background: rgba(0, 0, 0, .6); color: #fff; border: 1px solid var(--o2-line-2); cursor: pointer; }
+.o2-route-full svg { width: 16px; height: 16px; }
+.o2-route-legend { position: absolute; left: 10px; bottom: 10px; z-index: 500; display: flex; align-items: center; gap: 6px; padding: 4px 8px; border-radius: 9px; background: rgba(0, 0, 0, .6); font-size: 10px; font-weight: 800; color: var(--o2-text-2); }
+.o2-route-legend i, .o2-route-legend b { width: 10px; height: 10px; border-radius: 50%; background: hsl(150, 75%, 58%); }
+.o2-route-legend b { background: hsl(20, 75%, 58%); }
+.o2-route-dot { border-radius: 50%; border: 3px solid #fff; box-shadow: 0 0 8px rgba(0, 0, 0, .6); }
+.o2-route-dot.start { background: var(--o2-green); }
+.o2-route-dot.end { background: var(--o2-red); }
+.o2-km-pin span { display: grid; place-items: center; width: 20px; height: 20px; border-radius: 50%; background: #111; color: var(--o2-gold); font-size: 10px; font-weight: 800; border: 1px solid var(--o2-gold); }
+.o2-route-thumb { flex-shrink: 0; border-radius: 10px; background: rgba(255, 255, 255, .04); }
+.o2-delta { font-weight: 800; }
+.o2-delta.up { color: var(--o2-green); }
+.o2-delta.down { color: var(--o2-orange); }
+.o2-detail-top { align-items: center; }
+.o2-detail-figs { display: flex; gap: 4px; justify-content: center; }
+.o2-detail-figs > div { width: 62px; }
+.o2-detail-muscles > div { display: grid; grid-template-columns: 74px 1fr; gap: 8px; align-items: center; margin: 6px 0; font-size: 11.5px; font-weight: 700; color: var(--o2-text-2); }
+.o2-ex-detail { margin-top: 10px; padding: 14px; }
+.o2-ex-detail-head { display: flex; justify-content: space-between; gap: 10px; }
+.o2-ex-detail-head h5 { margin: 0; font-size: 14.5px; font-weight: 800; }
+.o2-ex-detail-head p { margin: 3px 0 0; font-size: 11.5px; color: var(--o2-text-3); }
+.o2-set-table { margin-top: 10px; border-radius: 12px; overflow: hidden; border: 1px solid var(--o2-line); font-variant-numeric: tabular-nums; }
+.o2-set-table > div { display: grid; grid-template-columns: .7fr 1fr 1fr .8fr 1fr; padding: 6px 10px; font-size: 12.5px; text-align: center; border-top: 1px solid var(--o2-line); }
+.o2-set-table > div:first-child { border-top: 0; background: rgba(255, 255, 255, .05); font-size: 10.5px; color: var(--o2-text-3); }
+.o2-set-table > div.top { background: rgba(230, 195, 116, .12); font-weight: 800; }
+.o2-ex-detail-foot { margin: 10px 0 0; font-size: 12px; color: var(--o2-text-3); }

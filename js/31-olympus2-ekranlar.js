@@ -291,7 +291,8 @@
             ${O2.reviewCard ? O2.reviewCard() : ''}
 
             <div class="o2-section-head"><h3>Bugünün seansı</h3><button class="o2-link" onclick="O2.go('train')">Programı gör</button></div>
-            ${plan.isRest ? restCard(plan) : (doneToday ? doneCard(doneToday) : sessionHero(plan, 0))}
+            ${O2.missedCard ? O2.missedCard() : ''}
+            ${plan.isRest ? restCard(plan, 0) : (doneToday ? doneCard(doneToday) : sessionHero(plan, 0))}
 
             ${O2.flowTodayCard ? O2.flowTodayCard() : ''}
 
@@ -360,6 +361,7 @@
                 <div style="display:flex;gap:8px;flex-wrap:wrap">
                     <button class="o2-btn o2-btn-gold" onclick="event.stopPropagation(); O2.startSession(${offset})">${I('play')}Başlat</button>
                     <button class="o2-btn o2-btn-ghost o2-btn-sm" style="height:50px" onclick="event.stopPropagation(); O2.startSession(${offset}, { express: true })" title="Az vaktin varsa: ana hareketler, daha az set">${I('bolt')}Ekspres</button>
+                    <button class="o2-btn o2-btn-ghost o2-btn-sm" style="height:50px" onclick="event.stopPropagation(); O2.postponeDay(${offset})" title="Bugünü dinlenme yap, programı bir gün kaydır">${I('clock')}Yarına ertele</button>
                 </div>
             </div>
         </div>`;
@@ -385,7 +387,7 @@
         </div>`;
     }
 
-    function restCard(plan) {
+    function restCard(plan, offset) {
         return `
         <div class="o2-card o2-card-glow">
             <div class="o2-eyebrow" style="color:var(--o2-green)">● Toparlanma</div>
@@ -396,6 +398,7 @@
                 <button class="o2-btn o2-btn-ghost o2-btn-sm" onclick="O2.openZen()">${I('heart')}Nefes egzersizi</button>
                 <button class="o2-btn o2-btn-ghost o2-btn-sm" onclick="O2.openCardio()">${I('run')}Hafif kardiyo</button>
             </div>
+            ${plan.postponed ? `<button class="o2-btn o2-btn-ghost o2-btn-sm" style="margin-top:8px" onclick="O2.undoPostpone(${offset || 0})">${I('back')}Ertelemeyi geri al</button>` : ''}
         </div>`;
     }
 
@@ -484,7 +487,7 @@
             <div class="o2-card" style="padding:12px;margin-top:12px;">${weekStrip(true)}</div>
 
             <div class="o2-section-head"><h3>${esc(dayLabel)}</h3>${plan.isRest ? '' : `<span class="o2-link" style="color:var(--o2-text-3)">~${O2.estMinutes(plan)} dk</span>`}</div>
-            ${plan.isRest ? restCard(plan) : `
+            ${plan.isRest ? restCard(plan, O2.ui.trainOffset) : `
             <div class="o2-card o2-day-card">
                 <div class="o2-eyebrow">${esc(String(plan.title).split(':')[0])}</div>
                 <h2>${esc((String(plan.title).split(':')[1] || plan.title).trim())}</h2>
@@ -519,7 +522,7 @@
     function historyList() {
         const items = [];
         O2.sessions().forEach(s => items.push({
-            t: s.endedAt, title: s.title, id: s.id, prs: (s.prs || []).length,
+            t: s.endedAt, title: s.title, id: s.id, prs: (s.prs || []).length, route: s.route,
             sub: s.type === 'cardio'
                 ? `${O2.fmtNum(s.distanceKm, 2)} km · ${O2.fmtClock(s.durationSec)}${s.kind === 'ride' ? '' : ` · ${O2.fmtPace(s.paceSec)}/km`}`
                 : `${O2.fmtClock(s.durationSec)} · ${O2.fmtNum(s.volume)} kg · ${s.setCount} set`
@@ -533,7 +536,7 @@
         if (!items.length) return `<div class="o2-card o2-empty">${I('trophy')}<br>İlk seansını tamamladığında geçmişin burada görünecek.</div>`;
         return `<div class="o2-card" style="padding:4px 18px;"><div class="o2-list">${items.slice(0, 8).map(it => `
             <div class="o2-row ${it.id ? 'is-tap' : ''}" ${it.id ? `onclick="O2.sessionSheet('${it.id}')"` : ''}>
-                <div class="o2-row-idx" style="color:var(--o2-gold)">${I('check')}</div>
+                ${it.route && it.route.length > 1 && O2.routeSVG ? O2.routeSVG(it.route, 40) : `<div class="o2-row-idx" style="color:var(--o2-gold)">${I('check')}</div>`}
                 <div class="o2-row-main"><h5>${esc(it.title)}</h5><p>${esc(it.id ? new Date(it.t).toLocaleDateString('tr-TR', { day: 'numeric', month: 'short' }) + ' · ' : '')}${esc(it.sub)}</p></div>
                 ${it.prs ? `<span class="o2-chip gold">${it.prs} PR</span>` : ''}
             </div>`).join('')}</div></div>`;
@@ -577,24 +580,7 @@
         O2.drawExerciseChart(name, 'o2-ex-chart');
     };
 
-    const shareBtn = (id) => `<button class="o2-btn o2-btn-ghost o2-btn-block" style="margin-top:16px" onclick="O2.shareCard('${esc(id)}')">${I('camera')}Paylaşım kartı oluştur</button>`;
-    O2.sessionSheet = (id) => {
-        const s = O2.sessions().find(x => x.id === id);
-        if (!s) return;
-        if (s.type === 'cardio') return O2.sheet(s.title, O2.cardioDetail(s) + shareBtn(s.id));
-        O2.sheet(s.title, `
-            <div class="o2-grid-3">
-                <div class="o2-card o2-stat"><small>Süre</small><strong style="font-size:20px">${O2.fmtClock(s.durationSec)}</strong></div>
-                <div class="o2-card o2-stat" style="margin-top:0"><small>Hacim</small><strong style="font-size:20px">${O2.fmtNum(s.volume)}<small> kg</small></strong></div>
-                <div class="o2-card o2-stat" style="margin-top:0"><small>Set</small><strong style="font-size:20px">${s.setCount}</strong></div>
-            </div>
-            <div class="o2-list" style="margin-top:10px;">${(s.exercises || []).filter(e => e.sets.length).map(e => `
-                <div class="o2-row"><div class="o2-row-main"><h5>${esc(e.name)}</h5><p>${e.sets.map(st => `${O2.fmtNum(st.w, 1)}×${st.r}`).join('  ·  ')}</p></div>
-                ${(s.prs || []).some(p => p.ex === e.name) ? '<span class="o2-chip gold">PR</span>' : ''}</div>`).join('')}</div>
-            ${s.note ? `<div class="o2-field"><label>Not</label><p style="margin:0;color:var(--o2-text-2);font-size:13px">${esc(s.note)}</p></div>` : ''}
-            ${shareBtn(s.id)}
-        `);
-    };
+    // Seans detayı (O2.sessionSheet): js/48-olympus2-gecmis.js
 
     // ==========================================
     // 🥗 BESLENME

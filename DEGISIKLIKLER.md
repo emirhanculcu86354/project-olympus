@@ -295,3 +295,10 @@ Yeni modül: `js/36-olympus2-gelismis.js`. Yeni bağımlılık: `@capacitor/loca
 - TSK erkek boy-kilo kontrolü VKİ yerine Tablo-4 nomogramıyla yapılıyor (asgari boy 168 cm, boya göre alt/üst kilo).
 - Bugün ekranında "TSK fiziki test" kartı: son mekik, şınav ve 400 m değeri ile puanları. Jandarma ve Polis seçiliyse parkur süresi gösterilir.
 - Kadın puan tablosu henüz eklenmedi; kadın değerleri tahmini kalıyor.
+
+# Antrenman erteleme ve ayrıntılı geçmiş (2026-11-06)
+- "Yarına ertele": o gün dinlenmeye döner, program (diyet ve bildirimler dahil) bir gün kayar; "Ertelemeyi geri al" ile eski haline döner. Kayıt: oly2_postponed.
+- Dün antrenman günüyse ve yapılmadıysa Bugün ekranında "Dün: … yapılmadı" kartı çıkar: "Bugüne al" ya da "Atla".
+- Koşu detayı: kaydırılıp yakınlaştırılabilen harita, km'ye göre hızlı (yeşil) → yavaş (turuncu) renklenen rota, km işaretleri, başlangıç/bitiş noktaları, büyütme, en hızlı km, önceki koşuyla tempo/mesafe kıyası, km bölümlerinde bir öncekine göre fark.
+- Güç antrenmanı detayı: ön/arka vücut figürü, kas grubu başına hacim, her hareket için set tablosu (kg, tekrar, RPE, tahmini 1RM; en iyi set vurgulu), önceki seansa göre 1RM farkı, aynı antrenmanla hacim/süre kıyası, rekorlar ve puan.
+- Son seanslar listesinde koşuların yanında küçük rota çizimi.
